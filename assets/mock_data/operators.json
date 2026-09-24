@@ -1,0 +1,52 @@
+[
+  {
+    "id": "OP_FUTA",
+    "name": "Phương Trang (FUTA Bus Lines)",
+    "shortName": "Phương Trang",
+    "hotline": "1900 6067",
+    "rating": 4.8,
+    "reviewCount": 12450,
+    "logoUrl": "https://cdn.vexere.com/v3/2022/07/logo-futa.png",
+    "policy": "Hủy vé trước 24h: hoàn 90%, trước 12h: hoàn 50%, sau 12h: không hoàn."
+  },
+  {
+    "id": "OP_HOAMAI",
+    "name": "Hoa Mai Limousine",
+    "shortName": "Hoa Mai",
+    "hotline": "1900 599 997",
+    "rating": 4.9,
+    "reviewCount": 8320,
+    "logoUrl": "https://cdn.vexere.com/v3/2022/07/logo-hoamai.png",
+    "policy": "Hủy vé trước 12h hoàn 80%, sau 12h không hỗ trợ đổi hủy."
+  },
+  {
+    "id": "OP_KUMHO",
+    "name": "Kumho Samco Buslines",
+    "shortName": "Kumho Samco",
+    "hotline": "028 35 112 112",
+    "rating": 4.7,
+    "reviewCount": 6120,
+    "logoUrl": "https://cdn.vexere.com/v3/2022/07/logo-kumho.png",
+    "policy": "Hủy vé trước 24h hoàn 85%."
+  },
+  {
+    "id": "OP_SAOVIET",
+    "name": "Sao Việt (Hà Nội - Sa Pa)",
+    "shortName": "Sao Việt",
+    "hotline": "1900 6746",
+    "rating": 4.8,
+    "reviewCount": 5400,
+    "logoUrl": "https://cdn.vexere.com/v3/2022/07/logo-saoviet.png",
+    "policy": "Hủy vé trước 24h miễn phí, trước 6h thu phí 20%."
+  },
+  {
+    "id": "OP_THANHBUOI",
+    "name": "Thành Bưởi Limousine",
+    "shortName": "Thành Bưởi",
+    "hotline": "1900 6079",
+    "rating": 4.7,
+    "reviewCount": 9800,
+    "logoUrl": "https://cdn.vexere.com/v3/2022/07/logo-thanhbuoi.png",
+    "policy": "Hủy vé trước 24h hoàn 90%."
+  }
+]

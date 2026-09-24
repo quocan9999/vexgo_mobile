@@ -1,0 +1,46 @@
+[
+  {
+    "id": "NOTIF01",
+    "title": "Chuyến xe sắp khởi hành",
+    "message": "Chuyến xe Sài Gòn - Đà Lạt của bạn sẽ khởi hành lúc 22:30 hôm nay tại Bến xe Miền Đông mới. Quý khách vui lòng đến trước 30 phút.",
+    "category": "TRIP",
+    "createdAt": "2026-09-24T18:00:00Z",
+    "isRead": false,
+    "ticketCode": "VG2026092401"
+  },
+  {
+    "id": "NOTIF02",
+    "title": "Tặng bạn voucher 50.000đ",
+    "message": "Mừng bạn thăng hạng Thành viên Vàng! VexGo gửi tặng bạn mã HE2026 giảm ngay 50k cho mọi chuyến xe đi miền Trung.",
+    "category": "PROMO",
+    "createdAt": "2026-09-23T09:00:00Z",
+    "isRead": false,
+    "voucherCode": "HE2026"
+  },
+  {
+    "id": "NOTIF03",
+    "title": "Đánh giá chuyến đi thành công",
+    "message": "Cảm ơn bạn đã gửi đánh giá 5 sao cho nhà xe Phương Trang. Bạn được cộng thêm 50 điểm thưởng VexGo Points.",
+    "category": "SYSTEM",
+    "createdAt": "2026-09-22T15:20:00Z",
+    "isRead": true,
+    "ticketCode": "VG2026092002"
+  },
+  {
+    "id": "NOTIF04",
+    "title": "Xác nhận hoàn tiền vé",
+    "message": "Vé VG2026091803 đã được hủy thành công. Số tiền hoàn 225.000đ (90%) đã được gửi về ví MoMo của bạn.",
+    "category": "TRIP",
+    "createdAt": "2026-09-18T11:45:00Z",
+    "isRead": true,
+    "ticketCode": "VG2026091803"
+  },
+  {
+    "id": "NOTIF05",
+    "title": "Cập nhật ứng dụng phiên bản v0.4.0",
+    "message": "Trải nghiệm giao diện đặt vé hoàn toàn mới, tối ưu hóa cho điện thoại Realme và Android. Cảm ơn bạn đã đồng hành!",
+    "category": "SYSTEM",
+    "createdAt": "2026-09-15T08:00:00Z",
+    "isRead": true
+  }
+]
