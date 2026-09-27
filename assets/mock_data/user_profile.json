@@ -1,0 +1,44 @@
+{
+  "taiKhoanId": 101,
+  "maKhachHang": "KH-VEXGO-888",
+  "hoTen": "Phạm Minh Tài",
+  "soDienThoai": "0987654321",
+  "email": "nguyen221205@gmail.com",
+  "cccd": "079202012345",
+  "ngaySinh": "2002-12-22",
+  "daXacThucSoDienThoai": true,
+  "trangThai": "HOAT_DONG",
+  "diemTichLuy": 1450,
+  "hangThanhVien": "VÀNG",
+  "diemToiHangTiepTheo": 3000,
+  "pointHistory": [
+    {
+      "id": "PT01",
+      "title": "Tích điểm chuyến Sài Gòn - Đà Lạt",
+      "points": 150,
+      "type": "EARN",
+      "createdAt": "2026-09-23T14:30:00Z"
+    },
+    {
+      "id": "PT02",
+      "title": "Đổi mã giảm giá VEXGO50K",
+      "points": -100,
+      "type": "REDEEM",
+      "createdAt": "2026-09-20T10:15:00Z"
+    },
+    {
+      "id": "PT03",
+      "title": "Tích điểm chuyến Sài Gòn - Vũng Tàu",
+      "points": 80,
+      "type": "EARN",
+      "createdAt": "2026-09-15T08:00:00Z"
+    },
+    {
+      "id": "PT04",
+      "title": "Thưởng nâng hạng thành viên Bạc lên Vàng",
+      "points": 200,
+      "type": "BONUS",
+      "createdAt": "2026-09-01T00:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+[
+  {
+    "id": "TKT_984210",
+    "ticketCode": "VXG-984210",
+    "status": "UPCOMING",
+    "bookingDate": "23/09/2026 14:30",
+    "trip": {
+      "id": "TRIP_001",
+      "operatorName": "Phương Trang (FUTA Bus Lines)",
+      "vehicleType": "Limousine 34 Phòng VIP",
+      "departureTime": "22:30",
+      "departureDate": "25/09/2026",
+      "arrivalTime": "05:30",
+      "arrivalDate": "26/09/2026",
+      "fromCity": "TP. Hồ Chí Minh",
+      "toCity": "Đà Lạt",
+      "pickupPoint": "Bến xe Miền Đông mới",
+      "pickupAddress": "TP. Thủ Đức, TP. Hồ Chí Minh",
+      "dropoffPoint": "Bến xe Liên tỉnh Đà Lạt",
+      "dropoffAddress": "01 Tô Hiến Thành, Phường 3, Đà Lạt"
+    },
+    "seats": ["A03", "A05"],
+    "totalAmount": 580000,
+    "discountAmount": 50000,
+    "finalAmount": 530000,
+    "paymentMethod": "Ví MoMo",
+    "passenger": {
+      "fullName": "Nguyễn Văn An",
+      "phone": "0987654321",
+      "email": "nguyenvanan@gmail.com"
+    },
+    "licensePlate": "51B-289.45",
+    "driverPhone": "0912 345 678"
+  },
+  {
+    "id": "TKT_984211",
+    "ticketCode": "VXG-984211",
+    "status": "UPCOMING",
+    "bookingDate": "24/09/2026 18:00",
+    "trip": {
+      "id": "TRIP_002",
+      "operatorName": "Thành Bưởi Limousine",
+      "vehicleType": "Cabin 22 Phòng VIP",
+      "departureTime": "22:00",
+      "departureDate": "24/09/2026",
+      "arrivalTime": "04:30",
+      "arrivalDate": "25/09/2026",
+      "fromCity": "TP. Hồ Chí Minh",
+      "toCity": "Cần Thơ",
+      "pickupPoint": "Bến xe Miền Tây",
+      "pickupAddress": "395 Kinh Dương Vương, An Lạc, Bình Tân",
+      "dropoffPoint": "Bến xe Trung tâm Cần Thơ",
+      "dropoffAddress": "Đường dẫn cầu Cần Thơ, Hưng Thạnh, Cái Răng"
+    },
+    "seats": ["VIP01"],
+    "totalAmount": 260000,
+    "discountAmount": 0,
+    "finalAmount": 260000,
+    "paymentMethod": "Chuyển khoản VietQR",
+    "passenger": {
+      "fullName": "Nguyễn Văn An",
+      "phone": "0987654321",
+      "email": "nguyenvanan@gmail.com"
+    },
+    "licensePlate": "65B-014.28",
+    "driverPhone": "0908 999 888"
+  },
+  {
+    "id": "TKT_782190",
+    "ticketCode": "VXG-782190",
+    "status": "COMPLETED",
+    "bookingDate": "10/09/2026 09:15",
+    "trip": {
+      "id": "TRIP_003",
+      "operatorName": "Hoa Mai Limousine",
+      "vehicleType": "Limousine 9 chỗ VIP",
+      "departureTime": "07:00",
+      "departureDate": "15/09/2026",
+      "arrivalTime": "09:30",
+      "arrivalDate": "15/09/2026",
+      "fromCity": "TP. Hồ Chí Minh",
+      "toCity": "Vũng Tàu",
+      "pickupPoint": "44 Nguyễn Thái Bình, Q1",
+      "pickupAddress": "Quận 1, TP. Hồ Chí Minh",
+      "dropoffPoint": "47 Trưng Trắc, Phường 1",
+      "dropoffAddress": "Thành phố Vũng Tàu"
+    },
+    "seats": ["G03"],
+    "totalAmount": 180000,
+    "discountAmount": 0,
+    "finalAmount": 180000,
+    "paymentMethod": "Ví ZaloPay",
+    "passenger": {
+      "fullName": "Nguyễn Văn An",
+      "phone": "0987654321",
+      "email": "nguyenvanan@gmail.com"
+    },
+    "licensePlate": "72B-019.82",
+    "driverPhone": "0933 222 111",
+    "review": {
+      "rating": 5,
+      "comment": "Xe chạy êm, đón đúng giờ tại quận 1, bác tài lái xe cẩn thận và nhiệt tình!",
+      "tags": ["Đúng giờ", "Xe sạch sẽ", "Lái xe an toàn"],
+      "createdAt": "15/09/2026 11:30"
+    }
+  },
+  {
+    "id": "TKT_782195",
+    "ticketCode": "VXG-782195",
+    "status": "COMPLETED",
+    "bookingDate": "01/09/2026 08:30",
+    "trip": {
+      "id": "TRIP_005",
+      "operatorName": "Hải Vân Limousine",
+      "vehicleType": "Limousine giường phòng 22 chỗ",
+      "departureTime": "19:00",
+      "departureDate": "05/09/2026",
+      "arrivalTime": "12:00",
+      "arrivalDate": "06/09/2026",
+      "fromCity": "Đà Nẵng",
+      "toCity": "TP. Hồ Chí Minh",
+      "pickupPoint": "Bến xe Trung tâm Đà Nẵng",
+      "pickupAddress": "Tôn Đức Thắng, Hòa Minh, Liên Chiểu",
+      "dropoffPoint": "Bến xe Miền Đông mới",
+      "dropoffAddress": "TP. Thủ Đức, TP. Hồ Chí Minh"
+    },
+    "seats": ["P04"],
+    "totalAmount": 520000,
+    "discountAmount": 50000,
+    "finalAmount": 470000,
+    "paymentMethod": "Thẻ ATM nội địa",
+    "passenger": {
+      "fullName": "Nguyễn Văn An",
+      "phone": "0987654321",
+      "email": "nguyenvanan@gmail.com"
+    },
+    "licensePlate": "43B-088.19",
+    "driverPhone": "0977 444 333"
+  },
+  {
+    "id": "TKT_651230",
+    "ticketCode": "VXG-651230",
+    "status": "CANCELLED",
+    "bookingDate": "01/08/2026 18:00",
+    "trip": {
+      "id": "TRIP_004",
+      "operatorName": "Phương Trang",
+      "vehicleType": "Giường nằm 40 chỗ",
+      "departureTime": "20:00",
+      "departureDate": "05/08/2026",
+      "arrivalTime": "04:30",
+      "arrivalDate": "06/08/2026",
+      "fromCity": "TP. Hồ Chí Minh",
+      "toCity": "Nha Trang",
+      "pickupPoint": "Bến xe Miền Đông mới",
+      "pickupAddress": "TP. Thủ Đức",
+      "dropoffPoint": "Bến xe Phía Nam Nha Trang",
+      "dropoffAddress": "Km 6 Đường 23/10"
+    },
+    "seats": ["A12"],
+    "totalAmount": 275000,
+    "discountAmount": 0,
+    "finalAmount": 275000,
+    "paymentMethod": "Thẻ ATM Nội địa",
+    "passenger": {
+      "fullName": "Nguyễn Văn An",
+      "phone": "0987654321",
+      "email": "nguyenvanan@gmail.com"
+    },
+    "cancelReason": "Đổi kế hoạch cá nhân",
+    "refundAmount": 247500
+  }
+]

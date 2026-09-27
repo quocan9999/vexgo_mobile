@@ -1,0 +1,294 @@
+[
+  {
+    "id": "TRIP_001",
+    "operatorId": "OP_FUTA",
+    "operatorName": "Phương Trang (FUTA Bus Lines)",
+    "vehicleType": "Limousine 34 Phòng VIP",
+    "fromCityId": "HCM",
+    "fromCityName": "TP. Hồ Chí Minh",
+    "toCityId": "DL",
+    "toCityName": "Đà Lạt",
+    "departureTime": "23:00",
+    "arrivalTime": "06:00",
+    "duration": "7 tiếng",
+    "pickupPoint": "Bến xe Miền Đông mới",
+    "pickupAddress": "TP. Thủ Đức, TP. Hồ Chí Minh",
+    "dropoffPoint": "Bến xe Liên tỉnh Đà Lạt",
+    "dropoffAddress": "01 Tô Hiến Thành, Phường 3, Đà Lạt",
+    "originalPrice": 320000,
+    "discountPrice": 290000,
+    "availableSeats": 8,
+    "totalSeats": 34,
+    "seatLayoutType": "SLEEPER_34",
+    "rating": 4.8,
+    "reviewCount": 1245,
+    "amenities": ["Wifi tốc độ cao", "Cổng sạc Type-C/USB", "Nước suối & khăn lạnh", "Chăn gối kháng khuẩn", "Màn hình giải trí"],
+    "images": [
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&auto=format&fit=crop"
+    ],
+    "pickupPoints": [
+      { "id": "PU_001_1", "name": "Bến xe Miền Tây", "time": "22:15", "address": "395 Kinh Dương Vương, An Lạc, Bình Tân", "type": "station", "isDefault": false },
+      { "id": "PU_001_2", "name": "Văn phòng Lê Hồng Phong (Quận 5)", "time": "22:30", "address": "266 Lê Hồng Phong, Phường 4, Quận 5", "type": "office", "isDefault": false },
+      { "id": "PU_001_3", "name": "Bến xe Miền Đông mới", "time": "23:00", "address": "TP. Thủ Đức, TP. Hồ Chí Minh", "type": "station", "isDefault": true },
+      { "id": "PU_001_4", "name": "Ngã 4 Hàng Xanh", "time": "23:25", "address": "Cây xăng Comeco số 3, Điện Biên Phủ, Bình Thạnh", "type": "point", "isDefault": false }
+    ],
+    "dropoffPoints": [
+      { "id": "DO_001_1", "name": "Ngã 3 Phi Nôm", "time": "05:30", "address": "Quốc lộ 20, Đức Trọng, Lâm Đồng", "type": "point", "isDefault": false },
+      { "id": "DO_001_2", "name": "Bến xe Liên tỉnh Đà Lạt", "time": "06:00", "address": "01 Tô Hiến Thành, Phường 3, Đà Lạt", "type": "station", "isDefault": true },
+      { "id": "DO_001_3", "name": "Trung chuyển nội thành Đà Lạt", "time": "06:30", "address": "Bán kính 5km quanh hồ Xuân Hương, Đà Lạt", "type": "transfer", "isDefault": false }
+    ]
+  },
+  {
+    "id": "TRIP_002",
+    "operatorId": "OP_THANHBUOI",
+    "operatorName": "Thành Bưởi Limousine",
+    "vehicleType": "Giường nằm 40 chỗ",
+    "fromCityId": "HCM",
+    "fromCityName": "TP. Hồ Chí Minh",
+    "toCityId": "DL",
+    "toCityName": "Đà Lạt",
+    "departureTime": "22:30",
+    "arrivalTime": "05:30",
+    "duration": "7 tiếng",
+    "pickupPoint": "Văn phòng Lê Hồng Phong (Quận 5)",
+    "pickupAddress": "266 Lê Hồng Phong, Phường 4, Quận 5",
+    "dropoffPoint": "Văn phòng Phan Bội Châu (Đà Lạt)",
+    "dropoffAddress": "Phan Bội Châu, Phường 1, Đà Lạt",
+    "originalPrice": 270000,
+    "discountPrice": 250000,
+    "availableSeats": 4,
+    "totalSeats": 40,
+    "seatLayoutType": "SLEEPER_40",
+    "rating": 4.7,
+    "reviewCount": 890,
+    "amenities": ["Wifi tốc độ cao", "Nước suối & khăn lạnh", "Chăn gối kháng khuẩn"],
+    "images": [
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop"
+    ],
+    "pickupPoints": [
+      { "id": "PU_002_1", "name": "Văn phòng Lê Hồng Phong (Quận 5)", "time": "22:30", "address": "266 Lê Hồng Phong, Phường 4, Quận 5", "type": "office", "isDefault": true },
+      { "id": "PU_002_2", "name": "Văn phòng Hàng Xanh", "time": "22:50", "address": "Điện Biên Phủ, Phường 21, Bình Thạnh", "type": "office", "isDefault": false },
+      { "id": "PU_002_3", "name": "Ngã ba Vũng Tàu", "time": "23:20", "address": "Quốc lộ 1A, An Bình, Biên Hòa, Đồng Nai", "type": "point", "isDefault": false }
+    ],
+    "dropoffPoints": [
+      { "id": "DO_002_1", "name": "Văn phòng Bảo Lộc", "time": "03:45", "address": "139 Phan Bội Châu, Phường 1, TP. Bảo Lộc", "type": "office", "isDefault": false },
+      { "id": "DO_002_2", "name": "Văn phòng Phan Bội Châu (Đà Lạt)", "time": "05:30", "address": "Phan Bội Châu, Phường 1, Đà Lạt", "type": "office", "isDefault": true },
+      { "id": "DO_002_3", "name": "Trung chuyển nội thành Đà Lạt", "time": "06:00", "address": "Giao tận nơi khách sạn trung tâm Đà Lạt", "type": "transfer", "isDefault": false }
+    ]
+  },
+  {
+    "id": "TRIP_006",
+    "operatorId": "OP_FUTA",
+    "operatorName": "Phương Trang (FUTA Bus Lines)",
+    "vehicleType": "Limousine 34 Phòng VIP",
+    "fromCityId": "HCM",
+    "fromCityName": "TP. Hồ Chí Minh",
+    "toCityId": "DL",
+    "toCityName": "Đà Lạt",
+    "departureTime": "08:00",
+    "arrivalTime": "15:00",
+    "duration": "7 tiếng",
+    "pickupPoint": "Bến xe Miền Tây",
+    "pickupAddress": "395 Kinh Dương Vương, An Lạc, Bình Tân",
+    "dropoffPoint": "Bến xe Liên tỉnh Đà Lạt",
+    "dropoffAddress": "01 Tô Hiến Thành, Phường 3, Đà Lạt",
+    "originalPrice": 310000,
+    "discountPrice": 280000,
+    "availableSeats": 12,
+    "totalSeats": 34,
+    "seatLayoutType": "SLEEPER_34",
+    "rating": 4.8,
+    "reviewCount": 950,
+    "amenities": ["Wifi tốc độ cao", "Cổng sạc Type-C/USB", "Nước suối & khăn lạnh", "Chăn gối kháng khuẩn"],
+    "images": [
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop"
+    ],
+    "pickupPoints": [
+      { "id": "PU_006_1", "name": "Bến xe Miền Tây", "time": "08:00", "address": "395 Kinh Dương Vương, An Lạc, Bình Tân", "type": "station", "isDefault": true },
+      { "id": "PU_006_2", "name": "Bến xe Miền Đông mới", "time": "08:45", "address": "TP. Thủ Đức, TP. Hồ Chí Minh", "type": "station", "isDefault": false }
+    ],
+    "dropoffPoints": [
+      { "id": "DO_006_1", "name": "Bến xe Liên tỉnh Đà Lạt", "time": "15:00", "address": "01 Tô Hiến Thành, Phường 3, Đà Lạt", "type": "station", "isDefault": true },
+      { "id": "DO_006_2", "name": "Trung chuyển nội thành Đà Lạt", "time": "15:30", "address": "Trung chuyển xe 16 chỗ nội thành Đà Lạt", "type": "transfer", "isDefault": false }
+    ]
+  },
+  {
+    "id": "TRIP_007",
+    "operatorId": "OP_THANHBUOI",
+    "operatorName": "Thành Bưởi Limousine",
+    "vehicleType": "Limousine 34 Phòng VIP",
+    "fromCityId": "HCM",
+    "fromCityName": "TP. Hồ Chí Minh",
+    "toCityId": "DL",
+    "toCityName": "Đà Lạt",
+    "departureTime": "13:30",
+    "arrivalTime": "20:30",
+    "duration": "7 tiếng",
+    "pickupPoint": "Văn phòng Hàng Xanh",
+    "pickupAddress": "Điện Biên Phủ, Phường 21, Bình Thạnh",
+    "dropoffPoint": "Văn phòng Phan Bội Châu (Đà Lạt)",
+    "dropoffAddress": "Phan Bội Châu, Phường 1, Đà Lạt",
+    "originalPrice": 330000,
+    "discountPrice": 300000,
+    "availableSeats": 5,
+    "totalSeats": 34,
+    "seatLayoutType": "SLEEPER_34",
+    "rating": 4.9,
+    "reviewCount": 1120,
+    "amenities": ["Wifi tốc độ cao", "Cổng sạc Type-C/USB", "Nước suối & khăn lạnh", "Chăn gối kháng khuẩn", "Màn hình giải trí"],
+    "images": [
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop"
+    ],
+    "pickupPoints": [
+      { "id": "PU_007_1", "name": "Văn phòng Hàng Xanh", "time": "13:30", "address": "Điện Biên Phủ, Phường 21, Bình Thạnh", "type": "office", "isDefault": true },
+      { "id": "PU_007_2", "name": "Văn phòng Thủ Đức", "time": "14:00", "address": "Ngã 4 Thủ Đức, TP. Thủ Đức", "type": "office", "isDefault": false }
+    ],
+    "dropoffPoints": [
+      { "id": "DO_007_1", "name": "Văn phòng Phan Bội Châu (Đà Lạt)", "time": "20:30", "address": "Phan Bội Châu, Phường 1, Đà Lạt", "type": "office", "isDefault": true }
+    ]
+  },
+  {
+    "id": "TRIP_008",
+    "operatorId": "OP_KUMHO",
+    "operatorName": "Kumho Samco Buslines",
+    "vehicleType": "Giường nằm 40 chỗ",
+    "fromCityId": "HCM",
+    "fromCityName": "TP. Hồ Chí Minh",
+    "toCityId": "DL",
+    "toCityName": "Đà Lạt",
+    "departureTime": "17:30",
+    "arrivalTime": "00:30",
+    "duration": "7 tiếng",
+    "pickupPoint": "Bến xe Miền Đông mới",
+    "pickupAddress": "TP. Thủ Đức, TP. Hồ Chí Minh",
+    "dropoffPoint": "Bến xe Liên tỉnh Đà Lạt",
+    "dropoffAddress": "01 Tô Hiến Thành, Phường 3, Đà Lạt",
+    "originalPrice": 260000,
+    "discountPrice": 240000,
+    "availableSeats": 15,
+    "totalSeats": 40,
+    "seatLayoutType": "SLEEPER_40",
+    "rating": 4.6,
+    "reviewCount": 670,
+    "amenities": ["Wifi tốc độ cao", "Nước suối & khăn lạnh", "Chăn gối kháng khuẩn"],
+    "images": [
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop"
+    ],
+    "pickupPoints": [
+      { "id": "PU_008_1", "name": "Bến xe Miền Đông mới", "time": "17:30", "address": "TP. Thủ Đức, TP. Hồ Chí Minh", "type": "station", "isDefault": true }
+    ],
+    "dropoffPoints": [
+      { "id": "DO_008_1", "name": "Bến xe Liên tỉnh Đà Lạt", "time": "00:30", "address": "01 Tô Hiến Thành, Phường 3, Đà Lạt", "type": "station", "isDefault": true }
+    ]
+  },
+  {
+    "id": "TRIP_003",
+    "operatorId": "OP_HOAMAI",
+    "operatorName": "Hoa Mai Limousine",
+    "vehicleType": "Limousine 9 chỗ VIP",
+    "fromCityId": "HCM",
+    "fromCityName": "TP. Hồ Chí Minh",
+    "toCityId": "VT",
+    "toCityName": "Vũng Tàu",
+    "departureTime": "07:00",
+    "arrivalTime": "09:30",
+    "duration": "2.5 tiếng",
+    "pickupPoint": "Văn phòng Nguyễn Thái Bình (Q1)",
+    "pickupAddress": "44 Nguyễn Thái Bình, Quận 1, TP. HCM",
+    "dropoffPoint": "Văn phòng Trưng Trắc (Vũng Tàu)",
+    "dropoffAddress": "47 Trưng Trắc, Phường 1, Vũng Tàu",
+    "originalPrice": 180000,
+    "discountPrice": 160000,
+    "availableSeats": 5,
+    "totalSeats": 9,
+    "seatLayoutType": "LIMOUSINE_9",
+    "rating": 4.9,
+    "reviewCount": 2100,
+    "amenities": ["Ghế massage", "Wifi tốc độ cao", "Cổng sạc Type-C/USB", "Nước suối & khăn lạnh", "Đưa đón tận nơi"],
+    "images": [
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop"
+    ],
+    "pickupPoints": [
+      { "id": "PU_003_1", "name": "Văn phòng Nguyễn Thái Bình (Q1)", "time": "07:00", "address": "44 Nguyễn Thái Bình, Quận 1, TP. HCM", "type": "office", "isDefault": true },
+      { "id": "PU_003_2", "name": "Hàng Xanh (Văn Thánh)", "time": "07:20", "address": "Điện Biên Phủ, Phường 25, Bình Thạnh", "type": "point", "isDefault": false }
+    ],
+    "dropoffPoints": [
+      { "id": "DO_003_1", "name": "Văn phòng Trưng Trắc (Vũng Tàu)", "time": "09:30", "address": "47 Trưng Trắc, Phường 1, Vũng Tàu", "type": "office", "isDefault": true },
+      { "id": "DO_003_2", "name": "Đón/Trả tận nơi Bãi Sau - Bãi Trước", "time": "09:45", "address": "Khách sạn nội thành TP. Vũng Tàu", "type": "transfer", "isDefault": false }
+    ]
+  },
+  {
+    "id": "TRIP_004",
+    "operatorId": "OP_FUTA",
+    "operatorName": "Phương Trang (FUTA Bus Lines)",
+    "vehicleType": "Giường nằm 40 chỗ",
+    "fromCityId": "HCM",
+    "fromCityName": "TP. Hồ Chí Minh",
+    "toCityId": "NT",
+    "toCityName": "Nha Trang",
+    "departureTime": "20:00",
+    "arrivalTime": "04:30",
+    "duration": "8.5 tiếng",
+    "pickupPoint": "Bến xe Miền Đông mới",
+    "pickupAddress": "TP. Thủ Đức, TP. HCM",
+    "dropoffPoint": "Bến xe Phía Nam Nha Trang",
+    "dropoffAddress": "Km 6 Đường 23/10, Vĩnh Trung, Nha Trang",
+    "originalPrice": 290000,
+    "discountPrice": 275000,
+    "availableSeats": 12,
+    "totalSeats": 40,
+    "seatLayoutType": "SLEEPER_40",
+    "rating": 4.8,
+    "reviewCount": 3200,
+    "amenities": ["Wifi tốc độ cao", "Cổng sạc Type-C/USB", "Nước suối & khăn lạnh", "Chăn gối kháng khuẩn"],
+    "images": [
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop"
+    ],
+    "pickupPoints": [
+      { "id": "PU_004_1", "name": "Bến xe Miền Đông mới", "time": "20:00", "address": "TP. Thủ Đức, TP. HCM", "type": "station", "isDefault": true },
+      { "id": "PU_004_2", "name": "Văn phòng Xa Lộ Hà Nội", "time": "20:30", "address": "Xa lộ Hà Nội, Hiệp Phú, Quận 9", "type": "office", "isDefault": false }
+    ],
+    "dropoffPoints": [
+      { "id": "DO_004_1", "name": "Bến xe Phía Nam Nha Trang", "time": "04:30", "address": "Km 6 Đường 23/10, Vĩnh Trung, Nha Trang", "type": "station", "isDefault": true },
+      { "id": "DO_004_2", "name": "Trung chuyển TP. Nha Trang", "time": "05:00", "address": "Bán kính 7km trung tâm Nha Trang", "type": "transfer", "isDefault": false }
+    ]
+  },
+  {
+    "id": "TRIP_005",
+    "operatorId": "OP_SAOVIET",
+    "operatorName": "Sao Việt",
+    "vehicleType": "Cabin Cung Điện Đôi",
+    "fromCityId": "HN",
+    "fromCityName": "Hà Nội",
+    "toCityId": "SP",
+    "toCityName": "Sa Pa",
+    "departureTime": "22:00",
+    "arrivalTime": "04:00",
+    "duration": "6 tiếng",
+    "pickupPoint": "Văn phòng Phạm Hùng",
+    "pickupAddress": "789 Phạm Hùng, Nam Từ Liêm, Hà Nội",
+    "dropoffPoint": "Bến xe Sa Pa",
+    "dropoffAddress": "Điện Biên Phủ, Thị xã Sa Pa",
+    "originalPrice": 450000,
+    "discountPrice": 400000,
+    "availableSeats": 6,
+    "totalSeats": 22,
+    "seatLayoutType": "CABIN_22",
+    "rating": 4.9,
+    "reviewCount": 1840,
+    "amenities": ["Wifi tốc độ cao", "Cổng sạc Type-C/USB", "Nước suối & khăn lạnh", "Chăn gối kháng khuẩn", "Màn hình giải trí"],
+    "images": [
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop"
+    ],
+    "pickupPoints": [
+      { "id": "PU_005_1", "name": "Văn phòng Phạm Hùng", "time": "22:00", "address": "789 Phạm Hùng, Nam Từ Liêm, Hà Nội", "type": "office", "isDefault": true },
+      { "id": "PU_005_2", "name": "Văn phòng Giải Phóng", "time": "21:30", "address": "78 Giải Phóng, Phương Mai, Đống Đa", "type": "office", "isDefault": false },
+      { "id": "PU_005_3", "name": "Sân bay Nội Bài (Ngã 3 Kim Anh)", "time": "22:45", "address": "Xã Thanh Xuân, Sóc Sơn, Hà Nội", "type": "point", "isDefault": false }
+    ],
+    "dropoffPoints": [
+      { "id": "DO_005_1", "name": "Bến xe Sa Pa", "time": "04:00", "address": "Điện Biên Phủ, Thị xã Sa Pa", "type": "station", "isDefault": true },
+      { "id": "DO_005_2", "name": "Trung chuyển khách sạn trung tâm Sa Pa", "time": "04:30", "address": "Khu vực trung tâm thị xã Sa Pa", "type": "transfer", "isDefault": false }
+    ]
+  }
+]

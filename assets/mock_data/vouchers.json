@@ -1,0 +1,33 @@
+[
+  {
+    "code": "VEXGO50K",
+    "title": "Giảm 50.000đ cho đơn từ 250k",
+    "description": "Áp dụng cho mọi chuyến đi khi đặt vé qua VexGo",
+    "discountAmount": 50000,
+    "discountPercent": 0,
+    "minOrderAmount": 250000,
+    "expiryDate": "31/12/2026",
+    "isApplicable": true
+  },
+  {
+    "code": "HELLOVEXGO",
+    "title": "Giảm 15% tối đa 60.000đ",
+    "description": "Áp dụng cho khách hàng mới đặt vé lần đầu",
+    "discountAmount": 0,
+    "discountPercent": 15,
+    "maxDiscount": 60000,
+    "minOrderAmount": 150000,
+    "expiryDate": "30/11/2026",
+    "isApplicable": true
+  },
+  {
+    "code": "FUTASALE",
+    "title": "Giảm 30.000đ cho xe Phương Trang",
+    "description": "Chỉ áp dụng cho các chuyến đi của nhà xe Phương Trang FUTA",
+    "discountAmount": 30000,
+    "discountPercent": 0,
+    "minOrderAmount": 200000,
+    "expiryDate": "15/10/2026",
+    "isApplicable": true
+  }
+]

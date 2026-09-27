@@ -1,0 +1,100 @@
+[
+  {
+    "id": "HCM",
+    "name": "TP. Hồ Chí Minh",
+    "region": "Miền Nam",
+    "isPopular": true,
+    "stations": [
+      { "id": "BXMD", "name": "Bến xe Miền Đông mới", "address": "TP. Thủ Đức, TP. Hồ Chí Minh" },
+      { "id": "BXMT", "name": "Bến xe Miền Tây", "address": "395 Kinh Dương Vương, An Lạc, Bình Tân" },
+      { "id": "BXAS", "name": "Bến xe An Sương", "address": "QL22, Bà Điểm, Hóc Môn" },
+      { "id": "VPQ1", "name": "Văn phòng Quận 1 (Phạm Ngũ Lão)", "address": "Phạm Ngũ Lão, Quận 1" }
+    ]
+  },
+  {
+    "id": "DL",
+    "name": "Đà Lạt",
+    "region": "Tây Nguyên",
+    "isPopular": true,
+    "stations": [
+      { "id": "BXDL", "name": "Bến xe Liên tỉnh Đà Lạt", "address": "01 Tô Hiến Thành, Phường 3, Đà Lạt" },
+      { "id": "VPDL", "name": "Văn phòng Trung tâm Đà Lạt", "address": "Nguyễn Thị Minh Khai, Phường 1" }
+    ]
+  },
+  {
+    "id": "VT",
+    "name": "Vũng Tàu",
+    "region": "Miền Nam",
+    "isPopular": true,
+    "stations": [
+      { "id": "BXVT", "name": "Bến xe Vũng Tàu", "address": "192 Nam Kỳ Khởi Nghĩa, Phường 3, Vũng Tàu" },
+      { "id": "VPVT", "name": "Văn phòng Bãi Trước", "address": "Trần Phú, Phường 1, Vũng Tàu" }
+    ]
+  },
+  {
+    "id": "NT",
+    "name": "Nha Trang",
+    "region": "Miền Trung",
+    "isPopular": true,
+    "stations": [
+      { "id": "BXPN", "name": "Bến xe Phía Nam Nha Trang", "address": "Km 6 Đường 23/10, Vĩnh Trung" },
+      { "id": "VPNT", "name": "Văn phòng Hùng Vương", "address": "Hùng Vương, Lộc Thọ, Nha Trang" }
+    ]
+  },
+  {
+    "id": "HN",
+    "name": "Hà Nội",
+    "region": "Miền Bắc",
+    "isPopular": true,
+    "stations": [
+      { "id": "BXMD_HN", "name": "Bến xe Mỹ Đình", "address": "20 Phạm Hùng, Nam Từ Liêm" },
+      { "id": "BXGP", "name": "Bến xe Giáp Bát", "address": "Giải Phóng, Giáp Bát, Hoàng Mai" },
+      { "id": "BXGL", "name": "Bến xe Gia Lâm", "address": "Ngô Gia Khảm, Long Biên" }
+    ]
+  },
+  {
+    "id": "SP",
+    "name": "Sa Pa",
+    "region": "Miền Bắc",
+    "isPopular": true,
+    "stations": [
+      { "id": "BXSP", "name": "Bến xe Sa Pa", "address": "Điện Biên Phủ, Thị xã Sa Pa, Lào Cai" }
+    ]
+  },
+  {
+    "id": "DN",
+    "name": "Đà Nẵng",
+    "region": "Miền Trung",
+    "isPopular": true,
+    "stations": [
+      { "id": "BXTTDN", "name": "Bến xe Trung tâm Đà Nẵng", "address": "Tôn Đức Thắng, Hòa Minh, Liên Chiểu" }
+    ]
+  },
+  {
+    "id": "CT",
+    "name": "Cần Thơ",
+    "region": "Miền Nam",
+    "isPopular": true,
+    "stations": [
+      { "id": "BXCT", "name": "Bến xe Trung tâm Cần Thơ", "address": "Đường dẫn cầu Cần Thơ, Hưng Thạnh, Cái Răng" }
+    ]
+  },
+  {
+    "id": "QN",
+    "name": "Quy Nhơn",
+    "region": "Miền Trung",
+    "isPopular": false,
+    "stations": [
+      { "id": "BXQN", "name": "Bến xe Trung tâm Quy Nhơn", "address": "71 Tây Sơn, Ghềnh Ráng, Quy Nhơn" }
+    ]
+  },
+  {
+    "id": "PT",
+    "name": "Phan Thiết",
+    "region": "Miền Nam",
+    "isPopular": false,
+    "stations": [
+      { "id": "BXPT", "name": "Bến xe Bắc Phan Thiết", "address": "1 Từ Văn Tư, Phú Trinh, Phan Thiết" }
+    ]
+  }
+]
