@@ -35,7 +35,9 @@ class SearchTripsState extends Equatable {
 
   int get minPriceInResults {
     if (filteredTrips.isEmpty) return 240000;
-    return filteredTrips.map((t) => t.discountPrice).reduce((a, b) => a < b ? a : b);
+    return filteredTrips
+        .map((t) => t.discountPrice)
+        .reduce((a, b) => a < b ? a : b);
   }
 
   SearchTripsState copyWith({
@@ -60,7 +62,8 @@ class SearchTripsState extends Equatable {
       currentFilter: currentFilter ?? this.currentFilter,
       currentSort: currentSort ?? this.currentSort,
       availableOperators: availableOperators ?? this.availableOperators,
-      availableVehicleTypes: availableVehicleTypes ?? this.availableVehicleTypes,
+      availableVehicleTypes:
+          availableVehicleTypes ?? this.availableVehicleTypes,
       availableAmenities: availableAmenities ?? this.availableAmenities,
       fromCityId: fromCityId ?? this.fromCityId,
       toCityId: toCityId ?? this.toCityId,
@@ -70,17 +73,17 @@ class SearchTripsState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        allTrips,
-        filteredTrips,
-        selectedDate,
-        currentFilter,
-        currentSort,
-        availableOperators,
-        availableVehicleTypes,
-        availableAmenities,
-        fromCityId,
-        toCityId,
-        errorMessage,
-      ];
+    status,
+    allTrips,
+    filteredTrips,
+    selectedDate,
+    currentFilter,
+    currentSort,
+    availableOperators,
+    availableVehicleTypes,
+    availableAmenities,
+    fromCityId,
+    toCityId,
+    errorMessage,
+  ];
 }

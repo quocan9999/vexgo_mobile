@@ -12,10 +12,7 @@ import '../../bloc/auth_event.dart';
 class EditProfileDialog extends StatefulWidget {
   final UserModel user;
 
-  const EditProfileDialog({
-    super.key,
-    required this.user,
-  });
+  const EditProfileDialog({super.key, required this.user});
 
   static Future<void> show(BuildContext context, {required UserModel user}) {
     return showModalBottomSheet(
@@ -64,9 +61,15 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
 
     final updated = widget.user.copyWith(
       hoTen: _nameController.text.trim(),
-      email: _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
-      cccd: _cccdController.text.trim().isEmpty ? null : _cccdController.text.trim(),
-      ngaySinh: _dobController.text.trim().isEmpty ? null : _dobController.text.trim(),
+      email: _emailController.text.trim().isEmpty
+          ? null
+          : _emailController.text.trim(),
+      cccd: _cccdController.text.trim().isEmpty
+          ? null
+          : _cccdController.text.trim(),
+      ngaySinh: _dobController.text.trim().isEmpty
+          ? null
+          : _dobController.text.trim(),
     );
 
     context.read<AuthBloc>().add(UpdateProfileEvent(updated));
@@ -100,7 +103,9 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                   height: 4,
                   decoration: BoxDecoration(
                     color: AppColors.neutral300,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.radiusFull,
+                    ),
                   ),
                 ),
               ),
@@ -123,7 +128,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded, color: AppColors.neutral600),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: AppColors.neutral600,
+                    ),
                   ),
                 ],
               ),
@@ -142,7 +150,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
               CustomTextField(
                 controller: _nameController,
                 hintText: 'Nhập họ và tên',
-                prefixIcon: const Icon(Icons.person_outline_rounded, color: AppColors.neutral500),
+                prefixIcon: const Icon(
+                  Icons.person_outline_rounded,
+                  color: AppColors.neutral500,
+                ),
               ),
 
               const SizedBox(height: AppDimensions.md),
@@ -157,7 +168,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
               ),
               const SizedBox(height: AppDimensions.xs),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.md,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.neutral100,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
@@ -165,7 +179,11 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.phone_android_rounded, color: AppColors.success, size: 20),
+                    const Icon(
+                      Icons.phone_android_rounded,
+                      color: AppColors.success,
+                      size: 20,
+                    ),
                     const SizedBox(width: AppDimensions.sm),
                     Text(
                       widget.user.soDienThoai,
@@ -176,7 +194,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.successLight,
                         borderRadius: BorderRadius.circular(4),
@@ -209,7 +230,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                 controller: _emailController,
                 hintText: 'example@gmail.com',
                 keyboardType: TextInputType.emailAddress,
-                prefixIcon: const Icon(Icons.email_outlined, color: AppColors.neutral500),
+                prefixIcon: const Icon(
+                  Icons.email_outlined,
+                  color: AppColors.neutral500,
+                ),
               ),
 
               const SizedBox(height: AppDimensions.md),

@@ -89,7 +89,9 @@ class TicketQrModal extends StatelessWidget {
                 children: [
                   Text(
                     'Mã vé: ',
-                    style: AppTextStyles.caption.copyWith(color: AppColors.neutral700),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.neutral700,
+                    ),
                   ),
                   Text(
                     ticket.ticketCode,
@@ -110,7 +112,11 @@ class TicketQrModal extends StatelessWidget {
                         ),
                       );
                     },
-                    child: const Icon(Icons.copy_rounded, size: 16, color: AppColors.primary),
+                    child: const Icon(
+                      Icons.copy_rounded,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
               ),

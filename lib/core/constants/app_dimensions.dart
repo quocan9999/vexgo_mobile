@@ -23,23 +23,11 @@ class AppDimensions {
 
   // Common Shadows
   static const List<BoxShadow> cardShadow = [
-    BoxShadow(
-      color: Color(0x0F101828),
-      blurRadius: 10,
-      offset: Offset(0, 4),
-    ),
-    BoxShadow(
-      color: Color(0x0A101828),
-      blurRadius: 4,
-      offset: Offset(0, 2),
-    ),
+    BoxShadow(color: Color(0x0F101828), blurRadius: 10, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x0A101828), blurRadius: 4, offset: Offset(0, 2)),
   ];
 
   static const List<BoxShadow> bottomBarShadow = [
-    BoxShadow(
-      color: Color(0x14000000),
-      blurRadius: 16,
-      offset: Offset(0, -4),
-    ),
+    BoxShadow(color: Color(0x14000000), blurRadius: 16, offset: Offset(0, -4)),
   ];
 }

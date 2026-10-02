@@ -16,10 +16,7 @@ class LoginWithPhoneEvent extends AuthEvent {
   final String phone;
   final String password;
 
-  const LoginWithPhoneEvent({
-    required this.phone,
-    required this.password,
-  });
+  const LoginWithPhoneEvent({required this.phone, required this.password});
 
   @override
   List<Object?> get props => [phone, password];
@@ -70,10 +67,7 @@ class RedeemPointsEvent extends AuthEvent {
   final int points;
   final String rewardTitle;
 
-  const RedeemPointsEvent({
-    required this.points,
-    required this.rewardTitle,
-  });
+  const RedeemPointsEvent({required this.points, required this.rewardTitle});
 
   @override
   List<Object?> get props => [points, rewardTitle];

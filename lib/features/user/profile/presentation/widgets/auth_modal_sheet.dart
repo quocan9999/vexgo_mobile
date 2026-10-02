@@ -13,10 +13,7 @@ import '../../bloc/auth_state.dart';
 class AuthModalSheet extends StatefulWidget {
   final bool initialIsRegister;
 
-  const AuthModalSheet({
-    super.key,
-    this.initialIsRegister = false,
-  });
+  const AuthModalSheet({super.key, this.initialIsRegister = false});
 
   static void show(BuildContext context, {bool isRegister = false}) {
     showModalBottomSheet(
@@ -33,9 +30,15 @@ class AuthModalSheet extends StatefulWidget {
 
 class _AuthModalSheetState extends State<AuthModalSheet> {
   late bool _isRegister;
-  final TextEditingController _phoneController = TextEditingController(text: '0987654321');
-  final TextEditingController _nameController = TextEditingController(text: 'Phạm Minh Tài');
-  final TextEditingController _passwordController = TextEditingController(text: '123456');
+  final TextEditingController _phoneController = TextEditingController(
+    text: '0987654321',
+  );
+  final TextEditingController _nameController = TextEditingController(
+    text: 'Phạm Minh Tài',
+  );
+  final TextEditingController _passwordController = TextEditingController(
+    text: '123456',
+  );
   final TextEditingController _otpController = TextEditingController();
 
   bool _isObscurePassword = true;
@@ -76,12 +79,16 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
     final pass = _passwordController.text.trim();
     if (phone.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập đầy đủ Số điện thoại và Mật khẩu')),
+        const SnackBar(
+          content: Text('Vui lòng nhập đầy đủ Số điện thoại và Mật khẩu'),
+        ),
       );
       return;
     }
 
-    context.read<AuthBloc>().add(LoginWithPhoneEvent(phone: phone, password: pass));
+    context.read<AuthBloc>().add(
+      LoginWithPhoneEvent(phone: phone, password: pass),
+    );
     Navigator.of(context).pop();
   }
 
@@ -97,11 +104,9 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
       return;
     }
 
-    context.read<AuthBloc>().add(RequestRegisterOtpEvent(
-          phone: phone,
-          fullName: name,
-          password: pass,
-        ));
+    context.read<AuthBloc>().add(
+      RequestRegisterOtpEvent(phone: phone, fullName: name, password: pass),
+    );
 
     setState(() {
       _isVerifyingOtp = true;
@@ -119,12 +124,14 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
       return;
     }
 
-    context.read<AuthBloc>().add(VerifyOtpAndRegisterEvent(
-          phone: _phoneController.text.trim(),
-          otp: otp,
-          fullName: _nameController.text.trim(),
-          password: _passwordController.text.trim(),
-        ));
+    context.read<AuthBloc>().add(
+      VerifyOtpAndRegisterEvent(
+        phone: _phoneController.text.trim(),
+        otp: otp,
+        fullName: _nameController.text.trim(),
+        password: _passwordController.text.trim(),
+      ),
+    );
     Navigator.of(context).pop();
   }
 
@@ -197,7 +204,10 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
             ),
             IconButton(
               onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.close_rounded, color: AppColors.neutral600),
+              icon: const Icon(
+                Icons.close_rounded,
+                color: AppColors.neutral600,
+              ),
             ),
           ],
         ),
@@ -221,17 +231,28 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       color: !_isRegister ? Colors.white : Colors.transparent,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusSm,
+                      ),
                       boxShadow: !_isRegister
-                          ? const [BoxShadow(color: Color(0x0F000000), blurRadius: 4)]
+                          ? const [
+                              BoxShadow(
+                                color: Color(0x0F000000),
+                                blurRadius: 4,
+                              ),
+                            ]
                           : null,
                     ),
                     child: Center(
                       child: Text(
                         'Đăng nhập',
                         style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: !_isRegister ? FontWeight.w700 : FontWeight.w500,
-                          color: !_isRegister ? AppColors.primary : AppColors.neutral600,
+                          fontWeight: !_isRegister
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: !_isRegister
+                              ? AppColors.primary
+                              : AppColors.neutral600,
                         ),
                       ),
                     ),
@@ -246,17 +267,28 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       color: _isRegister ? Colors.white : Colors.transparent,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusSm,
+                      ),
                       boxShadow: _isRegister
-                          ? const [BoxShadow(color: Color(0x0F000000), blurRadius: 4)]
+                          ? const [
+                              BoxShadow(
+                                color: Color(0x0F000000),
+                                blurRadius: 4,
+                              ),
+                            ]
                           : null,
                     ),
                     child: Center(
                       child: Text(
                         'Đăng ký mới',
                         style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: _isRegister ? FontWeight.w700 : FontWeight.w500,
-                          color: _isRegister ? AppColors.primary : AppColors.neutral600,
+                          fontWeight: _isRegister
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: _isRegister
+                              ? AppColors.primary
+                              : AppColors.neutral600,
                         ),
                       ),
                     ),
@@ -279,7 +311,10 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           CustomTextField(
             controller: _nameController,
             hintText: 'Nhập họ và tên đầy đủ',
-            prefixIcon: const Icon(Icons.person_outline_rounded, color: AppColors.neutral500),
+            prefixIcon: const Icon(
+              Icons.person_outline_rounded,
+              color: AppColors.neutral500,
+            ),
           ),
           const SizedBox(height: AppDimensions.sm),
         ],
@@ -294,7 +329,10 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           controller: _phoneController,
           hintText: 'Ví dụ: 0987654321',
           keyboardType: TextInputType.phone,
-          prefixIcon: const Icon(Icons.phone_iphone_rounded, color: AppColors.neutral500),
+          prefixIcon: const Icon(
+            Icons.phone_iphone_rounded,
+            color: AppColors.neutral500,
+          ),
         ),
 
         const SizedBox(height: AppDimensions.sm),
@@ -309,14 +347,20 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           controller: _passwordController,
           hintText: 'Nhập mật khẩu',
           obscureText: _isObscurePassword,
-          prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.neutral500),
+          prefixIcon: const Icon(
+            Icons.lock_outline_rounded,
+            color: AppColors.neutral500,
+          ),
           suffixIcon: IconButton(
             icon: Icon(
-              _isObscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+              _isObscurePassword
+                  ? Icons.visibility_off_rounded
+                  : Icons.visibility_rounded,
               color: AppColors.neutral500,
               size: 20,
             ),
-            onPressed: () => setState(() => _isObscurePassword = !_isObscurePassword),
+            onPressed: () =>
+                setState(() => _isObscurePassword = !_isObscurePassword),
           ),
         ),
 
@@ -335,7 +379,10 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         Center(
           child: Text(
             'Bằng việc tiếp tục, bạn đồng ý với Điều khoản sử dụng của VexGo',
-            style: AppTextStyles.caption.copyWith(color: AppColors.neutral500, fontSize: 11),
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.neutral500,
+              fontSize: 11,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -366,20 +413,29 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
             color: AppColors.primaryLight,
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.mark_email_read_rounded, color: AppColors.primary, size: 28),
+          child: const Icon(
+            Icons.mark_email_read_rounded,
+            color: AppColors.primary,
+            size: 28,
+          ),
         ),
         const SizedBox(height: AppDimensions.md),
 
         Text(
           'Xác thực mã OTP',
-          style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w800, fontSize: 20),
+          style: AppTextStyles.titleMedium.copyWith(
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+          ),
         ),
         const SizedBox(height: AppDimensions.xs),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md),
           child: Text(
             'Mã xác thực gồm 6 chữ số đã được gửi đến số điện thoại ${_phoneController.text.trim()}',
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.neutral600),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.neutral600,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -400,7 +456,10 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         const SizedBox(height: AppDimensions.sm),
         Text(
           '(Gợi ý mã thử nghiệm: 123456)',
-          style: AppTextStyles.caption.copyWith(color: AppColors.neutral500, fontStyle: FontStyle.italic),
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.neutral500,
+            fontStyle: FontStyle.italic,
+          ),
         ),
 
         const SizedBox(height: AppDimensions.md),
@@ -414,11 +473,13 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         else
           TextButton(
             onPressed: () {
-              context.read<AuthBloc>().add(RequestRegisterOtpEvent(
-                    phone: _phoneController.text.trim(),
-                    fullName: _nameController.text.trim(),
-                    password: _passwordController.text.trim(),
-                  ));
+              context.read<AuthBloc>().add(
+                RequestRegisterOtpEvent(
+                  phone: _phoneController.text.trim(),
+                  fullName: _nameController.text.trim(),
+                  password: _passwordController.text.trim(),
+                ),
+              );
               _startTimer();
             },
             child: const Text('Gửi lại mã OTP'),

@@ -31,7 +31,8 @@ class NotificationsScreen extends StatelessWidget {
             actions: [
               if (unreadCount > 0)
                 TextButton(
-                  onPressed: () => bloc.add(const MarkAllNotificationsAsReadEvent()),
+                  onPressed: () =>
+                      bloc.add(const MarkAllNotificationsAsReadEvent()),
                   child: Text(
                     'Đọc tất cả',
                     style: AppTextStyles.bodySmall.copyWith(
@@ -55,15 +56,39 @@ class NotificationsScreen extends StatelessWidget {
                 ),
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.base,
+                    vertical: 6,
+                  ),
                   children: [
-                    _buildTab(context, title: 'Tất cả', count: unreadCount, index: 0, activeIndex: state.activeTabIndex),
+                    _buildTab(
+                      context,
+                      title: 'Tất cả',
+                      count: unreadCount,
+                      index: 0,
+                      activeIndex: state.activeTabIndex,
+                    ),
                     const SizedBox(width: AppDimensions.xs),
-                    _buildTab(context, title: 'Chuyến đi', index: 1, activeIndex: state.activeTabIndex),
+                    _buildTab(
+                      context,
+                      title: 'Chuyến đi',
+                      index: 1,
+                      activeIndex: state.activeTabIndex,
+                    ),
                     const SizedBox(width: AppDimensions.xs),
-                    _buildTab(context, title: 'Ưu đãi', index: 2, activeIndex: state.activeTabIndex),
+                    _buildTab(
+                      context,
+                      title: 'Ưu đãi',
+                      index: 2,
+                      activeIndex: state.activeTabIndex,
+                    ),
                     const SizedBox(width: AppDimensions.xs),
-                    _buildTab(context, title: 'Hệ thống', index: 3, activeIndex: state.activeTabIndex),
+                    _buildTab(
+                      context,
+                      title: 'Hệ thống',
+                      index: 3,
+                      activeIndex: state.activeTabIndex,
+                    ),
                   ],
                 ),
               ),
@@ -71,30 +96,36 @@ class NotificationsScreen extends StatelessWidget {
               // 2. Notification List
               Expanded(
                 child: state.status == NotificationStatus.loading
-                    ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      )
                     : list.isEmpty
-                        ? EmptyState(
-                            icon: Icons.notifications_off_outlined,
-                            title: 'Chưa có thông báo nào',
-                            message: 'Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.',
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.all(AppDimensions.base),
-                            itemCount: list.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: AppDimensions.sm),
-                            itemBuilder: (context, index) {
-                              final item = list[index];
-                              return _NotificationItemCard(
-                                item: item,
-                                onTap: () {
-                                  bloc.add(MarkNotificationAsReadEvent(item.id));
-                                  if (item.ticketCode != null) {
-                                    context.push('/my-tickets');
-                                  }
-                                },
-                              );
+                    ? EmptyState(
+                        icon: Icons.notifications_off_outlined,
+                        title: 'Chưa có thông báo nào',
+                        message:
+                            'Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.',
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(AppDimensions.base),
+                        itemCount: list.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: AppDimensions.sm),
+                        itemBuilder: (context, index) {
+                          final item = list[index];
+                          return _NotificationItemCard(
+                            item: item,
+                            onTap: () {
+                              bloc.add(MarkNotificationAsReadEvent(item.id));
+                              if (item.ticketCode != null) {
+                                context.push('/my-tickets');
+                              }
                             },
-                          ),
+                          );
+                        },
+                      ),
               ),
             ],
           ),
@@ -113,7 +144,9 @@ class NotificationsScreen extends StatelessWidget {
     final isSelected = index == activeIndex;
 
     return InkWell(
-      onTap: () => context.read<NotificationBloc>().add(ChangeNotificationTabEvent(index)),
+      onTap: () => context.read<NotificationBloc>().add(
+        ChangeNotificationTabEvent(index),
+      ),
       borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -162,10 +195,7 @@ class _NotificationItemCard extends StatelessWidget {
   final NotificationModel item;
   final VoidCallback onTap;
 
-  const _NotificationItemCard({
-    required this.item,
-    required this.onTap,
-  });
+  const _NotificationItemCard({required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -199,10 +229,14 @@ class _NotificationItemCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.md),
         decoration: BoxDecoration(
-          color: item.isRead ? Colors.white : AppColors.primaryLight.withValues(alpha: 0.15),
+          color: item.isRead
+              ? Colors.white
+              : AppColors.primaryLight.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           border: Border.all(
-            color: item.isRead ? AppColors.neutral200 : AppColors.primary.withValues(alpha: 0.3),
+            color: item.isRead
+                ? AppColors.neutral200
+                : AppColors.primary.withValues(alpha: 0.3),
           ),
           boxShadow: [
             BoxShadow(
@@ -238,8 +272,12 @@ class _NotificationItemCard extends StatelessWidget {
                         child: Text(
                           item.title,
                           style: AppTextStyles.titleSmall.copyWith(
-                            fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w800,
-                            color: item.isRead ? AppColors.neutral900 : AppColors.primary,
+                            fontWeight: item.isRead
+                                ? FontWeight.w600
+                                : FontWeight.w800,
+                            color: item.isRead
+                                ? AppColors.neutral900
+                                : AppColors.primary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

@@ -77,7 +77,10 @@ class UserModel extends Equatable {
       hangThanhVien: json['hangThanhVien'] as String? ?? 'BẠC',
       diemToiHangTiepTheo: json['diemToiHangTiepTheo'] as int? ?? 1000,
       pointHistory: historyJson
-          .map((item) => PointTransactionModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                PointTransactionModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
     );
   }
@@ -134,18 +137,18 @@ class UserModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        taiKhoanId,
-        maKhachHang,
-        hoTen,
-        soDienThoai,
-        email,
-        cccd,
-        ngaySinh,
-        daXacThucSoDienThoai,
-        trangThai,
-        diemTichLuy,
-        hangThanhVien,
-        diemToiHangTiepTheo,
-        pointHistory,
-      ];
+    taiKhoanId,
+    maKhachHang,
+    hoTen,
+    soDienThoai,
+    email,
+    cccd,
+    ngaySinh,
+    daXacThucSoDienThoai,
+    trangThai,
+    diemTichLuy,
+    hangThanhVien,
+    diemToiHangTiepTheo,
+    pointHistory,
+  ];
 }

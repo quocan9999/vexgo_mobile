@@ -20,7 +20,10 @@ class FakeAuthRepository implements AuthRepository {
   Future<UserModel?> getCurrentUser() async => user;
 
   @override
-  Future<UserModel> login({required String phone, required String password}) async {
+  Future<UserModel> login({
+    required String phone,
+    required String password,
+  }) async {
     user = UserModel(
       taiKhoanId: 101,
       maKhachHang: 'KH00101',
@@ -145,115 +148,148 @@ void main() {
       expect(authBloc.state.isAuthenticated, false);
     });
 
-    test('CheckAuthStatusEvent loads current user and marks authenticated', () async {
-      authBloc.add(const CheckAuthStatusEvent());
-      await expectLater(
-        authBloc.stream,
-        emitsInOrder([
-          predicate<AuthState>((s) => s.status == AuthStatus.loading),
-          predicate<AuthState>((s) {
-            return s.status == AuthStatus.authenticated &&
-                s.user?.hoTen == 'Nguyễn Văn An' &&
-                s.user?.tier == MembershipTier.gold &&
-                s.user?.diemTichLuy == 1450;
-          }),
-        ]),
-      );
-    });
+    test(
+      'CheckAuthStatusEvent loads current user and marks authenticated',
+      () async {
+        authBloc.add(const CheckAuthStatusEvent());
+        await expectLater(
+          authBloc.stream,
+          emitsInOrder([
+            predicate<AuthState>((s) => s.status == AuthStatus.loading),
+            predicate<AuthState>((s) {
+              return s.status == AuthStatus.authenticated &&
+                  s.user?.hoTen == 'Nguyễn Văn An' &&
+                  s.user?.tier == MembershipTier.gold &&
+                  s.user?.diemTichLuy == 1450;
+            }),
+          ]),
+        );
+      },
+    );
 
     test('LoginWithPhoneEvent succeeds and updates user info', () async {
-      authBloc.add(const LoginWithPhoneEvent(phone: '0988776655', password: 'password123'));
+      authBloc.add(
+        const LoginWithPhoneEvent(phone: '0988776655', password: 'password123'),
+      );
       await expectLater(
         authBloc.stream,
         emitsInOrder([
           predicate<AuthState>((s) => s.status == AuthStatus.loading),
-          predicate<AuthState>((s) =>
-              s.status == AuthStatus.authenticated &&
-              s.user?.soDienThoai == '0988776655' &&
-              s.successMessage?.contains('Đăng nhập thành công') == true),
+          predicate<AuthState>(
+            (s) =>
+                s.status == AuthStatus.authenticated &&
+                s.user?.soDienThoai == '0988776655' &&
+                s.successMessage?.contains('Đăng nhập thành công') == true,
+          ),
         ]),
       );
     });
 
     test('RequestRegisterOtpEvent initiates OTP verification flow', () async {
-      authBloc.add(const RequestRegisterOtpEvent(
-        phone: '0912345678',
-        fullName: 'Trần Văn Mới',
-        password: 'pass',
-      ));
+      authBloc.add(
+        const RequestRegisterOtpEvent(
+          phone: '0912345678',
+          fullName: 'Trần Văn Mới',
+          password: 'pass',
+        ),
+      );
       await expectLater(
         authBloc.stream,
         emitsInOrder([
           predicate<AuthState>((s) => s.status == AuthStatus.loading),
-          predicate<AuthState>((s) =>
-              s.status == AuthStatus.otpRequired &&
-              s.pendingPhone == '0912345678' &&
-              s.successMessage?.contains('0912345678') == true),
+          predicate<AuthState>(
+            (s) =>
+                s.status == AuthStatus.otpRequired &&
+                s.pendingPhone == '0912345678' &&
+                s.successMessage?.contains('0912345678') == true,
+          ),
         ]),
       );
     });
 
-    test('VerifyOtpAndRegisterEvent with incorrect OTP fails with error', () async {
-      authBloc.add(const VerifyOtpAndRegisterEvent(
-        phone: '0912345678',
-        otp: '999999',
-        fullName: 'Trần Văn Mới',
-        password: 'pass',
-      ));
-      await expectLater(
-        authBloc.stream,
-        emitsInOrder([
-          predicate<AuthState>((s) => s.status == AuthStatus.loading),
-          predicate<AuthState>((s) =>
-              s.status == AuthStatus.failure &&
-              s.errorMessage != null &&
-              s.errorMessage!.contains('OTP không chính xác')),
-        ]),
-      );
-    });
+    test(
+      'VerifyOtpAndRegisterEvent with incorrect OTP fails with error',
+      () async {
+        authBloc.add(
+          const VerifyOtpAndRegisterEvent(
+            phone: '0912345678',
+            otp: '999999',
+            fullName: 'Trần Văn Mới',
+            password: 'pass',
+          ),
+        );
+        await expectLater(
+          authBloc.stream,
+          emitsInOrder([
+            predicate<AuthState>((s) => s.status == AuthStatus.loading),
+            predicate<AuthState>(
+              (s) =>
+                  s.status == AuthStatus.failure &&
+                  s.errorMessage != null &&
+                  s.errorMessage!.contains('OTP không chính xác'),
+            ),
+          ]),
+        );
+      },
+    );
 
-    test('VerifyOtpAndRegisterEvent with valid OTP succeeds and logs in', () async {
-      authBloc.add(const VerifyOtpAndRegisterEvent(
-        phone: '0912345678',
-        otp: '123456',
-        fullName: 'Trần Văn Mới',
-        password: 'pass',
-      ));
-      await expectLater(
-        authBloc.stream,
-        emitsInOrder([
-          predicate<AuthState>((s) => s.status == AuthStatus.loading),
-          predicate<AuthState>((s) =>
-              s.status == AuthStatus.authenticated &&
-              s.user?.hoTen == 'Trần Văn Mới' &&
-              s.user?.hangThanhVien == 'BẠC'),
-        ]),
-      );
-    });
+    test(
+      'VerifyOtpAndRegisterEvent with valid OTP succeeds and logs in',
+      () async {
+        authBloc.add(
+          const VerifyOtpAndRegisterEvent(
+            phone: '0912345678',
+            otp: '123456',
+            fullName: 'Trần Văn Mới',
+            password: 'pass',
+          ),
+        );
+        await expectLater(
+          authBloc.stream,
+          emitsInOrder([
+            predicate<AuthState>((s) => s.status == AuthStatus.loading),
+            predicate<AuthState>(
+              (s) =>
+                  s.status == AuthStatus.authenticated &&
+                  s.user?.hoTen == 'Trần Văn Mới' &&
+                  s.user?.hangThanhVien == 'BẠC',
+            ),
+          ]),
+        );
+      },
+    );
 
     test('UpdateProfileEvent updates personal info correctly', () async {
       // First ensure authenticated
       authBloc.add(const CheckAuthStatusEvent());
-      await authBloc.stream.firstWhere((s) => s.status == AuthStatus.authenticated);
+      await authBloc.stream.firstWhere(
+        (s) => s.status == AuthStatus.authenticated,
+      );
 
       final currentUser = authBloc.state.user!;
-      authBloc.add(UpdateProfileEvent(currentUser.copyWith(
-        hoTen: 'Nguyễn Văn An Cập Nhật',
-        email: 'an.updated@vexgo.vn',
-        cccd: '079201009999',
-        ngaySinh: '1995-10-20',
-      )));
+      authBloc.add(
+        UpdateProfileEvent(
+          currentUser.copyWith(
+            hoTen: 'Nguyễn Văn An Cập Nhật',
+            email: 'an.updated@vexgo.vn',
+            cccd: '079201009999',
+            ngaySinh: '1995-10-20',
+          ),
+        ),
+      );
 
       await expectLater(
         authBloc.stream,
         emitsInOrder([
           predicate<AuthState>((s) => s.status == AuthStatus.loading),
-          predicate<AuthState>((s) =>
-              s.status == AuthStatus.authenticated &&
-              s.user?.hoTen == 'Nguyễn Văn An Cập Nhật' &&
-              s.user?.email == 'an.updated@vexgo.vn' &&
-              s.user?.cccd == '079201009999' &&
-              s.successMessage?.contains('thành công') == true),
+          predicate<AuthState>(
+            (s) =>
+                s.status == AuthStatus.authenticated &&
+                s.user?.hoTen == 'Nguyễn Văn An Cập Nhật' &&
+                s.user?.email == 'an.updated@vexgo.vn' &&
+                s.user?.cccd == '079201009999' &&
+                s.successMessage?.contains('thành công') == true,
+          ),
         ]),
       );
     });
@@ -261,39 +297,46 @@ void main() {
     test('RedeemPointsEvent deducts points and appends to history', () async {
       // First ensure authenticated
       authBloc.add(const CheckAuthStatusEvent());
-      await authBloc.stream.firstWhere((s) => s.status == AuthStatus.authenticated);
+      await authBloc.stream.firstWhere(
+        (s) => s.status == AuthStatus.authenticated,
+      );
 
-      authBloc.add(const RedeemPointsEvent(
-        points: 100,
-        rewardTitle: 'Voucher 50.000đ',
-      ));
+      authBloc.add(
+        const RedeemPointsEvent(points: 100, rewardTitle: 'Voucher 50.000đ'),
+      );
 
       await expectLater(
         authBloc.stream,
         emitsInOrder([
           predicate<AuthState>((s) => s.status == AuthStatus.loading),
-          predicate<AuthState>((s) =>
-              s.status == AuthStatus.authenticated &&
-              s.user?.diemTichLuy == 1350 &&
-              s.user?.pointHistory.first.title.contains('Voucher 50.000đ') == true &&
-              s.successMessage?.contains('thành công') == true),
+          predicate<AuthState>(
+            (s) =>
+                s.status == AuthStatus.authenticated &&
+                s.user?.diemTichLuy == 1350 &&
+                s.user?.pointHistory.first.title.contains('Voucher 50.000đ') ==
+                    true &&
+                s.successMessage?.contains('thành công') == true,
+          ),
         ]),
       );
     });
 
-    test('ToggleLanguageEvent and TogglePushNotificationEvent update preferences', () async {
-      authBloc.add(const ToggleLanguageEvent('en'));
-      await expectLater(
-        authBloc.stream,
-        emits(predicate<AuthState>((s) => s.language == 'en')),
-      );
+    test(
+      'ToggleLanguageEvent and TogglePushNotificationEvent update preferences',
+      () async {
+        authBloc.add(const ToggleLanguageEvent('en'));
+        await expectLater(
+          authBloc.stream,
+          emits(predicate<AuthState>((s) => s.language == 'en')),
+        );
 
-      authBloc.add(const TogglePushNotificationEvent(false));
-      await expectLater(
-        authBloc.stream,
-        emits(predicate<AuthState>((s) => s.pushEnabled == false)),
-      );
-    });
+        authBloc.add(const TogglePushNotificationEvent(false));
+        await expectLater(
+          authBloc.stream,
+          emits(predicate<AuthState>((s) => s.pushEnabled == false)),
+        );
+      },
+    );
 
     test('LogoutEvent clears user state to unauthenticated', () async {
       authBloc.add(const LogoutEvent());
@@ -301,10 +344,12 @@ void main() {
         authBloc.stream,
         emitsInOrder([
           predicate<AuthState>((s) => s.status == AuthStatus.loading),
-          predicate<AuthState>((s) =>
-              s.status == AuthStatus.unauthenticated &&
-              s.user == null &&
-              s.successMessage?.contains('đăng xuất') == true),
+          predicate<AuthState>(
+            (s) =>
+                s.status == AuthStatus.unauthenticated &&
+                s.user == null &&
+                s.successMessage?.contains('đăng xuất') == true,
+          ),
         ]),
       );
     });
@@ -352,69 +397,105 @@ void main() {
       notifBloc.close();
     });
 
-    test('LoadNotificationsEvent loads list and calculates unread count (2 unread)', () async {
-      notifBloc.add(const LoadNotificationsEvent());
-      await expectLater(
-        notifBloc.stream,
-        emitsInOrder([
-          predicate<NotificationState>((s) => s.status == NotificationStatus.loading),
-          predicate<NotificationState>((s) =>
-              s.status == NotificationStatus.loaded &&
-              s.notifications.length == 3 &&
-              s.unreadCount == 2),
-        ]),
-      );
-    });
+    test(
+      'LoadNotificationsEvent loads list and calculates unread count (2 unread)',
+      () async {
+        notifBloc.add(const LoadNotificationsEvent());
+        await expectLater(
+          notifBloc.stream,
+          emitsInOrder([
+            predicate<NotificationState>(
+              (s) => s.status == NotificationStatus.loading,
+            ),
+            predicate<NotificationState>(
+              (s) =>
+                  s.status == NotificationStatus.loaded &&
+                  s.notifications.length == 3 &&
+                  s.unreadCount == 2,
+            ),
+          ]),
+        );
+      },
+    );
 
     test('ChangeNotificationTabEvent filters items by category tab', () async {
       notifBloc.add(const LoadNotificationsEvent());
-      await notifBloc.stream.firstWhere((s) => s.status == NotificationStatus.loaded);
+      await notifBloc.stream.firstWhere(
+        (s) => s.status == NotificationStatus.loaded,
+      );
 
       // Tab 1: Trip
       notifBloc.add(const ChangeNotificationTabEvent(1));
       await expectLater(
         notifBloc.stream,
-        emits(predicate<NotificationState>((s) =>
-            s.activeTabIndex == 1 &&
-            s.filteredNotifications.length == 1 &&
-            s.filteredNotifications.first.id == 'NOTIF_1')),
+        emits(
+          predicate<NotificationState>(
+            (s) =>
+                s.activeTabIndex == 1 &&
+                s.filteredNotifications.length == 1 &&
+                s.filteredNotifications.first.id == 'NOTIF_1',
+          ),
+        ),
       );
 
       // Tab 2: Promo
       notifBloc.add(const ChangeNotificationTabEvent(2));
       await expectLater(
         notifBloc.stream,
-        emits(predicate<NotificationState>((s) =>
-            s.activeTabIndex == 2 &&
-            s.filteredNotifications.length == 1 &&
-            s.filteredNotifications.first.id == 'NOTIF_2')),
+        emits(
+          predicate<NotificationState>(
+            (s) =>
+                s.activeTabIndex == 2 &&
+                s.filteredNotifications.length == 1 &&
+                s.filteredNotifications.first.id == 'NOTIF_2',
+          ),
+        ),
       );
     });
 
-    test('MarkNotificationAsReadEvent updates single item and decrements unread count', () async {
-      notifBloc.add(const LoadNotificationsEvent());
-      await notifBloc.stream.firstWhere((s) => s.status == NotificationStatus.loaded);
+    test(
+      'MarkNotificationAsReadEvent updates single item and decrements unread count',
+      () async {
+        notifBloc.add(const LoadNotificationsEvent());
+        await notifBloc.stream.firstWhere(
+          (s) => s.status == NotificationStatus.loaded,
+        );
 
-      notifBloc.add(const MarkNotificationAsReadEvent('NOTIF_1'));
-      await expectLater(
-        notifBloc.stream,
-        emits(predicate<NotificationState>((s) =>
-            s.unreadCount == 1 &&
-            s.notifications.firstWhere((n) => n.id == 'NOTIF_1').isRead == true)),
-      );
-    });
+        notifBloc.add(const MarkNotificationAsReadEvent('NOTIF_1'));
+        await expectLater(
+          notifBloc.stream,
+          emits(
+            predicate<NotificationState>(
+              (s) =>
+                  s.unreadCount == 1 &&
+                  s.notifications.firstWhere((n) => n.id == 'NOTIF_1').isRead ==
+                      true,
+            ),
+          ),
+        );
+      },
+    );
 
-    test('MarkAllNotificationsAsReadEvent sets all to read and unread count to 0', () async {
-      notifBloc.add(const LoadNotificationsEvent());
-      await notifBloc.stream.firstWhere((s) => s.status == NotificationStatus.loaded);
+    test(
+      'MarkAllNotificationsAsReadEvent sets all to read and unread count to 0',
+      () async {
+        notifBloc.add(const LoadNotificationsEvent());
+        await notifBloc.stream.firstWhere(
+          (s) => s.status == NotificationStatus.loaded,
+        );
 
-      notifBloc.add(const MarkAllNotificationsAsReadEvent());
-      await expectLater(
-        notifBloc.stream,
-        emits(predicate<NotificationState>((s) =>
-            s.unreadCount == 0 &&
-            s.notifications.every((n) => n.isRead == true))),
-      );
-    });
+        notifBloc.add(const MarkAllNotificationsAsReadEvent());
+        await expectLater(
+          notifBloc.stream,
+          emits(
+            predicate<NotificationState>(
+              (s) =>
+                  s.unreadCount == 0 &&
+                  s.notifications.every((n) => n.isRead == true),
+            ),
+          ),
+        );
+      },
+    );
   });
 }

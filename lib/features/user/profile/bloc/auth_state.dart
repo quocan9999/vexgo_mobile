@@ -1,7 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:vexgo_app/data/models/user_model.dart';
 
-enum AuthStatus { initial, loading, authenticated, unauthenticated, otpRequired, failure }
+enum AuthStatus {
+  initial,
+  loading,
+  authenticated,
+  unauthenticated,
+  otpRequired,
+  failure,
+}
 
 class AuthState extends Equatable {
   final AuthStatus status;
@@ -26,7 +33,8 @@ class AuthState extends Equatable {
     this.pushEnabled = true,
   });
 
-  bool get isAuthenticated => status == AuthStatus.authenticated && user != null;
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && user != null;
 
   AuthState copyWith({
     AuthStatus? status,
@@ -44,7 +52,9 @@ class AuthState extends Equatable {
       status: status ?? this.status,
       user: user ?? this.user,
       errorMessage: clearMessages ? null : (errorMessage ?? this.errorMessage),
-      successMessage: clearMessages ? null : (successMessage ?? this.successMessage),
+      successMessage: clearMessages
+          ? null
+          : (successMessage ?? this.successMessage),
       pendingPhone: pendingPhone ?? this.pendingPhone,
       pendingFullName: pendingFullName ?? this.pendingFullName,
       pendingPassword: pendingPassword ?? this.pendingPassword,
@@ -55,14 +65,14 @@ class AuthState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        user,
-        errorMessage,
-        successMessage,
-        pendingPhone,
-        pendingFullName,
-        pendingPassword,
-        language,
-        pushEnabled,
-      ];
+    status,
+    user,
+    errorMessage,
+    successMessage,
+    pendingPhone,
+    pendingFullName,
+    pendingPassword,
+    language,
+    pushEnabled,
+  ];
 }

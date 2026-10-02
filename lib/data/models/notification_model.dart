@@ -98,13 +98,13 @@ class NotificationModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        message,
-        category,
-        createdAt,
-        isRead,
-        ticketCode,
-        voucherCode,
-      ];
+    id,
+    title,
+    message,
+    category,
+    createdAt,
+    isRead,
+    ticketCode,
+    voucherCode,
+  ];
 }

@@ -127,3 +127,7 @@ class GoToStepEvent extends BookingFlowEvent {
 class ConfirmPaymentEvent extends BookingFlowEvent {
   const ConfirmPaymentEvent();
 }
+
+class ReleaseSeatHoldEvent extends BookingFlowEvent {
+  const ReleaseSeatHoldEvent();
+}

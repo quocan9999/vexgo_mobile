@@ -1,12 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum TripSortType {
-  earliest,
-  latest,
-  priceAsc,
-  priceDesc,
-  ratingDesc,
-}
+enum TripSortType { earliest, latest, priceAsc, priceDesc, ratingDesc }
 
 extension TripSortTypeExt on TripSortType {
   String get label {
@@ -119,11 +113,11 @@ class TripFilterModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        selectedTimeSlots,
-        selectedOperators,
-        selectedVehicleTypes,
-        selectedAmenities,
-        minPrice,
-        maxPrice,
-      ];
+    selectedTimeSlots,
+    selectedOperators,
+    selectedVehicleTypes,
+    selectedAmenities,
+    minPrice,
+    maxPrice,
+  ];
 }

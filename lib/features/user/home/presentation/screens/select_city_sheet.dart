@@ -66,7 +66,9 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
       } else {
         _filteredCities = widget.cities.where((city) {
           final matchName = city.name.toLowerCase().contains(query);
-          final matchStation = city.stations.any((s) => s.name.toLowerCase().contains(query));
+          final matchStation = city.stations.any(
+            (s) => s.name.toLowerCase().contains(query),
+          );
           return matchName || matchStation;
         }).toList();
       }
@@ -91,7 +93,10 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
           // Drag handle
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: AppDimensions.md, bottom: AppDimensions.xs),
+              margin: const EdgeInsets.only(
+                top: AppDimensions.md,
+                bottom: AppDimensions.xs,
+              ),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
@@ -123,7 +128,10 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close_rounded, color: AppColors.neutral600),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: AppColors.neutral600,
+                  ),
                 ),
               ],
             ),
@@ -135,10 +143,17 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
             child: CustomTextField(
               controller: _searchController,
               hintText: 'Tìm tỉnh thành, bến xe, văn phòng...',
-              prefixIcon: const Icon(Icons.search_rounded, color: AppColors.neutral400),
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                color: AppColors.neutral400,
+              ),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear_rounded, size: 18, color: AppColors.neutral500),
+                      icon: const Icon(
+                        Icons.clear_rounded,
+                        size: 18,
+                        color: AppColors.neutral500,
+                      ),
                       onPressed: () => _searchController.clear(),
                     )
                   : null,
@@ -150,14 +165,20 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
           // Content List
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+              ),
               children: [
                 // Popular Cities Chips (only when search query is empty)
-                if (_searchController.text.isEmpty && popularCities.isNotEmpty) ...[
+                if (_searchController.text.isEmpty &&
+                    popularCities.isNotEmpty) ...[
                   Row(
                     children: [
-                      const Icon(Icons.local_fire_department_rounded,
-                          color: AppColors.secondary, size: 18),
+                      const Icon(
+                        Icons.local_fire_department_rounded,
+                        color: AppColors.secondary,
+                        size: 18,
+                      ),
                       const SizedBox(width: AppDimensions.xs),
                       Text(
                         'Địa điểm phổ biến',
@@ -180,11 +201,17 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                         selectedColor: AppColors.primaryLight,
                         backgroundColor: AppColors.neutral50,
                         labelStyle: AppTextStyles.bodyMedium.copyWith(
-                          color: isSelected ? AppColors.primary : AppColors.neutral700,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.neutral700,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                         ),
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : AppColors.neutral200,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.neutral200,
                         ),
                         onSelected: (_) => Navigator.of(context).pop(city),
                       );
@@ -207,11 +234,15 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
 
                 if (_filteredCities.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppDimensions.xxl),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppDimensions.xxl,
+                    ),
                     child: Center(
                       child: Text(
                         'Không tìm thấy địa điểm phù hợp',
-                        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.neutral500),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.neutral500,
+                        ),
                       ),
                     ),
                   )
@@ -221,8 +252,12 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: AppDimensions.xs),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primaryLight.withValues(alpha: 0.5) : Colors.transparent,
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                        color: isSelected
+                            ? AppColors.primaryLight.withValues(alpha: 0.5)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusMd,
+                        ),
                       ),
                       child: ExpansionTile(
                         shape: const Border(),
@@ -230,20 +265,30 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                         leading: Container(
                           padding: const EdgeInsets.all(AppDimensions.xs + 2),
                           decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primary : AppColors.neutral100,
-                            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.neutral100,
+                            borderRadius: BorderRadius.circular(
+                              AppDimensions.radiusSm,
+                            ),
                           ),
                           child: Icon(
                             Icons.location_on_rounded,
-                            color: isSelected ? Colors.white : AppColors.neutral600,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.neutral600,
                             size: 18,
                           ),
                         ),
                         title: Text(
                           city.name,
                           style: AppTextStyles.titleSmall.copyWith(
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                            color: isSelected ? AppColors.primary : AppColors.neutral900,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.neutral900,
                           ),
                         ),
                         subtitle: Text(
@@ -265,20 +310,30 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                                 ),
                               ),
                             ),
-                            const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+                            const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              size: 20,
+                            ),
                           ],
                         ),
                         children: city.stations.map((station) {
                           return ListTile(
                             dense: true,
-                            contentPadding: const EdgeInsets.only(left: 48, right: 16),
+                            contentPadding: const EdgeInsets.only(
+                              left: 48,
+                              right: 16,
+                            ),
                             title: Text(
                               station.name,
-                              style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                             subtitle: Text(
                               station.address,
-                              style: AppTextStyles.caption.copyWith(color: AppColors.neutral400),
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.neutral400,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),

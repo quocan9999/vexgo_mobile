@@ -11,11 +11,7 @@ class Step6Payment extends StatelessWidget {
   final BookingFlowState state;
   final BookingFlowBloc bloc;
 
-  const Step6Payment({
-    super.key,
-    required this.state,
-    required this.bloc,
-  });
+  const Step6Payment({super.key, required this.state, required this.bloc});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +31,9 @@ class Step6Payment extends StatelessWidget {
                 ],
               ),
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-              border: Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
+              border: Border.all(
+                color: AppColors.warning.withValues(alpha: 0.4),
+              ),
             ),
             child: Row(
               children: [
@@ -45,7 +43,11 @@ class Step6Payment extends StatelessWidget {
                     color: AppColors.warning,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.timer_outlined, color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.timer_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: AppDimensions.md),
                 Expanded(
@@ -54,7 +56,9 @@ class Step6Payment extends StatelessWidget {
                     children: [
                       Text(
                         'Thời gian giữ chỗ còn lại:',
-                        style: AppTextStyles.caption.copyWith(color: AppColors.neutral700),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.neutral700,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -97,7 +101,9 @@ class Step6Payment extends StatelessWidget {
                   children: [
                     Text(
                       'Số tiền thanh toán',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.neutral500,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -111,7 +117,10 @@ class Step6Payment extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primaryLight,
                     borderRadius: BorderRadius.circular(12),
@@ -183,7 +192,11 @@ class Step6Payment extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_rounded, size: 14, color: AppColors.neutral500),
+                const Icon(
+                  Icons.lock_rounded,
+                  size: 14,
+                  color: AppColors.neutral500,
+                ),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -220,7 +233,9 @@ class Step6Payment extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: AppDimensions.sm),
         padding: const EdgeInsets.all(AppDimensions.base),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight.withValues(alpha: 0.3) : Colors.white,
+          color: isSelected
+              ? AppColors.primaryLight.withValues(alpha: 0.3)
+              : Colors.white,
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.neutral200,
@@ -296,7 +311,10 @@ class Step6Payment extends StatelessWidget {
                       if (badgeText != null) ...[
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.secondaryLight,
                             borderRadius: BorderRadius.circular(4),

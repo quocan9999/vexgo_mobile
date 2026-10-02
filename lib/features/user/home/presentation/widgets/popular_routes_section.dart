@@ -17,7 +17,8 @@ class PopularRoutesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
       buildWhen: (prev, curr) =>
-          prev.popularRoutes != curr.popularRoutes || prev.status != curr.status,
+          prev.popularRoutes != curr.popularRoutes ||
+          prev.status != curr.status,
       builder: (context, state) {
         final routes = state.popularRoutes;
         if (routes.isEmpty) return const SizedBox.shrink();
@@ -26,14 +27,18 @@ class PopularRoutesSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
                       'Tuyến đường phổ biến',
-                      style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
+                      style: AppTextStyles.h3.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -56,9 +61,12 @@ class PopularRoutesSection extends StatelessWidget {
               height: 220,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.base,
+                ),
                 itemCount: routes.length,
-                separatorBuilder: (context, index) => const SizedBox(width: AppDimensions.md),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(width: AppDimensions.md),
                 itemBuilder: (context, index) {
                   final route = routes[index];
                   return _PopularRouteCard(route: route);
@@ -138,7 +146,11 @@ class _PopularRouteCard extends StatelessWidget {
                       height: 110,
                       color: AppColors.primaryLight,
                       child: const Center(
-                        child: Icon(Icons.landscape_rounded, color: AppColors.primary, size: 36),
+                        child: Icon(
+                          Icons.landscape_rounded,
+                          color: AppColors.primary,
+                          size: 36,
+                        ),
                       ),
                     );
                   },
@@ -147,15 +159,24 @@ class _PopularRouteCard extends StatelessWidget {
                   bottom: 8,
                   left: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.65),
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusXs),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusXs,
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.access_time_rounded, size: 12, color: Colors.white),
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 12,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           route.duration,
@@ -200,7 +221,9 @@ class _PopularRouteCard extends StatelessWidget {
                     children: [
                       Text(
                         'Từ ',
-                        style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.neutral500,
+                        ),
                       ),
                       Flexible(
                         child: Text(

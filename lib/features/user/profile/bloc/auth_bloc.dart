@@ -26,22 +26,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await authRepository.getCurrentUser();
       if (user != null) {
-        emit(state.copyWith(
-          status: AuthStatus.authenticated,
-          user: user,
-          clearMessages: true,
-        ));
+        emit(
+          state.copyWith(
+            status: AuthStatus.authenticated,
+            user: user,
+            clearMessages: true,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          status: AuthStatus.unauthenticated,
-          clearMessages: true,
-        ));
+        emit(
+          state.copyWith(
+            status: AuthStatus.unauthenticated,
+            clearMessages: true,
+          ),
+        );
       }
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.unauthenticated,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.unauthenticated,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 
@@ -55,16 +61,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         phone: event.phone,
         password: event.password,
       );
-      emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: user,
-        successMessage: 'Đăng nhập thành công! Chào mừng ${user.hoTen}',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: user,
+          successMessage: 'Đăng nhập thành công! Chào mừng ${user.hoTen}',
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.failure,
-        errorMessage: e.toString().replaceAll('Exception: ', ''),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          errorMessage: e.toString().replaceAll('Exception: ', ''),
+        ),
+      );
     }
   }
 
@@ -75,18 +85,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(state.copyWith(status: AuthStatus.loading, clearMessages: true));
     try {
       await authRepository.sendOtp(phone: event.phone);
-      emit(state.copyWith(
-        status: AuthStatus.otpRequired,
-        pendingPhone: event.phone,
-        pendingFullName: event.fullName,
-        pendingPassword: event.password,
-        successMessage: 'Mã xác thực OTP đã được gửi đến số ${event.phone}',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.otpRequired,
+          pendingPhone: event.phone,
+          pendingFullName: event.fullName,
+          pendingPassword: event.password,
+          successMessage: 'Mã xác thực OTP đã được gửi đến số ${event.phone}',
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.failure,
-        errorMessage: e.toString().replaceAll('Exception: ', ''),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          errorMessage: e.toString().replaceAll('Exception: ', ''),
+        ),
+      );
     }
   }
 
@@ -102,16 +116,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         fullName: event.fullName,
         password: event.password,
       );
-      emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: user,
-        successMessage: 'Đăng ký thành công! Bạn nhận được 100 điểm VexGo thưởng.',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: user,
+          successMessage:
+              'Đăng ký thành công! Bạn nhận được 100 điểm VexGo thưởng.',
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.failure,
-        errorMessage: e.toString().replaceAll('Exception: ', ''),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          errorMessage: e.toString().replaceAll('Exception: ', ''),
+        ),
+      );
     }
   }
 
@@ -122,16 +141,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(state.copyWith(status: AuthStatus.loading, clearMessages: true));
     try {
       final updated = await authRepository.updateProfile(event.updatedUser);
-      emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: updated,
-        successMessage: 'Cập nhật thông tin cá nhân thành công!',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: updated,
+          successMessage: 'Cập nhật thông tin cá nhân thành công!',
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.failure,
-        errorMessage: e.toString().replaceAll('Exception: ', ''),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          errorMessage: e.toString().replaceAll('Exception: ', ''),
+        ),
+      );
     }
   }
 
@@ -145,49 +168,57 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         pointsToRedeem: event.points,
         rewardTitle: event.rewardTitle,
       );
-      emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: updated,
-        successMessage: 'Đổi thành công: ${event.rewardTitle}',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: updated,
+          successMessage: 'Đổi thành công: ${event.rewardTitle}',
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.failure,
-        errorMessage: e.toString().replaceAll('Exception: ', ''),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          errorMessage: e.toString().replaceAll('Exception: ', ''),
+        ),
+      );
     }
   }
 
-  void _onToggleLanguage(
-    ToggleLanguageEvent event,
-    Emitter<AuthState> emit,
-  ) {
-    emit(state.copyWith(
-      language: event.languageCode,
-      successMessage: event.languageCode == 'en' ? 'Switched to English' : 'Đã đổi sang Tiếng Việt',
-    ));
+  void _onToggleLanguage(ToggleLanguageEvent event, Emitter<AuthState> emit) {
+    emit(
+      state.copyWith(
+        language: event.languageCode,
+        successMessage: event.languageCode == 'en'
+            ? 'Switched to English'
+            : 'Đã đổi sang Tiếng Việt',
+      ),
+    );
   }
 
   void _onTogglePushNotification(
     TogglePushNotificationEvent event,
     Emitter<AuthState> emit,
   ) {
-    emit(state.copyWith(
-      pushEnabled: event.enabled,
-      successMessage: event.enabled ? 'Đã bật thông báo đẩy' : 'Đã tắt thông báo đẩy',
-    ));
+    emit(
+      state.copyWith(
+        pushEnabled: event.enabled,
+        successMessage: event.enabled
+            ? 'Đã bật thông báo đẩy'
+            : 'Đã tắt thông báo đẩy',
+      ),
+    );
   }
 
-  Future<void> _onLogout(
-    LogoutEvent event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
     emit(state.copyWith(status: AuthStatus.loading, clearMessages: true));
     await authRepository.logout();
-    emit(state.copyWith(
-      status: AuthStatus.unauthenticated,
-      user: null,
-      successMessage: 'Đã đăng xuất tài khoản an toàn.',
-    ));
+    emit(
+      state.copyWith(
+        status: AuthStatus.unauthenticated,
+        user: null,
+        successMessage: 'Đã đăng xuất tài khoản an toàn.',
+      ),
+    );
   }
 }

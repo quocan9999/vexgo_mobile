@@ -8,10 +8,7 @@ import 'loyalty_history_sheet.dart';
 class LoyaltyCardWidget extends StatelessWidget {
   final UserModel user;
 
-  const LoyaltyCardWidget({
-    super.key,
-    required this.user,
-  });
+  const LoyaltyCardWidget({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +52,11 @@ class LoyaltyCardWidget extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 22),
+                  const Icon(
+                    Icons.workspace_premium_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                   const SizedBox(width: AppDimensions.xs),
                   Text(
                     'HẠNG ${user.tierName}',
@@ -133,10 +134,15 @@ class LoyaltyCardWidget extends StatelessWidget {
                 onTap: () => LoyaltyHistorySheet.show(context, user: user),
                 borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.radiusFull,
+                    ),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0x1F000000),
@@ -148,7 +154,11 @@ class LoyaltyCardWidget extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.stars_rounded, color: AppColors.secondary, size: 16),
+                      const Icon(
+                        Icons.stars_rounded,
+                        color: AppColors.secondary,
+                        size: 16,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Đổi điểm',
@@ -199,7 +209,9 @@ class LoyaltyCardWidget extends StatelessWidget {
                   ),
                   const SizedBox(width: AppDimensions.xs),
                   Text(
-                    user.tier == MembershipTier.diamond ? '100%' : '${(user.tierProgress * 100).toInt()}%',
+                    user.tier == MembershipTier.diamond
+                        ? '100%'
+                        : '${(user.tierProgress * 100).toInt()}%',
                     style: AppTextStyles.caption.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,

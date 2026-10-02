@@ -7,7 +7,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final NotificationRepository notificationRepository;
 
   NotificationBloc({required this.notificationRepository})
-      : super(const NotificationState()) {
+    : super(const NotificationState()) {
     on<LoadNotificationsEvent>(_onLoadNotifications);
     on<ChangeNotificationTabEvent>(_onChangeNotificationTab);
     on<MarkNotificationAsReadEvent>(_onMarkNotificationAsRead);
@@ -21,15 +21,16 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     emit(state.copyWith(status: NotificationStatus.loading));
     try {
       final list = await notificationRepository.getNotifications();
-      emit(state.copyWith(
-        status: NotificationStatus.loaded,
-        notifications: list,
-      ));
+      emit(
+        state.copyWith(status: NotificationStatus.loaded, notifications: list),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: NotificationStatus.failure,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: NotificationStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 
@@ -59,7 +60,9 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     Emitter<NotificationState> emit,
   ) async {
     await notificationRepository.markAllAsRead();
-    final updated = state.notifications.map((n) => n.copyWith(isRead: true)).toList();
+    final updated = state.notifications
+        .map((n) => n.copyWith(isRead: true))
+        .toList();
     emit(state.copyWith(notifications: updated));
   }
 }

@@ -59,10 +59,7 @@ class SubmitTicketReviewEvent extends MyTicketsEvent {
   final String ticketId;
   final ReviewModel review;
 
-  const SubmitTicketReviewEvent({
-    required this.ticketId,
-    required this.review,
-  });
+  const SubmitTicketReviewEvent({required this.ticketId, required this.review});
 
   @override
   List<Object?> get props => [ticketId, review];

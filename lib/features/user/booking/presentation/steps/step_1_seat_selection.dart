@@ -28,7 +28,9 @@ class Step1SeatSelection extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final dateStr = state.date != null ? DateFormatter.formatFullDate(state.date!) : '';
+    final dateStr = state.date != null
+        ? DateFormatter.formatFullDate(state.date!)
+        : '';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: AppDimensions.xl),
@@ -130,7 +132,11 @@ class Step1SeatSelection extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.info_outline_rounded, size: 14, color: AppColors.neutral600),
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    size: 14,
+                    color: AppColors.neutral600,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Mỗi khách hàng được chọn tối đa 6 chỗ/lượt đặt',

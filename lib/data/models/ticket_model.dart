@@ -156,18 +156,28 @@ class TicketModel extends Equatable {
       ticketCode: json['ticketCode'] as String? ?? '',
       status: parseStatus(json['status'] as String?),
       bookingDate: json['bookingDate'] as String? ?? '',
-      trip: TicketTripSummary.fromJson(json['trip'] as Map<String, dynamic>? ?? {}),
-      seats: (json['seats'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      trip: TicketTripSummary.fromJson(
+        json['trip'] as Map<String, dynamic>? ?? {},
+      ),
+      seats:
+          (json['seats'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       totalAmount: json['totalAmount'] as int? ?? 0,
       discountAmount: json['discountAmount'] as int? ?? 0,
       finalAmount: json['finalAmount'] as int? ?? 0,
       paymentMethod: json['paymentMethod'] as String? ?? '',
-      passenger: PassengerInfo.fromJson(json['passenger'] as Map<String, dynamic>? ?? {}),
+      passenger: PassengerInfo.fromJson(
+        json['passenger'] as Map<String, dynamic>? ?? {},
+      ),
       licensePlate: json['licensePlate'] as String?,
       driverPhone: json['driverPhone'] as String?,
       cancelReason: json['cancelReason'] as String?,
       refundAmount: json['refundAmount'] as int?,
-      review: json['review'] != null ? ReviewModel.fromJson(json['review'] as Map<String, dynamic>) : null,
+      review: json['review'] != null
+          ? ReviewModel.fromJson(json['review'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -256,8 +266,16 @@ class TicketModel extends Equatable {
   }
 
   /// Business Rule sub_uc_huy_ve: cancellation permitted if departure is >= 3 hours away
-  bool get canCancel => status == TicketStatus.upcoming && hoursUntilDeparture >= 3.0;
+  bool get canCancel =>
+      status == TicketStatus.upcoming && hoursUntilDeparture >= 3.0;
 
   @override
-  List<Object?> get props => [id, ticketCode, status, finalAmount, review, cancelReason];
+  List<Object?> get props => [
+    id,
+    ticketCode,
+    status,
+    finalAmount,
+    review,
+    cancelReason,
+  ];
 }

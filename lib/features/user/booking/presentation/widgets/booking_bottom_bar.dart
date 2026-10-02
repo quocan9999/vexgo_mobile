@@ -39,10 +39,7 @@ class BookingBottomBar extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(
-        top: false,
-        child: _buildContentByStep(context),
-      ),
+      child: SafeArea(top: false, child: _buildContentByStep(context)),
     );
   }
 
@@ -80,7 +77,9 @@ class BookingBottomBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                hasSeats ? 'Ghế: $seatNames (${state.selectedSeats.length} chỗ)' : 'Vui lòng chọn chỗ',
+                hasSeats
+                    ? 'Ghế: $seatNames (${state.selectedSeats.length} chỗ)'
+                    : 'Vui lòng chọn chỗ',
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   color: hasSeats ? AppColors.primary : AppColors.neutral500,
@@ -90,7 +89,9 @@ class BookingBottomBar extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                hasSeats ? CurrencyFormatter.format(state.seatsTotalAmount) : '0 đ',
+                hasSeats
+                    ? CurrencyFormatter.format(state.seatsTotalAmount)
+                    : '0 đ',
                 style: AppTextStyles.price.copyWith(fontSize: 18),
               ),
             ],
@@ -187,7 +188,9 @@ class BookingBottomBar extends StatelessWidget {
             children: [
               Text(
                 'Tổng thanh toán:',
-                style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.neutral500,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
@@ -203,10 +206,7 @@ class BookingBottomBar extends StatelessWidget {
         const SizedBox(width: AppDimensions.base),
         SizedBox(
           width: 170,
-          child: CustomButton(
-            text: 'Thanh toán',
-            onPressed: onNext,
-          ),
+          child: CustomButton(text: 'Thanh toán', onPressed: onNext),
         ),
       ],
     );
@@ -230,7 +230,11 @@ class BookingBottomBar extends StatelessWidget {
           child: CustomButton(
             text: 'Thanh toán ${CurrencyFormatter.format(state.finalAmount)}',
             isLoading: isSubmitting,
-            prefixIcon: const Icon(Icons.shield_rounded, color: Colors.white, size: 18),
+            prefixIcon: const Icon(
+              Icons.shield_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
             onPressed: isSubmitting ? null : onConfirmPayment,
           ),
         ),

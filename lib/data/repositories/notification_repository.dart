@@ -14,8 +14,12 @@ class MockNotificationRepository implements NotificationRepository {
   Future<List<NotificationModel>> getNotifications() async {
     if (_cachedNotifications != null) return _cachedNotifications!;
     try {
-      final rawList = await JsonLoader.loadJsonList('assets/mock_data/notifications.json');
-      _cachedNotifications = rawList.map((item) => NotificationModel.fromJson(item)).toList();
+      final rawList = await JsonLoader.loadJsonList(
+        'assets/mock_data/notifications.json',
+      );
+      _cachedNotifications = rawList
+          .map((item) => NotificationModel.fromJson(item))
+          .toList();
       return _cachedNotifications!;
     } catch (_) {
       _cachedNotifications = [];

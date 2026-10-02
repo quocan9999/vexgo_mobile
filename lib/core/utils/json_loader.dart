@@ -15,7 +15,9 @@ class JsonLoader {
   }
 
   /// Load a list of JSON objects from the asset path.
-  static Future<List<Map<String, dynamic>>> loadJsonList(String assetPath) async {
+  static Future<List<Map<String, dynamic>>> loadJsonList(
+    String assetPath,
+  ) async {
     final dynamic data = await loadJson(assetPath);
     if (data is List) {
       return data.map((item) => item as Map<String, dynamic>).toList();

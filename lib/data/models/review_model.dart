@@ -3,7 +3,8 @@ import 'package:equatable/equatable.dart';
 class ReviewModel extends Equatable {
   final int rating; // 1 to 5
   final String comment;
-  final List<String> tags; // ['Đúng giờ', 'Xe sạch sẽ', 'Lái xe an toàn', 'Nhân viên nhiệt tình']
+  final List<String>
+  tags; // ['Đúng giờ', 'Xe sạch sẽ', 'Lái xe an toàn', 'Nhân viên nhiệt tình']
   final String createdAt;
 
   const ReviewModel({
@@ -17,7 +18,9 @@ class ReviewModel extends Equatable {
     return ReviewModel(
       rating: json['rating'] as int? ?? 5,
       comment: json['comment'] as String? ?? '',
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
+          [],
       createdAt: json['createdAt'] as String? ?? '',
     );
   }

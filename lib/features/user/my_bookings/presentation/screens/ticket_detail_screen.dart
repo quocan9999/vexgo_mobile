@@ -75,7 +75,9 @@ class TicketDetailScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Thông tin liên hệ chuyến đi',
-                        style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: AppDimensions.md),
                       Row(
@@ -86,7 +88,11 @@ class TicketDetailScreen extends StatelessWidget {
                               color: AppColors.primaryLight,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.phone_rounded, color: AppColors.primary, size: 20),
+                            child: const Icon(
+                              Icons.phone_rounded,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: AppDimensions.sm),
                           Expanded(
@@ -95,7 +101,9 @@ class TicketDetailScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   'Tổng đài nhà xe ${ticket.trip.operatorName}',
-                                  style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.neutral500,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -114,7 +122,9 @@ class TicketDetailScreen extends StatelessWidget {
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Đang quay số: ${ticket.driverPhone ?? "1900 6067"}'),
+                                  content: Text(
+                                    'Đang quay số: ${ticket.driverPhone ?? "1900 6067"}',
+                                  ),
                                   duration: const Duration(seconds: 2),
                                 ),
                               );
@@ -124,7 +134,9 @@ class TicketDetailScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                             ),
                             child: const Text('Gọi ngay'),
                           ),
@@ -162,7 +174,11 @@ class TicketDetailScreen extends StatelessWidget {
                         flex: 2,
                         child: CustomButton(
                           text: 'Đổi vé xe',
-                          prefixIcon: const Icon(Icons.swap_horiz_rounded, color: Colors.white, size: 18),
+                          prefixIcon: const Icon(
+                            Icons.swap_horiz_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                           onPressed: () {
                             _showChangeTicketDialog(context, ticket);
                           },
@@ -176,7 +192,11 @@ class TicketDetailScreen extends StatelessWidget {
                   if (ticket.review == null)
                     CustomButton(
                       text: 'Đánh giá chuyến đi',
-                      prefixIcon: const Icon(Icons.star_rate_rounded, color: Colors.white, size: 18),
+                      prefixIcon: const Icon(
+                        Icons.star_rate_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                       onPressed: () {
                         ReviewBottomSheet.show(
                           context,
@@ -188,7 +208,11 @@ class TicketDetailScreen extends StatelessWidget {
                   else
                     CustomButton(
                       text: 'Đặt lại chuyến xe này',
-                      prefixIcon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 18),
+                      prefixIcon: const Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                       onPressed: () => context.go('/search-trips'),
                     ),
                 ],
@@ -198,17 +222,26 @@ class TicketDetailScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(AppDimensions.base),
                     decoration: BoxDecoration(
                       color: AppColors.errorLight.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                      border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusMd,
+                      ),
+                      border: Border.all(
+                        color: AppColors.error.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.cancel_outlined, color: AppColors.error),
+                        const Icon(
+                          Icons.cancel_outlined,
+                          color: AppColors.error,
+                        ),
                         const SizedBox(width: AppDimensions.sm),
                         Expanded(
                           child: Text(
                             'Vé này đã bị hủy. Tiền hoàn đã được gửi về tài khoản theo quy định.',
-                            style: AppTextStyles.caption.copyWith(color: AppColors.error),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.error,
+                            ),
                           ),
                         ),
                       ],
@@ -245,7 +278,11 @@ class TicketDetailScreen extends StatelessWidget {
                 color: AppColors.primaryLight,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.swap_horiz_rounded, color: AppColors.primary, size: 20),
+              child: const Icon(
+                Icons.swap_horiz_rounded,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: AppDimensions.sm),
             const Expanded(
@@ -264,7 +301,9 @@ class TicketDetailScreen extends StatelessWidget {
           children: [
             Text(
               'Quy trình đổi vé xe:',
-              style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 8),
             Text(

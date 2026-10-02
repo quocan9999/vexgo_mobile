@@ -11,11 +11,7 @@ class Step3DropoffPoint extends StatelessWidget {
   final BookingFlowState state;
   final BookingFlowBloc bloc;
 
-  const Step3DropoffPoint({
-    super.key,
-    required this.state,
-    required this.bloc,
-  });
+  const Step3DropoffPoint({super.key, required this.state, required this.bloc});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +32,11 @@ class Step3DropoffPoint extends StatelessWidget {
                   color: AppColors.secondaryLight,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.pin_drop_rounded, color: AppColors.secondary, size: 20),
+                child: const Icon(
+                  Icons.pin_drop_rounded,
+                  color: AppColors.secondary,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: AppDimensions.sm),
               Expanded(
@@ -49,7 +49,9 @@ class Step3DropoffPoint extends StatelessWidget {
                     ),
                     Text(
                       'Có ${points.length} điểm trả / trung chuyển tại nơi đến',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.neutral500,
+                      ),
                     ),
                   ],
                 ),
@@ -65,12 +67,18 @@ class Step3DropoffPoint extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.successLight.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-              border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.2),
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.check_circle_outline_rounded, size: 18, color: AppColors.success),
+                const Icon(
+                  Icons.check_circle_outline_rounded,
+                  size: 18,
+                  color: AppColors.success,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

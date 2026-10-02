@@ -9,7 +9,11 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
   final TripRepository tripRepository;
 
   SearchTripsBloc({required this.tripRepository})
-      : super(SearchTripsState(selectedDate: DateTime.now().add(const Duration(days: 1)))) {
+    : super(
+        SearchTripsState(
+          selectedDate: DateTime.now().add(const Duration(days: 1)),
+        ),
+      ) {
     on<LoadTripsEvent>(_onLoadTrips);
     on<ChangeSelectedDateEvent>(_onChangeSelectedDate);
     on<ApplyFilterEvent>(_onApplyFilter);
@@ -21,12 +25,14 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
     LoadTripsEvent event,
     Emitter<SearchTripsState> emit,
   ) async {
-    emit(state.copyWith(
-      status: SearchTripsStatus.loading,
-      fromCityId: event.fromCityId,
-      toCityId: event.toCityId,
-      selectedDate: event.date,
-    ));
+    emit(
+      state.copyWith(
+        status: SearchTripsStatus.loading,
+        fromCityId: event.fromCityId,
+        toCityId: event.toCityId,
+        selectedDate: event.date,
+      ),
+    );
 
     try {
       final trips = await tripRepository.searchTrips(
@@ -45,19 +51,23 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
         state.currentSort,
       );
 
-      emit(state.copyWith(
-        status: SearchTripsStatus.success,
-        allTrips: trips,
-        filteredTrips: filtered,
-        availableOperators: operators,
-        availableVehicleTypes: vehicleTypes,
-        availableAmenities: amenities,
-      ));
+      emit(
+        state.copyWith(
+          status: SearchTripsStatus.success,
+          allTrips: trips,
+          filteredTrips: filtered,
+          availableOperators: operators,
+          availableVehicleTypes: vehicleTypes,
+          availableAmenities: amenities,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: SearchTripsStatus.failure,
-        errorMessage: 'Lỗi tải danh sách chuyến xe: $e',
-      ));
+      emit(
+        state.copyWith(
+          status: SearchTripsStatus.failure,
+          errorMessage: 'Lỗi tải danh sách chuyến xe: $e',
+        ),
+      );
     }
   }
 
@@ -65,25 +75,21 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
     ChangeSelectedDateEvent event,
     Emitter<SearchTripsState> emit,
   ) {
-    emit(state.copyWith(
-      selectedDate: event.newDate,
-      // In a real app or with mock, we can slight vary price or show the trips
-    ));
+    emit(
+      state.copyWith(
+        selectedDate: event.newDate,
+        // In a real app or with mock, we can slight vary price or show the trips
+      ),
+    );
   }
 
-  void _onApplyFilter(
-    ApplyFilterEvent event,
-    Emitter<SearchTripsState> emit,
-  ) {
+  void _onApplyFilter(ApplyFilterEvent event, Emitter<SearchTripsState> emit) {
     final filtered = _applyFilterAndSort(
       state.allTrips,
       event.filter,
       state.currentSort,
     );
-    emit(state.copyWith(
-      currentFilter: event.filter,
-      filteredTrips: filtered,
-    ));
+    emit(state.copyWith(currentFilter: event.filter, filteredTrips: filtered));
   }
 
   void _onChangeSortType(
@@ -95,26 +101,19 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
       state.currentFilter,
       event.sortType,
     );
-    emit(state.copyWith(
-      currentSort: event.sortType,
-      filteredTrips: sorted,
-    ));
+    emit(state.copyWith(currentSort: event.sortType, filteredTrips: sorted));
   }
 
-  void _onResetFilter(
-    ResetFilterEvent event,
-    Emitter<SearchTripsState> emit,
-  ) {
+  void _onResetFilter(ResetFilterEvent event, Emitter<SearchTripsState> emit) {
     const defaultFilter = TripFilterModel();
     final resetTrips = _applyFilterAndSort(
       state.allTrips,
       defaultFilter,
       state.currentSort,
     );
-    emit(state.copyWith(
-      currentFilter: defaultFilter,
-      filteredTrips: resetTrips,
-    ));
+    emit(
+      state.copyWith(currentFilter: defaultFilter, filteredTrips: resetTrips),
+    );
   }
 
   List<TripModel> _applyFilterAndSort(
@@ -133,12 +132,16 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
 
       // Filter operators
       if (filter.selectedOperators.isNotEmpty) {
-        if (!filter.selectedOperators.contains(trip.operatorName)) return false;
+        if (!filter.selectedOperators.contains(trip.operatorName)) {
+          return false;
+        }
       }
 
       // Filter vehicle types
       if (filter.selectedVehicleTypes.isNotEmpty) {
-        if (!filter.selectedVehicleTypes.contains(trip.vehicleType)) return false;
+        if (!filter.selectedVehicleTypes.contains(trip.vehicleType)) {
+          return false;
+        }
       }
 
       // Filter amenities
@@ -146,11 +149,14 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
         final hasAllAmenities = filter.selectedAmenities.every(
           (a) => trip.amenities.contains(a),
         );
-        if (!hasAllAmenities) return false;
+        if (!hasAllAmenities) {
+          return false;
+        }
       }
 
       // Filter price range
-      if (trip.discountPrice < filter.minPrice || trip.discountPrice > filter.maxPrice) {
+      if (trip.discountPrice < filter.minPrice ||
+          trip.discountPrice > filter.maxPrice) {
         return false;
       }
 

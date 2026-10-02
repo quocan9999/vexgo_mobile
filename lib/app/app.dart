@@ -22,16 +22,16 @@ class VexGoApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<TripRepository>(
-          create: (context) => MockTripRepository(),
+          create: (context) => HybridTripRepository(),
         ),
         RepositoryProvider<SeatRepository>(
-          create: (context) => MockSeatRepository(),
+          create: (context) => HybridSeatRepository(),
         ),
         RepositoryProvider<BookingRepository>(
-          create: (context) => MockBookingRepository(),
+          create: (context) => HybridBookingRepository(),
         ),
         RepositoryProvider<AuthRepository>(
-          create: (context) => MockAuthRepository(),
+          create: (context) => HybridAuthRepository(),
         ),
         RepositoryProvider<NotificationRepository>(
           create: (context) => MockNotificationRepository(),
@@ -40,12 +40,13 @@ class VexGoApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider<MyTicketsBloc>(
-            create: (context) => MyTicketsBloc()..add(const LoadMyTicketsEvent()),
+            create: (context) =>
+                MyTicketsBloc()..add(const LoadMyTicketsEvent()),
           ),
           BlocProvider<AuthBloc>(
-            create: (context) => AuthBloc(
-              authRepository: context.read<AuthRepository>(),
-            )..add(const CheckAuthStatusEvent()),
+            create: (context) =>
+                AuthBloc(authRepository: context.read<AuthRepository>())
+                  ..add(const CheckAuthStatusEvent()),
           ),
           BlocProvider<NotificationBloc>(
             create: (context) => NotificationBloc(

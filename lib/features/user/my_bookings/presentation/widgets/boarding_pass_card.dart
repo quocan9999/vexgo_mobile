@@ -63,7 +63,9 @@ class BoardingPassCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             ticket.trip.vehicleType,
-                            style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.neutral500,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -87,7 +89,9 @@ class BoardingPassCard extends StatelessWidget {
                         children: [
                           Text(
                             'Điểm đi',
-                            style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.neutral500,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -127,7 +131,9 @@ class BoardingPassCard extends StatelessWidget {
                         children: [
                           Text(
                             'Điểm đến',
-                            style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.neutral500,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -158,7 +164,10 @@ class BoardingPassCard extends StatelessWidget {
                 GestureDetector(
                   onTap: () => TicketQrModal.show(context, ticket),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.neutral100.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
@@ -189,7 +198,11 @@ class BoardingPassCard extends StatelessWidget {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.fullscreen_rounded, size: 16, color: AppColors.primary),
+                                  const Icon(
+                                    Icons.fullscreen_rounded,
+                                    size: 16,
+                                    color: AppColors.primary,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     'Chạm để phóng to mã QR',
@@ -276,7 +289,8 @@ class BoardingPassCard extends StatelessWidget {
                 // Passenger and Contact
                 _buildInfoLine(
                   label: 'Hành khách:',
-                  value: '${ticket.passenger.fullName} · ${ticket.passenger.phone}',
+                  value:
+                      '${ticket.passenger.fullName} · ${ticket.passenger.phone}',
                 ),
                 const SizedBox(height: 8),
                 _buildInfoLine(
@@ -334,7 +348,8 @@ class BoardingPassCard extends StatelessWidget {
             builder: (context, constraints) {
               const dashWidth = 6.0;
               const dashSpace = 4.0;
-              final dashCount = (constraints.maxWidth / (dashWidth + dashSpace)).floor();
+              final dashCount = (constraints.maxWidth / (dashWidth + dashSpace))
+                  .floor();
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(dashCount, (_) {
@@ -342,7 +357,9 @@ class BoardingPassCard extends StatelessWidget {
                     width: dashWidth,
                     height: 1.5,
                     color: AppColors.neutral300,
-                    margin: const EdgeInsets.symmetric(horizontal: dashSpace / 2),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: dashSpace / 2,
+                    ),
                   );
                 }),
               );
@@ -396,7 +413,9 @@ class BoardingPassCard extends StatelessWidget {
           width: 50,
           child: Text(
             time,
-            style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         const SizedBox(width: AppDimensions.xs),
@@ -406,14 +425,18 @@ class BoardingPassCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
               Text(
                 address,
-                style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.neutral500,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

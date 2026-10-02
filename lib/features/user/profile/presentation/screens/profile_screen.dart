@@ -46,7 +46,10 @@ class ProfileScreen extends StatelessWidget {
 
           return SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base, vertical: AppDimensions.md),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+                vertical: AppDimensions.md,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -74,7 +77,8 @@ class ProfileScreen extends StatelessWidget {
                         icon: Icons.person_outline_rounded,
                         title: 'Thông tin cá nhân',
                         subtitle: 'Họ tên, email, CCCD, ngày sinh',
-                        onTap: () => EditProfileDialog.show(context, user: user),
+                        onTap: () =>
+                            EditProfileDialog.show(context, user: user),
                       ),
                       _MenuItem(
                         icon: Icons.lock_outline_rounded,
@@ -82,7 +86,11 @@ class ProfileScreen extends StatelessWidget {
                         subtitle: 'Cập nhật mật khẩu định kỳ để an toàn',
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Tính năng Đổi mật khẩu đã sẵn sàng!')),
+                            const SnackBar(
+                              content: Text(
+                                'Tính năng Đổi mật khẩu đã sẵn sàng!',
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -101,8 +109,10 @@ class ProfileScreen extends StatelessWidget {
                         icon: Icons.stars_rounded,
                         iconColor: AppColors.secondary,
                         title: 'Lịch sử điểm VexGo Points',
-                        subtitle: 'Tích điểm mỗi chuyến đi, đổi voucher giảm giá',
-                        onTap: () => LoyaltyHistorySheet.show(context, user: user),
+                        subtitle:
+                            'Tích điểm mỗi chuyến đi, đổi voucher giảm giá',
+                        onTap: () =>
+                            LoyaltyHistorySheet.show(context, user: user),
                       ),
                       _MenuItem(
                         icon: Icons.confirmation_number_outlined,
@@ -139,7 +149,9 @@ class ProfileScreen extends StatelessWidget {
                         value: state.pushEnabled,
                         activeThumbColor: AppColors.primary,
                         onChanged: (val) {
-                          context.read<AuthBloc>().add(TogglePushNotificationEvent(val));
+                          context.read<AuthBloc>().add(
+                            TogglePushNotificationEvent(val),
+                          );
                         },
                       ),
                     ),
@@ -166,7 +178,9 @@ class ProfileScreen extends StatelessWidget {
                           context: context,
                           builder: (ctx) => AlertDialog(
                             title: const Text('Tổng đài hỗ trợ VexGo'),
-                            content: const Text('Quý khách vui lòng gọi 1900 8888 để được giải đáp thắc mắc và hỗ trợ đặt vé khẩn cấp.'),
+                            content: const Text(
+                              'Quý khách vui lòng gọi 1900 8888 để được giải đáp thắc mắc và hỗ trợ đặt vé khẩn cấp.',
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(ctx).pop(),
@@ -196,7 +210,10 @@ class ProfileScreen extends StatelessWidget {
                     Center(
                       child: TextButton.icon(
                         onPressed: () => _confirmLogout(context),
-                        icon: const Icon(Icons.logout_rounded, color: AppColors.error),
+                        icon: const Icon(
+                          Icons.logout_rounded,
+                          color: AppColors.error,
+                        ),
                         label: Text(
                           'Đăng xuất tài khoản',
                           style: AppTextStyles.bodyMedium.copyWith(
@@ -281,19 +298,27 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.verified_rounded, color: AppColors.primary, size: 16),
+                    const Icon(
+                      Icons.verified_rounded,
+                      color: AppColors.primary,
+                      size: 16,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 2),
                 Text(
                   user.soDienThoai,
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.neutral600),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.neutral600,
+                  ),
                 ),
                 if (user.email != null) ...[
                   const SizedBox(height: 2),
                   Text(
                     user.email!,
-                    style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.neutral500,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -304,7 +329,11 @@ class ProfileScreen extends StatelessWidget {
 
           IconButton(
             onPressed: () => EditProfileDialog.show(context, user: user),
-            icon: const Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 26),
+            icon: const Icon(
+              Icons.edit_note_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
             tooltip: 'Chỉnh sửa hồ sơ',
           ),
         ],
@@ -331,7 +360,11 @@ class ProfileScreen extends StatelessWidget {
                   color: AppColors.neutral100,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.person_outline_rounded, color: AppColors.neutral500, size: 28),
+                child: const Icon(
+                  Icons.person_outline_rounded,
+                  color: AppColors.neutral500,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: AppDimensions.md),
               Expanded(
@@ -340,12 +373,16 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Chào mừng bạn đến với VexGo',
-                      style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w700),
+                      style: AppTextStyles.titleMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Đăng nhập để tích điểm và nhận ưu đãi độc quyền',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.neutral500,
+                      ),
                     ),
                   ],
                 ),
@@ -366,7 +403,10 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildQuickStats(BuildContext context, UserModel user) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppDimensions.md, horizontal: AppDimensions.sm),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppDimensions.md,
+        horizontal: AppDimensions.sm,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
@@ -375,22 +415,42 @@ class ProfileScreen extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _buildStatItem('12', 'Chuyến đã đi', Icons.directions_bus_rounded, AppColors.primary),
+            child: _buildStatItem(
+              '12',
+              'Chuyến đã đi',
+              Icons.directions_bus_rounded,
+              AppColors.primary,
+            ),
           ),
           Container(width: 1, height: 32, color: AppColors.neutral200),
           Expanded(
-            child: _buildStatItem('${user.diemTichLuy}', 'Điểm VexGo', Icons.stars_rounded, AppColors.secondary),
+            child: _buildStatItem(
+              '${user.diemTichLuy}',
+              'Điểm VexGo',
+              Icons.stars_rounded,
+              AppColors.secondary,
+            ),
           ),
           Container(width: 1, height: 32, color: AppColors.neutral200),
           Expanded(
-            child: _buildStatItem('3', 'Voucher', Icons.card_giftcard_rounded, const Color(0xFF0F9D58)),
+            child: _buildStatItem(
+              '3',
+              'Voucher',
+              Icons.card_giftcard_rounded,
+              const Color(0xFF0F9D58),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String value, String label, IconData icon, Color color) {
+  Widget _buildStatItem(
+    String value,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -398,11 +458,16 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w800),
+          style: AppTextStyles.titleMedium.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
         ),
         Text(
           label,
-          style: AppTextStyles.caption.copyWith(color: AppColors.neutral500, fontSize: 11),
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.neutral500,
+            fontSize: 11,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -442,8 +507,12 @@ class ProfileScreen extends StatelessWidget {
               InkWell(
                 onTap: item.onTap,
                 borderRadius: BorderRadius.vertical(
-                  top: idx == 0 ? const Radius.circular(AppDimensions.radiusLg) : Radius.zero,
-                  bottom: isLast ? const Radius.circular(AppDimensions.radiusLg) : Radius.zero,
+                  top: idx == 0
+                      ? const Radius.circular(AppDimensions.radiusLg)
+                      : Radius.zero,
+                  bottom: isLast
+                      ? const Radius.circular(AppDimensions.radiusLg)
+                      : Radius.zero,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -455,7 +524,8 @@ class ProfileScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: (item.iconColor ?? AppColors.primary).withValues(alpha: 0.1),
+                          color: (item.iconColor ?? AppColors.primary)
+                              .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
@@ -515,7 +585,9 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản VexGo không?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản VexGo không?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -528,7 +600,10 @@ class ProfileScreen extends StatelessWidget {
             },
             child: const Text(
               'Đăng xuất',
-              style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

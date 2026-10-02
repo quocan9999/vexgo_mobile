@@ -26,10 +26,8 @@ class TripDetailSheet extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => TripDetailSheet(
-        trip: trip,
-        onSelectTrip: onSelectTrip,
-      ),
+      builder: (context) =>
+          TripDetailSheet(trip: trip, onSelectTrip: onSelectTrip),
     );
   }
 
@@ -51,7 +49,10 @@ class TripDetailSheet extends StatelessWidget {
             // Drag handle
             Center(
               child: Container(
-                margin: const EdgeInsets.only(top: AppDimensions.md, bottom: AppDimensions.xs),
+                margin: const EdgeInsets.only(
+                  top: AppDimensions.md,
+                  bottom: AppDimensions.xs,
+                ),
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
@@ -74,7 +75,9 @@ class TripDetailSheet extends StatelessWidget {
                     height: 44,
                     decoration: BoxDecoration(
                       color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusSm,
+                      ),
                     ),
                     child: const Icon(
                       Icons.directions_bus_rounded,
@@ -89,19 +92,26 @@ class TripDetailSheet extends StatelessWidget {
                       children: [
                         Text(
                           trip.operatorName,
-                          style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w700),
+                          style: AppTextStyles.titleMedium.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            RatingBadge(rating: trip.rating, reviewCount: trip.reviewCount),
+                            RatingBadge(
+                              rating: trip.rating,
+                              reviewCount: trip.reviewCount,
+                            ),
                             const SizedBox(width: AppDimensions.xs),
                             Flexible(
                               child: Text(
                                 '• ${trip.vehicleType}',
-                                style: AppTextStyles.caption.copyWith(color: AppColors.neutral600),
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.neutral600,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -176,7 +186,9 @@ class TripDetailSheet extends StatelessWidget {
                       children: [
                         Text(
                           'Giá chỉ từ',
-                          style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.neutral500,
+                          ),
                         ),
                         Text(
                           CurrencyFormatter.format(trip.discountPrice),
@@ -223,7 +235,11 @@ class TripDetailSheet extends StatelessWidget {
                 imgUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => const Center(
-                  child: Icon(Icons.directions_bus_rounded, size: 50, color: AppColors.primary),
+                  child: Icon(
+                    Icons.directions_bus_rounded,
+                    size: 50,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
             );
@@ -253,12 +269,18 @@ class TripDetailSheet extends StatelessWidget {
                   color: AppColors.successLight,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                 ),
-                child: const Icon(Icons.check_rounded, color: AppColors.success, size: 16),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: AppColors.success,
+                  size: 16,
+                ),
               ),
               const SizedBox(width: AppDimensions.md),
               Text(
                 amenity,
-                style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -285,11 +307,7 @@ class TripDetailSheet extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                Container(
-                  width: 2,
-                  height: 60,
-                  color: AppColors.primaryLight,
-                ),
+                Container(width: 2, height: 60, color: AppColors.primaryLight),
               ],
             ),
             const SizedBox(width: AppDimensions.md),
@@ -310,9 +328,19 @@ class TripDetailSheet extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(trip.pickupPoint, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700)),
+                  Text(
+                    trip.pickupPoint,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(trip.pickupAddress, style: AppTextStyles.bodySmall.copyWith(color: AppColors.neutral500)),
+                  Text(
+                    trip.pickupAddress,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.neutral500,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -349,9 +377,19 @@ class TripDetailSheet extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(trip.dropoffPoint, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700)),
+                  Text(
+                    trip.dropoffPoint,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(trip.dropoffAddress, style: AppTextStyles.bodySmall.copyWith(color: AppColors.neutral500)),
+                  Text(
+                    trip.dropoffAddress,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.neutral500,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -365,10 +403,22 @@ class TripDetailSheet extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppDimensions.base),
       children: [
-        _buildPolicyRow('Trước giờ khởi hành 24 tiếng', 'Phí hủy 10% (Hoàn 90% giá vé)'),
-        _buildPolicyRow('Trước giờ khởi hành 12 - 24 tiếng', 'Phí hủy 30% (Hoàn 70% giá vé)'),
-        _buildPolicyRow('Trước giờ khởi hành 6 - 12 tiếng', 'Phí hủy 50% (Hoàn 50% giá vé)'),
-        _buildPolicyRow('Dưới 6 tiếng trước giờ chạy', 'Không hỗ trợ hoàn hủy vé'),
+        _buildPolicyRow(
+          'Trước giờ khởi hành 24 tiếng',
+          'Phí hủy 10% (Hoàn 90% giá vé)',
+        ),
+        _buildPolicyRow(
+          'Trước giờ khởi hành 12 - 24 tiếng',
+          'Phí hủy 30% (Hoàn 70% giá vé)',
+        ),
+        _buildPolicyRow(
+          'Trước giờ khởi hành 6 - 12 tiếng',
+          'Phí hủy 50% (Hoàn 50% giá vé)',
+        ),
+        _buildPolicyRow(
+          'Dưới 6 tiếng trước giờ chạy',
+          'Không hỗ trợ hoàn hủy vé',
+        ),
         const SizedBox(height: AppDimensions.md),
         Container(
           padding: const EdgeInsets.all(AppDimensions.md),
@@ -378,12 +428,18 @@ class TripDetailSheet extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 20),
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: AppColors.warning,
+                size: 20,
+              ),
               const SizedBox(width: AppDimensions.sm),
               Expanded(
                 child: Text(
                   'Lưu ý: Vào dịp Lễ/Tết chính sách hoàn hủy vé sẽ tuân theo quy định riêng của nhà xe.',
-                  style: AppTextStyles.caption.copyWith(color: AppColors.neutral800),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.neutral800,
+                  ),
                 ),
               ),
             ],
@@ -405,9 +461,19 @@ class TripDetailSheet extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(time, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                Text(
+                  time,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(rule, style: AppTextStyles.bodySmall.copyWith(color: AppColors.neutral600)),
+                Text(
+                  rule,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.neutral600,
+                  ),
+                ),
               ],
             ),
           ),

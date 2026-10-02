@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import '../../core/network/api_client.dart';
+import '../datasources/remote/auth_remote_data_source.dart';
 import 'package:vexgo_app/core/utils/json_loader.dart';
 import '../models/point_transaction_model.dart';
 import '../models/user_model.dart';
@@ -27,7 +30,9 @@ class MockAuthRepository implements AuthRepository {
   Future<UserModel?> getCurrentUser() async {
     if (_currentUser != null) return _currentUser;
     try {
-      final jsonMap = await JsonLoader.loadJsonMap('assets/mock_data/user_profile.json');
+      final jsonMap = await JsonLoader.loadJsonMap(
+        'assets/mock_data/user_profile.json',
+      );
       _currentUser = UserModel.fromJson(jsonMap);
       return _currentUser;
     } catch (_) {
@@ -36,7 +41,10 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<UserModel> login({required String phone, required String password}) async {
+  Future<UserModel> login({
+    required String phone,
+    required String password,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 600));
     if (phone.isEmpty || password.isEmpty) {
       throw Exception('Số điện thoại và mật khẩu không được để trống.');
@@ -49,7 +57,8 @@ class MockAuthRepository implements AuthRepository {
     }
     _currentUser = UserModel(
       taiKhoanId: 101,
-      maKhachHang: 'KH-VEXGO-${phone.substring(phone.length >= 4 ? phone.length - 4 : 0)}',
+      maKhachHang:
+          'KH-VEXGO-${phone.substring(phone.length >= 4 ? phone.length - 4 : 0)}',
       hoTen: 'Phạm Minh Tài',
       soDienThoai: phone,
       email: 'nguyen221205@gmail.com',
@@ -81,7 +90,8 @@ class MockAuthRepository implements AuthRepository {
     }
     _currentUser = UserModel(
       taiKhoanId: DateTime.now().millisecondsSinceEpoch % 10000,
-      maKhachHang: 'KH-NEW-${phone.substring(phone.length >= 4 ? phone.length - 4 : 0)}',
+      maKhachHang:
+          'KH-NEW-${phone.substring(phone.length >= 4 ? phone.length - 4 : 0)}',
       hoTen: fullName.isNotEmpty ? fullName : 'Khách hàng mới',
       soDienThoai: phone,
       email: null,
@@ -140,4 +150,90 @@ class MockAuthRepository implements AuthRepository {
     await Future.delayed(const Duration(milliseconds: 300));
     _currentUser = null;
   }
+}
+
+class HybridAuthRepository implements AuthRepository {
+  final AuthRemoteDataSource remoteDataSource;
+  final MockAuthRepository mockFallback;
+
+  HybridAuthRepository({
+    AuthRemoteDataSource? remoteDataSource,
+    MockAuthRepository? mockFallback,
+  }) : remoteDataSource =
+           remoteDataSource ?? AuthRemoteDataSourceImpl(client: ApiClient()),
+       mockFallback = mockFallback ?? MockAuthRepository();
+
+  @override
+  Future<UserModel?> getCurrentUser() async {
+    try {
+      final user = await remoteDataSource.getCurrentUser();
+      if (user != null) return user;
+    } catch (_) {}
+    return null;
+  }
+
+  @override
+  Future<UserModel> login({
+    required String phone,
+    required String password,
+  }) async {
+    try {
+      return await remoteDataSource.login(phone: phone, password: password);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[HybridAuthRepository] Remote login failed: $e');
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> sendOtp({required String phone}) async {
+    try {
+      await remoteDataSource.sendOtp(phone: phone);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[HybridAuthRepository] Remote sendOtp failed: $e');
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UserModel> verifyOtpAndRegister({
+    required String phone,
+    required String otp,
+    required String fullName,
+    required String password,
+  }) async {
+    try {
+      return await remoteDataSource.verifyOtpAndRegister(
+        phone: phone,
+        otp: otp,
+        fullName: fullName,
+        password: password,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[HybridAuthRepository] Remote register failed: $e');
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UserModel> updateProfile(UserModel updatedUser) =>
+      mockFallback.updateProfile(updatedUser);
+
+  @override
+  Future<UserModel> redeemPoints({
+    required int pointsToRedeem,
+    required String rewardTitle,
+  }) => mockFallback.redeemPoints(
+    pointsToRedeem: pointsToRedeem,
+    rewardTitle: rewardTitle,
+  );
+
+  @override
+  Future<void> logout() => remoteDataSource.logout();
 }

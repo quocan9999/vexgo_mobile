@@ -6,10 +6,7 @@ import 'package:vexgo_app/core/constants/app_text_styles.dart';
 class MainShellScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const MainShellScreen({
-    super.key,
-    required this.navigationShell,
-  });
+  const MainShellScreen({super.key, required this.navigationShell});
 
   void _onItemTapped(int index) {
     navigationShell.goBranch(

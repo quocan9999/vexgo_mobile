@@ -61,17 +61,19 @@ class MyTicketsState extends Equatable {
       selectedTab: selectedTab ?? this.selectedTab,
       searchQuery: searchQuery ?? this.searchQuery,
       errorMessage: clearMessages ? null : (errorMessage ?? this.errorMessage),
-      successMessage: clearMessages ? null : (successMessage ?? this.successMessage),
+      successMessage: clearMessages
+          ? null
+          : (successMessage ?? this.successMessage),
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        tickets,
-        selectedTab,
-        searchQuery,
-        errorMessage,
-        successMessage,
-      ];
+    status,
+    tickets,
+    selectedTab,
+    searchQuery,
+    errorMessage,
+    successMessage,
+  ];
 }

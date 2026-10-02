@@ -11,11 +11,7 @@ class Step2PickupPoint extends StatelessWidget {
   final BookingFlowState state;
   final BookingFlowBloc bloc;
 
-  const Step2PickupPoint({
-    super.key,
-    required this.state,
-    required this.bloc,
-  });
+  const Step2PickupPoint({super.key, required this.state, required this.bloc});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +32,11 @@ class Step2PickupPoint extends StatelessWidget {
                   color: AppColors.primaryLight,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.departure_board_rounded, color: AppColors.primary, size: 20),
+                child: const Icon(
+                  Icons.departure_board_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: AppDimensions.sm),
               Expanded(
@@ -49,7 +49,9 @@ class Step2PickupPoint extends StatelessWidget {
                     ),
                     Text(
                       'Có ${points.length} điểm đón phù hợp cho chuyến xe này',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.neutral500,
+                      ),
                     ),
                   ],
                 ),
@@ -65,12 +67,18 @@ class Step2PickupPoint extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.primaryLight.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.2),
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.alarm_on_rounded, size: 18, color: AppColors.primary),
+                const Icon(
+                  Icons.alarm_on_rounded,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

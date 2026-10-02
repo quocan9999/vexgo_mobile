@@ -39,7 +39,10 @@ class BookingStepper extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(12),
@@ -80,7 +83,9 @@ class BookingStepper extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.neutral200,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
               minHeight: 5,
             ),
           ),
@@ -116,7 +121,10 @@ class BookingStepper extends StatelessWidget {
                     onTap: isPassed ? () => onStepTapped(index) : null,
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: bgColor,
                         borderRadius: BorderRadius.circular(20),
@@ -137,7 +145,9 @@ class BookingStepper extends StatelessWidget {
                             '${index + 1}. ${step.shortTitle}',
                             style: AppTextStyles.caption.copyWith(
                               color: textColor,
-                              fontWeight: isCurrent || isPassed ? FontWeight.w700 : FontWeight.w500,
+                              fontWeight: isCurrent || isPassed
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
                               fontSize: 11,
                             ),
                           ),

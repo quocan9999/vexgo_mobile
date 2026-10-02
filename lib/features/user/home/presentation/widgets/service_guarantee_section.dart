@@ -18,7 +18,8 @@ class ServiceGuaranteeSection extends StatelessWidget {
       {
         'icon': Icons.support_agent_rounded,
         'title': 'Hỗ trợ khách hàng 24/7',
-        'desc': 'Tổng đài viên luôn sẵn sàng giải đáp và xử lý phát sinh trên hành trình.',
+        'desc':
+            'Tổng đài viên luôn sẵn sàng giải đáp và xử lý phát sinh trên hành trình.',
         'color': AppColors.secondary,
       },
       {
@@ -62,7 +63,9 @@ class ServiceGuaranteeSection extends StatelessWidget {
                     padding: const EdgeInsets.all(AppDimensions.sm),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusSm,
+                      ),
                     ),
                     child: Icon(g['icon'] as IconData, color: color, size: 22),
                   ),

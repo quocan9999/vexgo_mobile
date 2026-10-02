@@ -13,11 +13,18 @@ import '../features/user/notification/presentation/screens/notifications_screen.
 import '../features/user/profile/presentation/screens/profile_screen.dart';
 import '../features/user/search_trips/presentation/screens/search_trips_screen.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
-final GlobalKey<NavigatorState> _ticketsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'tickets');
-final GlobalKey<NavigatorState> _notificationsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'notifications');
-final GlobalKey<NavigatorState> _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
+final GlobalKey<NavigatorState> _homeNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'home',
+);
+final GlobalKey<NavigatorState> _ticketsNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'tickets');
+final GlobalKey<NavigatorState> _notificationsNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'notifications');
+final GlobalKey<NavigatorState> _profileNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'profile');
 
 class AppRoutes {
   AppRoutes._();
@@ -95,9 +102,8 @@ class AppRoutes {
             routes: [
               GoRoute(
                 path: home,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: HomeScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: HomeScreen()),
               ),
             ],
           ),
@@ -108,9 +114,8 @@ class AppRoutes {
             routes: [
               GoRoute(
                 path: myTickets,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: MyTicketsScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: MyTicketsScreen()),
               ),
             ],
           ),
@@ -121,9 +126,8 @@ class AppRoutes {
             routes: [
               GoRoute(
                 path: notifications,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: NotificationsScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: NotificationsScreen()),
               ),
             ],
           ),
@@ -134,9 +138,8 @@ class AppRoutes {
             routes: [
               GoRoute(
                 path: profile,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: ProfileScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: ProfileScreen()),
               ),
             ],
           ),

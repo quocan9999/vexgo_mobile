@@ -17,7 +17,11 @@ class CancelTicketSheet extends StatefulWidget {
     required this.bloc,
   });
 
-  static Future<void> show(BuildContext context, TicketModel ticket, MyTicketsBloc bloc) {
+  static Future<void> show(
+    BuildContext context,
+    TicketModel ticket,
+    MyTicketsBloc bloc,
+  ) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -51,7 +55,9 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.radiusLg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppDimensions.radiusLg),
+        ),
       ),
       padding: EdgeInsets.fromLTRB(
         AppDimensions.base,
@@ -85,12 +91,18 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: canCancel ? AppColors.errorLight : AppColors.warningLight,
+                      color: canCancel
+                          ? AppColors.errorLight
+                          : AppColors.warningLight,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      canCancel ? Icons.cancel_outlined : Icons.warning_amber_rounded,
-                      color: canCancel ? AppColors.error : AppColors.warningDark,
+                      canCancel
+                          ? Icons.cancel_outlined
+                          : Icons.warning_amber_rounded,
+                      color: canCancel
+                          ? AppColors.error
+                          : AppColors.warningDark,
                       size: 22,
                     ),
                   ),
@@ -105,7 +117,9 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                         ),
                         Text(
                           'Mã vé: ${widget.ticket.ticketCode}',
-                          style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.neutral500,
+                          ),
                         ),
                       ],
                     ),
@@ -126,14 +140,20 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                   decoration: BoxDecoration(
                     color: AppColors.errorLight.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.error.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: AppColors.error,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -189,7 +209,9 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                           Navigator.of(context).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Đang liên hệ tổng đài: ${widget.ticket.driverPhone ?? "1900 6067"}'),
+                              content: Text(
+                                'Đang liên hệ tổng đài: ${widget.ticket.driverPhone ?? "1900 6067"}',
+                              ),
                               duration: const Duration(seconds: 2),
                             ),
                           );
@@ -225,10 +247,15 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Tiền vé đã thanh toán:', style: AppTextStyles.bodySmall),
+                          Text(
+                            'Tiền vé đã thanh toán:',
+                            style: AppTextStyles.bodySmall,
+                          ),
                           Text(
                             CurrencyFormatter.format(widget.ticket.finalAmount),
-                            style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700),
+                            style: AppTextStyles.bodySmall.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ],
                       ),
@@ -236,10 +263,18 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Phí hủy theo quy định (10%):', style: AppTextStyles.caption.copyWith(color: AppColors.error)),
+                          Text(
+                            'Phí hủy theo quy định (10%):',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.error,
+                            ),
+                          ),
                           Text(
                             '- ${CurrencyFormatter.format(cancellationFee)}',
-                            style: AppTextStyles.caption.copyWith(color: AppColors.error, fontWeight: FontWeight.w700),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ],
                       ),
@@ -249,7 +284,9 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                         children: [
                           Text(
                             'Số tiền hoàn lại:',
-                            style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           Text(
                             CurrencyFormatter.format(refundAmount),
@@ -263,7 +300,11 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(Icons.info_outline, size: 13, color: AppColors.neutral500),
+                          const Icon(
+                            Icons.info_outline,
+                            size: 13,
+                            color: AppColors.neutral500,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -285,7 +326,9 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                 // Cancellation Reason
                 Text(
                   'Chọn lý do hủy vé',
-                  style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 RadioGroup<String>(
                   groupValue: _selectedReason,
@@ -310,10 +353,13 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                 // Agreement checkbox
                 CheckboxListTile(
                   value: _agreedToPolicy,
-                  onChanged: (val) => setState(() => _agreedToPolicy = val ?? false),
+                  onChanged: (val) =>
+                      setState(() => _agreedToPolicy = val ?? false),
                   title: Text(
                     'Tôi đã đọc và đồng ý với chính sách hủy vé và khấu trừ phí của nhà xe.',
-                    style: AppTextStyles.caption.copyWith(color: AppColors.neutral700),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.neutral700,
+                    ),
                   ),
                   contentPadding: EdgeInsets.zero,
                   controlAffinity: ListTileControlAffinity.leading,
@@ -329,11 +375,13 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                   child: ElevatedButton(
                     onPressed: _agreedToPolicy
                         ? () {
-                            widget.bloc.add(CancelTicketEvent(
-                              ticketId: widget.ticket.id,
-                              reason: _selectedReason,
-                              refundAmount: refundAmount,
-                            ));
+                            widget.bloc.add(
+                              CancelTicketEvent(
+                                ticketId: widget.ticket.id,
+                                reason: _selectedReason,
+                                refundAmount: refundAmount,
+                              ),
+                            );
                             Navigator.of(context).pop();
                           }
                         : null,

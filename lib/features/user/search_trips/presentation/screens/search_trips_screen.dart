@@ -40,13 +40,14 @@ class SearchTripsScreen extends StatelessWidget {
     final effectiveDate = date ?? DateTime.now().add(const Duration(days: 1));
 
     return BlocProvider<SearchTripsBloc>(
-      create: (context) => SearchTripsBloc(
-        tripRepository: context.read<TripRepository>(),
-      )..add(LoadTripsEvent(
-          fromCityId: effectiveFromCity,
-          toCityId: effectiveToCity,
-          date: effectiveDate,
-        )),
+      create: (context) =>
+          SearchTripsBloc(tripRepository: context.read<TripRepository>())..add(
+            LoadTripsEvent(
+              fromCityId: effectiveFromCity,
+              toCityId: effectiveToCity,
+              date: effectiveDate,
+            ),
+          ),
       child: _SearchTripsView(
         fromCityName: fromCity?.name ?? 'TP. Hồ Chí Minh',
         toCityName: toCity?.name ?? 'Đà Lạt',
@@ -81,7 +82,10 @@ class _SearchTripsView extends StatelessWidget {
             subtitle: '$dateStr • $ticketCount vé',
             actions: [
               IconButton(
-                icon: const Icon(Icons.tune_rounded, color: AppColors.neutral900),
+                icon: const Icon(
+                  Icons.tune_rounded,
+                  color: AppColors.neutral900,
+                ),
                 tooltip: 'Bộ lọc',
                 onPressed: () async {
                   final newFilter = await TripFilterSheet.show(
@@ -126,7 +130,10 @@ class _SearchTripsView extends StatelessWidget {
                   }
                 },
                 onOpenSortSheet: () async {
-                  final newSort = await TripSortSheet.show(context, state.currentSort);
+                  final newSort = await TripSortSheet.show(
+                    context,
+                    state.currentSort,
+                  );
                   if (newSort != null) {
                     bloc.add(ChangeSortTypeEvent(newSort));
                   }
@@ -161,7 +168,11 @@ class _SearchTripsView extends StatelessWidget {
                         onTap: () => bloc.add(const ResetFilterEvent()),
                         child: Row(
                           children: [
-                            const Icon(Icons.close_rounded, size: 14, color: AppColors.secondary),
+                            const Icon(
+                              Icons.close_rounded,
+                              size: 14,
+                              color: AppColors.secondary,
+                            ),
                             const SizedBox(width: 2),
                             Text(
                               'Xóa lọc (${state.currentFilter.activeFilterCount})',
@@ -178,9 +189,7 @@ class _SearchTripsView extends StatelessWidget {
               ),
 
               // 4. Trip list view
-              Expanded(
-                child: _buildTripsList(context, state, bloc),
-              ),
+              Expanded(child: _buildTripsList(context, state, bloc)),
             ],
           ),
         );
@@ -205,14 +214,17 @@ class _SearchTripsView extends StatelessWidget {
       return EmptyState(
         icon: Icons.error_outline_rounded,
         title: 'Có lỗi xảy ra',
-        message: state.errorMessage ?? 'Không thể tải danh sách chuyến xe lúc này.',
+        message:
+            state.errorMessage ?? 'Không thể tải danh sách chuyến xe lúc này.',
         buttonText: 'Thử lại',
         onButtonPressed: () {
-          bloc.add(LoadTripsEvent(
-            fromCityId: state.fromCityId,
-            toCityId: state.toCityId,
-            date: state.selectedDate,
-          ));
+          bloc.add(
+            LoadTripsEvent(
+              fromCityId: state.fromCityId,
+              toCityId: state.toCityId,
+              date: state.selectedDate,
+            ),
+          );
         },
       );
     }
@@ -221,7 +233,8 @@ class _SearchTripsView extends StatelessWidget {
       return EmptyState(
         icon: Icons.directions_bus_outlined,
         title: 'Không tìm thấy chuyến xe phù hợp',
-        message: 'Không có chuyến xe nào thỏa mãn các tiêu chí lọc của bạn. Hãy thử thay đổi bộ lọc.',
+        message:
+            'Không có chuyến xe nào thỏa mãn các tiêu chí lọc của bạn. Hãy thử thay đổi bộ lọc.',
         buttonText: 'Thiết lập lại bộ lọc',
         onButtonPressed: () => bloc.add(const ResetFilterEvent()),
       );

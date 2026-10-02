@@ -30,10 +30,7 @@ class TicketSummaryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-          border: Border.all(
-            color: _getBorderColor(),
-            width: 1.2,
-          ),
+          border: Border.all(color: _getBorderColor(), width: 1.2),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -177,7 +174,9 @@ class TicketSummaryCard extends StatelessWidget {
 
             // Seats and Pickup point
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+              ),
               padding: const EdgeInsets.all(AppDimensions.sm),
               decoration: BoxDecoration(
                 color: AppColors.neutral100.withValues(alpha: 0.6),
@@ -185,11 +184,17 @@ class TicketSummaryCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.airline_seat_recline_extra_rounded, size: 16, color: AppColors.primary),
+                  const Icon(
+                    Icons.airline_seat_recline_extra_rounded,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Ghế: ',
-                    style: AppTextStyles.caption.copyWith(color: AppColors.neutral600),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.neutral600,
+                    ),
                   ),
                   Text(
                     ticket.seats.join(', '),
@@ -202,7 +207,9 @@ class TicketSummaryCard extends StatelessWidget {
                   Flexible(
                     child: Text(
                       ticket.trip.vehicleType,
-                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral600),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.neutral600,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -222,7 +229,11 @@ class TicketSummaryCard extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, size: 14, color: AppColors.error),
+                    const Icon(
+                      Icons.info_outline,
+                      size: 14,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -280,12 +291,17 @@ class TicketSummaryCard extends StatelessWidget {
                     const SizedBox(width: AppDimensions.sm),
                   ],
 
-                  if (ticket.status == TicketStatus.completed && ticket.review == null) ...[
+                  if (ticket.status == TicketStatus.completed &&
+                      ticket.review == null) ...[
                     SizedBox(
                       height: 36,
                       child: OutlinedButton.icon(
                         onPressed: onReview,
-                        icon: const Icon(Icons.star_rate_rounded, size: 16, color: AppColors.secondary),
+                        icon: const Icon(
+                          Icons.star_rate_rounded,
+                          size: 16,
+                          color: AppColors.secondary,
+                        ),
                         label: Text(
                           'Đánh giá',
                           style: AppTextStyles.caption.copyWith(
@@ -294,7 +310,9 @@ class TicketSummaryCard extends StatelessWidget {
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.secondaryLight),
+                          side: const BorderSide(
+                            color: AppColors.secondaryLight,
+                          ),
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -305,9 +323,13 @@ class TicketSummaryCard extends StatelessWidget {
                     const SizedBox(width: AppDimensions.sm),
                   ],
 
-                  if (ticket.status == TicketStatus.completed && ticket.review != null) ...[
+                  if (ticket.status == TicketStatus.completed &&
+                      ticket.review != null) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.warningLight.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(6),
@@ -315,7 +337,11 @@ class TicketSummaryCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star_rounded, size: 14, color: AppColors.secondary),
+                          const Icon(
+                            Icons.star_rounded,
+                            size: 14,
+                            color: AppColors.secondary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${ticket.review!.rating}.0 (Đã đánh giá)',
@@ -338,10 +364,12 @@ class TicketSummaryCard extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: onTap,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: ticket.status == TicketStatus.cancelled
+                          backgroundColor:
+                              ticket.status == TicketStatus.cancelled
                               ? AppColors.neutral200
                               : AppColors.primary,
-                          foregroundColor: ticket.status == TicketStatus.cancelled
+                          foregroundColor:
+                              ticket.status == TicketStatus.cancelled
                               ? AppColors.neutral700
                               : Colors.white,
                           elevation: 0,
@@ -362,7 +390,9 @@ class TicketSummaryCard extends StatelessWidget {
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(
-                                ticket.status == TicketStatus.cancelled ? 'Xem chi tiết' : 'Xem vé & QR',
+                                ticket.status == TicketStatus.cancelled
+                                    ? 'Xem chi tiết'
+                                    : 'Xem vé & QR',
                                 style: AppTextStyles.caption.copyWith(
                                   color: ticket.status == TicketStatus.cancelled
                                       ? AppColors.neutral700

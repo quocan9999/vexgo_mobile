@@ -18,7 +18,11 @@ class ReviewBottomSheet extends StatefulWidget {
     required this.bloc,
   });
 
-  static Future<void> show(BuildContext context, TicketModel ticket, MyTicketsBloc bloc) {
+  static Future<void> show(
+    BuildContext context,
+    TicketModel ticket,
+    MyTicketsBloc bloc,
+  ) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -72,7 +76,9 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.radiusLg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppDimensions.radiusLg),
+        ),
       ),
       padding: EdgeInsets.fromLTRB(
         AppDimensions.base,
@@ -109,7 +115,11 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                       color: AppColors.warningLight,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.star_rounded, color: AppColors.secondary, size: 24),
+                    child: const Icon(
+                      Icons.star_rounded,
+                      color: AppColors.secondary,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(width: AppDimensions.sm),
                   Expanded(
@@ -122,7 +132,9 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                         ),
                         Text(
                           widget.ticket.trip.operatorName,
-                          style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.neutral500,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -152,9 +164,13 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: Icon(
-                              isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
+                              isFilled
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
                               size: 40,
-                              color: isFilled ? AppColors.secondary : AppColors.neutral400,
+                              color: isFilled
+                                  ? AppColors.secondary
+                                  : AppColors.neutral400,
                             ),
                           ),
                         );
@@ -177,7 +193,9 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
               // Quick Tags (Wrap for 360dp safety)
               Text(
                 'Điểm bạn hài lòng nhất',
-                style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700),
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -200,14 +218,20 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                     selectedColor: AppColors.primaryLight,
                     checkmarkColor: AppColors.primary,
                     labelStyle: AppTextStyles.caption.copyWith(
-                      color: isSelected ? AppColors.primary : AppColors.neutral700,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.neutral700,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                     ),
                     backgroundColor: AppColors.neutral100,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: isSelected ? AppColors.primary : AppColors.neutral200,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.neutral200,
                       ),
                     ),
                   );
@@ -219,22 +243,30 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
               // Comment text field
               Text(
                 'Nhận xét chi tiết',
-                style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700),
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 6),
               TextField(
                 controller: _commentCtrl,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'Chia sẻ cảm nhận của bạn về tài xế, độ êm của xe, thái độ phục vụ...',
-                  hintStyle: AppTextStyles.caption.copyWith(color: AppColors.neutral400),
+                  hintText:
+                      'Chia sẻ cảm nhận của bạn về tài xế, độ êm của xe, thái độ phục vụ...',
+                  hintStyle: AppTextStyles.caption.copyWith(
+                    color: AppColors.neutral400,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: AppColors.neutral300),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 1.5,
+                    ),
                   ),
                   contentPadding: const EdgeInsets.all(12),
                 ),
@@ -248,7 +280,9 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                 height: 46,
                 child: ElevatedButton(
                   onPressed: () {
-                    final nowStr = DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now());
+                    final nowStr = DateFormat(
+                      'dd/MM/yyyy HH:mm',
+                    ).format(DateTime.now());
                     final review = ReviewModel(
                       rating: _rating,
                       comment: _commentCtrl.text.trim().isEmpty
@@ -258,10 +292,12 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                       createdAt: nowStr,
                     );
 
-                    widget.bloc.add(SubmitTicketReviewEvent(
-                      ticketId: widget.ticket.id,
-                      review: review,
-                    ));
+                    widget.bloc.add(
+                      SubmitTicketReviewEvent(
+                        ticketId: widget.ticket.id,
+                        review: review,
+                      ),
+                    );
 
                     Navigator.of(context).pop();
                   },

@@ -21,11 +21,17 @@ class NotificationState extends Equatable {
   List<NotificationModel> get filteredNotifications {
     switch (activeTabIndex) {
       case 1:
-        return notifications.where((n) => n.category == NotificationCategory.trip).toList();
+        return notifications
+            .where((n) => n.category == NotificationCategory.trip)
+            .toList();
       case 2:
-        return notifications.where((n) => n.category == NotificationCategory.promo).toList();
+        return notifications
+            .where((n) => n.category == NotificationCategory.promo)
+            .toList();
       case 3:
-        return notifications.where((n) => n.category == NotificationCategory.system).toList();
+        return notifications
+            .where((n) => n.category == NotificationCategory.system)
+            .toList();
       case 0:
       default:
         return notifications;
@@ -48,9 +54,9 @@ class NotificationState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        notifications,
-        activeTabIndex,
-        errorMessage,
-      ];
+    status,
+    notifications,
+    activeTabIndex,
+    errorMessage,
+  ];
 }

@@ -21,9 +21,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<HomeBloc>(
-      create: (context) => HomeBloc(
-        tripRepository: context.read<TripRepository>(),
-      )..add(const LoadHomeDataEvent()),
+      create: (context) =>
+          HomeBloc(tripRepository: context.read<TripRepository>())
+            ..add(const LoadHomeDataEvent()),
       child: const _HomeScreenContent(),
     );
   }
@@ -49,7 +49,11 @@ class _HomeScreenContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 48),
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: AppColors.error,
+                    size: 48,
+                  ),
                   const SizedBox(height: AppDimensions.md),
                   Text(
                     state.errorMessage ?? 'Đã có lỗi xảy ra',
@@ -57,7 +61,8 @@ class _HomeScreenContent extends StatelessWidget {
                   ),
                   const SizedBox(height: AppDimensions.base),
                   ElevatedButton(
-                    onPressed: () => context.read<HomeBloc>().add(const LoadHomeDataEvent()),
+                    onPressed: () =>
+                        context.read<HomeBloc>().add(const LoadHomeDataEvent()),
                     child: const Text('Thử lại'),
                   ),
                 ],
@@ -74,7 +79,10 @@ class _HomeScreenContent extends StatelessWidget {
                   width: double.infinity,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [AppColors.primaryGradientStart, AppColors.primaryGradientEnd],
+                      colors: [
+                        AppColors.primaryGradientStart,
+                        AppColors.primaryGradientEnd,
+                      ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -102,10 +110,14 @@ class _HomeScreenContent extends StatelessWidget {
                               Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.all(AppDimensions.xs + 2),
+                                    padding: const EdgeInsets.all(
+                                      AppDimensions.xs + 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
-                                      borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                                      borderRadius: BorderRadius.circular(
+                                        AppDimensions.radiusSm,
+                                      ),
                                     ),
                                     child: const Icon(
                                       Icons.directions_bus_rounded,
@@ -127,8 +139,12 @@ class _HomeScreenContent extends StatelessWidget {
                               Row(
                                 children: [
                                   IconButton(
-                                    onPressed: () => context.push('/notifications'),
-                                    icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                                    onPressed: () =>
+                                        context.push('/notifications'),
+                                    icon: const Icon(
+                                      Icons.notifications_none_rounded,
+                                      color: Colors.white,
+                                    ),
                                     tooltip: 'Thông báo',
                                   ),
                                   IconButton(
@@ -136,18 +152,26 @@ class _HomeScreenContent extends StatelessWidget {
                                       showDialog(
                                         context: context,
                                         builder: (ctx) => AlertDialog(
-                                          title: const Text('Hotline Hỗ trợ VexGo'),
-                                          content: const Text('Tổng đài hỗ trợ đặt vé: 1900 8888 (24/7)'),
+                                          title: const Text(
+                                            'Hotline Hỗ trợ VexGo',
+                                          ),
+                                          content: const Text(
+                                            'Tổng đài hỗ trợ đặt vé: 1900 8888 (24/7)',
+                                          ),
                                           actions: [
                                             TextButton(
-                                              onPressed: () => Navigator.of(ctx).pop(),
+                                              onPressed: () =>
+                                                  Navigator.of(ctx).pop(),
                                               child: const Text('Đóng'),
                                             ),
                                           ],
                                         ),
                                       );
                                     },
-                                    icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
+                                    icon: const Icon(
+                                      Icons.headset_mic_outlined,
+                                      color: Colors.white,
+                                    ),
                                     tooltip: 'Hotline',
                                   ),
                                 ],
@@ -159,7 +183,7 @@ class _HomeScreenContent extends StatelessWidget {
 
                           // Slogan & Guarantee
                           Text(
-                            'Hệ thống đặt vé trực tuyến',
+                            'Đặt vé xe khách trực tuyến',
                             style: AppTextStyles.h2.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w800,
@@ -167,7 +191,7 @@ class _HomeScreenContent extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Cam kết giữ chỗ 100% • Hàng triệu khách hàng tin dùng',
+                            'Cam kết giữ chỗ 100% • Hàng triệu hành khách tin dùng',
                             style: AppTextStyles.bodySmall.copyWith(
                               color: Colors.white.withValues(alpha: 0.9),
                             ),
@@ -175,7 +199,7 @@ class _HomeScreenContent extends StatelessWidget {
 
                           const SizedBox(height: AppDimensions.md),
 
-                          // 4 Service Category Tabs (Xe khách, Máy bay, Tàu hỏa, Thuê xe)
+                          // Dịch vụ hệ sinh thái xe khách (Vé xe khách, Gửi hàng hóa, Tra cứu vé)
                           const ServiceCategoryTabs(),
                         ],
                       ),

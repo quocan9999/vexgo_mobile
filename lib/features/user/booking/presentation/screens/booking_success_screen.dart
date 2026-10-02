@@ -15,10 +15,7 @@ import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_event.dart';
 class BookingSuccessScreen extends StatefulWidget {
   final TicketModel ticket;
 
-  const BookingSuccessScreen({
-    super.key,
-    required this.ticket,
-  });
+  const BookingSuccessScreen({super.key, required this.ticket});
 
   @override
   State<BookingSuccessScreen> createState() => _BookingSuccessScreenState();
@@ -107,14 +104,19 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'Cảm ơn bạn đã lựa chọn VexGo!',
-                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.neutral600),
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.neutral600,
+                      ),
                     ),
 
                     const SizedBox(height: AppDimensions.base),
 
                     // Ticket Code Banner
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.neutral100,
                         borderRadius: BorderRadius.circular(10),
@@ -124,7 +126,9 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                         children: [
                           Text(
                             'Mã vé: ',
-                            style: AppTextStyles.caption.copyWith(color: AppColors.neutral600),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.neutral600,
+                            ),
                           ),
                           Text(
                             ticket.ticketCode,
@@ -137,15 +141,23 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                           const SizedBox(width: 8),
                           GestureDetector(
                             onTap: () {
-                              Clipboard.setData(ClipboardData(text: ticket.ticketCode));
+                              Clipboard.setData(
+                                ClipboardData(text: ticket.ticketCode),
+                              );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Đã sao chép mã vé vào bộ nhớ tạm!'),
+                                  content: Text(
+                                    'Đã sao chép mã vé vào bộ nhớ tạm!',
+                                  ),
                                   duration: Duration(seconds: 2),
                                 ),
                               );
                             },
-                            child: const Icon(Icons.copy_rounded, size: 16, color: AppColors.primary),
+                            child: const Icon(
+                              Icons.copy_rounded,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
                           ),
                         ],
                       ),
@@ -188,7 +200,11 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.directions_bus_rounded, color: AppColors.primary, size: 20),
+                        const Icon(
+                          Icons.directions_bus_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -197,7 +213,10 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.successLight,
                             borderRadius: BorderRadius.circular(4),
@@ -217,7 +236,9 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                     const SizedBox(height: AppDimensions.sm),
                     Text(
                       '${trip.fromCity} -> ${trip.toCity} • ${trip.vehicleType}',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.neutral500,
+                      ),
                     ),
 
                     const SizedBox(height: AppDimensions.md),
@@ -228,13 +249,27 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                     const SizedBox(height: 8),
                     _buildInfoRow('Giờ đón:', trip.departureTime),
                     const SizedBox(height: 8),
-                    _buildInfoRow('Điểm đón:', '${trip.pickupPoint} (${trip.pickupAddress})'),
+                    _buildInfoRow(
+                      'Điểm đón:',
+                      '${trip.pickupPoint} (${trip.pickupAddress})',
+                    ),
                     const SizedBox(height: 8),
-                    _buildInfoRow('Điểm trả:', '${trip.dropoffPoint} (${trip.dropoffAddress})'),
+                    _buildInfoRow(
+                      'Điểm trả:',
+                      '${trip.dropoffPoint} (${trip.dropoffAddress})',
+                    ),
                     const SizedBox(height: 8),
-                    _buildInfoRow('Chỗ ngồi:', seatsStr, valueColor: AppColors.primary, isBold: true),
+                    _buildInfoRow(
+                      'Chỗ ngồi:',
+                      seatsStr,
+                      valueColor: AppColors.primary,
+                      isBold: true,
+                    ),
                     const SizedBox(height: 8),
-                    _buildInfoRow('Hành khách:', '${ticket.passenger.fullName} - ${ticket.passenger.phone}'),
+                    _buildInfoRow(
+                      'Hành khách:',
+                      '${ticket.passenger.fullName} - ${ticket.passenger.phone}',
+                    ),
                     const SizedBox(height: 8),
                     _buildInfoRow(
                       'Tổng thanh toán:',
@@ -257,12 +292,18 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.email_outlined, color: AppColors.primary, size: 20),
+                    const Icon(
+                      Icons.email_outlined,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                     const SizedBox(width: AppDimensions.sm),
                     Expanded(
                       child: Text(
                         'Chi tiết vé điện tử đã được gửi tới email ${ticket.passenger.email}.',
-                        style: AppTextStyles.caption.copyWith(color: AppColors.neutral700),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.neutral700,
+                        ),
                       ),
                     ),
                   ],
@@ -274,14 +315,22 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
               // Action Buttons
               CustomButton(
                 text: 'Xem vé của tôi',
-                prefixIcon: const Icon(Icons.confirmation_number_outlined, color: Colors.white, size: 20),
+                prefixIcon: const Icon(
+                  Icons.confirmation_number_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 onPressed: () => context.go('/my-tickets'),
               ),
               const SizedBox(height: AppDimensions.sm),
               CustomButton(
                 text: 'Về trang chủ',
                 type: ButtonType.outline,
-                prefixIcon: const Icon(Icons.home_rounded, color: AppColors.primary, size: 20),
+                prefixIcon: const Icon(
+                  Icons.home_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
                 onPressed: () => context.go('/'),
               ),
 
@@ -306,7 +355,9 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
           width: 100,
           child: Text(
             label,
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.neutral500),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.neutral500,
+            ),
           ),
         ),
         Expanded(

@@ -26,9 +26,7 @@ class DateSelectorStrip extends StatelessWidget {
       height: 76,
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: AppColors.neutral200),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.neutral200)),
       ),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
@@ -37,19 +35,27 @@ class DateSelectorStrip extends StatelessWidget {
           vertical: 6,
         ),
         itemCount: days.length,
-        separatorBuilder: (context, index) => const SizedBox(width: AppDimensions.sm),
+        separatorBuilder: (context, index) =>
+            const SizedBox(width: AppDimensions.sm),
         itemBuilder: (context, index) {
           final date = days[index];
-          final isSelected = date.year == selectedDate.year &&
+          final isSelected =
+              date.year == selectedDate.year &&
               date.month == selectedDate.month &&
               date.day == selectedDate.day;
 
           // Format price: e.g. 240k or 280k
           final priceK = '${(minPrice / 1000).round()}k';
 
-          final isToday = date.year == today.year && date.month == today.month && date.day == today.day;
+          final isToday =
+              date.year == today.year &&
+              date.month == today.month &&
+              date.day == today.day;
           final tomorrow = today.add(const Duration(days: 1));
-          final isTomorrow = date.year == tomorrow.year && date.month == tomorrow.month && date.day == tomorrow.day;
+          final isTomorrow =
+              date.year == tomorrow.year &&
+              date.month == tomorrow.month &&
+              date.day == tomorrow.day;
 
           String dateTitle;
           if (isToday) {
@@ -95,7 +101,9 @@ class DateSelectorStrip extends StatelessWidget {
                     dateTitle,
                     style: AppTextStyles.caption.copyWith(
                       color: isSelected ? Colors.white : AppColors.neutral700,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                       fontSize: 11,
                     ),
                     maxLines: 1,

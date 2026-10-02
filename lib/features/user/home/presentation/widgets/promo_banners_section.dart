@@ -68,7 +68,8 @@ class PromoBannersSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
             itemCount: banners.length,
-            separatorBuilder: (context, index) => const SizedBox(width: AppDimensions.md),
+            separatorBuilder: (context, index) =>
+                const SizedBox(width: AppDimensions.md),
             itemBuilder: (context, index) {
               final item = banners[index];
               final gradientColors = item['gradient'] as List<Color>;
@@ -100,10 +101,15 @@ class PromoBannersSection extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(AppDimensions.radiusXs),
+                              borderRadius: BorderRadius.circular(
+                                AppDimensions.radiusXs,
+                              ),
                             ),
                             child: Text(
                               item['tag'] as String,

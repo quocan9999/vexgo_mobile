@@ -97,7 +97,9 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.neutral400),
+        hintStyle: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.neutral400,
+        ),
       ),
       cardTheme: CardThemeData(
         color: Colors.white,
