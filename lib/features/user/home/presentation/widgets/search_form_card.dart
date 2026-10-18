@@ -10,6 +10,7 @@ import '../../bloc/home_bloc.dart';
 import '../../bloc/home_event.dart';
 import '../../bloc/home_state.dart';
 import '../screens/select_city_sheet.dart';
+import 'package:vexgo_app/data/models/city_model.dart';
 
 class SearchFormCard extends StatelessWidget {
   const SearchFormCard({super.key});
@@ -438,8 +439,31 @@ class SearchFormCard extends StatelessWidget {
                         final dateStr =
                             '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
+                        final departureCity =
+                            state.departureCity ??
+                            CityModel(
+                              id: fromId,
+                              name: fromName,
+                              region: '',
+                              isPopular: false,
+                            );
+                        final destinationCity =
+                            state.destinationCity ??
+                            CityModel(
+                              id: toId,
+                              name: toName,
+                              region: '',
+                              isPopular: false,
+                            );
+
                         context.push(
                           '/search-trips?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&ticketCount=${state.ticketCount}',
+                          extra: {
+                            'fromCity': departureCity,
+                            'toCity': destinationCity,
+                            'date': state.departureDate,
+                            'ticketCount': state.ticketCount,
+                          },
                         );
                       },
                     ),

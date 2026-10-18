@@ -49,11 +49,43 @@ class AppRoutes {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
+          final query = state.uri.queryParameters;
+
+          CityModel? fromCity = extra?['fromCity'] as CityModel?;
+          if (fromCity == null && query.containsKey('fromCityId')) {
+            fromCity = CityModel(
+              id: query['fromCityId']!,
+              name: query['fromCityName'] ?? query['fromCityId']!,
+              region: '',
+              isPopular: false,
+            );
+          }
+
+          CityModel? toCity = extra?['toCity'] as CityModel?;
+          if (toCity == null && query.containsKey('toCityId')) {
+            toCity = CityModel(
+              id: query['toCityId']!,
+              name: query['toCityName'] ?? query['toCityId']!,
+              region: '',
+              isPopular: false,
+            );
+          }
+
+          DateTime? date = extra?['date'] as DateTime?;
+          if (date == null && query.containsKey('date')) {
+            date = DateTime.tryParse(query['date']!);
+          }
+
+          final ticketCount =
+              extra?['ticketCount'] as int? ??
+              int.tryParse(query['ticketCount'] ?? '1') ??
+              1;
+
           return SearchTripsScreen(
-            fromCity: extra?['fromCity'] as CityModel?,
-            toCity: extra?['toCity'] as CityModel?,
-            date: extra?['date'] as DateTime?,
-            ticketCount: extra?['ticketCount'] as int? ?? 1,
+            fromCity: fromCity,
+            toCity: toCity,
+            date: date,
+            ticketCount: ticketCount,
           );
         },
       ),

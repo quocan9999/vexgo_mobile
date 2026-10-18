@@ -135,7 +135,7 @@ void main() {
       () {
         expect(
           CitySearchAdapter.resolveBackendSearchCity('HCM'),
-          equals('TP. Hồ Chí Minh'),
+          equals('TP.HCM'),
         );
         expect(
           CitySearchAdapter.resolveBackendSearchCity('DL'),
@@ -162,10 +162,14 @@ void main() {
           equals('Cần Thơ'),
         );
 
-        // Already formatted names stay unchanged
+        // Already formatted names and variations map to verified backend term
         expect(
           CitySearchAdapter.resolveBackendSearchCity('TP. Hồ Chí Minh'),
-          equals('TP. Hồ Chí Minh'),
+          equals('TP.HCM'),
+        );
+        expect(
+          CitySearchAdapter.resolveBackendSearchCity('TP.HCM'),
+          equals('TP.HCM'),
         );
         expect(
           CitySearchAdapter.resolveBackendSearchCity('Đà Lạt'),
@@ -207,7 +211,7 @@ void main() {
           date: '2026-10-10',
         );
 
-        expect(requestedFrom, equals('TP. Hồ Chí Minh'));
+        expect(requestedFrom, equals('TP.HCM'));
         expect(requestedTo, equals('Đà Lạt'));
         expect(results, isEmpty);
       },
