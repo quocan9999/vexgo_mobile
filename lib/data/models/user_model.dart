@@ -3,6 +3,8 @@ import 'point_transaction_model.dart';
 
 enum MembershipTier { silver, gold, diamond }
 
+const _unchangedProfileField = Object();
+
 class UserModel extends Equatable {
   final int taiKhoanId;
   final String maKhachHang;
@@ -135,9 +137,9 @@ class UserModel extends Equatable {
     String? maKhachHang,
     String? hoTen,
     String? soDienThoai,
-    String? email,
-    String? cccd,
-    String? ngaySinh,
+    Object? email = _unchangedProfileField,
+    Object? cccd = _unchangedProfileField,
+    Object? ngaySinh = _unchangedProfileField,
     bool? daXacThucSoDienThoai,
     String? trangThai,
     int? diemTichLuy,
@@ -150,9 +152,15 @@ class UserModel extends Equatable {
       maKhachHang: maKhachHang ?? this.maKhachHang,
       hoTen: hoTen ?? this.hoTen,
       soDienThoai: soDienThoai ?? this.soDienThoai,
-      email: email ?? this.email,
-      cccd: cccd ?? this.cccd,
-      ngaySinh: ngaySinh ?? this.ngaySinh,
+      email: identical(email, _unchangedProfileField)
+          ? this.email
+          : email as String?,
+      cccd: identical(cccd, _unchangedProfileField)
+          ? this.cccd
+          : cccd as String?,
+      ngaySinh: identical(ngaySinh, _unchangedProfileField)
+          ? this.ngaySinh
+          : ngaySinh as String?,
       daXacThucSoDienThoai: daXacThucSoDienThoai ?? this.daXacThucSoDienThoai,
       trangThai: trangThai ?? this.trangThai,
       diemTichLuy: diemTichLuy ?? this.diemTichLuy,

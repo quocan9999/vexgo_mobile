@@ -25,6 +25,7 @@ abstract class AuthRemoteDataSource {
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final ApiClient client;
+  int _generation = 0;
 
   AuthRemoteDataSourceImpl({required this.client});
 
@@ -33,6 +34,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String phone,
     required String password,
   }) async {
+    final generation = ++_generation;
+    final sessionVersion = TokenStorage.sessionVersion;
     final formattedPhone = phone.startsWith('0')
         ? '+84${phone.substring(1)}'
         : phone;
@@ -51,17 +54,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final accessToken = data['accessToken'] as String?;
       final refreshToken = data['refreshToken'] as String?;
 
-      if (accessToken != null && accessToken.isNotEmpty) {
+      if (generation != _generation ||
+          sessionVersion != TokenStorage.sessionVersion) {
+        throw StateError('Phiên đăng nhập đã thay đổi.');
+      }
+      if (accessToken == null ||
+          accessToken.isEmpty ||
+          refreshToken == null ||
+          refreshToken.isEmpty) {
+        throw const FormatException('Phản hồi xác thực thiếu thông tin phiên.');
+      }
+      if (accessToken.isNotEmpty) {
         await TokenStorage.saveTokens(
           accessToken: accessToken,
           refreshToken: refreshToken,
         );
       }
 
-      final userJson = data['user'] is Map<String, dynamic>
-          ? data['user'] as Map<String, dynamic>
-          : data;
-      return UserModel.fromJson(userJson);
+      if (generation != _generation) {
+        throw StateError('Phiên đăng nhập đã thay đổi.');
+      }
+      return _loadAuthenticatedProfile(generation);
     }
     throw Exception('Phản hồi đăng nhập không hợp lệ');
   }
@@ -86,7 +99,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return challengeId;
       }
     }
-    return '';
+    throw const FormatException('Máy chủ không cấp mã yêu cầu OTP.');
   }
 
   @override
@@ -97,6 +110,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     String? challengeId,
   }) async {
+    final generation = ++_generation;
+    final sessionVersion = TokenStorage.sessionVersion;
     final formattedPhone = phone.startsWith('0')
         ? '+84${phone.substring(1)}'
         : phone;
@@ -122,6 +137,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               : '');
     }
 
+    if (otpProof.isEmpty) {
+      throw const FormatException('Máy chủ không cấp bằng chứng OTP.');
+    }
+    if (generation != _generation) throw StateError('Đăng ký đã bị hủy.');
     final registerRes = await client.post(
       ApiConfig.authRegister,
       body: {
@@ -139,16 +158,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           : registerRes;
       final accessToken = data['accessToken'] as String?;
       final refreshToken = data['refreshToken'] as String?;
-      if (accessToken != null && accessToken.isNotEmpty) {
+      if (generation != _generation ||
+          sessionVersion != TokenStorage.sessionVersion) {
+        throw StateError('Đăng ký đã bị hủy.');
+      }
+      if (accessToken == null ||
+          accessToken.isEmpty ||
+          refreshToken == null ||
+          refreshToken.isEmpty) {
+        throw const FormatException('Phản hồi xác thực thiếu thông tin phiên.');
+      }
+      if (accessToken.isNotEmpty) {
         await TokenStorage.saveTokens(
           accessToken: accessToken,
           refreshToken: refreshToken,
         );
       }
-      final userJson = data['user'] is Map<String, dynamic>
-          ? data['user'] as Map<String, dynamic>
-          : data;
-      return UserModel.fromJson(userJson);
+      if (generation != _generation) {
+        throw StateError('Phiên đăng nhập đã thay đổi.');
+      }
+      return _loadAuthenticatedProfile(generation);
     }
     throw Exception('Phản hồi đăng ký không hợp lệ');
   }
@@ -158,21 +187,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final hasToken = await TokenStorage.hasAccessToken();
     if (!hasToken) return null;
 
-    try {
-      final res = await client.get(ApiConfig.me, requiresAuth: true);
-      if (res is Map<String, dynamic>) {
-        final data = res['data'] is Map<String, dynamic>
-            ? res['data'] as Map<String, dynamic>
-            : res;
-        final userJson = data['user'] is Map<String, dynamic>
-            ? data['user'] as Map<String, dynamic>
-            : data;
-        return UserModel.fromJson(userJson);
-      }
-      return null;
-    } catch (_) {
-      return null;
+    return _loadAuthenticatedProfile(_generation);
+  }
+
+  Future<UserModel> _loadAuthenticatedProfile(int generation) async {
+    final sessionVersion = TokenStorage.sessionVersion;
+    final res = await client.get(ApiConfig.me, requiresAuth: true);
+    if (generation != _generation ||
+        sessionVersion != TokenStorage.sessionVersion) {
+      throw StateError('Phiên đăng nhập đã thay đổi.');
     }
+    if (res is! Map<String, dynamic>) {
+      throw const FormatException('Hồ sơ không hợp lệ.');
+    }
+    final data = res['data'] is Map<String, dynamic>
+        ? res['data'] as Map<String, dynamic>
+        : res;
+    final user = UserModel.fromJson(data);
+    if (user.taiKhoanId <= 0 || user.soDienThoai.isEmpty) {
+      throw const FormatException('Hồ sơ không đầy đủ.');
+    }
+    return user;
   }
 
   @override
@@ -184,9 +219,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     final body = <String, dynamic>{};
     if (fullName != null) body['fullName'] = fullName;
-    if (dateOfBirth != null) body['dateOfBirth'] = dateOfBirth;
-    if (email != null) body['email'] = email;
-    if (citizenId != null) body['citizenId'] = citizenId;
+    body['dateOfBirth'] = dateOfBirth;
+    body['email'] = email;
+    body['citizenId'] = citizenId;
     final res = await client.patch(
       ApiConfig.me,
       body: body,
@@ -203,8 +238,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> logout() async {
+    _generation++;
+    final refreshToken = await TokenStorage.getRefreshToken();
+    await TokenStorage.clearTokens();
     try {
-      final refreshToken = await TokenStorage.getRefreshToken();
       if (refreshToken != null && refreshToken.isNotEmpty) {
         await client.post(
           ApiConfig.authLogout,
@@ -213,9 +250,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
     } catch (_) {
-      // Ignore network / token errors to guarantee local state clearance
-    } finally {
-      await TokenStorage.clearTokens();
+      // Local logout is complete even when remote revocation is unavailable.
     }
   }
 }

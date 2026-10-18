@@ -9,12 +9,35 @@ import 'my_tickets_state.dart';
 
 class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
   final BookingRepository bookingRepository;
+  int _generation = 0;
+  String? _sessionKey;
+  bool _sessionInitialized = false;
+  bool _authenticated;
+
+  void setSession(String? key) {
+    if (_sessionInitialized &&
+        _sessionKey == key &&
+        _authenticated == (key != null)) {
+      return;
+    }
+    _sessionInitialized = true;
+    _sessionKey = key;
+    _authenticated = key != null;
+    _generation++;
+    // Clear synchronously before pending account requests can complete.
+    // ignore: invalid_use_of_visible_for_testing_member
+    emit(MyTicketsState(requiresLogin: !_authenticated));
+    if (_authenticated) add(const LoadMyTicketsEvent());
+  }
+
   final ReviewRemoteDataSource reviewRemoteDataSource;
 
   MyTicketsBloc({
     BookingRepository? bookingRepository,
+    bool authenticated = true,
     ReviewRemoteDataSource? reviewRemoteDataSource,
-  }) : bookingRepository = bookingRepository ?? HybridBookingRepository(),
+  }) : _authenticated = authenticated,
+       bookingRepository = bookingRepository ?? HybridBookingRepository(),
        reviewRemoteDataSource =
            reviewRemoteDataSource ??
            ReviewRemoteDataSourceImpl(client: ApiClient()),
@@ -31,15 +54,13 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     LoadMyTicketsEvent event,
     Emitter<MyTicketsState> emit,
   ) async {
-    // If already loaded and we have tickets, don't overwrite if not necessary
-    if (state.tickets.isNotEmpty && state.status == MyTicketsStatus.loaded) {
-      return;
-    }
-
+    if (!_authenticated) return;
+    final generation = _generation;
     emit(state.copyWith(status: MyTicketsStatus.loading, clearMessages: true));
 
     try {
       final loadedTickets = await bookingRepository.getMyTickets();
+      if (generation != _generation) return;
 
       emit(
         state.copyWith(
@@ -49,6 +70,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
         ),
       );
     } catch (e) {
+      if (generation != _generation) return;
       emit(
         state.copyWith(
           status: MyTicketsStatus.error,
@@ -59,6 +81,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
   }
 
   void _onAddNewTicket(AddNewTicketEvent event, Emitter<MyTicketsState> emit) {
+    if (!_authenticated) return;
     // Avoid duplicate
     final existingIndex = state.tickets.indexWhere(
       (t) => t.id == event.ticket.id,
@@ -97,6 +120,8 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     CancelTicketEvent event,
     Emitter<MyTicketsState> emit,
   ) async {
+    if (!_authenticated) return;
+    final generation = _generation;
     final ticketIndex = state.tickets.indexWhere(
       (t) => t.id == event.ticketId || t.ticketCode == event.ticketId,
     );
@@ -132,6 +157,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
         expectedCancelFeeRate: ticket.cancelFeeRate,
       );
 
+      if (generation != _generation) return;
       final payload = cancelResult['data'] is Map<String, dynamic>
           ? cancelResult['data'] as Map<String, dynamic>
           : cancelResult;
@@ -145,7 +171,9 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       );
 
       final updatedList = List<TicketModel>.from(state.tickets);
-      updatedList[ticketIndex] = updatedTicket;
+      final currentIndex = updatedList.indexWhere((t) => t.id == ticket.id);
+      if (currentIndex < 0) return;
+      updatedList[currentIndex] = updatedTicket;
 
       final successMessage = serverRefund != null
           ? 'Hủy vé ${ticket.ticketCode} thành công! Số tiền hoàn lại: $serverRefund đ.'
@@ -159,6 +187,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
         ),
       );
     } catch (e) {
+      if (generation != _generation) return;
       emit(
         state.copyWith(
           errorMessage: 'Không thể hủy vé: $e',
@@ -172,6 +201,8 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     SubmitTicketReviewEvent event,
     Emitter<MyTicketsState> emit,
   ) async {
+    if (!_authenticated) return;
+    final generation = _generation;
     final ticketIndex = state.tickets.indexWhere(
       (t) => t.id == event.ticketId || t.ticketCode == event.ticketId,
     );
@@ -183,9 +214,12 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     final ticket = state.tickets[ticketIndex];
 
     if (ApiConfig.isDemoMode) {
+      if (generation != _generation) return;
       final updatedTicket = ticket.copyWith(review: event.review);
       final updatedList = List<TicketModel>.from(state.tickets);
-      updatedList[ticketIndex] = updatedTicket;
+      final currentIndex = updatedList.indexWhere((t) => t.id == ticket.id);
+      if (currentIndex < 0) return;
+      updatedList[currentIndex] = updatedTicket;
 
       emit(
         state.copyWith(
@@ -197,38 +231,44 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       return;
     }
 
-    // Resolve tripId authoritatively: check ticket.trip.id, or query booking
-    int? tripId;
-    final parsedTripId = int.tryParse(ticket.trip.id);
-    if (parsedTripId != null && parsedTripId > 0) {
-      tripId = parsedTripId;
-    } else if (ticket.bookingId != null) {
-      final booking = await bookingRepository.getBookingById(ticket.bookingId);
-      if (booking != null && booking.tripId > 0) {
-        tripId = booking.tripId;
-      }
-    }
-
-    if (tripId == null || tripId <= 0) {
-      emit(
-        state.copyWith(
-          errorMessage:
-              'Không thể xác định mã chuyến đi hợp lệ để gửi đánh giá.',
-        ),
-      );
-      return;
-    }
-
     try {
+      // Resolve tripId authoritatively: check ticket.trip.id, or query booking
+      int? tripId;
+      final parsedTripId = int.tryParse(ticket.trip.id);
+      if (parsedTripId != null && parsedTripId > 0) {
+        tripId = parsedTripId;
+      } else if (ticket.bookingId != null) {
+        final booking = await bookingRepository.getBookingById(
+          ticket.bookingId,
+        );
+        if (generation != _generation) return;
+        if (booking != null && booking.tripId > 0) {
+          tripId = booking.tripId;
+        }
+      }
+
+      if (tripId == null || tripId <= 0) {
+        emit(
+          state.copyWith(
+            errorMessage:
+                'Không thể xác định mã chuyến đi hợp lệ để gửi đánh giá.',
+          ),
+        );
+        return;
+      }
+
       await reviewRemoteDataSource.createReview(
         tripId: tripId,
         rating: event.review.rating.round(),
         comment: event.review.comment,
       );
 
+      if (generation != _generation) return;
       final updatedTicket = ticket.copyWith(review: event.review);
       final updatedList = List<TicketModel>.from(state.tickets);
-      updatedList[ticketIndex] = updatedTicket;
+      final currentIndex = updatedList.indexWhere((t) => t.id == ticket.id);
+      if (currentIndex < 0) return;
+      updatedList[currentIndex] = updatedTicket;
 
       emit(
         state.copyWith(
@@ -238,6 +278,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
         ),
       );
     } catch (e) {
+      if (generation != _generation) return;
       emit(
         state.copyWith(
           errorMessage:

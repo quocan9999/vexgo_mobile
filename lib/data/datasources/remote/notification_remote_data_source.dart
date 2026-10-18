@@ -34,25 +34,34 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
       'pageSize': pageSize,
     };
 
-    final res = await client.get(
-      ApiConfig.notifications,
-      queryParams: query,
-      requiresAuth: true,
-    );
-
-    if (res is Map<String, dynamic>) {
-      final data = res['data'];
-      if (data is List) {
-        return data
-            .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
-            .toList();
+    final items = <NotificationModel>[];
+    var currentPage = page;
+    while (true) {
+      query['page'] = currentPage;
+      final res = await client.get(
+        ApiConfig.notifications,
+        queryParams: query,
+        requiresAuth: true,
+      );
+      final data = res is Map<String, dynamic> ? res['data'] : res;
+      if (data is! List) {
+        throw const FormatException('Danh sách từ máy chủ không hợp lệ.');
       }
-    } else if (res is List) {
-      return res
-          .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      items.addAll(
+        data.map(
+          (item) => NotificationModel.fromJson(item as Map<String, dynamic>),
+        ),
+      );
+      final meta = res is Map<String, dynamic> ? res['meta'] : null;
+      final totalPages = meta is Map
+          ? (meta['totalPages'] as num?)?.toInt()
+          : null;
+      if (totalPages == null || currentPage >= totalPages || data.isEmpty) {
+        break;
+      }
+      currentPage++;
     }
-    return [];
+    return items;
   }
 
   @override

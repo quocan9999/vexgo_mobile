@@ -227,6 +227,34 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
     MyTicketsState state,
     MyTicketsBloc bloc,
   ) {
+    if (state.requiresLogin) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Đăng nhập để xem vé của bạn.'),
+            TextButton(
+              onPressed: () => context.go('/profile'),
+              child: const Text('Đăng nhập'),
+            ),
+          ],
+        ),
+      );
+    }
+    if (state.status == MyTicketsStatus.error) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Không thể tải vé. Vui lòng thử lại.'),
+            TextButton(
+              onPressed: () => bloc.add(const LoadMyTicketsEvent()),
+              child: const Text('Thử lại'),
+            ),
+          ],
+        ),
+      );
+    }
     if (state.status == MyTicketsStatus.loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -234,12 +262,24 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
     final tickets = state.filteredTickets;
 
     if (tickets.isEmpty) {
-      return _buildEmptyState(context, state.selectedTab);
+      return Column(
+        children: [
+          Expanded(child: _buildEmptyState(context, state.selectedTab)),
+          TextButton(
+            onPressed: () => bloc.add(const LoadMyTicketsEvent()),
+            child: const Text('Tải lại'),
+          ),
+        ],
+      );
     }
 
     return RefreshIndicator(
       onRefresh: () async {
+        final completed = bloc.stream.firstWhere(
+          (s) => s.status != MyTicketsStatus.loading,
+        );
         bloc.add(const LoadMyTicketsEvent());
+        await completed;
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(AppDimensions.base),

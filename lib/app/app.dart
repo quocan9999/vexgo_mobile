@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/network/api_config.dart';
@@ -8,11 +9,10 @@ import '../data/repositories/notification_repository.dart';
 import '../data/repositories/seat_repository.dart';
 import '../data/repositories/trip_repository.dart';
 import '../features/user/my_bookings/bloc/my_tickets_bloc.dart';
-import '../features/user/my_bookings/bloc/my_tickets_event.dart';
 import '../features/user/notification/bloc/notification_bloc.dart';
-import '../features/user/notification/bloc/notification_event.dart';
 import '../features/user/profile/bloc/auth_bloc.dart';
 import '../features/user/profile/bloc/auth_event.dart';
+import '../features/user/profile/bloc/auth_state.dart';
 import 'routes.dart';
 
 class VexGoApp extends StatelessWidget {
@@ -51,7 +51,8 @@ class VexGoApp extends StatelessWidget {
           BlocProvider<MyTicketsBloc>(
             create: (context) => MyTicketsBloc(
               bookingRepository: context.read<BookingRepository>(),
-            )..add(const LoadMyTicketsEvent()),
+              authenticated: false,
+            ),
           ),
           BlocProvider<AuthBloc>(
             create: (context) =>
@@ -61,16 +62,55 @@ class VexGoApp extends StatelessWidget {
           BlocProvider<NotificationBloc>(
             create: (context) => NotificationBloc(
               notificationRepository: context.read<NotificationRepository>(),
-            )..add(const LoadNotificationsEvent()),
+              authenticated: false,
+            ),
           ),
         ],
-        child: MaterialApp.router(
-          title: 'VexGo - Đặt vé xe khách trực tuyến',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          routerConfig: AppRoutes.router,
+        child: _SessionSynchronization(
+          child: MaterialApp.router(
+            title: 'VexGo - Đặt vé xe khách trực tuyến',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            routerConfig: AppRoutes.router,
+          ),
         ),
       ),
     );
   }
+}
+
+class _SessionSynchronization extends StatefulWidget {
+  final Widget child;
+  const _SessionSynchronization({required this.child});
+  @override
+  State<_SessionSynchronization> createState() =>
+      _SessionSynchronizationState();
+}
+
+class _SessionSynchronizationState extends State<_SessionSynchronization> {
+  StreamSubscription<AuthState>? _subscription;
+  @override
+  void initState() {
+    super.initState();
+    final auth = context.read<AuthBloc>();
+    _synchronize(auth.state);
+    _subscription = auth.stream.listen(_synchronize);
+  }
+
+  void _synchronize(AuthState state) {
+    final key = state.isAuthenticated
+        ? state.user!.taiKhoanId.toString()
+        : null;
+    context.read<MyTicketsBloc>().setSession(key);
+    context.read<NotificationBloc>().setSession(key);
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

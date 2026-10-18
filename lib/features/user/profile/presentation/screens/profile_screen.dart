@@ -53,6 +53,15 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (state.status == AuthStatus.loading)
+                    const LinearProgressIndicator(),
+                  if (state.status == AuthStatus.failure && state.user == null)
+                    TextButton(
+                      onPressed: () => context.read<AuthBloc>().add(
+                        const CheckAuthStatusEvent(),
+                      ),
+                      child: const Text('Thử tải lại phiên đăng nhập'),
+                    ),
                   // 1. Profile Header
                   if (isAuthenticated && user != null)
                     _buildUserHeader(context, user)
@@ -88,7 +97,7 @@ class ProfileScreen extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
-                                'Tính năng Đổi mật khẩu đã sẵn sàng!',
+                                'Đổi mật khẩu chưa được máy chủ hỗ trợ.',
                               ),
                             ),
                           );

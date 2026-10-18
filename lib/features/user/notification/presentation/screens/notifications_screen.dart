@@ -17,7 +17,15 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<NotificationBloc, NotificationState>(
+    return BlocConsumer<NotificationBloc, NotificationState>(
+      listenWhen: (previous, current) =>
+          current.errorMessage != null &&
+          current.errorMessage != previous.errorMessage,
+      listener: (context, state) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+      },
       builder: (context, state) {
         final bloc = context.read<NotificationBloc>();
         final unreadCount = state.unreadCount;
@@ -95,36 +103,84 @@ class NotificationsScreen extends StatelessWidget {
 
               // 2. Notification List
               Expanded(
-                child: state.status == NotificationStatus.loading
+                child: state.requiresLogin
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Đăng nhập để xem thông báo.'),
+                            TextButton(
+                              onPressed: () => context.go('/profile'),
+                              child: const Text('Đăng nhập'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : state.status == NotificationStatus.failure
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Không thể tải thông báo.'),
+                            TextButton(
+                              onPressed: () =>
+                                  bloc.add(const LoadNotificationsEvent()),
+                              child: const Text('Thử lại'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : state.status == NotificationStatus.loading
                     ? const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primary,
                         ),
                       )
                     : list.isEmpty
-                    ? EmptyState(
-                        icon: Icons.notifications_off_outlined,
-                        title: 'Chưa có thông báo nào',
-                        message:
-                            'Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.',
+                    ? Column(
+                        children: [
+                          Expanded(
+                            child: EmptyState(
+                              icon: Icons.notifications_off_outlined,
+                              title: 'Chưa có thông báo nào',
+                              message:
+                                  'Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.',
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                bloc.add(const LoadNotificationsEvent()),
+                            child: const Text('Tải lại'),
+                          ),
+                        ],
                       )
-                    : ListView.separated(
-                        padding: const EdgeInsets.all(AppDimensions.base),
-                        itemCount: list.length,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: AppDimensions.sm),
-                        itemBuilder: (context, index) {
-                          final item = list[index];
-                          return _NotificationItemCard(
-                            item: item,
-                            onTap: () {
-                              bloc.add(MarkNotificationAsReadEvent(item.id));
-                              if (item.ticketCode != null) {
-                                context.push('/my-tickets');
-                              }
-                            },
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          final completed = bloc.stream.firstWhere(
+                            (s) => s.status != NotificationStatus.loading,
                           );
+                          bloc.add(const LoadNotificationsEvent());
+                          await completed;
                         },
+                        child: ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.all(AppDimensions.base),
+                          itemCount: list.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: AppDimensions.sm),
+                          itemBuilder: (context, index) {
+                            final item = list[index];
+                            return _NotificationItemCard(
+                              item: item,
+                              onTap: () {
+                                bloc.add(MarkNotificationAsReadEvent(item.id));
+                                if (item.ticketCode != null) {
+                                  context.push('/my-tickets');
+                                }
+                              },
+                            );
+                          },
+                        ),
                       ),
               ),
             ],

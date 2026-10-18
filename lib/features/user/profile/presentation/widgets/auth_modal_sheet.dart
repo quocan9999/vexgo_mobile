@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
@@ -19,6 +20,8 @@ class AuthModalSheet extends StatefulWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
       backgroundColor: Colors.transparent,
       builder: (context) => AuthModalSheet(initialIsRegister: isRegister),
     );
@@ -30,31 +33,32 @@ class AuthModalSheet extends StatefulWidget {
 
 class _AuthModalSheetState extends State<AuthModalSheet> {
   late bool _isRegister;
-  final TextEditingController _phoneController = TextEditingController(
-    text: '0987654321',
-  );
-  final TextEditingController _nameController = TextEditingController(
-    text: 'Phạm Minh Tài',
-  );
-  final TextEditingController _passwordController = TextEditingController(
-    text: '123456',
-  );
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
 
   bool _isObscurePassword = true;
   bool _isVerifyingOtp = false;
   int _otpCountdown = 60;
   Timer? _timer;
+  late AuthBloc _authBloc;
+  bool _busy = false;
+  bool _finished = false;
 
   @override
   void initState() {
     super.initState();
     _isRegister = widget.initialIsRegister;
+    _authBloc = context.read<AuthBloc>();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    if (!_finished && !_authBloc.isClosed) {
+      _authBloc.add(const ClearPendingRegistrationEvent());
+    }
     _phoneController.dispose();
     _nameController.dispose();
     _passwordController.dispose();
@@ -76,7 +80,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
 
   void _onLogin() {
     final phone = _phoneController.text.trim();
-    final pass = _passwordController.text.trim();
+    final pass = _passwordController.text;
     if (phone.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -89,13 +93,13 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
     context.read<AuthBloc>().add(
       LoginWithPhoneEvent(phone: phone, password: pass),
     );
-    Navigator.of(context).pop();
+    setState(() => _busy = true);
   }
 
   void _onRequestOtp() {
     final phone = _phoneController.text.trim();
     final name = _nameController.text.trim();
-    final pass = _passwordController.text.trim();
+    final pass = _passwordController.text;
 
     if (phone.isEmpty || name.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -108,11 +112,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
       RequestRegisterOtpEvent(phone: phone, fullName: name, password: pass),
     );
 
-    setState(() {
-      _isVerifyingOtp = true;
-      _otpController.text = '123456'; // Default mock code for convenience
-    });
-    _startTimer();
+    setState(() => _busy = true);
   }
 
   void _onVerifyOtp() {
@@ -129,17 +129,30 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         phone: _phoneController.text.trim(),
         otp: otp,
         fullName: _nameController.text.trim(),
-        password: _passwordController.text.trim(),
+        password: _passwordController.text,
       ),
     );
-    Navigator.of(context).pop();
+    setState(() => _busy = true);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
+    return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
+        if (state.status == AuthStatus.otpRequired) {
+          setState(() {
+            _busy = false;
+            _isVerifyingOtp = true;
+            _otpController.clear();
+          });
+          _startTimer();
+        }
+        if (state.status == AuthStatus.authenticated && _busy) {
+          _finished = true;
+          Navigator.of(context).pop();
+        }
         if (state.status == AuthStatus.failure && state.errorMessage != null) {
+          setState(() => _busy = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
@@ -148,21 +161,24 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           );
         }
       },
-      child: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(AppDimensions.base),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(AppDimensions.radiusXl),
-              topRight: Radius.circular(AppDimensions.radiusXl),
-            ),
+      builder: (context, state) => PopScope(
+        canPop: !_busy,
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          child: SingleChildScrollView(
-            child: _isVerifyingOtp ? _buildOtpView() : _buildFormView(),
+          child: Container(
+            padding: const EdgeInsets.all(AppDimensions.base),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(AppDimensions.radiusXl),
+                topRight: Radius.circular(AppDimensions.radiusXl),
+              ),
+            ),
+            child: SingleChildScrollView(
+              child: _isVerifyingOtp ? _buildOtpView() : _buildFormView(),
+            ),
           ),
         ),
       ),
@@ -203,7 +219,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
               ),
             ),
             IconButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: _busy ? null : () => Navigator.of(context).pop(),
               icon: const Icon(
                 Icons.close_rounded,
                 color: AppColors.neutral600,
@@ -225,7 +241,9 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
             children: [
               Expanded(
                 child: InkWell(
-                  onTap: () => setState(() => _isRegister = false),
+                  onTap: _busy
+                      ? null
+                      : () => setState(() => _isRegister = false),
                   borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -261,7 +279,9 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
               ),
               Expanded(
                 child: InkWell(
-                  onTap: () => setState(() => _isRegister = true),
+                  onTap: _busy
+                      ? null
+                      : () => setState(() => _isRegister = true),
                   borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -371,7 +391,8 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           text: _isRegister ? 'TIẾP TỤC (XÁC THỰC OTP)' : 'ĐĂNG NHẬP NGAY',
           width: double.infinity,
           type: ButtonType.primary,
-          onPressed: _isRegister ? _onRequestOtp : _onLogin,
+          isLoading: _busy,
+          onPressed: _busy ? null : (_isRegister ? _onRequestOtp : _onLogin),
         ),
 
         const SizedBox(height: AppDimensions.md),
@@ -454,13 +475,14 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         ),
 
         const SizedBox(height: AppDimensions.sm),
-        Text(
-          '(Gợi ý mã thử nghiệm: 123456)',
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.neutral500,
-            fontStyle: FontStyle.italic,
+        if (ApiConfig.isDemoMode)
+          Text(
+            '(Gợi ý mã thử nghiệm: 123456)',
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.neutral500,
+              fontStyle: FontStyle.italic,
+            ),
           ),
-        ),
 
         const SizedBox(height: AppDimensions.md),
 
@@ -472,16 +494,18 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           )
         else
           TextButton(
-            onPressed: () {
-              context.read<AuthBloc>().add(
-                RequestRegisterOtpEvent(
-                  phone: _phoneController.text.trim(),
-                  fullName: _nameController.text.trim(),
-                  password: _passwordController.text.trim(),
-                ),
-              );
-              _startTimer();
-            },
+            onPressed: _busy
+                ? null
+                : () {
+                    setState(() => _busy = true);
+                    context.read<AuthBloc>().add(
+                      RequestRegisterOtpEvent(
+                        phone: _phoneController.text.trim(),
+                        fullName: _nameController.text.trim(),
+                        password: _passwordController.text,
+                      ),
+                    );
+                  },
             child: const Text('Gửi lại mã OTP'),
           ),
 
@@ -493,12 +517,14 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
               child: CustomButton(
                 text: 'QUAY LẠI',
                 type: ButtonType.outline,
-                onPressed: () {
-                  context.read<AuthBloc>().add(
-                    const ClearPendingRegistrationEvent(),
-                  );
-                  setState(() => _isVerifyingOtp = false);
-                },
+                onPressed: _busy
+                    ? null
+                    : () {
+                        context.read<AuthBloc>().add(
+                          const ClearPendingRegistrationEvent(),
+                        );
+                        setState(() => _isVerifyingOtp = false);
+                      },
               ),
             ),
             const SizedBox(width: AppDimensions.md),
@@ -506,7 +532,8 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
               child: CustomButton(
                 text: 'XÁC NHẬN',
                 type: ButtonType.primary,
-                onPressed: _onVerifyOtp,
+                isLoading: _busy,
+                onPressed: _busy ? null : _onVerifyOtp,
               ),
             ),
           ],

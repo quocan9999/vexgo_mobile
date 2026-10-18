@@ -238,7 +238,7 @@ class HybridAuthRepository implements AuthRepository {
       if (kDebugMode) {
         debugPrint('[HybridAuthRepository] Remote updateProfile failed: $e');
       }
-      return mockFallback.updateProfile(updatedUser);
+      rethrow;
     }
   }
 

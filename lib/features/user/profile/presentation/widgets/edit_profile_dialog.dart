@@ -160,7 +160,9 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
 
               // Số điện thoại (Read-only)
               Text(
-                'Số điện thoại (Đã xác thực)',
+                widget.user.daXacThucSoDienThoai
+                    ? 'Số điện thoại (Đã xác thực)'
+                    : 'Số điện thoại',
                 style: AppTextStyles.caption.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.neutral700,
@@ -202,8 +204,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                         color: AppColors.successLight,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text(
-                        'Đã kích hoạt',
+                      child: Text(
+                        widget.user.daXacThucSoDienThoai
+                            ? 'Đã xác thực'
+                            : 'Chưa xác thực',
                         style: TextStyle(
                           color: AppColors.success,
                           fontSize: 10,

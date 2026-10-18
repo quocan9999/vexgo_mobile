@@ -5,12 +5,14 @@ enum NotificationStatus { initial, loading, loaded, failure }
 
 class NotificationState extends Equatable {
   final NotificationStatus status;
+  final bool requiresLogin;
   final List<NotificationModel> notifications;
   final int activeTabIndex;
   final String? errorMessage;
 
   const NotificationState({
     this.status = NotificationStatus.initial,
+    this.requiresLogin = false,
     this.notifications = const [],
     this.activeTabIndex = 0,
     this.errorMessage,
@@ -40,21 +42,25 @@ class NotificationState extends Equatable {
 
   NotificationState copyWith({
     NotificationStatus? status,
+    bool? requiresLogin,
+    bool clearError = false,
     List<NotificationModel>? notifications,
     int? activeTabIndex,
     String? errorMessage,
   }) {
     return NotificationState(
       status: status ?? this.status,
+      requiresLogin: requiresLogin ?? this.requiresLogin,
       notifications: notifications ?? this.notifications,
       activeTabIndex: activeTabIndex ?? this.activeTabIndex,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
 
   @override
   List<Object?> get props => [
     status,
+    requiresLogin,
     notifications,
     activeTabIndex,
     errorMessage,
