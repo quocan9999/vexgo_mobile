@@ -74,8 +74,10 @@ class ProfileScreen extends StatelessWidget {
 
                   // 2. Loyalty VIP Card (If authenticated)
                   if (isAuthenticated && user != null) ...[
-                    LoyaltyCardWidget(user: user),
-                    const SizedBox(height: AppDimensions.base),
+                    if (ApiConfig.isDemoMode) ...[
+                      LoyaltyCardWidget(user: user),
+                      const SizedBox(height: AppDimensions.base),
+                    ],
                     _buildQuickStats(context, user),
                     const SizedBox(height: AppDimensions.base),
                   ],
@@ -111,10 +113,13 @@ class ProfileScreen extends StatelessWidget {
                         icon: Icons.stars_rounded,
                         iconColor: AppColors.secondary,
                         title: 'Lịch sử điểm VexGo Points',
-                        subtitle:
-                            'Tích điểm mỗi chuyến đi, đổi voucher giảm giá',
-                        onTap: () =>
-                            LoyaltyHistorySheet.show(context, user: user),
+                        subtitle: ApiConfig.isDemoMode
+                            ? 'Tích điểm mỗi chuyến đi, đổi voucher giảm giá'
+                            : 'Máy chủ chưa cung cấp lịch sử và đổi điểm',
+                        onTap: !ApiConfig.isDemoMode
+                            ? null
+                            : () =>
+                                  LoyaltyHistorySheet.show(context, user: user),
                       ),
                       _MenuItem(
                         icon: Icons.confirmation_number_outlined,
