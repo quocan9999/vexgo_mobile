@@ -104,7 +104,10 @@ class _TicketDetailContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Boarding Pass Card
-            BoardingPassCard(ticket: ticket),
+            BoardingPassCard(
+              ticket: ticket,
+              ticketReader: context.read<TicketReadCubit>(),
+            ),
 
             const SizedBox(height: AppDimensions.base),
 
@@ -285,7 +288,7 @@ class _TicketDetailContent extends StatelessWidget {
                     const SizedBox(width: AppDimensions.sm),
                     Expanded(
                       child: Text(
-                        'Vé này đã bị hủy. Tiền hoàn đã được gửi về tài khoản theo quy định.',
+                        'Vé này đã bị hủy. Trạng thái hoàn tiền chưa được xác nhận. Vui lòng kiểm tra với nhà xe hoặc đơn vị thanh toán.',
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.error,
                         ),

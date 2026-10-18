@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
+import '../../bloc/my_tickets_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../bloc/ticket_read_cubit.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -7,13 +12,86 @@ import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'ticket_qr_modal.dart';
 
-class BoardingPassCard extends StatelessWidget {
+class BoardingPassCard extends StatefulWidget {
   final TicketModel ticket;
+  final TicketReadCubit? ticketReader;
 
-  const BoardingPassCard({super.key, required this.ticket});
+  const BoardingPassCard({super.key, required this.ticket, this.ticketReader});
+
+  @override
+  State<BoardingPassCard> createState() => _BoardingPassCardState();
+}
+
+class _BoardingPassCardState extends State<BoardingPassCard> {
+  late final int _tokenVersion;
+  late final MyTicketsBloc? _owner;
+  int? _sessionGeneration;
+  bool _invalidated = false;
+  final List<StreamSubscription<dynamic>> _subscriptions = [];
+  TicketModel get ticket => widget.ticket;
+  TicketReadCubit? get ticketReader => widget.ticketReader;
+
+  bool get _authorized {
+    final owner = _owner;
+    final reader = ticketReader;
+    return !_invalidated &&
+        _tokenVersion == TokenStorage.sessionVersion &&
+        (owner == null ||
+            (!owner.isClosed &&
+                owner.sessionGeneration == _sessionGeneration)) &&
+        (reader == null ||
+            (!reader.isClosed &&
+                reader.state.status == TicketReadStatus.loaded &&
+                identical(reader.state.ticket, ticket)));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _tokenVersion = TokenStorage.sessionVersion;
+    _owner = ticketReader?.owner ?? context.read<MyTicketsBloc?>();
+    _sessionGeneration = _owner?.sessionGeneration;
+    _subscriptions.add(
+      TokenStorage.sessionInvalidations.listen((_) => _checkAuthorization()),
+    );
+    final reader = ticketReader;
+    if (reader != null) {
+      _subscriptions.add(
+        reader.stream.listen(
+          (_) => _checkAuthorization(),
+          onDone: _checkAuthorization,
+        ),
+      );
+    }
+    final owner = _owner;
+    if (owner != null) {
+      _subscriptions.add(
+        owner.stream.listen(
+          (_) => _checkAuthorization(),
+          onDone: _checkAuthorization,
+        ),
+      );
+    }
+  }
+
+  void _checkAuthorization() {
+    if (!mounted || _authorized || _invalidated) return;
+    setState(() => _invalidated = true);
+  }
+
+  @override
+  void dispose() {
+    for (final subscription in _subscriptions) {
+      subscription.cancel();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (!_authorized) {
+      return const Text('Phiên đã thay đổi. Vui lòng mở lại thông tin vé.');
+    }
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -163,7 +241,11 @@ class BoardingPassCard extends StatelessWidget {
                 // QR Code Tap Box
                 GestureDetector(
                   onTap: ticket.canShowQr
-                      ? () => TicketQrModal.show(context, ticket)
+                      ? () => TicketQrModal.show(
+                          context,
+                          ticket,
+                          ticketReader: ticketReader,
+                        )
                       : null,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -322,10 +404,10 @@ class BoardingPassCard extends StatelessWidget {
                 if (ticket.status == TicketStatus.cancelled) ...[
                   const SizedBox(height: 8),
                   _buildInfoLine(
-                    label: 'Số tiền hoàn lại:',
+                    label: 'Số tiền hoàn (chưa xác nhận):',
                     value: ticket.refundAmount != null
                         ? CurrencyFormatter.format(ticket.refundAmount!)
-                        : 'Đang xử lý',
+                        : 'Chưa có dữ liệu',
                     valueColor: AppColors.success,
                     isBold: true,
                   ),

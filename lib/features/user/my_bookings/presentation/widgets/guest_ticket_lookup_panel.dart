@@ -117,7 +117,7 @@ class _GuestTicketLookupPanelState extends State<GuestTicketLookupPanel> {
           TextButton(onPressed: _lookup, child: const Text('Thử lại')),
         if (state.ticket != null) ...[
           const SizedBox(height: 20),
-          BoardingPassCard(ticket: state.ticket!),
+          BoardingPassCard(ticket: state.ticket!, ticketReader: _reader),
           TextButton(
             onPressed: _reader.refresh,
             child: const Text('Cập nhật trạng thái vé'),

@@ -143,6 +143,7 @@ class TicketReadCubit extends Cubit<TicketReadState> {
 
   @override
   Future<void> close() async {
+    invalidate();
     _request++;
     _retry = null;
     await _ownerChanges.cancel();

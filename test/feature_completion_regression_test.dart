@@ -24,6 +24,7 @@ import 'package:vexgo_app/features/user/my_bookings/presentation/screens/ticket_
 import 'package:vexgo_app/features/user/my_bookings/presentation/screens/my_tickets_screen.dart';
 import 'package:vexgo_app/features/user/my_bookings/presentation/widgets/boarding_pass_card.dart';
 import 'package:vexgo_app/features/user/my_bookings/presentation/widgets/guest_ticket_lookup_panel.dart';
+import 'package:vexgo_app/features/user/my_bookings/presentation/widgets/ticket_qr_modal.dart';
 import 'package:vexgo_app/features/user/search_trips/bloc/trip_detail_cubit.dart';
 import 'package:vexgo_app/features/user/search_trips/presentation/widgets/trip_detail_sheet.dart';
 import 'qa/qa_fixtures.dart';
@@ -571,6 +572,143 @@ void main() {
             .text,
         isEmpty,
       );
+    },
+  );
+  for (final invalidation in ['account switch', 'token clear']) {
+    testWidgets('open guest QR is removed after $invalidation', (tester) async {
+      final repository = ReadBookingRepository();
+      final owner = MyTicketsBloc(
+        bookingRepository: repository,
+        authenticated: false,
+      )..setSession(null);
+      addTearDown(owner.close);
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: owner,
+          child: const MaterialApp(
+            home: Scaffold(body: GuestTicketLookupPanel()),
+          ),
+        ),
+      );
+      await tester.enterText(
+        find.byKey(const Key('lookup-ticket-code')),
+        'TICKET-AUTH-91',
+      );
+      await tester.enterText(
+        find.byKey(const Key('lookup-phone')),
+        '0901234567',
+      );
+      await tester.tap(find.text('Tra cứu vé'));
+      await tester.pump();
+      repository.lookups.single.complete(ticket());
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byType(QrImageView));
+      await tester.tap(find.byType(QrImageView));
+      await tester.pumpAndSettle();
+      expect(find.byType(TicketQrModal), findsOneWidget);
+      if (invalidation == 'account switch') {
+        owner.setSession('B');
+      } else {
+        await tester.runAsync(TokenStorage.clearTokens);
+      }
+      await tester.pumpAndSettle();
+      expect(find.byType(TicketQrModal), findsNothing);
+      expect(find.byType(QrImageView), findsNothing);
+      expect(find.text('TICKET-AUTH-91'), findsNothing);
+    });
+  }
+
+  testWidgets(
+    'readerless QR entrypoint binds root account owner and cannot reopen after switch',
+    (tester) async {
+      final repository = ReadBookingRepository();
+      final owner = MyTicketsBloc(
+        bookingRepository: repository,
+        authenticated: false,
+      )..setSession(null);
+      addTearDown(owner.close);
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: owner,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: BoardingPassCard(ticket: ticket()),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.ensureVisible(find.byType(QrImageView));
+      await tester.tap(find.byType(QrImageView));
+      await tester.pumpAndSettle();
+      expect(find.byType(TicketQrModal), findsOneWidget);
+      owner.setSession('B');
+      await tester.pumpAndSettle();
+      expect(find.byType(TicketQrModal), findsNothing);
+      expect(find.byType(QrImageView), findsNothing);
+      expect(find.text('TICKET-AUTH-91'), findsNothing);
+    },
+  );
+
+  testWidgets('open QR cannot outlive refresh of its authoritative reader', (
+    tester,
+  ) async {
+    final repository = ReadBookingRepository();
+    final owner = MyTicketsBloc(bookingRepository: repository);
+    final reader = TicketReadCubit(owner: owner);
+    addTearDown(owner.close);
+    addTearDown(reader.close);
+    final read = reader.loadTicket(ticket());
+    repository.details.single.complete(ticket());
+    await read;
+    final authoritativeTicket = reader.state.ticket!;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: BoardingPassCard(
+              ticket: authoritativeTicket,
+              ticketReader: reader,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.ensureVisible(find.byType(QrImageView));
+    await tester.tap(find.byType(QrImageView));
+    await tester.pumpAndSettle();
+    expect(find.byType(TicketQrModal), findsOneWidget);
+    final refresh = reader.refresh();
+    await tester.pumpAndSettle();
+    expect(find.byType(TicketQrModal), findsNothing);
+    expect(find.byType(QrImageView), findsNothing);
+    repository.details[1].complete(ticket(status: 'HUY'));
+    await refresh;
+  });
+
+  testWidgets(
+    'cancelled ticket and quoted refund amount do not imply settlement',
+    (tester) async {
+      final repository = ReadBookingRepository();
+      final owner = MyTicketsBloc(bookingRepository: repository);
+      addTearDown(owner.close);
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: owner,
+          child: MaterialApp(home: TicketDetailScreen(initialTicket: ticket())),
+        ),
+      );
+      repository.details.single.complete(
+        ticket(status: 'HUY').copyWith(refundAmount: 225000),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Tiền hoàn đã được gửi'), findsNothing);
+      expect(
+        find.textContaining('Trạng thái hoàn tiền chưa được xác nhận'),
+        findsOneWidget,
+      );
+      expect(find.text('Số tiền hoàn (chưa xác nhận):'), findsOneWidget);
     },
   );
 }
