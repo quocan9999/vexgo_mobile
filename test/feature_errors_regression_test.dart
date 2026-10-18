@@ -20,7 +20,6 @@ import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_event.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_state.dart';
 import 'package:vexgo_app/features/user/notification/bloc/notification_bloc.dart';
 import 'package:vexgo_app/features/user/notification/bloc/notification_event.dart';
-import 'package:vexgo_app/features/user/notification/bloc/notification_state.dart';
 
 class TicketsRepository implements BookingRepository {
   int calls = 0;
@@ -306,6 +305,7 @@ void main() {
               'meta': {'totalPages': 2},
             }),
             200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
           );
         }),
       ),

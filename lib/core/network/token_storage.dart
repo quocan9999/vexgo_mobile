@@ -54,6 +54,8 @@ class TokenStorage {
 
   static SecureStorageAdapter _secureStorage = FlutterSecureStorageAdapter();
   static String? _cachedAccessToken;
+  static String? _cachedRefreshToken;
+  static bool _refreshLoaded = false;
   static int _sessionVersion = 0;
   static bool _cleared = false;
   static Future<void> _writes = Future<void>.value();
@@ -73,6 +75,8 @@ class TokenStorage {
   static void setStorageAdapterForTesting(SecureStorageAdapter adapter) {
     _secureStorage = adapter;
     _cachedAccessToken = null;
+    _cachedRefreshToken = null;
+    _refreshLoaded = false;
     _cleared = false;
     _sessionVersion++;
   }
@@ -81,6 +85,8 @@ class TokenStorage {
   static void resetStorageAdapter() {
     _secureStorage = FlutterSecureStorageAdapter();
     _cachedAccessToken = null;
+    _cachedRefreshToken = null;
+    _refreshLoaded = false;
     _cleared = false;
     _sessionVersion++;
   }
@@ -111,11 +117,15 @@ class TokenStorage {
   /// Get current refresh token securely from KeyStore / Keychain
   static Future<String?> getRefreshToken() async {
     if (_cleared) return null;
+    if (_refreshLoaded) return _cachedRefreshToken;
     final version = _sessionVersion;
     try {
       await _writes;
       final token = await _secureStorage.read(_refreshTokenKey);
-      return version == _sessionVersion && !_cleared ? token : null;
+      if (version != _sessionVersion || _cleared) return null;
+      _cachedRefreshToken = token;
+      _refreshLoaded = true;
+      return token;
     } catch (_) {
       return null;
     }
@@ -129,10 +139,12 @@ class TokenStorage {
     final version = ++_sessionVersion;
     _cleared = false;
     _cachedAccessToken = accessToken;
+    _cachedRefreshToken = refreshToken;
+    _refreshLoaded = true;
     final storage = _secureStorage;
-    await _serialize(() async {
-      if (version != _sessionVersion) return;
-      try {
+    try {
+      await _serialize(() async {
+        if (version != _sessionVersion) return;
         await storage.write(_accessTokenKey, accessToken);
         if (refreshToken != null) {
           await storage.write(_refreshTokenKey, refreshToken);
@@ -140,10 +152,13 @@ class TokenStorage {
           // Never reuse another account's refresh token.
           await storage.delete(_refreshTokenKey);
         }
-      } catch (_) {
-        // Access remains available in memory for this session only.
-      }
-    });
+      });
+    } catch (_) {
+      if (version == _sessionVersion) await clearTokens();
+      throw StateError(
+        'Không thể lưu phiên đăng nhập an toàn. Vui lòng thử lại.',
+      );
+    }
   }
 
   /// A refresh response arriving after logout/account switch must be discarded.
@@ -154,16 +169,19 @@ class TokenStorage {
   }) async {
     if (_cleared || expectedVersion != _sessionVersion) return false;
     _cachedAccessToken = accessToken;
+    _cachedRefreshToken = refreshToken;
+    _refreshLoaded = true;
     final storage = _secureStorage;
-    await _serialize(() async {
-      if (_cleared || expectedVersion != _sessionVersion) return;
-      try {
+    try {
+      await _serialize(() async {
+        if (_cleared || expectedVersion != _sessionVersion) return;
         await storage.write(_accessTokenKey, accessToken);
         await storage.write(_refreshTokenKey, refreshToken);
-      } catch (_) {
-        // The rotated access token is usable in memory; persistence may fail.
-      }
-    });
+      });
+    } catch (_) {
+      if (expectedVersion == _sessionVersion) await clearTokens();
+      return false;
+    }
     return !_cleared && expectedVersion == _sessionVersion;
   }
 
@@ -182,6 +200,8 @@ class TokenStorage {
     ++_sessionVersion;
     _cleared = true;
     _cachedAccessToken = null;
+    _cachedRefreshToken = null;
+    _refreshLoaded = true;
     _invalidations.add(null);
     final storage = _secureStorage;
     await _serialize(() async {

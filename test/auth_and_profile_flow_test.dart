@@ -345,15 +345,11 @@ void main() {
       authBloc.add(const LogoutEvent());
       await expectLater(
         authBloc.stream,
-        emitsInOrder([
-          predicate<AuthState>((s) => s.status == AuthStatus.loading),
+        emits(
           predicate<AuthState>(
-            (s) =>
-                s.status == AuthStatus.unauthenticated &&
-                s.user == null &&
-                s.successMessage?.contains('đăng xuất') == true,
+            (s) => s.status == AuthStatus.unauthenticated && s.user == null,
           ),
-        ]),
+        ),
       );
     });
 

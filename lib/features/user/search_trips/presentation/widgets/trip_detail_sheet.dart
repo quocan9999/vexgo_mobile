@@ -404,20 +404,8 @@ class TripDetailSheet extends StatelessWidget {
       padding: const EdgeInsets.all(AppDimensions.base),
       children: [
         _buildPolicyRow(
-          'Trước giờ khởi hành 24 tiếng',
-          'Phí hủy 10% (Hoàn 90% giá vé)',
-        ),
-        _buildPolicyRow(
-          'Trước giờ khởi hành 12 - 24 tiếng',
-          'Phí hủy 30% (Hoàn 70% giá vé)',
-        ),
-        _buildPolicyRow(
-          'Trước giờ khởi hành 6 - 12 tiếng',
-          'Phí hủy 50% (Hoàn 50% giá vé)',
-        ),
-        _buildPolicyRow(
-          'Dưới 6 tiếng trước giờ chạy',
-          'Không hỗ trợ hoàn hủy vé',
+          'Điều kiện hủy vé',
+          'Mở chi tiết vé để xem điều kiện, phí hủy và số tiền hoàn do hệ thống xác nhận trước khi hủy.',
         ),
         const SizedBox(height: AppDimensions.md),
         Container(

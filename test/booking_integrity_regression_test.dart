@@ -129,8 +129,9 @@ class CheckoutServer {
     } else if (path == '/bookings' && request.method == 'POST') {
       bookingPosts++;
       selected = (body['seatIds'] as List).cast<int>();
-      if (bookingResponseLost)
+      if (bookingResponseLost) {
         throw const SocketException('Response lost after commit');
+      }
       data = {
         'bookingId': 42,
         'bookingCode': 'VXG-PDV-42',
@@ -145,8 +146,9 @@ class CheckoutServer {
       };
     } else if (path == '/payments' && request.method == 'POST') {
       paymentPosts++;
-      if (paymentResponseLost)
+      if (paymentResponseLost) {
         throw const SocketException('Payment response lost');
+      }
       data = {
         'paymentId': 9,
         'bookingId': 42,
@@ -159,8 +161,9 @@ class CheckoutServer {
       };
     } else if (path == '/payments/9/status') {
       statusGets++;
-      if (statusResponseLost)
+      if (statusResponseLost) {
         throw const SocketException('Status response lost');
+      }
       data = {
         'paymentId': wrongPaymentId ? 10 : 9,
         'bookingId': wrongPaymentBooking ? 43 : 42,
@@ -191,10 +194,12 @@ class CheckoutServer {
       };
     } else if (path.startsWith('/tickets/')) {
       ticketGets++;
-      if (ticketResponseLost)
+      if (ticketResponseLost) {
         throw const SocketException('Ticket response lost');
-      if (ticketNotFound)
+      }
+      if (ticketNotFound) {
         return http.Response(jsonEncode({'message': 'Ticket not found'}), 404);
+      }
       data = ticket(int.parse(path.split('/').last));
     } else {
       throw StateError('Unexpected ${request.method} $path');
@@ -293,6 +298,11 @@ Future<BookingFlowBloc> ready(
     (s) => s.isPassengerValid,
   );
   await dispatch(bloc, const NextStepEvent(), (s) => s.seatHold != null);
+  await dispatch(
+    bloc,
+    const SelectPaymentMethodEvent('momo'),
+    (s) => s.selectedPaymentMethod == 'momo',
+  );
   return bloc;
 }
 
@@ -513,20 +523,24 @@ void main() {
   }
 
   test(
-    'guest real checkout surfaces Backend blocker before authenticated POST',
+    'guest creates booking without Authorization on latest develop',
     () async {
       final server = CheckoutServer();
-      final bloc = await ready(server);
-      addTearDown(bloc.close);
       await TokenStorage.clearTokens();
-      await dispatch(
-        bloc,
-        const ConfirmPaymentEvent(),
-        (s) => s.status == BookingFlowStatus.blockedByBackend,
+      final booking = await server.real.createApiBooking(
+        tripId: 101,
+        seatIds: [1],
+        pickupPoint: 'Ben xe',
+        dropoffPoint: 'Da Lat',
+        holdToken: 'fixture-hold',
+        contact: const PassengerInfo(
+          fullName: 'Guest',
+          phone: '0901234567',
+          email: '',
+        ),
       );
-      expect(server.bookingPosts, 0);
-      expect(bloc.state.bookingOutcomeUnknown, isFalse);
-      expect(bloc.state.errorMessage, contains('BLOCKED_BY_BACKEND'));
+      expect(server.bookingPosts, 1);
+      expect(booking.bookingId, 42);
     },
   );
 
@@ -684,12 +698,37 @@ void main() {
       expect(ticket.canShowQr, isFalse);
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: BoardingPassCard(ticket: ticket)),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: BoardingPassCard(ticket: ticket),
+            ),
+          ),
         ),
       );
       expect(find.byType(QrImageView), findsNothing);
       await tester.pumpWidget(MaterialApp(home: TicketQrModal(ticket: ticket)));
       expect(find.byType(QrImageView), findsNothing);
+    },
+  );
+
+  test(
+    'unknown, cancelled and used ticket states never authorize a boarding QR',
+    () {
+      final server = CheckoutServer();
+      for (final status in [
+        'UNKNOWN',
+        'HUY',
+        'DA_HUY',
+        'HET_HAN',
+        'DA_SU_DUNG',
+      ]) {
+        final ticket = TicketModel.fromJson({
+          ...server.ticket(101),
+          'status': status,
+        });
+        expect(ticket.canShowQr, isFalse, reason: status);
+      }
+      expect(TicketModel.fromJson(server.ticket(101)).canShowQr, isTrue);
     },
   );
 }

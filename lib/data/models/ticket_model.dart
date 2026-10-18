@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'review_model.dart';
+import '../../core/network/api_config.dart';
 
 enum TicketStatus { upcoming, completed, cancelled }
 
@@ -17,7 +18,7 @@ class PassengerInfo extends Equatable {
   factory PassengerInfo.fromJson(Map<String, dynamic> json) {
     return PassengerInfo(
       fullName: json['fullName'] as String? ?? '',
-      phone: json['phone'] as String? ?? '',
+      phone: json['phone'] as String? ?? json['phoneNumber'] as String? ?? '',
       email: json['email'] as String? ?? '',
     );
   }
@@ -168,6 +169,7 @@ class TicketModel extends Equatable {
   final String? bookingCode;
   final String? bookingStatus;
   final String? paymentStatus;
+  final String? rawStatus;
 
   const TicketModel({
     required this.id,
@@ -193,15 +195,16 @@ class TicketModel extends Equatable {
     this.bookingCode,
     this.bookingStatus,
     this.paymentStatus,
+    this.rawStatus,
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
     TicketStatus parseStatus(String? statusStr) {
       final s = statusStr?.toUpperCase() ?? '';
-      if (s == 'COMPLETED' || s == 'HOAN_THANH') {
+      if (s == 'COMPLETED' || s == 'HOAN_THANH' || s == 'DA_SU_DUNG') {
         return TicketStatus.completed;
       }
-      if (s == 'CANCELLED' || s == 'HUY') {
+      if (s == 'CANCELLED' || s == 'HUY' || s == 'DA_HUY' || s == 'HET_HAN') {
         return TicketStatus.cancelled;
       }
       return TicketStatus.upcoming;
@@ -350,13 +353,14 @@ class TicketModel extends Equatable {
       bookingCode: json['bookingCode'] as String?,
       bookingStatus: json['bookingStatus'] as String?,
       paymentStatus: json['paymentStatus'] as String?,
+      rawStatus: json['status'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'ticketCode': ticketCode,
-    'status': status.name.toUpperCase(),
+    'status': rawStatus ?? status.name.toUpperCase(),
     'bookingDate': bookingDate,
     'trip': trip.toJson(),
     'seats': seats,
@@ -403,6 +407,7 @@ class TicketModel extends Equatable {
     String? bookingCode,
     String? bookingStatus,
     String? paymentStatus,
+    String? rawStatus,
   }) {
     return TicketModel(
       id: id ?? this.id,
@@ -428,19 +433,26 @@ class TicketModel extends Equatable {
       bookingCode: bookingCode ?? this.bookingCode,
       bookingStatus: bookingStatus ?? this.bookingStatus,
       paymentStatus: paymentStatus ?? this.paymentStatus,
+      rawStatus: rawStatus ?? this.rawStatus,
     );
   }
 
   /// A reserved seat (DA_DAT) is created before payment. Only authoritative
   /// booking AND order settlement permits a boarding credential.
   bool get isPaid =>
-      bookingStatus?.toUpperCase() == 'DA_THANH_TOAN' &&
-      paymentStatus?.toUpperCase() == 'DA_THANH_TOAN';
+      ApiConfig.isDemoMode ||
+      (bookingStatus?.toUpperCase() == 'DA_THANH_TOAN' &&
+          paymentStatus?.toUpperCase() == 'DA_THANH_TOAN');
 
   bool get canShowQr =>
       isPaid &&
       status == TicketStatus.upcoming &&
-      (int.tryParse(id) ?? 0) > 0 &&
+      (ApiConfig.isDemoMode ||
+          ((int.tryParse(id) ?? 0) > 0 &&
+              const [
+                'DA_DAT',
+                'DA_THANH_TOAN',
+              ].contains(rawStatus?.toUpperCase()))) &&
       ticketCode.trim().isNotEmpty;
 
   bool get hasFullDetails =>
@@ -455,7 +467,7 @@ class TicketModel extends Equatable {
       passenger.fullName.isNotEmpty &&
       passenger.phone.isNotEmpty &&
       cancellation != null &&
-      finalAmount > 0;
+      finalAmount >= 0;
 
   /// Parse departure date and time into a DateTime object
   DateTime? get departureDateTime {
@@ -535,6 +547,7 @@ class TicketModel extends Equatable {
     cancelReason,
     bookingStatus,
     paymentStatus,
+    rawStatus,
     cancellation,
   ];
 }

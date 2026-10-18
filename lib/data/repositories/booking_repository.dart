@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_config.dart';
 import '../../core/network/api_exceptions.dart';
+import '../../core/network/token_storage.dart';
 import '../../core/utils/json_loader.dart';
 import '../../core/utils/payment_provider_mapper.dart';
 import '../datasources/remote/booking_remote_data_source.dart';
@@ -23,12 +24,14 @@ class CheckoutProgressException implements Exception {
   final int? paymentId;
   final bool bookingOutcomeUnknown;
   final bool blockedByBackend;
+  final Object? cause;
   const CheckoutProgressException(
     this.message, {
     this.bookingId,
     this.paymentId,
     this.bookingOutcomeUnknown = false,
     this.blockedByBackend = false,
+    this.cause,
   });
   @override
   String toString() => message;
@@ -43,6 +46,9 @@ Future<List<TicketModel>> resolvePaidBookingTickets(
   final booking = await repository.getBookingById(bookingId);
   if (booking == null ||
       booking.bookingId != bookingId ||
+      !booking.isPaid ||
+      (booking.paymentStatus != null &&
+          booking.paymentStatus != 'DA_THANH_TOAN') ||
       booking.tickets.isEmpty ||
       (booking.ticketCount > 0 &&
           booking.ticketCount != booking.tickets.length)) {
@@ -52,13 +58,28 @@ Future<List<TicketModel>> resolvePaidBookingTickets(
   }
   final tickets = <TicketModel>[];
   final ids = <String>{};
+  final BookingRemoteDataSource? source = repository is RealBookingRepository
+      ? repository.remoteBookingDataSource
+      : repository is HybridBookingRepository
+      ? repository.remoteBookingDataSource
+      : null;
+  final guest =
+      (source is BookingRemoteDataSourceImpl &&
+          source.isGuestCheckout(bookingId)) ||
+      !await TokenStorage.hasAccessToken();
   for (final summary in booking.tickets) {
     if ((int.tryParse(summary.id) ?? 0) <= 0 || !ids.add(summary.id)) {
       throw StateError('Thông tin mã vé từ máy chủ không hợp lệ.');
     }
-    final ticket = await repository.getTicketById(summary.id);
+    final ticket = guest
+        ? await repository.lookupTicket(
+            ticketCode: summary.ticketCode,
+            phoneNumber: booking.contact.phone,
+          )
+        : await repository.getTicketById(summary.id);
     if (ticket == null ||
         ticket.id != summary.id ||
+        ticket.ticketCode != summary.ticketCode ||
         ticket.bookingId?.toString() != bookingId.toString() ||
         !ticket.hasFullDetails ||
         !ticket.canShowQr) {
@@ -125,6 +146,19 @@ Future<TicketModel> _createVerifiedBookingTicket({
         (!ApiConfig.isDemoMode && status.isDemo)) {
       throw StateError('Thông tin giao dịch thanh toán không khớp.');
     }
+    if (status.isFailed || status.isCancelled) {
+      throw PaymentFailedException(
+        paymentId: payment.paymentId,
+        failureReason: status.failureReason,
+      );
+    }
+    if (!status.isSuccess && !status.isPending) {
+      throw CheckoutProgressException(
+        'Máy chủ trả trạng thái thanh toán chưa xác định. Cần xác minh lại đơn hiện tại.',
+        bookingId: booking.bookingId,
+        paymentId: payment.paymentId,
+      );
+    }
     if (!status.isSuccess) {
       throw PaymentPendingException(
         message: status.isPending
@@ -143,6 +177,8 @@ Future<TicketModel> _createVerifiedBookingTicket({
     )).first;
   } on PaymentPendingException {
     rethrow;
+  } on PaymentFailedException {
+    rethrow;
   } on CheckoutProgressException {
     rethrow;
   } catch (error) {
@@ -154,6 +190,7 @@ Future<TicketModel> _createVerifiedBookingTicket({
         bookingId: booking?.bookingId,
         paymentId: payment?.paymentId,
         bookingOutcomeUnknown: booking == null,
+        cause: error,
       );
     }
     rethrow;

@@ -91,8 +91,9 @@ void main() {
             client: ApiClient(
               httpClient: MockClient((request) async {
                 paths.add(request.url.path);
-                if (request.url.path.endsWith('/verify-otp'))
+                if (request.url.path.endsWith('/verify-otp')) {
                   return reply({'otpProof': 'proof'});
+                }
                 if (request.url.path.endsWith('/me')) {
                   expect(request.headers['Authorization'], 'Bearer access');
                   return reply(profileJson);

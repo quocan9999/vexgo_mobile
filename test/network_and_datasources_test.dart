@@ -328,6 +328,7 @@ void main() {
         expect(promo.isValid, isTrue);
 
         final booking = await ds.createBooking(
+          holdToken: 'fixture-active-hold',
           tripId: 101,
           seatIds: [10, 11],
           pickupPoint: 'Bến xe Miền Đông',
@@ -500,6 +501,7 @@ void main() {
           // Real booking mutation must throw and NEVER fake success
           expect(
             () => hybridRepo.createApiBooking(
+              holdToken: 'fixture-active-hold',
               tripId: 101,
               seatIds: [10, 11],
               pickupPoint: 'Bến xe',
@@ -688,6 +690,25 @@ void main() {
                     },
                   }),
                   201,
+                  headers: {'content-type': 'application/json; charset=utf-8'},
+                );
+              }
+              if (request.url.path == '/api/v1/me') {
+                expect(
+                  request.headers['authorization'],
+                  'Bearer access_token_123',
+                );
+                return http.Response(
+                  jsonEncode({
+                    'data': {
+                      'accountId': 1,
+                      'customerCode': 'KH001',
+                      'fullName': 'Test User',
+                      'phoneNumber': '+84912345678',
+                      'loyaltyPoints': 0,
+                    },
+                  }),
+                  200,
                   headers: {'content-type': 'application/json; charset=utf-8'},
                 );
               }

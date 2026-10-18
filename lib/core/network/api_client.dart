@@ -172,6 +172,9 @@ class ApiClient {
           lower.contains('auth') ||
           lower.contains('password') ||
           lower.contains('code') ||
+          lower.contains('phone') ||
+          lower.contains('email') ||
+          lower.contains('signature') ||
           lower.contains('otp')) {
         cleanParams[key] = '***REDACTED***';
       }
@@ -237,11 +240,13 @@ class ApiClient {
     Map<String, dynamic>? queryParams,
     Map<String, String>? headers,
     bool requiresAuth = false,
+    bool optionalAuth = false,
   }) async {
     final uri = _buildUri(path, queryParams);
     final reqHeaders = await _buildHeaders(
       extraHeaders: headers,
       requiresAuth: requiresAuth,
+      optionalAuth: optionalAuth,
     );
 
     try {
@@ -250,7 +255,7 @@ class ApiClient {
       }
       final response = await _withRefresh(
         headers: reqHeaders,
-        requiresAuth: requiresAuth,
+        requiresAuth: requiresAuth || reqHeaders.containsKey('Authorization'),
         send: (h) =>
             _httpClient.get(uri, headers: h).timeout(ApiConfig.connectTimeout),
       );
@@ -280,11 +285,13 @@ class ApiClient {
     Map<String, dynamic>? queryParams,
     Map<String, String>? headers,
     bool requiresAuth = false,
+    bool optionalAuth = false,
   }) async {
     final uri = _buildUri(path, queryParams);
     final reqHeaders = await _buildHeaders(
       extraHeaders: headers,
       requiresAuth: requiresAuth,
+      optionalAuth: optionalAuth,
     );
 
     try {
@@ -297,7 +304,7 @@ class ApiClient {
       }
       final response = await _withRefresh(
         headers: reqHeaders,
-        requiresAuth: requiresAuth,
+        requiresAuth: requiresAuth || reqHeaders.containsKey('Authorization'),
         send: (h) => _httpClient
             .post(uri, headers: h, body: encodedBody)
             .timeout(ApiConfig.receiveTimeout),

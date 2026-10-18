@@ -160,8 +160,9 @@ void main() {
       var mutations = 0;
       final client = ApiClient(
         httpClient: MockClient((request) async {
-          if (request.url.path.endsWith('/auth/refresh'))
+          if (request.url.path.endsWith('/auth/refresh')) {
             throw http.ClientException('offline');
+          }
           mutations++;
           return jsonResponse({'error': 'ACCESS_TOKEN_INVALID'}, 401);
         }),
@@ -301,10 +302,11 @@ void main() {
     () async {
       final client = ApiClient(
         httpClient: MockClient((request) async {
-          if (request.url.path.endsWith('/auth/refresh'))
+          if (request.url.path.endsWith('/auth/refresh')) {
             return jsonResponse({
               'data': {'accessToken': ''},
             });
+          }
           return jsonResponse({'error': 'ACCESS_TOKEN_INVALID'}, 401);
         }),
       );

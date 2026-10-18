@@ -13,7 +13,7 @@ class DateSelectorStrip extends StatelessWidget {
     super.key,
     required this.selectedDate,
     required this.onDateSelected,
-    this.minPrice = 240000,
+    this.minPrice = 0,
   });
 
   @override
@@ -45,7 +45,10 @@ class DateSelectorStrip extends StatelessWidget {
               date.day == selectedDate.day;
 
           // Format price: e.g. 240k or 280k
-          final priceK = '${(minPrice / 1000).round()}k';
+          // Only the selected date has been queried; adjacent prices are unknown.
+          final priceK = isSelected && minPrice > 0
+              ? '${(minPrice / 1000).round()}k'
+              : '—';
 
           final isToday =
               date.year == today.year &&

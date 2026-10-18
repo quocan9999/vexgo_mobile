@@ -7,6 +7,7 @@ import 'search_trips_state.dart';
 
 class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
   final TripRepository tripRepository;
+  int _requestGeneration = 0;
 
   SearchTripsBloc({required this.tripRepository})
     : super(
@@ -25,12 +26,16 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
     LoadTripsEvent event,
     Emitter<SearchTripsState> emit,
   ) async {
+    final generation = ++_requestGeneration;
     emit(
       state.copyWith(
         status: SearchTripsStatus.loading,
         fromCityId: event.fromCityId,
         toCityId: event.toCityId,
         selectedDate: event.date,
+        allTrips: const [],
+        filteredTrips: const [],
+        errorMessage: '',
       ),
     );
 
@@ -43,6 +48,7 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
         toCityId: event.toCityId,
         date: dateStr,
       );
+      if (generation != _requestGeneration || emit.isDone) return;
 
       // Extract unique operators, vehicle types, amenities
       final operators = trips.map((t) => t.operatorName).toSet().toList();
@@ -66,6 +72,7 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
         ),
       );
     } catch (e) {
+      if (generation != _requestGeneration || emit.isDone) return;
       emit(
         state.copyWith(
           status: SearchTripsStatus.failure,
@@ -79,6 +86,7 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
     ChangeSelectedDateEvent event,
     Emitter<SearchTripsState> emit,
   ) {
+    ++_requestGeneration;
     emit(state.copyWith(selectedDate: event.newDate));
     if (state.fromCityId.isNotEmpty && state.toCityId.isNotEmpty) {
       add(

@@ -4,6 +4,8 @@ import 'package:vexgo_app/core/network/api_response.dart';
 import 'package:vexgo_app/core/utils/payment_provider_mapper.dart';
 import 'package:vexgo_app/data/datasources/remote/booking_remote_data_source.dart';
 import 'package:vexgo_app/data/datasources/remote/payment_remote_data_source.dart';
+import 'package:vexgo_app/data/datasources/remote/ticket_remote_data_source.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/data/models/booking_model.dart';
 import 'package:vexgo_app/data/models/booking_quote_model.dart';
 import 'package:vexgo_app/data/models/payment_transaction_model.dart';
@@ -14,6 +16,7 @@ import 'package:vexgo_app/data/repositories/booking_repository.dart';
 class FakeBookingRemoteDataSource implements BookingRemoteDataSource {
   BookingModel? nextBooking;
   Exception? errorToThrow;
+  BookingModel? createdBooking;
 
   @override
   Future<BookingModel> createBooking({
@@ -26,7 +29,8 @@ class FakeBookingRemoteDataSource implements BookingRemoteDataSource {
     String? holdToken,
   }) async {
     if (errorToThrow != null) throw errorToThrow!;
-    return nextBooking ??
+    return createdBooking =
+        nextBooking ??
         BookingModel(
           bookingId: 888,
           bookingCode: 'VG888TEST',
@@ -45,7 +49,15 @@ class FakeBookingRemoteDataSource implements BookingRemoteDataSource {
 
   @override
   Future<BookingModel> getBookingById(dynamic bookingId) async =>
-      throw UnimplementedError();
+      createdBooking!.copyWith(
+        paymentStatus: 'DA_THANH_TOAN',
+        tickets: [
+          TicketModel.fromJson({
+            'ticketId': 91,
+            'ticketCode': '${createdBooking!.bookingCode}-A01',
+          }),
+        ],
+      );
 
   @override
   Future<BookingQuoteModel> getBookingQuote({
@@ -75,6 +87,8 @@ class FakePaymentRemoteDataSource implements PaymentRemoteDataSource {
   Exception? createPaymentError;
   Exception? getStatusError;
   String? lastPassedProvider;
+  int lastBookingId = 888;
+  int defaultAmount = 250000;
 
   @override
   Future<PaymentTransactionModel> createPayment({
@@ -82,13 +96,14 @@ class FakePaymentRemoteDataSource implements PaymentRemoteDataSource {
     required String provider,
   }) async {
     lastPassedProvider = provider;
+    lastBookingId = bookingId;
     if (createPaymentError != null) throw createPaymentError!;
     return nextPayment ??
         PaymentTransactionModel(
-          paymentId: 1001,
+          paymentId: nextStatus?.paymentId ?? 1001,
           bookingId: bookingId,
           provider: PaymentProvider.momo,
-          amount: 250000,
+          amount: defaultAmount,
           status: PaymentStatus.pending,
         );
   }
@@ -99,16 +114,57 @@ class FakePaymentRemoteDataSource implements PaymentRemoteDataSource {
     return nextStatus ??
         PaymentTransactionModel(
           paymentId: paymentId as int,
-          bookingId: 888,
+          bookingId: lastBookingId,
           provider: PaymentProvider.momo,
-          amount: 250000,
+          amount: defaultAmount,
           status: PaymentStatus.success,
         );
   }
 }
 
+class FakeTicketRemoteDataSource implements TicketRemoteDataSource {
+  final FakeBookingRemoteDataSource bookings;
+  FakeTicketRemoteDataSource(this.bookings);
+  @override
+  Future<TicketModel> getCustomerTicketById(dynamic id) async {
+    final booking = bookings.createdBooking!;
+    return TicketModel.fromJson({
+      'ticketId': 91,
+      'ticketCode': '${booking.bookingCode}-A01',
+      'bookingId': booking.bookingId,
+      'bookingStatus': 'DA_THANH_TOAN',
+      'paymentStatus': 'DA_THANH_TOAN',
+      'status': 'DA_THANH_TOAN',
+      'origin': 'TP.HCM',
+      'destination': 'Đà Lạt',
+      'busCompanyName': 'Phương Trang',
+      'departureTime': '2030-10-20T16:00:00Z',
+      'seatNumber': 'A01',
+      'passengerName': booking.contact.fullName,
+      'passengerPhone': booking.contact.phone,
+      'totalAmount': booking.originalAmount,
+      'discountAmount': booking.discountAmount,
+      'finalAmount': booking.totalAmount,
+      'cancellation': {
+        'eligible': true,
+        'cancelFeeRate': 0.1,
+        'cancelFee': 25000,
+        'refundAmount': 225000,
+      },
+    });
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() async {
+    TokenStorage.setStorageAdapterForTesting(InMemorySecureStorageAdapter());
+    await TokenStorage.saveAccessToken('fixture-session');
+  });
+  tearDown(TokenStorage.resetStorageAdapter);
 
   const dummyTrip = TicketTripSummary(
     id: '101',
@@ -193,6 +249,7 @@ void main() {
         final repo = HybridBookingRepository(
           remoteBookingDataSource: fakeBookingDs,
           remotePaymentDataSource: fakePaymentDs,
+          remoteTicketDataSource: FakeTicketRemoteDataSource(fakeBookingDs),
           mockFallback: MockBookingRepository(),
         );
 
@@ -240,6 +297,7 @@ void main() {
         repo = HybridBookingRepository(
           remoteBookingDataSource: fakeBookingDs,
           remotePaymentDataSource: fakePaymentDs,
+          remoteTicketDataSource: FakeTicketRemoteDataSource(fakeBookingDs),
           mockFallback: MockBookingRepository(),
         );
       });
@@ -337,7 +395,11 @@ void main() {
               paymentMethod: 'momo',
               passenger: dummyPassenger,
             ),
-            throwsA(isA<NetworkException>()),
+            throwsA(
+              isA<CheckoutProgressException>()
+                  .having((e) => e.bookingId, 'bookingId', 888)
+                  .having((e) => e.cause, 'cause', isA<NetworkException>()),
+            ),
           );
         },
       );
@@ -364,7 +426,11 @@ void main() {
               paymentMethod: 'momo',
               passenger: dummyPassenger,
             ),
-            throwsA(isA<ApiException>()),
+            throwsA(
+              isA<CheckoutProgressException>()
+                  .having((e) => e.bookingId, 'bookingId', 888)
+                  .having((e) => e.cause, 'cause', isA<ApiException>()),
+            ),
           );
         },
       );
@@ -390,7 +456,7 @@ void main() {
         );
 
         expect(ticket, isNotNull);
-        expect(ticket.ticketCode, equals('VG888TEST'));
+        expect(ticket.ticketCode, equals('VG888TEST-A01'));
         expect(ticket.status, equals(TicketStatus.upcoming));
       });
     },
@@ -419,10 +485,12 @@ void main() {
             originalAmount: 320000, // Base fare
             discountAmount: 50000, // Voucher discount
           );
+          fakePaymentDs.defaultAmount = 270000;
 
           final repo = HybridBookingRepository(
             remoteBookingDataSource: fakeBookingDs,
             remotePaymentDataSource: fakePaymentDs,
+            remoteTicketDataSource: FakeTicketRemoteDataSource(fakeBookingDs),
             mockFallback: MockBookingRepository(),
           );
 
@@ -457,6 +525,7 @@ void main() {
         final repo = HybridBookingRepository(
           remoteBookingDataSource: fakeBookingDs,
           remotePaymentDataSource: fakePaymentDs,
+          remoteTicketDataSource: FakeTicketRemoteDataSource(fakeBookingDs),
           mockFallback: MockBookingRepository(),
         );
 

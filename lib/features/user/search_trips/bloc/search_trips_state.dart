@@ -34,7 +34,7 @@ class SearchTripsState extends Equatable {
   });
 
   int get minPriceInResults {
-    if (filteredTrips.isEmpty) return 240000;
+    if (filteredTrips.isEmpty) return 0;
     return filteredTrips
         .map((t) => t.discountPrice)
         .reduce((a, b) => a < b ? a : b);

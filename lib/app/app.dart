@@ -89,6 +89,7 @@ class _SessionSynchronization extends StatefulWidget {
 
 class _SessionSynchronizationState extends State<_SessionSynchronization> {
   StreamSubscription<AuthState>? _subscription;
+  String? _previousSession;
   @override
   void initState() {
     super.initState();
@@ -103,6 +104,10 @@ class _SessionSynchronizationState extends State<_SessionSynchronization> {
         : null;
     context.read<MyTicketsBloc>().setSession(key);
     context.read<NotificationBloc>().setSession(key);
+    if (_previousSession != null && key != _previousSession) {
+      AppRoutes.router.go(AppRoutes.home);
+    }
+    _previousSession = key;
   }
 
   @override

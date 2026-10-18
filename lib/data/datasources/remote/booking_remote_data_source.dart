@@ -5,7 +5,6 @@ import '../../models/ticket_model.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
 import '../../../core/network/token_storage.dart';
-import '../../../core/network/api_exceptions.dart';
 
 abstract class BookingRemoteDataSource {
   Future<BookingQuoteModel> getBookingQuote({
@@ -37,6 +36,11 @@ abstract class BookingRemoteDataSource {
 
 class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
   final ApiClient client;
+  final Map<String, PassengerInfo> _checkoutContacts = {};
+  final Map<String, String> _checkoutCodes = {};
+  final Map<String, bool> _guestCheckouts = {};
+  bool isGuestCheckout(int bookingId) =>
+      _guestCheckouts[bookingId.toString()] == true;
 
   BookingRemoteDataSourceImpl({required this.client});
 
@@ -93,13 +97,10 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     String? promotionCode,
     String? holdToken,
   }) async {
-    if (!await TokenStorage.hasAccessToken()) {
-      throw UnauthorizedException(
-        errorCode: 'BLOCKED_BY_BACKEND_GUEST_CHECKOUT',
-        message:
-            'BLOCKED_BY_BACKEND: Máy chủ chưa hỗ trợ đặt vé không đăng nhập.',
-      );
+    if (holdToken == null || holdToken.isEmpty) {
+      throw ArgumentError('Cần mã giữ ghế còn hiệu lực để tạo đơn.');
     }
+    final guest = !await TokenStorage.hasAccessToken();
 
     final body = {
       'tripId': tripId,
@@ -109,26 +110,45 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
       'contact': contact.toJson(),
       if (promotionCode != null && promotionCode.isNotEmpty)
         'promotionCode': promotionCode,
-      if (holdToken != null && holdToken.isNotEmpty) 'holdToken': holdToken,
+      'holdToken': holdToken,
     };
 
     final res = await client.post(
       ApiConfig.bookings,
       body: body,
-      requiresAuth: true,
+      optionalAuth: true,
     );
     if (res is Map<String, dynamic>) {
       final data = res['data'] ?? res;
-      return BookingModel.fromJson(data as Map<String, dynamic>);
+      final booking = BookingModel.fromJson(data as Map<String, dynamic>);
+      _checkoutContacts[booking.bookingId.toString()] = contact;
+      _checkoutCodes[booking.bookingId.toString()] = booking.bookingCode;
+      _guestCheckouts[booking.bookingId.toString()] = guest;
+      return booking;
     }
     throw Exception('Invalid create booking response');
   }
 
   @override
   Future<BookingModel> getBookingById(dynamic bookingId) async {
+    final guest =
+        _guestCheckouts[bookingId.toString()] ??
+        !await TokenStorage.hasAccessToken();
+    final contact = _checkoutContacts[bookingId.toString()];
+    final code = _checkoutCodes[bookingId.toString()];
+    if (guest && (contact == null || code == null || code.isEmpty)) {
+      throw StateError(
+        'Thiếu mã đặt vé và số điện thoại để tra cứu đơn khách.',
+      );
+    }
     final res = await client.get(
-      ApiConfig.bookingDetail(bookingId),
-      requiresAuth: true,
+      guest
+          ? '${ApiConfig.bookingDetail(bookingId)}/detail'
+          : ApiConfig.bookingDetail(bookingId),
+      requiresAuth: !guest,
+      headers: guest
+          ? {'x-booking-code': code!, 'x-booking-phone': contact!.phone}
+          : null,
     );
     if (res is Map<String, dynamic>) {
       final data = res['data'] ?? res;

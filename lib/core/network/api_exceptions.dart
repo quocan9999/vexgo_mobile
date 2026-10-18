@@ -27,7 +27,7 @@ class NetworkException implements Exception {
   });
 
   @override
-  String toString() => 'NetworkException: $message ($originalError)';
+  String toString() => 'NetworkException: $message';
 }
 
 /// Thrown when token is invalid or expired (401)

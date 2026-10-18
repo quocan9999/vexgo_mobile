@@ -5,6 +5,7 @@ import 'package:vexgo_app/data/models/seat_model.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/data/models/trip_model.dart';
+import 'package:vexgo_app/data/models/booking_model.dart';
 import 'package:vexgo_app/data/models/voucher_model.dart';
 
 enum BookingFlowStatus {
@@ -95,6 +96,7 @@ class BookingFlowState extends Equatable {
   final bool bookingOutcomeUnknown;
   final int? pendingPaymentAmount;
   final bool paymentConfirmed;
+  final BookingModel? checkoutBooking;
   final String? errorMessage;
   final int? pendingBookingId;
   final int? pendingPaymentId;
@@ -130,6 +132,7 @@ class BookingFlowState extends Equatable {
     this.bookingOutcomeUnknown = false,
     this.pendingPaymentAmount,
     this.paymentConfirmed = false,
+    this.checkoutBooking,
     this.errorMessage,
     this.pendingBookingId,
     this.pendingPaymentId,
@@ -183,8 +186,11 @@ class BookingFlowState extends Equatable {
   bool get isDropoffValid => selectedDropoffPoint != null;
   bool get isPassengerValid =>
       passengerName.trim().length >= 2 &&
-      RegExp(r'^(0[3|5|7|8|9])+([0-9]{8})$').hasMatch(passengerPhone.trim()) &&
-      passengerEmail.trim().contains('@');
+      RegExp(r'^(?:0|\+84)[35789][0-9]{8}$').hasMatch(passengerPhone.trim()) &&
+      (passengerEmail.trim().isEmpty ||
+          RegExp(
+            r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+          ).hasMatch(passengerEmail.trim()));
 
   bool get canProceed {
     switch (step) {
@@ -239,6 +245,7 @@ class BookingFlowState extends Equatable {
     bool? bookingOutcomeUnknown,
     int? pendingPaymentAmount,
     bool? paymentConfirmed,
+    BookingModel? checkoutBooking,
     Object? errorMessage = _unchangedError,
     int? pendingBookingId,
     int? pendingPaymentId,
@@ -281,6 +288,7 @@ class BookingFlowState extends Equatable {
           bookingOutcomeUnknown ?? this.bookingOutcomeUnknown,
       pendingPaymentAmount: pendingPaymentAmount ?? this.pendingPaymentAmount,
       paymentConfirmed: paymentConfirmed ?? this.paymentConfirmed,
+      checkoutBooking: checkoutBooking ?? this.checkoutBooking,
       errorMessage: identical(errorMessage, _unchangedError)
           ? this.errorMessage
           : errorMessage as String?,
@@ -327,6 +335,7 @@ class BookingFlowState extends Equatable {
     bookingOutcomeUnknown,
     pendingPaymentAmount,
     paymentConfirmed,
+    checkoutBooking,
     errorMessage,
     pendingBookingId,
     pendingPaymentId,

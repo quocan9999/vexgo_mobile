@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 enum PaymentProvider { momo, vnpay, zalopay, cash }
 
-enum PaymentStatus { pending, success, failed, cancelled }
+enum PaymentStatus { pending, success, failed, cancelled, unknown }
 
 /// Model representing an online payment transaction per endpoint-api.md 5.7
 class PaymentTransactionModel extends Equatable {
@@ -92,16 +92,21 @@ class PaymentTransactionModel extends Equatable {
         case 'SUCCESS':
         case 'PAID':
         case 'COMPLETED':
+        case 'THANH_CONG':
           return PaymentStatus.success;
         case 'FAILED':
         case 'ERROR':
+        case 'THAT_BAI':
           return PaymentStatus.failed;
         case 'CANCELLED':
         case 'CANCELED':
+        case 'HET_HAN':
           return PaymentStatus.cancelled;
         case 'PENDING':
-        default:
+        case 'DANG_XU_LY':
           return PaymentStatus.pending;
+        default:
+          return PaymentStatus.unknown;
       }
     }
 

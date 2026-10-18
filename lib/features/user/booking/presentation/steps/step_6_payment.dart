@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
+import 'package:vexgo_app/core/network/vietqr_config.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
@@ -36,9 +38,32 @@ class Step6Payment extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: Text('Đơn đặt chỗ: #${state.pendingBookingId}'),
             ),
+          if (state.selectedPaymentMethod == 'vietqr' &&
+              state.status == BookingFlowStatus.paymentPending &&
+              state.checkoutBooking != null) ...[
+            SelectableText(
+              'Nội dung chuyển khoản: ${state.checkoutBooking!.orderCode ?? ''}',
+            ),
+            const SizedBox(height: 8),
+            Text('Ngân hàng: ${VietQrConfig.bankId}'),
+            SelectableText('Số tài khoản: ${VietQrConfig.accountNumber}'),
+            Text('Chủ tài khoản: ${VietQrConfig.accountName}'),
+            if (state.pendingQrCodeUrl != null)
+              Image.network(
+                state.pendingQrCodeUrl!,
+                height: 260,
+                errorBuilder: (_, _, _) => const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Text(
+                    'Không tải được QR. Bạn có thể chuyển khoản theo thông tin và nội dung bên trên.',
+                  ),
+                ),
+              ),
+            const SizedBox(height: 12),
+          ],
           // Pending Payment Notification Card
-          if (state.pendingPaymentId != null ||
-              state.status == BookingFlowStatus.paymentPending) ...[
+          if (state.pendingPaymentId != null &&
+              state.status != BookingFlowStatus.blockedByBackend) ...[
             Container(
               padding: const EdgeInsets.all(AppDimensions.base),
               decoration: BoxDecoration(
@@ -241,7 +266,9 @@ class Step6Payment extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      CurrencyFormatter.format(state.finalAmount),
+                      CurrencyFormatter.format(
+                        state.pendingPaymentAmount ?? state.finalAmount,
+                      ),
                       style: AppTextStyles.price.copyWith(
                         color: AppColors.secondary,
                         fontSize: 22,
@@ -334,7 +361,7 @@ class Step6Payment extends StatelessWidget {
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
-                    'Bảo mật thông tin thanh toán chuẩn quốc tế PCI DSS',
+                    'Chỉ xuất vé sau khi hệ thống xác nhận thanh toán',
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.neutral500,
                       fontSize: 11,
@@ -358,10 +385,15 @@ class Step6Payment extends StatelessWidget {
     required Color iconColor,
     String? badgeText,
   }) {
+    if (!ApiConfig.isDemoMode && methodId != 'vietqr') {
+      return const SizedBox.shrink();
+    }
     final isSelected = state.selectedPaymentMethod == methodId;
 
     return GestureDetector(
-      onTap: () => bloc.add(SelectPaymentMethodEvent(methodId)),
+      onTap: state.isCheckoutLocked
+          ? null
+          : () => bloc.add(SelectPaymentMethodEvent(methodId)),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         margin: const EdgeInsets.only(bottom: AppDimensions.sm),

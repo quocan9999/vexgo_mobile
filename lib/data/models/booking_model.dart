@@ -246,8 +246,10 @@ class BookingModel extends Equatable {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,
-      expiresAt: json['expiresAt'] != null
-          ? DateTime.tryParse(json['expiresAt'] as String)
+      expiresAt: (json['paymentExpiresAt'] ?? json['expiresAt']) != null
+          ? DateTime.tryParse(
+              (json['paymentExpiresAt'] ?? json['expiresAt']) as String,
+            )
           : null,
       orderId: (json['orderId'] as num?)?.toInt(),
       orderCode: json['orderCode'] as String?,

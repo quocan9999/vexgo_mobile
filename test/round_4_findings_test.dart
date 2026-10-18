@@ -9,6 +9,7 @@ import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/data/datasources/remote/seat_remote_data_source.dart';
 import 'package:vexgo_app/data/datasources/remote/trip_remote_data_source.dart';
 import 'package:vexgo_app/data/models/payment_transaction_model.dart';
+import 'package:vexgo_app/data/models/booking_model.dart';
 import 'package:vexgo_app/data/models/seat_hold_model.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
@@ -355,6 +356,14 @@ void main() {
         );
         await Future.delayed(const Duration(milliseconds: 50));
 
+        bloc.add(
+          const UpdatePassengerInfoEvent(
+            name: 'Test Passenger',
+            phone: '0901234567',
+            email: 'test@example.com',
+          ),
+        );
+        bloc.add(const SelectPaymentMethodEvent('momo'));
         // Advance through steps to payment
         bloc.add(const NextStepEvent());
         await Future.delayed(const Duration(milliseconds: 50));
@@ -403,7 +412,7 @@ void main() {
           countingRepo.createBookingCallCount,
           equals(1),
         ); // ZERO duplicate!
-        expect(countingRepo.getPaymentStatusCallCount, equals(1));
+        expect(countingRepo.getPaymentStatusCallCount, equals(2));
 
         await bloc.close();
       },
@@ -443,9 +452,47 @@ class _MockSeatRepoValidHold extends FakeSeatRepository {
   }
 }
 
-class _MockCountingBookingRepository extends MockBookingRepository {
+class _MockCountingBookingRepository extends HybridBookingRepository {
   int createBookingCallCount = 0;
   int getPaymentStatusCallCount = 0;
+
+  @override
+  Future<BookingModel> createApiBooking({
+    required int tripId,
+    required List<int> seatIds,
+    required String pickupPoint,
+    required String dropoffPoint,
+    required PassengerInfo contact,
+    String? promotionCode,
+    String? holdToken,
+  }) async {
+    createBookingCallCount++;
+    return BookingModel(
+      bookingId: 888,
+      bookingCode: 'BOOKING-888',
+      tripId: tripId,
+      status: BookingStatus.pending,
+      contact: contact,
+      pickupPoint: pickupPoint,
+      dropoffPoint: dropoffPoint,
+      seats: ['A01'],
+      seatIds: seatIds,
+      totalAmount: 250000,
+    );
+  }
+
+  @override
+  Future<PaymentTransactionModel> createPayment({
+    required int bookingId,
+    required String provider,
+  }) async => const PaymentTransactionModel(
+    paymentId: 777,
+    bookingId: 888,
+    provider: PaymentProvider.momo,
+    amount: 250000,
+    status: PaymentStatus.pending,
+    paymentUrl: 'https://pay.vn/777',
+  );
 
   @override
   Future<TicketModel> createBooking({
@@ -493,7 +540,17 @@ class FakeSeatRepository implements SeatRepository {
   }
 
   @override
-  Future<List<SeatModel>> getTripSeats(dynamic tripId) async => [];
+  Future<List<SeatModel>> getTripSeats(dynamic tripId) async => const [
+    SeatModel(
+      id: '1',
+      name: 'A01',
+      floor: 1,
+      status: SeatStatus.available,
+      price: 250000,
+      row: 1,
+      col: 1,
+    ),
+  ];
 
   @override
   Future<SeatHoldModel> createSeatHold({

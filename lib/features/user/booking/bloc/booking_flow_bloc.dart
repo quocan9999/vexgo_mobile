@@ -5,6 +5,7 @@ import 'package:vexgo_app/data/models/seat_model.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/core/network/api_config.dart';
+import 'package:vexgo_app/core/network/vietqr_config.dart';
 import 'package:vexgo_app/core/utils/payment_provider_mapper.dart';
 import 'package:vexgo_app/data/repositories/booking_repository.dart';
 import 'package:vexgo_app/data/repositories/seat_repository.dart';
@@ -19,6 +20,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   bool _holdBusy = false;
   bool _confirmBusy = false;
   bool _closing = false;
+  Completer<void>? _holdFinished;
 
   BookingFlowBloc({
     required this.seatRepository,
@@ -53,6 +55,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         trip: event.trip,
         date: event.date,
         targetTicketCount: event.ticketCount,
+        selectedPaymentMethod: ApiConfig.isDemoMode ? 'momo' : 'vietqr',
       ),
     );
 
@@ -360,6 +363,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
       }
 
       _holdBusy = true;
+      _holdFinished = Completer<void>();
       emit(
         state.copyWith(status: BookingFlowStatus.loading, errorMessage: null),
       );
@@ -415,6 +419,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         return;
       } finally {
         _holdBusy = false;
+        if (!(_holdFinished?.isCompleted ?? true)) _holdFinished!.complete();
       }
     }
 
@@ -432,8 +437,27 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     if (_holdBusy || _confirmBusy || state.isCheckoutLocked) return;
     if (state.seatHold != null) {
       try {
-        await seatRepository.releaseSeatHold(state.seatHold!.holdToken);
-      } catch (_) {}
+        final released = await seatRepository.releaseSeatHold(
+          state.seatHold!.holdToken,
+        );
+        if (!released) {
+          emit(
+            state.copyWith(
+              errorMessage:
+                  'Chưa xác nhận được việc giải phóng ghế. Vui lòng thử lại.',
+            ),
+          );
+          return;
+        }
+      } catch (_) {
+        emit(
+          state.copyWith(
+            errorMessage:
+                'Không thể giải phóng ghế do lỗi kết nối. Vui lòng thử lại.',
+          ),
+        );
+        return;
+      }
     }
     _stopCountdown();
     emit(state.copyWith(clearSeatHold: true, countdownSeconds: 600));
@@ -456,12 +480,9 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     if (state.isCheckoutLocked || _holdBusy) return;
     if (event.stepIndex >= 0 && event.stepIndex < BookingStep.values.length) {
       // Allow going back to previous steps without re-validation
-      if (event.stepIndex <= state.step.index || state.canProceed) {
+      if (event.stepIndex <= state.step.index) {
         final targetStep = BookingStep.values[event.stepIndex];
         emit(state.copyWith(step: targetStep, errorMessage: null));
-        if (targetStep == BookingStep.payment) {
-          _startCountdown();
-        }
       }
     }
   }
@@ -544,9 +565,26 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         );
         return;
       }
-      final provider = PaymentProviderMapper.toBackendProvider(
-        draft.selectedPaymentMethod,
-      );
+      final bankTransfer =
+          draft.selectedPaymentMethod == 'vietqr' && !ApiConfig.isDemoMode;
+      if (bankTransfer &&
+          state.pendingBookingId == null &&
+          !VietQrConfig.isConfigured &&
+          draft.finalAmount != 0) {
+        emit(
+          state.copyWith(
+            status: BookingFlowStatus.failure,
+            errorMessage:
+                'Chưa có cấu hình tài khoản nhận VietQR. Vui lòng liên hệ hỗ trợ.',
+          ),
+        );
+        return;
+      }
+      final provider = bankTransfer
+          ? 'SEPAY'
+          : PaymentProviderMapper.toBackendProvider(
+              draft.selectedPaymentMethod,
+            );
       if (state.pendingBookingId == null) {
         // Once dispatched, a lost POST response is an unknown outcome. Backend
         // has no idempotency key contract, so never automatically replay it.
@@ -565,73 +603,124 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           promotionCode: draft.appliedVoucher?.code,
         );
         if (_closing || emit.isDone) return;
-        if (booking.bookingId <= 0)
+        if (booking.bookingId <= 0) {
           throw StateError('Máy chủ không trả mã đơn hợp lệ.');
+        }
         _stopCountdown();
         emit(
           state.copyWith(
             pendingBookingId: booking.bookingId,
+            checkoutBooking: booking,
             bookingOutcomeUnknown: false,
             clearSeatHold: true,
           ),
         );
       }
-      if (state.pendingPaymentId == null) {
-        final payment = await bookingRepository.createPayment(
-          bookingId: state.pendingBookingId!,
-          provider: provider,
+      if (bankTransfer || state.checkoutBooking?.totalAmount == 0) {
+        final expected = state.checkoutBooking!;
+        final verified = await bookingRepository.getBookingById(
+          expected.bookingId,
         );
         if (_closing || emit.isDone) return;
-        if (payment.paymentId <= 0 ||
-            payment.bookingId != state.pendingBookingId ||
-            payment.amount <= 0) {
-          throw StateError('Máy chủ trả thông tin thanh toán không hợp lệ.');
+        if (verified == null ||
+            verified.bookingId != expected.bookingId ||
+            verified.bookingCode != expected.bookingCode ||
+            verified.orderCode != expected.orderCode ||
+            verified.totalAmount != expected.totalAmount ||
+            verified.totalAmount < 0 ||
+            verified.orderCode == null ||
+            verified.orderCode!.isEmpty) {
+          throw StateError('Thông tin đơn thanh toán không khớp.');
         }
         emit(
           state.copyWith(
-            pendingPaymentId: payment.paymentId,
-            pendingPaymentAmount: payment.amount,
-            pendingPaymentUrl: payment.paymentUrl,
-            pendingQrCodeUrl: payment.qrCodeUrl,
-            pendingDeeplink: payment.deeplink,
+            checkoutBooking: verified,
+            pendingPaymentAmount: verified.totalAmount,
           ),
         );
-        if (!ApiConfig.isDemoMode && payment.isDemo) {
+        if (!verified.isPaid || verified.paymentStatus != 'DA_THANH_TOAN') {
+          final pending =
+              verified.isPending &&
+              verified.paymentStatus == 'CHO_THANH_TOAN' &&
+              verified.expiresAt != null &&
+              verified.expiresAt!.isAfter(_now());
           emit(
             state.copyWith(
-              status: BookingFlowStatus.blockedByBackend,
-              errorMessage:
-                  'BLOCKED_BY_BACKEND: Máy chủ chỉ hỗ trợ cổng thanh toán thử nghiệm, chưa hỗ trợ thanh toán thực tế.',
-            ),
-          );
-          return;
-        }
-      }
-      if (!state.paymentConfirmed) {
-        final payment = await bookingRepository.getPaymentStatus(
-          state.pendingPaymentId!,
-        );
-        if (_closing || emit.isDone) return;
-        if (payment.paymentId != state.pendingPaymentId ||
-            payment.bookingId != state.pendingBookingId ||
-            payment.amount != state.pendingPaymentAmount ||
-            (!ApiConfig.isDemoMode && payment.isDemo)) {
-          throw StateError('Kết quả thanh toán không khớp với đơn hiện tại.');
-        }
-        if (!payment.isSuccess) {
-          emit(
-            state.copyWith(
-              status: payment.isPending
+              status: pending
                   ? BookingFlowStatus.paymentPending
                   : BookingFlowStatus.failure,
-              errorMessage: payment.isPending
-                  ? 'Thanh toán đang chờ xử lý. Hoàn tất tại cổng thanh toán rồi kiểm tra lại.'
-                  : 'Thanh toán không thành công. Đơn và giao dịch hiện tại được giữ để kiểm tra, không tạo lại đơn.',
+              pendingQrCodeUrl: pending
+                  ? VietQrConfig.imageUrl(
+                      verified.totalAmount,
+                      verified.orderCode!,
+                    )
+                  : null,
+              errorMessage: pending
+                  ? 'Chuyển khoản đúng số tiền và nội dung mã đơn. Hệ thống sẽ xác minh thanh toán; nhấn kiểm tra lại sau khi chuyển khoản.'
+                  : 'Đơn chưa đủ điều kiện xuất vé, đã hết hạn hoặc bị hủy. Vui lòng liên hệ hỗ trợ nếu đã chuyển tiền.',
             ),
           );
           return;
         }
         emit(state.copyWith(paymentConfirmed: true));
+      } else {
+        if (state.pendingPaymentId == null) {
+          final payment = await bookingRepository.createPayment(
+            bookingId: state.pendingBookingId!,
+            provider: provider,
+          );
+          if (_closing || emit.isDone) return;
+          if (payment.paymentId <= 0 ||
+              payment.bookingId != state.pendingBookingId ||
+              payment.amount <= 0) {
+            throw StateError('Máy chủ trả thông tin thanh toán không hợp lệ.');
+          }
+          emit(
+            state.copyWith(
+              pendingPaymentId: payment.paymentId,
+              pendingPaymentAmount: payment.amount,
+              pendingPaymentUrl: payment.paymentUrl,
+              pendingQrCodeUrl: payment.qrCodeUrl,
+              pendingDeeplink: payment.deeplink,
+            ),
+          );
+          if (!ApiConfig.isDemoMode && payment.isDemo) {
+            emit(
+              state.copyWith(
+                status: BookingFlowStatus.blockedByBackend,
+                errorMessage:
+                    'BLOCKED_BY_BACKEND: Máy chủ chỉ hỗ trợ cổng thanh toán thử nghiệm, chưa hỗ trợ thanh toán thực tế.',
+              ),
+            );
+            return;
+          }
+        }
+        if (!state.paymentConfirmed) {
+          final payment = await bookingRepository.getPaymentStatus(
+            state.pendingPaymentId!,
+          );
+          if (_closing || emit.isDone) return;
+          if (payment.paymentId != state.pendingPaymentId ||
+              payment.bookingId != state.pendingBookingId ||
+              payment.amount != state.pendingPaymentAmount ||
+              (!ApiConfig.isDemoMode && payment.isDemo)) {
+            throw StateError('Kết quả thanh toán không khớp với đơn hiện tại.');
+          }
+          if (!payment.isSuccess) {
+            emit(
+              state.copyWith(
+                status: payment.isPending
+                    ? BookingFlowStatus.paymentPending
+                    : BookingFlowStatus.failure,
+                errorMessage: payment.isPending
+                    ? 'Thanh toán đang chờ xử lý. Hoàn tất tại cổng thanh toán rồi kiểm tra lại.'
+                    : 'Thanh toán không thành công. Đơn và giao dịch hiện tại được giữ để kiểm tra, không tạo lại đơn.',
+              ),
+            );
+            return;
+          }
+          emit(state.copyWith(paymentConfirmed: true));
+        }
       }
       final tickets = await resolvePaidBookingTickets(
         bookingRepository,
@@ -727,15 +816,16 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   }
 
   @override
-  Future<void> close() {
+  Future<void> close() async {
     _closing = true;
     _stopCountdown();
     if (state.seatHold != null &&
         state.createdTicket == null &&
         !state.isCheckoutLocked &&
         !_confirmBusy) {
-      unawaited(_releaseOnClose(state.seatHold!.holdToken));
+      await _releaseOnClose(state.seatHold!.holdToken);
     }
-    return super.close();
+    await super.close();
+    await _holdFinished?.future;
   }
 }

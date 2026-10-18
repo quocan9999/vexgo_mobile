@@ -359,6 +359,13 @@ void main() {
     test(
       'TickCountdownEvent reaching 0 triggers timeout, releases seat hold and resets step',
       () async {
+        await bloc.close();
+        var clock = DateTime.now();
+        bloc = BookingFlowBloc(
+          seatRepository: seatRepo,
+          bookingRepository: MockBookingRepository(),
+          now: () => clock,
+        );
         bloc.add(
           InitBookingFlowEvent(trip: testTrip, date: DateTime(2026, 10, 1)),
         );
@@ -381,13 +388,15 @@ void main() {
         bloc.add(const NextStepEvent());
         await bloc.stream.firstWhere((s) => s.seatHold != null);
 
-        // Fast-forward countdown down to 1 second
-        for (int i = 0; i < 599; i++) {
-          bloc.add(const TickCountdownEvent());
-        }
+        // Advance the clock to one second before the authoritative deadline.
+        clock = bloc.state.seatHold!.expiresAt.subtract(
+          const Duration(seconds: 1),
+        );
+        bloc.add(const TickCountdownEvent());
         await bloc.stream.firstWhere((s) => s.countdownSeconds == 1);
 
-        // Final tick: hits 0 -> timeout!
+        // Reconcile after the deadline, as when resuming a suspended app.
+        clock = bloc.state.seatHold!.expiresAt.add(const Duration(seconds: 1));
         bloc.add(const TickCountdownEvent());
         await expectLater(
           bloc.stream,
@@ -555,6 +564,31 @@ void main() {
           equals('spy_hold_token_123'),
         );
 
+        testBloc.add(
+          const SelectPickupPointEvent(
+            StopPointModel(id: 'p', name: 'Pickup', time: '23:00', address: ''),
+          ),
+        );
+        testBloc.add(
+          const SelectDropoffPointEvent(
+            StopPointModel(
+              id: 'd',
+              name: 'Dropoff',
+              time: '06:00',
+              address: '',
+            ),
+          ),
+        );
+        testBloc.add(
+          const UpdatePassengerInfoEvent(
+            name: 'Test Passenger',
+            phone: '0901234567',
+            email: 'test@example.com',
+          ),
+        );
+        await testBloc.stream.firstWhere(
+          (s) => s.isPickupValid && s.isDropoffValid && s.isPassengerValid,
+        );
         // Confirm booking
         testBloc.add(const ConfirmPaymentEvent());
         await testBloc.stream.firstWhere(
