@@ -78,7 +78,14 @@ class AppRoutes {
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           final ticket = extra?['ticket'] as TicketModel;
-          return BookingSuccessScreen(ticket: ticket);
+          return BookingSuccessScreen(
+            ticket: ticket,
+            tickets:
+                (extra?['tickets'] as List?)
+                    ?.whereType<TicketModel>()
+                    .toList() ??
+                const [],
+          );
         },
       ),
       GoRoute(
