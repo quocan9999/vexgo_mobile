@@ -256,7 +256,10 @@ void main() {
         'bookingId': 888,
         'status': raw,
       });
-      expect(payment.isPending, isTrue);
+      expect(payment.isPending, raw.toUpperCase() == 'PENDING');
+      if (raw == 'PROCESSING' || raw == 'UNRECOGNIZED') {
+        expect(payment.status, PaymentStatus.unknown);
+      }
       expect(payment.isFailed, isFalse);
       expect(payment.isSuccess, isFalse);
     });
