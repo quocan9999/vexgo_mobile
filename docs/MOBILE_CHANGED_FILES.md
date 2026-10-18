@@ -1,0 +1,86 @@
+# Changed files since audited baseline
+
+Source freeze: 0a58e3f59cd8214f3e4e3d18c5d70a0118c61f2b.
+
+Committed implementation and regression files; original uncommitted user changes are excluded from this manifest. The routes file includes only the committed issued-tickets hunk.
+
+- `lib/app/app.dart`
+- `lib/app/routes.dart`
+- `lib/core/network/api_client.dart`
+- `lib/core/network/api_config.dart`
+- `lib/core/network/api_exceptions.dart`
+- `lib/core/network/token_storage.dart`
+- `lib/core/network/vietqr_config.dart`
+- `lib/data/datasources/remote/auth_remote_data_source.dart`
+- `lib/data/datasources/remote/booking_remote_data_source.dart`
+- `lib/data/datasources/remote/notification_remote_data_source.dart`
+- `lib/data/datasources/remote/ticket_remote_data_source.dart`
+- `lib/data/datasources/remote/trip_remote_data_source.dart`
+- `lib/data/models/booking_model.dart`
+- `lib/data/models/booking_quote_model.dart`
+- `lib/data/models/payment_transaction_model.dart`
+- `lib/data/models/seat_model.dart`
+- `lib/data/models/ticket_model.dart`
+- `lib/data/models/user_model.dart`
+- `lib/data/repositories/auth_repository.dart`
+- `lib/data/repositories/booking_repository.dart`
+- `lib/features/user/booking/bloc/booking_flow_bloc.dart`
+- `lib/features/user/booking/bloc/booking_flow_event.dart`
+- `lib/features/user/booking/bloc/booking_flow_state.dart`
+- `lib/features/user/booking/presentation/screens/booking_flow_screen.dart`
+- `lib/features/user/booking/presentation/screens/booking_success_screen.dart`
+- `lib/features/user/booking/presentation/steps/step_4_passenger_info.dart`
+- `lib/features/user/booking/presentation/steps/step_5_trip_summary.dart`
+- `lib/features/user/booking/presentation/steps/step_6_payment.dart`
+- `lib/features/user/booking/presentation/widgets/booking_bottom_bar.dart`
+- `lib/features/user/booking/presentation/widgets/seat_item.dart`
+- `lib/features/user/my_bookings/bloc/my_tickets_bloc.dart`
+- `lib/features/user/my_bookings/bloc/my_tickets_event.dart`
+- `lib/features/user/my_bookings/bloc/my_tickets_state.dart`
+- `lib/features/user/my_bookings/bloc/ticket_read_cubit.dart`
+- `lib/features/user/my_bookings/presentation/screens/my_tickets_screen.dart`
+- `lib/features/user/my_bookings/presentation/screens/ticket_detail_screen.dart`
+- `lib/features/user/my_bookings/presentation/widgets/boarding_pass_card.dart`
+- `lib/features/user/my_bookings/presentation/widgets/guest_ticket_lookup_panel.dart`
+- `lib/features/user/my_bookings/presentation/widgets/ticket_qr_modal.dart`
+- `lib/features/user/my_bookings/presentation/widgets/ticket_summary_card.dart`
+- `lib/features/user/notification/bloc/notification_bloc.dart`
+- `lib/features/user/notification/bloc/notification_state.dart`
+- `lib/features/user/notification/presentation/screens/notifications_screen.dart`
+- `lib/features/user/profile/bloc/auth_bloc.dart`
+- `lib/features/user/profile/bloc/auth_event.dart`
+- `lib/features/user/profile/bloc/auth_state.dart`
+- `lib/features/user/profile/presentation/screens/profile_screen.dart`
+- `lib/features/user/profile/presentation/widgets/auth_modal_sheet.dart`
+- `lib/features/user/profile/presentation/widgets/change_password_dialog.dart`
+- `lib/features/user/profile/presentation/widgets/edit_profile_dialog.dart`
+- `lib/features/user/search_trips/bloc/search_trips_bloc.dart`
+- `lib/features/user/search_trips/bloc/search_trips_state.dart`
+- `lib/features/user/search_trips/bloc/trip_detail_cubit.dart`
+- `lib/features/user/search_trips/presentation/screens/search_trips_screen.dart`
+- `lib/features/user/search_trips/presentation/widgets/date_selector_strip.dart`
+- `lib/features/user/search_trips/presentation/widgets/trip_card.dart`
+- `lib/features/user/search_trips/presentation/widgets/trip_detail_sheet.dart`
+- `test/auth_and_profile_flow_test.dart`
+- `test/auth_lifecycle_regression_test.dart`
+- `test/booking_integrity_regression_test.dart`
+- `test/change_password_regression_test.dart`
+- `test/feature_completion_regression_test.dart`
+- `test/feature_errors_regression_test.dart`
+- `test/network_and_datasources_test.dart`
+- `test/payment_integrity_test.dart`
+- `test/pricing_completion_regression_test.dart`
+- `test/qa/api_mapping_test.dart`
+- `test/qa/booking_risk_test.dart`
+- `test/qa/qa_fixtures.dart`
+- `test/real_vs_demo_mode_test.dart`
+- `test/round_4_findings_test.dart`
+- `test/search_request_race_test.dart`
+- `test/seat_hold_flow_test.dart`
+- `test/session_refresh_regression_test.dart`
+
+Documentation added with this delivery:
+- `docs/MOBILE_EXECUTION_PLAN.md`
+- `docs/BACKEND_DATABASE_UPGRADE_REVIEW.md`
+- `docs/MOBILE_FINAL_REPORT.md`
+- `docs/MOBILE_CHANGED_FILES.md`
