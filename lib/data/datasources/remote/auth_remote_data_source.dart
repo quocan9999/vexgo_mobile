@@ -21,6 +21,10 @@ abstract class AuthRemoteDataSource {
     String? citizenId,
   });
   Future<void> logout();
+  Future<String> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -252,5 +256,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (_) {
       // Local logout is complete even when remote revocation is unavailable.
     }
+  }
+
+  @override
+  Future<String> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final generation = _generation;
+    final sessionVersion = TokenStorage.sessionVersion;
+    final res = await client.post(
+      ApiConfig.authChangePassword,
+      body: {'oldPassword': oldPassword, 'newPassword': newPassword},
+      requiresAuth: true,
+    );
+    if (generation != _generation ||
+        sessionVersion != TokenStorage.sessionVersion) {
+      throw StateError('Phiên đăng nhập đã thay đổi.');
+    }
+    final data =
+        res is Map<String, dynamic> && res['data'] is Map<String, dynamic>
+        ? res['data'] as Map<String, dynamic>
+        : res;
+    if (data is! Map<String, dynamic> ||
+        data['message'] is! String ||
+        (data['message'] as String).trim().isEmpty) {
+      throw const FormatException('Máy chủ chưa xác nhận đổi mật khẩu.');
+    }
+    return data['message'] as String;
   }
 }

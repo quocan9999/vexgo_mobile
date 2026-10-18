@@ -65,6 +65,18 @@ class UpdateProfileEvent extends AuthEvent {
   List<Object?> get props => [updatedUser];
 }
 
+class ChangePasswordEvent extends AuthEvent {
+  final String oldPassword;
+  final String newPassword;
+  const ChangePasswordEvent({
+    required this.oldPassword,
+    required this.newPassword,
+  });
+
+  @override
+  String toString() => 'ChangePasswordEvent([redacted])';
+}
+
 class RedeemPointsEvent extends AuthEvent {
   final int points;
   final String rewardTitle;

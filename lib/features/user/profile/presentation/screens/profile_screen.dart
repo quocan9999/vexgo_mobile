@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
@@ -10,6 +11,7 @@ import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
 import '../widgets/auth_modal_sheet.dart';
 import '../widgets/edit_profile_dialog.dart';
+import '../widgets/change_password_dialog.dart';
 import '../widgets/loyalty_card_widget.dart';
 import '../widgets/loyalty_history_sheet.dart';
 
@@ -93,21 +95,12 @@ class ProfileScreen extends StatelessWidget {
                         icon: Icons.lock_outline_rounded,
                         title: 'Đổi mật khẩu',
                         subtitle: 'Cập nhật mật khẩu định kỳ để an toàn',
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Đổi mật khẩu chưa được máy chủ hỗ trợ.',
-                              ),
-                            ),
-                          );
-                        },
+                        onTap: () => ChangePasswordDialog.show(context),
                       ),
                       _MenuItem(
                         icon: Icons.people_outline_rounded,
                         title: 'Danh sách hành khách thường xuyên',
-                        subtitle: 'Lưu thông tin để đặt vé nhanh hơn',
-                        onTap: () {},
+                        subtitle: 'Chưa hỗ trợ lưu hành khách trên máy chủ',
                       ),
                     ]),
                     const SizedBox(height: AppDimensions.base),
@@ -127,8 +120,7 @@ class ProfileScreen extends StatelessWidget {
                         icon: Icons.confirmation_number_outlined,
                         iconColor: AppColors.primary,
                         title: 'Ví Voucher & Khuyến mãi',
-                        subtitle: 'Mã giảm giá đang có hiệu lực',
-                        onTap: () {},
+                        subtitle: 'Nhập mã khuyến mãi tại bước xác nhận đặt vé',
                       ),
                     ]),
                     const SizedBox(height: AppDimensions.base),
@@ -139,6 +131,9 @@ class ProfileScreen extends StatelessWidget {
                     _MenuItem(
                       icon: Icons.language_rounded,
                       title: 'Ngôn ngữ (Language)',
+                      subtitle: ApiConfig.isDemoMode
+                          ? null
+                          : 'Hiện hỗ trợ Tiếng Việt',
                       trailing: Text(
                         state.language == 'en' ? 'English' : 'Tiếng Việt',
                         style: AppTextStyles.bodyMedium.copyWith(
@@ -146,31 +141,41 @@ class ProfileScreen extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      onTap: () {
-                        final next = state.language == 'vi' ? 'en' : 'vi';
-                        context.read<AuthBloc>().add(ToggleLanguageEvent(next));
-                      },
+                      onTap: !ApiConfig.isDemoMode
+                          ? null
+                          : () {
+                              final next = state.language == 'vi' ? 'en' : 'vi';
+                              context.read<AuthBloc>().add(
+                                ToggleLanguageEvent(next),
+                              );
+                            },
                     ),
                     _MenuItem(
                       icon: Icons.notifications_none_rounded,
                       title: 'Thông báo đẩy',
+                      subtitle: ApiConfig.isDemoMode
+                          ? null
+                          : 'Chưa tích hợp thông báo đẩy; xem thông báo trong ứng dụng',
                       trailing: Switch(
-                        value: state.pushEnabled,
+                        value: ApiConfig.isDemoMode && state.pushEnabled,
                         activeThumbColor: AppColors.primary,
-                        onChanged: (val) {
-                          context.read<AuthBloc>().add(
-                            TogglePushNotificationEvent(val),
-                          );
-                        },
+                        onChanged: !ApiConfig.isDemoMode
+                            ? null
+                            : (val) {
+                                context.read<AuthBloc>().add(
+                                  TogglePushNotificationEvent(val),
+                                );
+                              },
                       ),
                     ),
                     _MenuItem(
                       icon: Icons.fingerprint_rounded,
                       title: 'Đăng nhập sinh trắc học',
+                      subtitle: 'Chưa hỗ trợ',
                       trailing: Switch(
-                        value: true,
+                        value: false,
                         activeThumbColor: AppColors.primary,
-                        onChanged: (_) {},
+                        onChanged: null,
                       ),
                     ),
                   ]),
@@ -181,14 +186,14 @@ class ProfileScreen extends StatelessWidget {
                     _MenuItem(
                       icon: Icons.headset_mic_outlined,
                       title: 'Tổng đài chăm sóc khách hàng',
-                      subtitle: '1900 8888 (24/7, 1.000đ/phút)',
+                      subtitle: 'Chưa cấu hình tổng đài chính thức',
                       onTap: () {
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
                             title: const Text('Tổng đài hỗ trợ VexGo'),
                             content: const Text(
-                              'Quý khách vui lòng gọi 1900 8888 để được giải đáp thắc mắc và hỗ trợ đặt vé khẩn cấp.',
+                              'Liên hệ nhà xe theo thông tin được cung cấp trên vé của bạn.',
                             ),
                             actions: [
                               TextButton(
@@ -203,7 +208,8 @@ class ProfileScreen extends StatelessWidget {
                     _MenuItem(
                       icon: Icons.policy_outlined,
                       title: 'Quy chế hoạt động & Chính sách',
-                      onTap: () {},
+                      subtitle:
+                          'Chưa có nội dung công bố; xem chính sách vé trước khi hủy',
                     ),
                     _MenuItem(
                       icon: Icons.info_outline_rounded,
@@ -425,7 +431,7 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Expanded(
             child: _buildStatItem(
-              '12',
+              ApiConfig.isDemoMode ? '12' : '—',
               'Chuyến đã đi',
               Icons.directions_bus_rounded,
               AppColors.primary,
@@ -443,7 +449,7 @@ class ProfileScreen extends StatelessWidget {
           Container(width: 1, height: 32, color: AppColors.neutral200),
           Expanded(
             child: _buildStatItem(
-              '3',
+              ApiConfig.isDemoMode ? '3' : '—',
               'Voucher',
               Icons.card_giftcard_rounded,
               const Color(0xFF0F9D58),

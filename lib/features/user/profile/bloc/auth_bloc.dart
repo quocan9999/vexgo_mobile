@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/core/network/api_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,6 +33,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RequestRegisterOtpEvent>(_onRequestRegisterOtp);
     on<VerifyOtpAndRegisterEvent>(_onVerifyOtpAndRegister);
     on<UpdateProfileEvent>(_onUpdateProfile);
+    on<ChangePasswordEvent>(_onChangePassword);
     on<RedeemPointsEvent>(_onRedeemPoints);
     on<ToggleLanguageEvent>(_onToggleLanguage);
     on<TogglePushNotificationEvent>(_onTogglePushNotification);
@@ -229,6 +231,55 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.failure,
           errorMessage: e.toString().replaceAll('Exception: ', ''),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onChangePassword(
+    ChangePasswordEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (!state.isAuthenticated ||
+        state.passwordChangeStatus == PasswordChangeStatus.submitting) {
+      return;
+    }
+    final bytes = utf8.encode(event.newPassword).length;
+    if (event.oldPassword.isEmpty ||
+        bytes < 8 ||
+        bytes > 72 ||
+        event.oldPassword == event.newPassword) {
+      emit(
+        state.copyWith(
+          passwordChangeStatus: PasswordChangeStatus.failure,
+          passwordChangeError:
+              'Nhập mật khẩu cũ và mật khẩu mới khác, dài 8–72 byte UTF-8.',
+        ),
+      );
+      return;
+    }
+    final generation = _generation;
+    final sessionVersion = TokenStorage.sessionVersion;
+    emit(state.copyWith(passwordChangeStatus: PasswordChangeStatus.submitting));
+    try {
+      await authRepository.changePassword(
+        oldPassword: event.oldPassword,
+        newPassword: event.newPassword,
+      );
+      if (generation != _generation ||
+          sessionVersion != TokenStorage.sessionVersion) {
+        return;
+      }
+      emit(state.copyWith(passwordChangeStatus: PasswordChangeStatus.success));
+    } catch (e) {
+      if (generation != _generation ||
+          sessionVersion != TokenStorage.sessionVersion) {
+        return;
+      }
+      emit(
+        state.copyWith(
+          passwordChangeStatus: PasswordChangeStatus.failure,
+          passwordChangeError: e.toString().replaceAll('Exception: ', ''),
         ),
       );
     }

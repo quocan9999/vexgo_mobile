@@ -14,6 +14,12 @@ import 'package:vexgo_app/features/user/profile/bloc/auth_state.dart';
 class FakeAuthRepository implements AuthRepository {
   UserModel? user;
 
+  @override
+  Future<String> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async => 'Đổi mật khẩu thành công.';
+
   FakeAuthRepository({this.user});
 
   @override

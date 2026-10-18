@@ -22,10 +22,22 @@ abstract class AuthRepository {
     required String rewardTitle,
   });
   Future<void> logout();
+  Future<String> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  });
 }
 
 class MockAuthRepository implements AuthRepository {
   UserModel? _currentUser;
+
+  @override
+  Future<String> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    throw UnsupportedError('Đổi mật khẩu cần kết nối tài khoản máy chủ thật.');
+  }
 
   @override
   Future<UserModel?> getCurrentUser() async {
@@ -253,6 +265,15 @@ class HybridAuthRepository implements AuthRepository {
 
   @override
   Future<void> logout() => remoteDataSource.logout();
+
+  @override
+  Future<String> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) => remoteDataSource.changePassword(
+    oldPassword: oldPassword,
+    newPassword: newPassword,
+  );
 }
 
 /// Real auth repository: 100% remote calls to backend authentication
@@ -311,4 +332,13 @@ class RealAuthRepository implements AuthRepository {
 
   @override
   Future<void> logout() => remoteDataSource.logout();
+
+  @override
+  Future<String> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) => remoteDataSource.changePassword(
+    oldPassword: oldPassword,
+    newPassword: newPassword,
+  );
 }

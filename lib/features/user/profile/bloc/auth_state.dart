@@ -10,6 +10,8 @@ enum AuthStatus {
   failure,
 }
 
+enum PasswordChangeStatus { idle, submitting, success, failure }
+
 class AuthState extends Equatable {
   final AuthStatus status;
   final UserModel? user;
@@ -21,6 +23,8 @@ class AuthState extends Equatable {
   final String? pendingChallengeId;
   final String language; // 'vi' or 'en'
   final bool pushEnabled;
+  final PasswordChangeStatus passwordChangeStatus;
+  final String? passwordChangeError;
 
   const AuthState({
     this.status = AuthStatus.initial,
@@ -33,6 +37,8 @@ class AuthState extends Equatable {
     this.pendingChallengeId,
     this.language = 'vi',
     this.pushEnabled = true,
+    this.passwordChangeStatus = PasswordChangeStatus.idle,
+    this.passwordChangeError,
   });
 
   bool get isAuthenticated =>
@@ -52,6 +58,8 @@ class AuthState extends Equatable {
     String? language,
     bool? pushEnabled,
     bool clearMessages = false,
+    PasswordChangeStatus? passwordChangeStatus,
+    String? passwordChangeError,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -74,6 +82,10 @@ class AuthState extends Equatable {
           : (pendingChallengeId ?? this.pendingChallengeId),
       language: language ?? this.language,
       pushEnabled: pushEnabled ?? this.pushEnabled,
+      passwordChangeStatus: clearUser
+          ? PasswordChangeStatus.idle
+          : (passwordChangeStatus ?? this.passwordChangeStatus),
+      passwordChangeError: passwordChangeError,
     );
   }
 
@@ -89,5 +101,7 @@ class AuthState extends Equatable {
     pendingChallengeId,
     language,
     pushEnabled,
+    passwordChangeStatus,
+    passwordChangeError,
   ];
 }
