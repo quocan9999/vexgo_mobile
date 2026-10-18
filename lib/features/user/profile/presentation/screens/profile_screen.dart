@@ -284,18 +284,23 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: AppColors.success,
-                    shape: BoxShape.circle,
+              if (user.daXacThucSoDienThoai)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(
+                      color: AppColors.success,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      size: 12,
+                      color: Colors.white,
+                    ),
                   ),
-                  child: const Icon(Icons.check, size: 12, color: Colors.white),
                 ),
-              ),
             ],
           ),
           const SizedBox(width: AppDimensions.md),
@@ -318,11 +323,12 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(
-                      Icons.verified_rounded,
-                      color: AppColors.primary,
-                      size: 16,
-                    ),
+                    if (user.daXacThucSoDienThoai)
+                      const Icon(
+                        Icons.verified_rounded,
+                        color: AppColors.primary,
+                        size: 16,
+                      ),
                   ],
                 ),
                 const SizedBox(height: 2),
