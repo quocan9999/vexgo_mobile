@@ -64,6 +64,7 @@ class FakeBookingRemoteDataSource implements BookingRemoteDataSource {
     required int tripId,
     required List<int> seatIds,
     String? promotionCode,
+    String? contactPhone,
   }) async => throw UnimplementedError();
 
   @override

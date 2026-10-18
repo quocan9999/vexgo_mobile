@@ -11,6 +11,7 @@ abstract class BookingRemoteDataSource {
     required int tripId,
     required List<int> seatIds,
     String? promotionCode,
+    String? contactPhone,
   });
 
   Future<PromotionValidationModel> validatePromotion({
@@ -49,15 +50,22 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required int tripId,
     required List<int> seatIds,
     String? promotionCode,
+    String? contactPhone,
   }) async {
     final body = {
       'tripId': tripId,
       'seatIds': seatIds,
+      if (contactPhone != null && contactPhone.trim().isNotEmpty)
+        'contactPhone': contactPhone.trim(),
       if (promotionCode != null && promotionCode.isNotEmpty)
         'promotionCode': promotionCode,
     };
 
-    final res = await client.post(ApiConfig.bookingQuote, body: body);
+    final res = await client.post(
+      ApiConfig.bookingQuote,
+      body: body,
+      optionalAuth: true,
+    );
     if (res is Map<String, dynamic>) {
       final data = res['data'] ?? res;
       return BookingQuoteModel.fromJson(data as Map<String, dynamic>);

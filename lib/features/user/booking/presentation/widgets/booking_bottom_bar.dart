@@ -201,7 +201,9 @@ class BookingBottomBar extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                CurrencyFormatter.format(state.finalAmount),
+                state.finalAmount == null
+                    ? 'Đang xác minh giá'
+                    : CurrencyFormatter.format(state.finalAmount),
                 style: AppTextStyles.price.copyWith(
                   fontSize: 19,
                   color: AppColors.secondary,
@@ -213,7 +215,10 @@ class BookingBottomBar extends StatelessWidget {
         const SizedBox(width: AppDimensions.base),
         SizedBox(
           width: 170,
-          child: CustomButton(text: 'Thanh toán', onPressed: onNext),
+          child: CustomButton(
+            text: 'Thanh toán',
+            onPressed: state.canProceed ? onNext : null,
+          ),
         ),
       ],
     );
@@ -237,6 +242,8 @@ class BookingBottomBar extends StatelessWidget {
           child: CustomButton(
             text: state.pendingBookingId != null
                 ? 'Kiểm tra đơn hiện tại'
+                : state.finalAmount == null
+                ? 'Đang xác minh giá'
                 : 'Thanh toán ${CurrencyFormatter.format(state.finalAmount)}',
             isLoading: isSubmitting,
             prefixIcon: const Icon(
@@ -247,6 +254,8 @@ class BookingBottomBar extends StatelessWidget {
             onPressed:
                 isSubmitting ||
                     state.bookingOutcomeUnknown ||
+                    state.quoteLoading ||
+                    (state.pendingBookingId == null && !state.hasUsableQuote) ||
                     state.status == BookingFlowStatus.blockedByBackend
                 ? null
                 : onConfirmPayment,

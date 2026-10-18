@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/network/api_exceptions.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
+import 'package:vexgo_app/data/models/voucher_model.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
@@ -21,6 +23,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   bool _confirmBusy = false;
   bool _closing = false;
   Completer<void>? _holdFinished;
+  int _quoteRevision = 0;
+  String? _acceptedQuoteKey;
 
   BookingFlowBloc({
     required this.seatRepository,
@@ -36,6 +40,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     on<UpdatePassengerInfoEvent>(_onUpdatePassengerInfo);
     on<ApplyVoucherEvent>(_onApplyVoucher);
     on<RemoveVoucherEvent>(_onRemoveVoucher);
+    on<ApplyPromotionCodeEvent>(_onApplyPromotionCode);
+    on<RefreshBookingQuoteEvent>((event, emit) => _loadQuote(emit));
     on<SelectPaymentMethodEvent>(_onSelectPaymentMethod);
     on<TickCountdownEvent>(_onTickCountdown);
     on<NextStepEvent>(_onNextStep);
@@ -49,8 +55,13 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     InitBookingFlowEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
+    _invalidateQuote();
     emit(
       state.copyWith(
+        requiresAuthoritativeQuote: bookingRepository is! MockBookingRepository,
+        clearQuote: true,
+        quoteLoading: false,
+        quoteError: null,
         status: BookingFlowStatus.loading,
         trip: event.trip,
         date: event.date,
@@ -173,12 +184,16 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     } else {
       current.add(seat!);
     }
+    _invalidateQuote();
     _holdBusy = true;
     final hold = state.seatHold;
     _stopCountdown();
     emit(
       state.copyWith(
         selectedSeats: current,
+        clearQuote: true,
+        quoteLoading: false,
+        quoteError: null,
         clearSeatHold: true,
         errorMessage: null,
       ),
@@ -212,11 +227,16 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     emit(state.copyWith(selectedDropoffPoint: event.point));
   }
 
-  void _onUpdatePassengerInfo(
+  Future<void> _onUpdatePassengerInfo(
     UpdatePassengerInfoEvent event,
     Emitter<BookingFlowState> emit,
-  ) {
+  ) async {
     if (state.isCheckoutLocked) return;
+    final changed =
+        state.passengerName.trim() != event.name.trim() ||
+        state.passengerPhone.trim() != event.phone.trim() ||
+        state.passengerEmail.trim() != event.email.trim();
+    if (changed) _invalidateQuote();
     emit(
       state.copyWith(
         passengerName: event.name,
@@ -224,24 +244,172 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         passengerEmail: event.email,
         passengerNote: event.note,
         savePassengerInfo: event.saveInfo,
+        clearQuote: changed,
+        quoteLoading: changed ? false : null,
+        quoteError: changed ? null : state.quoteError,
       ),
     );
+    if (changed &&
+        state.step.index >= BookingStep.tripSummary.index &&
+        state.isPassengerValid) {
+      await _loadQuote(emit);
+    }
   }
 
-  void _onApplyVoucher(
+  Future<void> _onApplyVoucher(
     ApplyVoucherEvent event,
     Emitter<BookingFlowState> emit,
-  ) {
+  ) async {
     if (state.isCheckoutLocked) return;
-    emit(state.copyWith(appliedVoucher: event.voucher));
+    if (!state.requiresAuthoritativeQuote) {
+      emit(state.copyWith(appliedVoucher: event.voucher));
+      return;
+    }
+    await _applyCode(event.voucher.code, emit);
   }
 
-  void _onRemoveVoucher(
+  Future<void> _onApplyPromotionCode(
+    ApplyPromotionCodeEvent event,
+    Emitter<BookingFlowState> emit,
+  ) async {
+    if (state.isCheckoutLocked) return;
+    await _applyCode(event.code, emit);
+  }
+
+  Future<void> _applyCode(String code, Emitter<BookingFlowState> emit) async {
+    final normalized = code.trim().toUpperCase();
+    if (state.quoteLoading && normalized == state.requestedPromotionCode) {
+      return;
+    }
+    _invalidateQuote();
+    emit(
+      state.copyWith(
+        requestedPromotionCode: normalized,
+        clearVoucher: true,
+        clearQuote: true,
+        quoteLoading: false,
+        quoteError: null,
+      ),
+    );
+    await _loadQuote(emit);
+  }
+
+  Future<void> _onRemoveVoucher(
     RemoveVoucherEvent event,
     Emitter<BookingFlowState> emit,
-  ) {
+  ) async {
     if (state.isCheckoutLocked) return;
-    emit(state.copyWith(clearVoucher: true));
+    _invalidateQuote();
+    emit(
+      state.copyWith(
+        clearVoucher: true,
+        requestedPromotionCode: '',
+        clearQuote: true,
+        quoteLoading: false,
+        quoteError: null,
+      ),
+    );
+    if (state.requiresAuthoritativeQuote) await _loadQuote(emit);
+  }
+
+  void _invalidateQuote() {
+    _quoteRevision++;
+    _acceptedQuoteKey = null;
+  }
+
+  String _quoteKey(BookingFlowState draft) {
+    final ids = draft.selectedSeats.map((seat) => seat.id).toList()..sort();
+    return '${draft.trip?.id}|${ids.join(',')}|${draft.passengerName.trim()}|${draft.passengerPhone.trim()}|${draft.passengerEmail.trim()}|${draft.requestedPromotionCode}|${TokenStorage.sessionVersion}';
+  }
+
+  bool get _hasCurrentQuote =>
+      state.hasUsableQuote &&
+      (!state.requiresAuthoritativeQuote ||
+          _acceptedQuoteKey == _quoteKey(state));
+
+  Future<void> _loadQuote(Emitter<BookingFlowState> emit) async {
+    if (!state.requiresAuthoritativeQuote ||
+        state.quoteLoading ||
+        state.isCheckoutLocked ||
+        !state.isSeatsValid ||
+        !state.isPassengerValid ||
+        _closing) {
+      return;
+    }
+    final revision = ++_quoteRevision;
+    final draft = state;
+    final key = _quoteKey(draft);
+    _acceptedQuoteKey = null;
+    emit(
+      state.copyWith(quoteLoading: true, clearQuote: true, quoteError: null),
+    );
+    try {
+      final quote = await bookingRepository.getBookingQuote(
+        tripId: draft.trip!.numericTripId ?? int.parse(draft.trip!.id),
+        seatIds: draft.selectedSeats
+            .map((seat) => seat.numericSeatId!)
+            .toList(),
+        promotionCode: draft.requestedPromotionCode.isEmpty
+            ? null
+            : draft.requestedPromotionCode,
+        contactPhone: draft.passengerPhone.trim(),
+      );
+      if (_closing || emit.isDone || revision != _quoteRevision) return;
+      if (_quoteKey(state) != key) {
+        emit(
+          state.copyWith(
+            quoteLoading: false,
+            clearQuote: true,
+            quoteError: 'Thông tin đặt vé đã thay đổi. Vui lòng cập nhật giá.',
+          ),
+        );
+        return;
+      }
+      if (quote.seatCount != draft.selectedSeats.length ||
+          quote.requiresPhoneBeforeBooking ||
+          (draft.requestedPromotionCode.isNotEmpty &&
+              (quote.appliedPromotionCode?.toUpperCase() !=
+                      draft.requestedPromotionCode ||
+                  (!quote.identityChecked &&
+                      !quote.phoneEligibilityChecked)))) {
+        throw StateError(
+          'Máy chủ chưa xác thực mã khuyến mãi cho thông tin liên hệ hiện tại.',
+        );
+      }
+      _acceptedQuoteKey = key;
+      final code = quote.appliedPromotionCode;
+      emit(
+        state.copyWith(
+          quote: quote,
+          quoteLoading: false,
+          quoteError: null,
+          clearVoucher: code == null || code.isEmpty,
+          appliedVoucher: code == null || code.isEmpty
+              ? null
+              : VoucherModel(
+                  code: code,
+                  title: code,
+                  description: quote.promotionDescription ?? '',
+                  discountAmount: quote.discountAmount,
+                  discountPercent: 0,
+                  minOrderAmount: 0,
+                  expiryDate: '',
+                  isApplicable: true,
+                ),
+        ),
+      );
+    } catch (error) {
+      if (_closing || emit.isDone || revision != _quoteRevision) return;
+      emit(
+        state.copyWith(
+          quoteLoading: false,
+          clearQuote: true,
+          quoteError: error is ApiException
+              ? error.message
+              : 'Chưa xác minh được giá vé hoặc mã khuyến mãi. Vui lòng cập nhật giá.',
+        ),
+      );
+    }
   }
 
   void _onSelectPaymentMethod(
@@ -273,8 +441,12 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
       return;
     }
     _stopCountdown();
+    _invalidateQuote();
     emit(
       state.copyWith(
+        clearQuote: true,
+        quoteLoading: false,
+        quoteError: null,
         countdownSeconds: 0,
         status: BookingFlowStatus.failure,
         errorMessage: 'Hết thời gian giữ ghế. Vui lòng chọn lại chỗ ngồi.',
@@ -423,10 +595,17 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
       }
     }
 
+    if (state.requiresAuthoritativeQuote &&
+        state.step == BookingStep.tripSummary &&
+        !_hasCurrentQuote) {
+      await _loadQuote(emit);
+      return;
+    }
     final nextIndex = state.step.index + 1;
     if (nextIndex < BookingStep.values.length) {
       final nextStep = BookingStep.values[nextIndex];
       emit(state.copyWith(step: nextStep, errorMessage: null));
+      if (nextStep == BookingStep.tripSummary) await _loadQuote(emit);
     }
   }
 
@@ -528,6 +707,18 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         _remainingSeconds(state.seatHold!.expiresAt) <= 0) {
       await _onTickCountdown(const TickCountdownEvent(), emit);
       return;
+    }
+    if (state.pendingBookingId == null &&
+        state.requiresAuthoritativeQuote &&
+        !_hasCurrentQuote) {
+      if (state.quoteLoading) return;
+      _confirmBusy = true;
+      try {
+        await _loadQuote(emit);
+      } finally {
+        _confirmBusy = false;
+      }
+      if (_closing || emit.isDone || !_hasCurrentQuote) return;
     }
     _confirmBusy = true;
     final draft = state;
@@ -640,6 +831,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         );
         if (!verified.isPaid || verified.paymentStatus != 'DA_THANH_TOAN') {
           final pending =
+              verified.totalAmount > 0 &&
               verified.isPending &&
               verified.paymentStatus == 'CHO_THANH_TOAN' &&
               verified.expiresAt != null &&
@@ -672,7 +864,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           if (_closing || emit.isDone) return;
           if (payment.paymentId <= 0 ||
               payment.bookingId != state.pendingBookingId ||
-              payment.amount <= 0) {
+              payment.amount <= 0 ||
+              payment.amount != state.checkoutBooking?.totalAmount) {
             throw StateError('Máy chủ trả thông tin thanh toán không hợp lệ.');
           }
           emit(

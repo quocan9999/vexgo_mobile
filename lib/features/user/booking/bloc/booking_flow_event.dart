@@ -144,3 +144,15 @@ class ConfirmPaymentEvent extends BookingFlowEvent {
 class ReleaseSeatHoldEvent extends BookingFlowEvent {
   const ReleaseSeatHoldEvent();
 }
+
+/// Uses the quote endpoint to validate a code against seats and customer identity.
+class ApplyPromotionCodeEvent extends BookingFlowEvent {
+  final String code;
+  const ApplyPromotionCodeEvent(this.code);
+  @override
+  List<Object?> get props => [code];
+}
+
+class RefreshBookingQuoteEvent extends BookingFlowEvent {
+  const RefreshBookingQuoteEvent();
+}

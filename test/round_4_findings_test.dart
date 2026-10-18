@@ -10,6 +10,7 @@ import 'package:vexgo_app/data/datasources/remote/seat_remote_data_source.dart';
 import 'package:vexgo_app/data/datasources/remote/trip_remote_data_source.dart';
 import 'package:vexgo_app/data/models/payment_transaction_model.dart';
 import 'package:vexgo_app/data/models/booking_model.dart';
+import 'package:vexgo_app/data/models/booking_quote_model.dart';
 import 'package:vexgo_app/data/models/seat_hold_model.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
@@ -453,6 +454,22 @@ class _MockSeatRepoValidHold extends FakeSeatRepository {
 }
 
 class _MockCountingBookingRepository extends HybridBookingRepository {
+  @override
+  Future<BookingQuoteModel> getBookingQuote({
+    required int tripId,
+    required List<int> seatIds,
+    String? promotionCode,
+    String? contactPhone,
+  }) async => BookingQuoteModel(
+    unitPrice: 250000,
+    seatCount: seatIds.length,
+    originalTotal: 250000 * seatIds.length,
+    discountAmount: 0,
+    finalTotal: 250000 * seatIds.length,
+    identityChecked: true,
+    phoneEligibilityChecked: true,
+  );
+
   int createBookingCallCount = 0;
   int getPaymentStatusCallCount = 0;
 

@@ -102,7 +102,20 @@ class CheckoutServer {
         ? <String, dynamic>{}
         : jsonDecode(request.body) as Map<String, dynamic>;
     Object? data;
-    if (path == '/trips/101/seats') {
+    if (path == '/bookings/quote') {
+      final count = (body['seatIds'] as List).length;
+      data = {
+        'unitPrice': '200000.00',
+        'seatCount': count,
+        'originalTotal': '${count * 200000}.00',
+        'discountAmount': '0.00',
+        'finalTotal': '${count * 200000}.00',
+        'currency': 'VND',
+        'identityChecked': true,
+        'phoneEligibilityChecked': true,
+        'requiresPhoneBeforeBooking': false,
+      };
+    } else if (path == '/trips/101/seats') {
       data = List.generate(
         7,
         (i) => {

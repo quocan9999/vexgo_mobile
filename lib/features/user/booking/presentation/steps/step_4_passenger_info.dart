@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
@@ -35,7 +36,7 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
     _phoneController = TextEditingController(text: widget.state.passengerPhone);
     _emailController = TextEditingController(text: widget.state.passengerEmail);
     _noteController = TextEditingController(text: widget.state.passengerNote);
-    _saveInfo = widget.state.savePassengerInfo;
+    _saveInfo = ApiConfig.isDemoMode && widget.state.savePassengerInfo;
   }
 
   @override
@@ -189,45 +190,46 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
 
                 const SizedBox(height: AppDimensions.md),
 
-                // Save info checkbox
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Checkbox(
-                        value: _saveInfo,
-                        activeColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
+                // Saved-passenger persistence has no backend contract yet.
+                if (ApiConfig.isDemoMode)
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Checkbox(
+                          value: _saveInfo,
+                          activeColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          onChanged: (val) {
+                            setState(() {
+                              _saveInfo = val ?? true;
+                            });
+                            _syncData();
+                          },
                         ),
-                        onChanged: (val) {
-                          setState(() {
-                            _saveInfo = val ?? true;
-                          });
-                          _syncData();
-                        },
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _saveInfo = !_saveInfo;
-                          });
-                          _syncData();
-                        },
-                        child: Text(
-                          'Lưu thông tin cho những lần đặt vé sau',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            fontSize: 13,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _saveInfo = !_saveInfo;
+                            });
+                            _syncData();
+                          },
+                          child: Text(
+                            'Lưu thông tin cho những lần đặt vé sau',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
           ),

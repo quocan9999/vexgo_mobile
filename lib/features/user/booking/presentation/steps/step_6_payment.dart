@@ -23,6 +23,18 @@ class Step6Payment extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (state.quoteError != null && state.pendingBookingId == null) ...[
+            Text(
+              state.quoteError!,
+              style: const TextStyle(color: AppColors.error),
+            ),
+            TextButton(
+              onPressed: state.quoteLoading
+                  ? null
+                  : () => bloc.add(const RefreshBookingQuoteEvent()),
+              child: const Text('Cập nhật giá vé'),
+            ),
+          ],
           if (state.errorMessage != null &&
               (state.isCheckoutLocked ||
                   state.status == BookingFlowStatus.blockedByBackend))
@@ -38,6 +50,17 @@ class Step6Payment extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: Text('Đơn đặt chỗ: #${state.pendingBookingId}'),
             ),
+          if (state.checkoutBooking != null) ...[
+            SelectableText('Mã đặt vé: ${state.checkoutBooking!.bookingCode}'),
+            for (final ticket in state.checkoutBooking!.tickets)
+              if (ticket.ticketCode.isNotEmpty)
+                SelectableText('Mã vé: ${ticket.ticketCode}'),
+            const SizedBox(height: 8),
+            const Text(
+              'Lưu mã vé và tra cứu bằng số điện thoại liên hệ để kiểm tra đơn sau khi rời màn hình.',
+            ),
+            const SizedBox(height: 12),
+          ],
           if (state.selectedPaymentMethod == 'vietqr' &&
               state.status == BookingFlowStatus.paymentPending &&
               state.checkoutBooking != null) ...[

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:vexgo_app/data/models/booking_quote_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:vexgo_app/data/models/seat_hold_model.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
@@ -87,6 +88,11 @@ class BookingFlowState extends Equatable {
   final String passengerNote;
   final bool savePassengerInfo;
   final VoucherModel? appliedVoucher;
+  final BookingQuoteModel? quote;
+  final bool requiresAuthoritativeQuote;
+  final bool quoteLoading;
+  final String? quoteError;
+  final String requestedPromotionCode;
   final List<VoucherModel> availableVouchers;
   final String selectedPaymentMethod;
   final int countdownSeconds;
@@ -123,6 +129,11 @@ class BookingFlowState extends Equatable {
     this.passengerNote = '',
     this.savePassengerInfo = true,
     this.appliedVoucher,
+    this.quote,
+    this.requiresAuthoritativeQuote = false,
+    this.quoteLoading = false,
+    this.quoteError,
+    this.requestedPromotionCode = '',
     this.availableVouchers = const [],
     this.selectedPaymentMethod = 'momo',
     this.countdownSeconds = 600,
@@ -158,7 +169,17 @@ class BookingFlowState extends Equatable {
     return selectedSeats.fold<int>(0, (sum, seat) => sum + seat.price!);
   }
 
+  int? get quotedSubtotal =>
+      quote?.originalTotal ??
+      (requiresAuthoritativeQuote ? null : seatsTotalAmount);
+  int? get quotedServiceFee =>
+      quote?.serviceFee ?? (requiresAuthoritativeQuote ? null : 0);
+  bool get hasUsableQuote =>
+      !requiresAuthoritativeQuote ||
+      (quote != null && !quoteLoading && quoteError == null);
+
   int get discountAmount {
+    if (requiresAuthoritativeQuote) return quote?.discountAmount ?? 0;
     if (appliedVoucher == null) return 0;
     final total = seatsTotalAmount;
     if (total == null || total < appliedVoucher!.minOrderAmount) return 0;
@@ -175,6 +196,8 @@ class BookingFlowState extends Equatable {
   }
 
   int? get finalAmount {
+    if (checkoutBooking != null) return checkoutBooking!.totalAmount;
+    if (requiresAuthoritativeQuote) return quote?.finalTotal;
     final seatsTotal = seatsTotalAmount;
     if (seatsTotal == null) return null;
     return max(0, seatsTotal - discountAmount);
@@ -203,9 +226,9 @@ class BookingFlowState extends Equatable {
       case BookingStep.passengerInfo:
         return isPassengerValid;
       case BookingStep.tripSummary:
-        return true;
+        return hasUsableQuote;
       case BookingStep.payment:
-        return selectedPaymentMethod.isNotEmpty;
+        return selectedPaymentMethod.isNotEmpty && hasUsableQuote;
     }
   }
 
@@ -234,6 +257,12 @@ class BookingFlowState extends Equatable {
     String? passengerNote,
     bool? savePassengerInfo,
     VoucherModel? appliedVoucher,
+    BookingQuoteModel? quote,
+    bool clearQuote = false,
+    bool? requiresAuthoritativeQuote,
+    bool? quoteLoading,
+    Object? quoteError = _unchangedError,
+    String? requestedPromotionCode,
     bool clearVoucher = false,
     List<VoucherModel>? availableVouchers,
     String? selectedPaymentMethod,
@@ -274,6 +303,15 @@ class BookingFlowState extends Equatable {
       passengerEmail: passengerEmail ?? this.passengerEmail,
       passengerNote: passengerNote ?? this.passengerNote,
       savePassengerInfo: savePassengerInfo ?? this.savePassengerInfo,
+      quote: clearQuote ? null : (quote ?? this.quote),
+      requiresAuthoritativeQuote:
+          requiresAuthoritativeQuote ?? this.requiresAuthoritativeQuote,
+      quoteLoading: quoteLoading ?? this.quoteLoading,
+      quoteError: identical(quoteError, _unchangedError)
+          ? this.quoteError
+          : quoteError as String?,
+      requestedPromotionCode:
+          requestedPromotionCode ?? this.requestedPromotionCode,
       appliedVoucher: clearVoucher
           ? null
           : (appliedVoucher ?? this.appliedVoucher),
@@ -327,6 +365,11 @@ class BookingFlowState extends Equatable {
     passengerNote,
     savePassengerInfo,
     appliedVoucher,
+    quote,
+    requiresAuthoritativeQuote,
+    quoteLoading,
+    quoteError,
+    requestedPromotionCode,
     selectedPaymentMethod,
     countdownSeconds,
     seatHold,

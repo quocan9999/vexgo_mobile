@@ -127,6 +127,12 @@ Future<TicketModel> _createVerifiedBookingTicket({
       holdToken: holdToken,
       promotionCode: promotionCode,
     );
+    if (booking.totalAmount == 0) {
+      return (await resolvePaidBookingTickets(
+        repository,
+        booking.bookingId,
+      )).first;
+    }
     payment = await payments.createPayment(
       bookingId: booking.bookingId,
       provider: provider,
@@ -220,6 +226,7 @@ abstract class BookingRepository {
     required int tripId,
     required List<int> seatIds,
     String? promotionCode,
+    String? contactPhone,
   });
 
   Future<PromotionValidationModel> validatePromotion({
@@ -357,6 +364,7 @@ class MockBookingRepository implements BookingRepository {
     required int tripId,
     required List<int> seatIds,
     String? promotionCode,
+    String? contactPhone,
   }) async {
     const unitPrice = 280000;
     final seatCount = seatIds.length;
@@ -625,12 +633,14 @@ class HybridBookingRepository implements BookingRepository {
     required int tripId,
     required List<int> seatIds,
     String? promotionCode,
+    String? contactPhone,
   }) async {
     try {
       return await remoteBookingDataSource.getBookingQuote(
         tripId: tripId,
         seatIds: seatIds,
         promotionCode: promotionCode,
+        contactPhone: contactPhone,
       );
     } catch (e) {
       if (kDebugMode) {
@@ -641,6 +651,7 @@ class HybridBookingRepository implements BookingRepository {
           tripId: tripId,
           seatIds: seatIds,
           promotionCode: promotionCode,
+          contactPhone: contactPhone,
         );
       }
       rethrow;
@@ -896,11 +907,13 @@ class RealBookingRepository implements BookingRepository {
     required int tripId,
     required List<int> seatIds,
     String? promotionCode,
+    String? contactPhone,
   }) {
     return remoteBookingDataSource.getBookingQuote(
       tripId: tripId,
       seatIds: seatIds,
       promotionCode: promotionCode,
+      contactPhone: contactPhone,
     );
   }
 

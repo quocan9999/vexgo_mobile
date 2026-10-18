@@ -11,6 +11,9 @@ class BookingQuoteModel extends Equatable {
   final String currency;
   final String? appliedPromotionCode;
   final String? promotionDescription;
+  final bool identityChecked;
+  final bool phoneEligibilityChecked;
+  final bool requiresPhoneBeforeBooking;
 
   const BookingQuoteModel({
     required this.unitPrice,
@@ -22,6 +25,9 @@ class BookingQuoteModel extends Equatable {
     this.currency = 'VND',
     this.appliedPromotionCode,
     this.promotionDescription,
+    this.identityChecked = false,
+    this.phoneEligibilityChecked = false,
+    this.requiresPhoneBeforeBooking = false,
   });
 
   BookingQuoteModel copyWith({
@@ -34,6 +40,9 @@ class BookingQuoteModel extends Equatable {
     String? currency,
     String? appliedPromotionCode,
     String? promotionDescription,
+    bool? identityChecked,
+    bool? phoneEligibilityChecked,
+    bool? requiresPhoneBeforeBooking,
   }) {
     return BookingQuoteModel(
       unitPrice: unitPrice ?? this.unitPrice,
@@ -45,19 +54,48 @@ class BookingQuoteModel extends Equatable {
       currency: currency ?? this.currency,
       appliedPromotionCode: appliedPromotionCode ?? this.appliedPromotionCode,
       promotionDescription: promotionDescription ?? this.promotionDescription,
+      identityChecked: identityChecked ?? this.identityChecked,
+      phoneEligibilityChecked:
+          phoneEligibilityChecked ?? this.phoneEligibilityChecked,
+      requiresPhoneBeforeBooking:
+          requiresPhoneBeforeBooking ?? this.requiresPhoneBeforeBooking,
     );
   }
 
   factory BookingQuoteModel.fromJson(Map<String, dynamic> json) {
-    final unitPrice = (json['unitPrice'] as num?)?.toInt() ?? 0;
-    final seatCount = (json['seatCount'] as num?)?.toInt() ?? 0;
-    final originalTotal =
-        (json['originalTotal'] as num?)?.toInt() ?? (unitPrice * seatCount);
-    final discountAmount = (json['discountAmount'] as num?)?.toInt() ?? 0;
-    final serviceFee = (json['serviceFee'] as num?)?.toInt() ?? 0;
-    final finalTotal =
-        (json['finalTotal'] as num?)?.toInt() ??
-        (originalTotal - discountAmount + serviceFee);
+    int amount(String key, {int? fallback}) {
+      final raw = json[key];
+      final value = raw is num
+          ? raw
+          : raw is String
+          ? num.tryParse(raw)
+          : null;
+      if (value == null && fallback != null && raw == null) return fallback;
+      if (value == null ||
+          !value.isFinite ||
+          value < 0 ||
+          value != value.round()) {
+        throw FormatException('Invalid booking quote $key');
+      }
+      return value.toInt();
+    }
+
+    final unitPrice = amount('unitPrice');
+    final seatCount = amount('seatCount');
+    final originalTotal = amount(
+      'originalTotal',
+      fallback: unitPrice * seatCount,
+    );
+    final discountAmount = amount('discountAmount', fallback: 0);
+    final serviceFee = amount('serviceFee', fallback: 0);
+    final finalTotal = amount('finalTotal');
+    if (seatCount <= 0 ||
+        originalTotal != unitPrice * seatCount ||
+        discountAmount > originalTotal ||
+        finalTotal != originalTotal - discountAmount + serviceFee ||
+        (json['currency'] != null && json['currency'] != 'VND')) {
+      throw const FormatException('Inconsistent booking quote totals');
+    }
 
     return BookingQuoteModel(
       unitPrice: unitPrice,
@@ -71,6 +109,9 @@ class BookingQuoteModel extends Equatable {
           json['appliedPromotionCode'] as String? ??
           json['promotionCode'] as String?,
       promotionDescription: json['promotionDescription'] as String?,
+      identityChecked: json['identityChecked'] == true,
+      phoneEligibilityChecked: json['phoneEligibilityChecked'] == true,
+      requiresPhoneBeforeBooking: json['requiresPhoneBeforeBooking'] == true,
     );
   }
 
@@ -82,6 +123,9 @@ class BookingQuoteModel extends Equatable {
     'serviceFee': serviceFee,
     'finalTotal': finalTotal,
     'currency': currency,
+    'identityChecked': identityChecked,
+    'phoneEligibilityChecked': phoneEligibilityChecked,
+    'requiresPhoneBeforeBooking': requiresPhoneBeforeBooking,
     if (appliedPromotionCode != null)
       'appliedPromotionCode': appliedPromotionCode,
     if (promotionDescription != null)
@@ -98,5 +142,8 @@ class BookingQuoteModel extends Equatable {
     finalTotal,
     currency,
     appliedPromotionCode,
+    identityChecked,
+    phoneEligibilityChecked,
+    requiresPhoneBeforeBooking,
   ];
 }
