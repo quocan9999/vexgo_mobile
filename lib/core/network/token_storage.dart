@@ -103,7 +103,7 @@ class TokenStorage {
       if (version != _sessionVersion || _cleared) return _cachedAccessToken;
       _cachedAccessToken = token;
     } catch (_) {
-      _cachedAccessToken = null;
+      if (version == _sessionVersion) _cachedAccessToken = null;
     }
     return _cachedAccessToken;
   }
