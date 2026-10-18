@@ -64,3 +64,11 @@ class SubmitTicketReviewEvent extends MyTicketsEvent {
   @override
   List<Object?> get props => [ticketId, review];
 }
+
+class SyncTicketDetailsEvent extends MyTicketsEvent {
+  final TicketModel ticket;
+  final int sessionGeneration;
+  const SyncTicketDetailsEvent(this.ticket, this.sessionGeneration);
+  @override
+  List<Object?> get props => [ticket, sessionGeneration];
+}

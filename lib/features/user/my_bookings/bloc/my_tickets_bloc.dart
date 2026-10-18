@@ -10,6 +10,7 @@ import 'my_tickets_state.dart';
 class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
   final BookingRepository bookingRepository;
   int _generation = 0;
+  int get sessionGeneration => _generation;
   String? _sessionKey;
   bool _sessionInitialized = false;
   bool _authenticated;
@@ -42,6 +43,20 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
            reviewRemoteDataSource ??
            ReviewRemoteDataSourceImpl(client: ApiClient()),
        super(const MyTicketsState()) {
+    on<SyncTicketDetailsEvent>((event, emit) {
+      if (!_authenticated || event.sessionGeneration != _generation) return;
+      final tickets = List<TicketModel>.from(state.tickets);
+      final index = tickets.indexWhere((t) => t.id == event.ticket.id);
+      if (index < 0) return;
+      tickets[index] = event.ticket;
+      emit(
+        state.copyWith(
+          tickets: tickets,
+          detailsRevision: state.detailsRevision + 1,
+          clearMessages: true,
+        ),
+      );
+    });
     on<LoadMyTicketsEvent>(_onLoadMyTickets);
     on<AddNewTicketEvent>(_onAddNewTicket);
     on<ChangeTabEvent>(_onChangeTab);

@@ -250,11 +250,11 @@ class _SearchTripsView extends StatelessWidget {
         final trip = state.filteredTrips[index];
         return TripCard(
           trip: trip,
-          onSelect: () {
+          onSelect: (selectedTrip) {
             context.push(
               '/seat-selection',
               extra: {
-                'trip': trip,
+                'trip': selectedTrip,
                 'date': state.selectedDate,
                 'ticketCount': ticketCount,
               },

@@ -10,7 +10,7 @@ import 'trip_detail_sheet.dart';
 
 class TripCard extends StatelessWidget {
   final TripModel trip;
-  final VoidCallback onSelect;
+  final ValueChanged<TripModel> onSelect;
 
   const TripCard({super.key, required this.trip, required this.onSelect});
 
@@ -36,7 +36,7 @@ class TripCard extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
         child: InkWell(
-          onTap: onSelect,
+          onTap: () => onSelect(trip),
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           child: Padding(
             padding: const EdgeInsets.all(AppDimensions.base),
@@ -278,7 +278,7 @@ class TripCard extends StatelessWidget {
                       text: 'Chọn chuyến',
                       height: 36,
                       type: ButtonType.secondary,
-                      onPressed: onSelect,
+                      onPressed: () => onSelect(trip),
                     ),
                   ],
                 ),

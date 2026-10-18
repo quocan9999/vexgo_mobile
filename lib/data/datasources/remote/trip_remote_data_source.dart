@@ -49,14 +49,33 @@ class TripRemoteDataSourceImpl implements TripRemoteDataSource {
     if (sortBy != null) query['sortBy'] = sortBy;
     if (sortDirection != null) query['sortDirection'] = sortDirection;
 
-    final res = await client.get(ApiConfig.tripsSearch, queryParams: query);
-    if (res is Map<String, dynamic> && res['data'] is List) {
-      final list = res['data'] as List;
-      return list
-          .map((item) => TripModel.fromJson(item as Map<String, dynamic>))
-          .toList();
+    final trips = <String, TripModel>{};
+    var currentPage = page;
+    while (true) {
+      query['page'] = currentPage;
+      final res = await client.get(ApiConfig.tripsSearch, queryParams: query);
+      if (res is! Map<String, dynamic> || res['data'] is! List) {
+        throw const FormatException('Danh sách chuyến xe không hợp lệ.');
+      }
+      final data = res['data'] as List;
+      for (final item in data) {
+        final trip = TripModel.fromJson(item as Map<String, dynamic>);
+        if (trip.id.isEmpty) {
+          throw const FormatException('Chuyến xe thiếu mã.');
+        }
+        trips[trip.id] = trip;
+      }
+      final meta = res['meta'];
+      final totalPages = meta is Map
+          ? (meta['totalPages'] as num?)?.toInt()
+          : null;
+      if (totalPages == null || currentPage >= totalPages) break;
+      if (data.isEmpty) {
+        throw const FormatException('Trang kết quả chuyến xe bị thiếu.');
+      }
+      currentPage++;
     }
-    return [];
+    return trips.values.toList();
   }
 
   @override

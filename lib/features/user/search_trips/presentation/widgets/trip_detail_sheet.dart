@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vexgo_app/data/repositories/trip_repository.dart';
+import '../../bloc/trip_detail_cubit.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
@@ -9,7 +12,7 @@ import 'package:vexgo_app/data/models/trip_model.dart';
 
 class TripDetailSheet extends StatelessWidget {
   final TripModel trip;
-  final VoidCallback onSelectTrip;
+  final ValueChanged<TripModel> onSelectTrip;
 
   const TripDetailSheet({
     super.key,
@@ -20,16 +23,68 @@ class TripDetailSheet extends StatelessWidget {
   static void show(
     BuildContext context, {
     required TripModel trip,
-    required VoidCallback onSelectTrip,
+    required ValueChanged<TripModel> onSelectTrip,
   }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) =>
-          TripDetailSheet(trip: trip, onSelectTrip: onSelectTrip),
+      builder: (_) => RepositoryProvider<TripRepository>.value(
+        value: context.read<TripRepository>(),
+        child: TripDetailSheet(trip: trip, onSelectTrip: onSelectTrip),
+      ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) => BlocProvider(
+    create: (_) => TripDetailCubit(
+      repository: context.read<TripRepository>(),
+      tripId: trip.id,
+    )..load(),
+    child: BlocBuilder<TripDetailCubit, TripDetailState>(
+      builder: (context, state) {
+        if (state.status != TripDetailStatus.loaded) {
+          return SizedBox(
+            height: MediaQuery.sizeOf(context).height * .5,
+            child: Material(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+              child: Center(
+                child: state.status == TripDetailStatus.loading
+                    ? const CircularProgressIndicator()
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(state.error!),
+                          TextButton(
+                            onPressed: context.read<TripDetailCubit>().load,
+                            child: const Text('Thử lại'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Đóng'),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          );
+        }
+        return _TripDetailContent(
+          trip: state.trip!,
+          onSelectTrip: onSelectTrip,
+        );
+      },
+    ),
+  );
+}
+
+class _TripDetailContent extends StatelessWidget {
+  final TripModel trip;
+  final ValueChanged<TripModel> onSelectTrip;
+  const _TripDetailContent({required this.trip, required this.onSelectTrip});
 
   @override
   Widget build(BuildContext context) {
@@ -199,12 +254,16 @@ class TripDetailSheet extends StatelessWidget {
                     const SizedBox(width: AppDimensions.base),
                     Expanded(
                       child: CustomButton(
-                        text: 'CHỌN CHUYẾN NÀY',
+                        text: trip.availableSeats > 0
+                            ? 'CHỌN CHUYẾN NÀY'
+                            : 'CHUYẾN XE ĐÃ HẾT CHỖ',
                         type: ButtonType.secondary,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          onSelectTrip();
-                        },
+                        onPressed: trip.availableSeats <= 0
+                            ? null
+                            : () {
+                                Navigator.of(context).pop();
+                                onSelectTrip(trip);
+                              },
                       ),
                     ),
                   ],
