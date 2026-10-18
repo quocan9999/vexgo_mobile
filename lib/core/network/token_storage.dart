@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Contract for secure credential storage backed by KeyStore/Keychain
@@ -53,16 +54,35 @@ class TokenStorage {
 
   static SecureStorageAdapter _secureStorage = FlutterSecureStorageAdapter();
   static String? _cachedAccessToken;
+  static int _sessionVersion = 0;
+  static bool _cleared = false;
+  static Future<void> _writes = Future<void>.value();
+  static final _invalidations = StreamController<void>.broadcast(sync: true);
+
+  /// Changes on login/logout, but stays stable during refresh token rotation.
+  static int get sessionVersion => _sessionVersion;
+  static Stream<void> get sessionInvalidations => _invalidations.stream;
+
+  static Future<void> _serialize(Future<void> Function() action) {
+    final operation = _writes.then((_) => action());
+    _writes = operation.catchError((Object _) {});
+    return operation;
+  }
 
   /// Visible for testing to inject mock/in-memory adapter
   static void setStorageAdapterForTesting(SecureStorageAdapter adapter) {
     _secureStorage = adapter;
+    _cachedAccessToken = null;
+    _cleared = false;
+    _sessionVersion++;
   }
 
   /// Reset to default storage adapter
   static void resetStorageAdapter() {
     _secureStorage = FlutterSecureStorageAdapter();
     _cachedAccessToken = null;
+    _cleared = false;
+    _sessionVersion++;
   }
 
   /// Fast synchronous access to cached in-memory token
@@ -70,18 +90,18 @@ class TokenStorage {
 
   /// Initialize token from secure storage into in-memory cache
   static Future<void> init() async {
-    try {
-      _cachedAccessToken = await _secureStorage.read(_accessTokenKey);
-    } catch (_) {
-      _cachedAccessToken = null;
-    }
+    await getAccessToken();
   }
 
   /// Get current access token
   static Future<String?> getAccessToken() async {
+    if (_cleared) return null;
     if (_cachedAccessToken != null) return _cachedAccessToken;
+    final version = _sessionVersion;
     try {
-      _cachedAccessToken = await _secureStorage.read(_accessTokenKey);
+      final token = await _secureStorage.read(_accessTokenKey);
+      if (version != _sessionVersion || _cleared) return _cachedAccessToken;
+      _cachedAccessToken = token;
     } catch (_) {
       _cachedAccessToken = null;
     }
@@ -90,8 +110,12 @@ class TokenStorage {
 
   /// Get current refresh token securely from KeyStore / Keychain
   static Future<String?> getRefreshToken() async {
+    if (_cleared) return null;
+    final version = _sessionVersion;
     try {
-      return await _secureStorage.read(_refreshTokenKey);
+      await _writes;
+      final token = await _secureStorage.read(_refreshTokenKey);
+      return version == _sessionVersion && !_cleared ? token : null;
     } catch (_) {
       return null;
     }
@@ -102,15 +126,45 @@ class TokenStorage {
     required String accessToken,
     String? refreshToken,
   }) async {
+    final version = ++_sessionVersion;
+    _cleared = false;
     _cachedAccessToken = accessToken;
-    try {
-      await _secureStorage.write(_accessTokenKey, accessToken);
-      if (refreshToken != null) {
-        await _secureStorage.write(_refreshTokenKey, refreshToken);
+    final storage = _secureStorage;
+    await _serialize(() async {
+      if (version != _sessionVersion) return;
+      try {
+        await storage.write(_accessTokenKey, accessToken);
+        if (refreshToken != null) {
+          await storage.write(_refreshTokenKey, refreshToken);
+        } else {
+          // Never reuse another account's refresh token.
+          await storage.delete(_refreshTokenKey);
+        }
+      } catch (_) {
+        // Access remains available in memory for this session only.
       }
-    } catch (_) {
-      // In-memory cache still holds accessToken if persistence temporarily fails
-    }
+    });
+  }
+
+  /// A refresh response arriving after logout/account switch must be discarded.
+  static Future<bool> rotateTokensIfCurrent({
+    required int expectedVersion,
+    required String accessToken,
+    required String refreshToken,
+  }) async {
+    if (_cleared || expectedVersion != _sessionVersion) return false;
+    _cachedAccessToken = accessToken;
+    final storage = _secureStorage;
+    await _serialize(() async {
+      if (_cleared || expectedVersion != _sessionVersion) return;
+      try {
+        await storage.write(_accessTokenKey, accessToken);
+        await storage.write(_refreshTokenKey, refreshToken);
+      } catch (_) {
+        // The rotated access token is usable in memory; persistence may fail.
+      }
+    });
+    return !_cleared && expectedVersion == _sessionVersion;
   }
 
   /// Check if user has an active access token
@@ -125,10 +179,18 @@ class TokenStorage {
 
   /// Clear all stored tokens upon logout
   static Future<void> clearTokens() async {
+    ++_sessionVersion;
+    _cleared = true;
     _cachedAccessToken = null;
-    try {
-      await _secureStorage.delete(_accessTokenKey);
-      await _secureStorage.delete(_refreshTokenKey);
-    } catch (_) {}
+    _invalidations.add(null);
+    final storage = _secureStorage;
+    await _serialize(() async {
+      // Independent deletions ensure failure of one does not skip the other.
+      for (final key in [_accessTokenKey, _refreshTokenKey]) {
+        try {
+          await storage.delete(key);
+        } catch (_) {}
+      }
+    });
   }
 }

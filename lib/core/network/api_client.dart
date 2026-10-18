@@ -11,9 +11,121 @@ import 'token_storage.dart';
 /// Central HTTP Client for VexGo Mobile per rule-api.md
 class ApiClient {
   final http.Client _httpClient;
+  static Future<void>? _refreshInFlight;
+  static int? _refreshVersion;
+  static String? _refreshBaseUrl;
 
   ApiClient({http.Client? httpClient})
     : _httpClient = httpClient ?? http.Client();
+
+  Future<void> _refreshAccessToken(int version) async {
+    final baseUrl = ApiConfig.baseUrl;
+    if (_refreshInFlight != null &&
+        _refreshVersion == version &&
+        _refreshBaseUrl == baseUrl) {
+      return _refreshInFlight;
+    }
+    final future = _rotateRefreshToken(version, baseUrl);
+    _refreshInFlight = future;
+    _refreshVersion = version;
+    _refreshBaseUrl = baseUrl;
+    try {
+      await future;
+    } finally {
+      if (identical(_refreshInFlight, future)) {
+        _refreshInFlight = null;
+        _refreshVersion = null;
+        _refreshBaseUrl = null;
+      }
+    }
+  }
+
+  Future<void> _rotateRefreshToken(int version, String baseUrl) async {
+    final refreshToken = await TokenStorage.getRefreshToken();
+    if (version != TokenStorage.sessionVersion) {
+      throw UnauthorizedException();
+    }
+    if (refreshToken == null || refreshToken.isEmpty) {
+      await TokenStorage.clearTokens();
+      throw UnauthorizedException();
+    }
+    try {
+      // Use the raw transport: refresh must never recursively refresh itself.
+      final response = await _httpClient
+          .post(
+            Uri.parse('$baseUrl${ApiConfig.authRefresh}'),
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({'refreshToken': refreshToken}),
+          )
+          .timeout(ApiConfig.receiveTimeout);
+      if (version != TokenStorage.sessionVersion) {
+        throw UnauthorizedException();
+      }
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        await TokenStorage.clearTokens();
+      }
+      final res = _processResponse(response);
+      final data = res is Map<String, dynamic> && res['data'] is Map
+          ? res['data']
+          : res;
+      final access = data is Map ? data['accessToken'] : null;
+      final refresh = data is Map ? data['refreshToken'] : null;
+      if (access is! String ||
+          access.isEmpty ||
+          refresh is! String ||
+          refresh.isEmpty) {
+        await TokenStorage.clearTokens();
+        throw UnauthorizedException(
+          message: 'Phản hồi làm mới phiên không hợp lệ.',
+        );
+      }
+      final saved = await TokenStorage.rotateTokensIfCurrent(
+        expectedVersion: version,
+        accessToken: access,
+        refreshToken: refresh,
+      );
+      if (!saved) throw UnauthorizedException();
+    } on SocketException {
+      throw const NetworkException();
+    } on TimeoutException {
+      throw const NetworkException(
+        message: 'Làm mới phiên quá hạn. Vui lòng thử lại.',
+      );
+    } on http.ClientException {
+      throw const NetworkException();
+    }
+  }
+
+  Future<http.Response> _withRefresh({
+    required Map<String, String> headers,
+    required bool requiresAuth,
+    required Future<http.Response> Function(Map<String, String>) send,
+  }) async {
+    final version = TokenStorage.sessionVersion;
+    final usedToken = headers['Authorization'];
+    if (requiresAuth && usedToken != 'Bearer ${TokenStorage.currentToken}') {
+      throw UnauthorizedException();
+    }
+    var response = await send(headers);
+    if (!requiresAuth) return response;
+    if (version != TokenStorage.sessionVersion) throw UnauthorizedException();
+    if (response.statusCode != 401) return response;
+
+    // Another client may already have rotated the token while this call waited.
+    if (usedToken == 'Bearer ${TokenStorage.currentToken}') {
+      await _refreshAccessToken(version);
+    }
+    if (version != TokenStorage.sessionVersion) throw UnauthorizedException();
+    final token = await TokenStorage.getAccessToken();
+    if (token == null || token.isEmpty) throw UnauthorizedException();
+    response = await send({...headers, 'Authorization': 'Bearer $token'});
+    if (version != TokenStorage.sessionVersion) throw UnauthorizedException();
+    if (response.statusCode == 401) await TokenStorage.clearTokens();
+    return response;
+  }
 
   /// Build URI from path and optional query parameters
   Uri _buildUri(String path, [Map<String, dynamic>? queryParams]) {
@@ -94,7 +206,11 @@ class ApiClient {
     };
 
     if (requiresAuth) {
-      final token = await TokenStorage.getAccessToken();
+      var token = await TokenStorage.getAccessToken();
+      if (token == null || token.isEmpty) {
+        await _refreshAccessToken(TokenStorage.sessionVersion);
+        token = await TokenStorage.getAccessToken();
+      }
       if (token == null || token.isEmpty) {
         throw UnauthorizedException(
           message: 'Yêu cầu đăng nhập để thực hiện tác vụ này.',
@@ -132,9 +248,12 @@ class ApiClient {
       if (kDebugMode) {
         debugPrint('[API GET] ${sanitizeUriForLog(uri)}');
       }
-      final response = await _httpClient
-          .get(uri, headers: reqHeaders)
-          .timeout(ApiConfig.connectTimeout);
+      final response = await _withRefresh(
+        headers: reqHeaders,
+        requiresAuth: requiresAuth,
+        send: (h) =>
+            _httpClient.get(uri, headers: h).timeout(ApiConfig.connectTimeout),
+      );
       return _processResponse(response);
     } on SocketException catch (e) {
       throw NetworkException(
@@ -148,7 +267,7 @@ class ApiClient {
       );
     } on http.ClientException catch (e) {
       throw NetworkException(
-        message: 'Lỗi kết nối client: ${e.message}',
+        message: 'Không thể kết nối đến máy chủ.',
         originalError: e,
       );
     }
@@ -176,9 +295,13 @@ class ApiClient {
             : '';
         debugPrint('[API POST] ${sanitizeUriForLog(uri)}$payloadSize');
       }
-      final response = await _httpClient
-          .post(uri, headers: reqHeaders, body: encodedBody)
-          .timeout(ApiConfig.receiveTimeout);
+      final response = await _withRefresh(
+        headers: reqHeaders,
+        requiresAuth: requiresAuth,
+        send: (h) => _httpClient
+            .post(uri, headers: h, body: encodedBody)
+            .timeout(ApiConfig.receiveTimeout),
+      );
       return _processResponse(response);
     } on SocketException catch (e) {
       throw NetworkException(
@@ -192,7 +315,7 @@ class ApiClient {
       );
     } on http.ClientException catch (e) {
       throw NetworkException(
-        message: 'Lỗi kết nối client: ${e.message}',
+        message: 'Không thể kết nối đến máy chủ.',
         originalError: e,
       );
     }
@@ -220,9 +343,13 @@ class ApiClient {
             : '';
         debugPrint('[API PUT] ${sanitizeUriForLog(uri)}$payloadSize');
       }
-      final response = await _httpClient
-          .put(uri, headers: reqHeaders, body: encodedBody)
-          .timeout(ApiConfig.receiveTimeout);
+      final response = await _withRefresh(
+        headers: reqHeaders,
+        requiresAuth: requiresAuth,
+        send: (h) => _httpClient
+            .put(uri, headers: h, body: encodedBody)
+            .timeout(ApiConfig.receiveTimeout),
+      );
       return _processResponse(response);
     } on SocketException catch (e) {
       throw NetworkException(
@@ -236,7 +363,7 @@ class ApiClient {
       );
     } on http.ClientException catch (e) {
       throw NetworkException(
-        message: 'Lỗi kết nối client: ${e.message}',
+        message: 'Không thể kết nối đến máy chủ.',
         originalError: e,
       );
     }
@@ -264,9 +391,13 @@ class ApiClient {
             : '';
         debugPrint('[API PATCH] ${sanitizeUriForLog(uri)}$payloadSize');
       }
-      final response = await _httpClient
-          .patch(uri, headers: reqHeaders, body: encodedBody)
-          .timeout(ApiConfig.receiveTimeout);
+      final response = await _withRefresh(
+        headers: reqHeaders,
+        requiresAuth: requiresAuth,
+        send: (h) => _httpClient
+            .patch(uri, headers: h, body: encodedBody)
+            .timeout(ApiConfig.receiveTimeout),
+      );
       return _processResponse(response);
     } on SocketException catch (e) {
       throw NetworkException(
@@ -280,7 +411,7 @@ class ApiClient {
       );
     } on http.ClientException catch (e) {
       throw NetworkException(
-        message: 'Lỗi kết nối client: ${e.message}',
+        message: 'Không thể kết nối đến máy chủ.',
         originalError: e,
       );
     }
@@ -305,9 +436,13 @@ class ApiClient {
       if (kDebugMode) {
         debugPrint('[API DELETE] ${sanitizeUriForLog(uri)}');
       }
-      final response = await _httpClient
-          .delete(uri, headers: reqHeaders, body: encodedBody)
-          .timeout(ApiConfig.connectTimeout);
+      final response = await _withRefresh(
+        headers: reqHeaders,
+        requiresAuth: requiresAuth,
+        send: (h) => _httpClient
+            .delete(uri, headers: h, body: encodedBody)
+            .timeout(ApiConfig.connectTimeout),
+      );
       return _processResponse(response);
     } on SocketException catch (e) {
       throw NetworkException(
@@ -318,7 +453,7 @@ class ApiClient {
       throw NetworkException(message: 'Yêu cầu quá hạn.', originalError: e);
     } on http.ClientException catch (e) {
       throw NetworkException(
-        message: 'Lỗi kết nối client: ${e.message}',
+        message: 'Không thể kết nối đến máy chủ.',
         originalError: e,
       );
     }
