@@ -6,8 +6,8 @@
 - Nhánh tích hợp: `fix/mobile-contract-integrity`. Vòng 1 chốt tại `a266508`; source vòng 2 đóng băng tại **`0a58e3f59cd8214f3e4e3d18c5d70a0118c61f2b`**, sau các commit đổi mật khẩu, fresh detail/guest lookup, quote/khuyến mãi và bản sửa review QR/refund. Gate vòng 2 được ghi bên dưới.
 - Đã fetch `team`; `team/develop@ba66748c7f13b57f7081ae27db56cea2708890e9` đã nằm trong lịch sử nhánh Mobile. Không có commit develop mới để nhập thêm.
 - Theo yêu cầu lấy code dev mới nhất, Backend đã chuyển từ `feature/realtime-chat-support@0fec20b` sang `develop@8b339250a95b6825cef591b1d10ae537ba1068f4`, bằng fast-forward nhánh develop. Nhánh feature cũ được giữ lại.
-- Bốn chỉnh sửa chưa commit đã tồn tại trước khi bắt đầu vẫn được giữ riêng: `lib/app/routes.dart` (phần tìm kiếm), `lib/data/adapters/city_search_adapter.dart`, `lib/features/user/home/presentation/widgets/search_form_card.dart`, `test/lead_review_findings_regression_test.dart`. Chỉ hunk truyền danh sách vé trong routes được đưa vào commit của lượt này.
-- Các lượt kiểm tra trên integration worktree bao gồm source commit được ghi cùng bốn thay đổi có sẵn này. Không khẳng định APK/test là checkout sạch của riêng SHA; phần thay đổi của người dùng vẫn chưa commit và cần được Lead xem cùng diff khi đánh giá bản tích hợp.
+- Trong vòng implementation, bốn chỉnh sửa có sẵn được giữ riêng: `lib/app/routes.dart` (phần tìm kiếm), `lib/data/adapters/city_search_adapter.dart`, `lib/features/user/home/presentation/widgets/search_form_card.dart`, `test/lead_review_findings_regression_test.dart`. Sau khi người dùng đồng ý push để Lead review, chúng được chốt thành commit riêng `a7fba6f9febc69b4fe87d7d1ad8307142e92acff`.
+- Gate vòng 2 kiểm tra source freeze cùng bốn thay đổi này; patch đã được đối chiếu với commit `a7fba6f` và khớp. Trên working tree sạch tại commit này, chạy lại analyze (không có issue) và toàn bộ **283 tests PASS**. Không có thay đổi implementation mới sau gate/APK; các commit handoff tiếp theo chỉ sửa tài liệu/bằng chứng.
 - PR #5 được đọc trực tiếp: 62 threads, 6 chưa resolve tại thời điểm audit. Các finding được đối chiếu source; không tự resolve thread của Lead.
 - Giữ BLoC → Repository → DataSource; không nâng dependencies. Không sửa implementation API Backend.
 
@@ -115,7 +115,7 @@ Tài khoản nhận VietQR public trong cấu hình web đã được đối chi
 | BP-03 | DONE trong phạm vi component | `c1a47f0`; 15 regression, suite tích hợp 278 PASS và review độc lập 20 PASS |
 | QA-02 | DONE cho mandatory gates | Runtime hold/migration PASS, quote local 404; final format/analyze/283 tests/APK PASS; device/provider E2E chưa xác minh |
 | SEC-02 | DONE | Hai P1 được sửa trong 1 vòng; 3 probe gốc cùng 3 probe mới +25 FE regression PASS, financial source hashes giữ nguyên so với review BP |
-| DOC-01 | DONE | Final matrix, task states, findings, 74-file manifest, commits, four gates and readiness recorded |
+| DOC-01 | DONE | Final matrix, task states, findings, 77-file source manifest, commits, four gates and readiness recorded |
 
 Lead cần xác nhận/phân công các bước còn lại: production wallet providers; API/client idempotency recovery; durable guest checkout recovery qua app restart; live auth/OTP/booking/provider/device E2E; membership redemption/push/localization/biometric và nội dung chính sách đầy đủ. Guest lookup UI, search paging/detail và password API đã được triển khai trong vòng 2; không tiếp tục đánh dấu những mục này là Backend chưa hỗ trợ.
 
@@ -140,8 +140,9 @@ Các commit triển khai kể từ baseline:
 - `c1a47f0` — tích hợp quote/khuyến mãi thật và zero-total recovery.
 - `372bc6d` — chỉ hiển thị badge xác thực theo boolean thật trong hồ sơ.
 - `0a58e3f` — QR modal/card theo vòng đời phiên/reader và thông báo hoàn tiền chưa xác nhận.
+- `a7fba6f` — chốt riêng bốn thay đổi search/navigation có sẵn, nội dung khớp patch đã kiểm thử.
 
-Danh sách **74 file implementation/regression đã commit**: [MOBILE_CHANGED_FILES.md](MOBILE_CHANGED_FILES.md). Bốn tài liệu Markdown của lượt bàn giao được liệt kê riêng trong manifest. Các file source Backend và bốn thay đổi có sẵn của người dùng không bị gom vào các commit triển khai này.
+Danh sách file implementation/regression: [MOBILE_CHANGED_FILES.md](MOBILE_CHANGED_FILES.md). Vòng implementation có 74 file; sau commit riêng bốn thay đổi search/navigation có sẵn, tổng cộng 77 file source/regression khác baseline (routes xuất hiện ở cả hai nhóm). Tài liệu/bằng chứng được liệt kê riêng; không commit source Backend, SQL backup, cấu hình bí mật hoặc APK.
 
 ## 10. Quality gate cuối — source 0a58e3f và bốn thay đổi có sẵn
 
@@ -163,3 +164,7 @@ QA xác minh bốn thay đổi có sẵn byte-identical trước/sau: patch SHA2
 Báo cáo QA: `../mobile-qa-evidence/final-round2/QA_FINAL_REPORT.md`; runtime hold/migration: `../mobile-qa-evidence/qa02/QA02_LIVE_REPORT.md`. Final source/security hashes và review: `C:/Users/HP/.codex/visualizations/2026/10/18/01a14ddf-2d2f-7903-beba-a6d51b96f7ff/security-review/FINAL-0a58e3f-REVIEW.md`.
 
 API local không còn listener ở kiểm tra cuối của QA. Orchestrator thử khởi động Node nền bằng `Start-Process -WindowStyle Hidden`; bộ kiểm duyệt tự động từ chối trước thực thi với lý do `blocked by policy`, không cung cấp chi tiết thêm. Không thử lách chính sách hoặc báo runtime đang chạy. Điều này không thay đổi kết quả Mobile gates; các probe live trước đó vẫn là bằng chứng lịch sử, không phải E2E hiện tại. Không có Android device/AVD, không chuyển khoản thật hoặc giả lập webhook để tạo bằng chứng thanh toán.
+
+## 11. Bàn giao PR #5 cho Lead review
+
+Xem [PR5_REVIEW_HANDOFF.md](PR5_REVIEW_HANDOFF.md) để đối chiếu sáu thread đang mở với source/test mới, kết quả trên commit sạch và điều kiện merge. Người dùng đã cho phép push cập nhật PR hiện có; không merge và không resolve thread thay Lead. Kết luận cho toàn bộ ứng dụng vẫn **NOT READY FOR MERGE**; việc gửi review không đồng nghĩa đã xác minh device/provider E2E.

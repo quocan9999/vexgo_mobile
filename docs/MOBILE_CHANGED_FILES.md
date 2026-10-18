@@ -1,8 +1,8 @@
 # Changed files since audited baseline
 
-Source freeze: 0a58e3f59cd8214f3e4e3d18c5d70a0118c61f2b.
+Committed source: a7fba6f9febc69b4fe87d7d1ad8307142e92acff.
 
-Committed implementation and regression files; original uncommitted user changes are excluded from this manifest. The routes file includes only the committed issued-tickets hunk.
+77 unique source/regression files differ from audited baseline 4aea423. Includes the four original search/navigation changes committed separately as a7fba6f; no original change remains uncommitted.
 
 - `lib/app/app.dart`
 - `lib/app/routes.dart`
@@ -11,6 +11,7 @@ Committed implementation and regression files; original uncommitted user changes
 - `lib/core/network/api_exceptions.dart`
 - `lib/core/network/token_storage.dart`
 - `lib/core/network/vietqr_config.dart`
+- `lib/data/adapters/city_search_adapter.dart`
 - `lib/data/datasources/remote/auth_remote_data_source.dart`
 - `lib/data/datasources/remote/booking_remote_data_source.dart`
 - `lib/data/datasources/remote/notification_remote_data_source.dart`
@@ -34,6 +35,7 @@ Committed implementation and regression files; original uncommitted user changes
 - `lib/features/user/booking/presentation/steps/step_6_payment.dart`
 - `lib/features/user/booking/presentation/widgets/booking_bottom_bar.dart`
 - `lib/features/user/booking/presentation/widgets/seat_item.dart`
+- `lib/features/user/home/presentation/widgets/search_form_card.dart`
 - `lib/features/user/my_bookings/bloc/my_tickets_bloc.dart`
 - `lib/features/user/my_bookings/bloc/my_tickets_event.dart`
 - `lib/features/user/my_bookings/bloc/my_tickets_state.dart`
@@ -67,6 +69,7 @@ Committed implementation and regression files; original uncommitted user changes
 - `test/change_password_regression_test.dart`
 - `test/feature_completion_regression_test.dart`
 - `test/feature_errors_regression_test.dart`
+- `test/lead_review_findings_regression_test.dart`
 - `test/network_and_datasources_test.dart`
 - `test/payment_integrity_test.dart`
 - `test/pricing_completion_regression_test.dart`
@@ -79,8 +82,10 @@ Committed implementation and regression files; original uncommitted user changes
 - `test/seat_hold_flow_test.dart`
 - `test/session_refresh_regression_test.dart`
 
-Documentation added with this delivery:
+Documentation and evidence added:
 - `docs/MOBILE_EXECUTION_PLAN.md`
 - `docs/BACKEND_DATABASE_UPGRADE_REVIEW.md`
 - `docs/MOBILE_FINAL_REPORT.md`
 - `docs/MOBILE_CHANGED_FILES.md`
+- `docs/PR5_REVIEW_HANDOFF.md`
+- `docs/review-evidence/pr5-quality-gates.json`
