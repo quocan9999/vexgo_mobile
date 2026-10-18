@@ -55,15 +55,43 @@ class BookingFlowScreen extends StatelessWidget {
   }
 }
 
-class _BookingFlowContent extends StatelessWidget {
+class _BookingFlowContent extends StatefulWidget {
   const _BookingFlowContent();
+  @override
+  State<_BookingFlowContent> createState() => _BookingFlowContentState();
+}
+
+class _BookingFlowContentState extends State<_BookingFlowContent>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<BookingFlowBloc>().add(const TickCountdownEvent());
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   Future<bool> _handlePop(
     BuildContext context,
     BookingFlowState state,
     BookingFlowBloc bloc,
   ) async {
-    if (state.step.index > 0) {
+    if (state.status == BookingFlowStatus.submitting ||
+        state.status == BookingFlowStatus.loading) {
+      return false;
+    }
+    if (state.step.index > 0 && !state.isCheckoutLocked) {
       bloc.add(const PreviousStepEvent());
       return false;
     }
@@ -72,8 +100,10 @@ class _BookingFlowContent extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Thoát khỏi đặt vé?'),
-        content: const Text(
-          'Bạn có chắc chắn muốn rời khỏi tiến trình đặt vé này không? Vị trí ghế đang giữ sẽ được giải phóng cho người khác.',
+        content: Text(
+          state.isCheckoutLocked
+              ? 'Đơn hiện tại chưa hoàn tất xác minh. Kiểm tra trong Vé của tôi trước khi tạo đơn khác.'
+              : 'Bạn có chắc chắn muốn rời khỏi tiến trình đặt vé này không? Vị trí ghế đang giữ sẽ được giải phóng cho người khác.',
         ),
         actions: [
           TextButton(
@@ -91,7 +121,7 @@ class _BookingFlowContent extends StatelessWidget {
       ),
     );
 
-    if (shouldExit == true) {
+    if (shouldExit == true && !state.isCheckoutLocked) {
       bloc.add(const ReleaseSeatHoldEvent());
     }
 
@@ -103,12 +133,18 @@ class _BookingFlowContent extends StatelessWidget {
     final bloc = context.read<BookingFlowBloc>();
 
     return BlocConsumer<BookingFlowBloc, BookingFlowState>(
+      listenWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.errorMessage != current.errorMessage,
       listener: (context, state) {
         if (state.status == BookingFlowStatus.success &&
             state.createdTicket != null) {
           context.pushReplacement(
             '/booking-success',
-            extra: {'ticket': state.createdTicket},
+            extra: {
+              'ticket': state.createdTicket,
+              'tickets': state.createdTickets,
+            },
           );
         } else if (state.errorMessage != null) {
           if (state.errorMessage!.contains('Hết thời gian') ||

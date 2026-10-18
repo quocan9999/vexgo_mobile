@@ -4,7 +4,8 @@ import 'package:vexgo_app/core/network/api_exceptions.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
-import 'package:vexgo_app/data/models/trip_model.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
+import 'package:vexgo_app/core/utils/payment_provider_mapper.dart';
 import 'package:vexgo_app/data/repositories/booking_repository.dart';
 import 'package:vexgo_app/data/repositories/seat_repository.dart';
 import 'booking_flow_event.dart';
@@ -14,11 +15,17 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   final SeatRepository seatRepository;
   final BookingRepository bookingRepository;
   Timer? _countdownTimer;
+  final DateTime Function() _now;
+  bool _holdBusy = false;
+  bool _confirmBusy = false;
+  bool _closing = false;
 
   BookingFlowBloc({
     required this.seatRepository,
     required this.bookingRepository,
-  }) : super(const BookingFlowState()) {
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now,
+       super(const BookingFlowState()) {
     on<InitBookingFlowEvent>(_onInit);
     on<ToggleSeatEvent>(_onToggleSeat);
     on<ChangeFloorEvent>(_onChangeFloor);
@@ -100,6 +107,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
       final initialPassengerPhone = event.passengerPhone?.trim() ?? '';
       final initialPassengerEmail = event.passengerEmail?.trim() ?? '';
 
+      if (_closing || emit.isDone) return;
       emit(
         state.copyWith(
           status: BookingFlowStatus.loaded,
@@ -122,6 +130,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         ),
       );
     } catch (e) {
+      if (_closing || emit.isDone) return;
       emit(
         state.copyWith(
           status: BookingFlowStatus.failure,
@@ -131,46 +140,52 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     }
   }
 
-  void _onToggleSeat(ToggleSeatEvent event, Emitter<BookingFlowState> emit) {
-    if (event.seat.status == SeatStatus.booked ||
-        event.seat.status == SeatStatus.held) {
+  Future<void> _onToggleSeat(
+    ToggleSeatEvent event,
+    Emitter<BookingFlowState> emit,
+  ) async {
+    if (state.isCheckoutLocked ||
+        _holdBusy ||
+        state.status == BookingFlowStatus.loading) {
       return;
     }
-
-    if (state.seatHold != null) {
-      seatRepository.releaseSeatHold(state.seatHold!.holdToken);
-      _stopCountdown();
+    final current = List<SeatModel>.from(state.selectedSeats);
+    final exists = current.any((s) => s.id == event.seat.id);
+    final inventory = [
+      ...?state.seatLayout?.lowerFloor,
+      ...?state.seatLayout?.upperFloor,
+    ];
+    final seat = inventory.where((s) => s.id == event.seat.id).firstOrNull;
+    if (!exists && (seat == null || !seat.isAvailable)) return;
+    if (!exists && current.length >= 6) {
+      emit(
+        state.copyWith(
+          errorMessage: 'Bạn chỉ có thể chọn tối đa 6 chỗ trong một lần đặt!',
+        ),
+      );
+      return;
     }
-
-    final currentSelected = List<SeatModel>.from(state.selectedSeats);
-    final exists = currentSelected.any((s) => s.id == event.seat.id);
-
     if (exists) {
-      currentSelected.removeWhere((s) => s.id == event.seat.id);
-      emit(
-        state.copyWith(
-          selectedSeats: currentSelected,
-          clearSeatHold: state.seatHold != null,
-          errorMessage: null,
-        ),
-      );
+      current.removeWhere((s) => s.id == event.seat.id);
     } else {
-      if (currentSelected.length >= 6) {
-        emit(
-          state.copyWith(
-            errorMessage: 'Bạn chỉ có thể chọn tối đa 6 chỗ trong một lần đặt!',
-          ),
-        );
-        return;
-      }
-      currentSelected.add(event.seat);
-      emit(
-        state.copyWith(
-          selectedSeats: currentSelected,
-          clearSeatHold: state.seatHold != null,
-          errorMessage: null,
-        ),
-      );
+      current.add(seat!);
+    }
+    _holdBusy = true;
+    final hold = state.seatHold;
+    _stopCountdown();
+    emit(
+      state.copyWith(
+        selectedSeats: current,
+        clearSeatHold: true,
+        errorMessage: null,
+      ),
+    );
+    try {
+      if (hold != null) await seatRepository.releaseSeatHold(hold.holdToken);
+    } catch (_) {
+      // The backend deadline still releases the old hold; no fake release result.
+    } finally {
+      _holdBusy = false;
     }
   }
 
@@ -182,6 +197,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     SelectPickupPointEvent event,
     Emitter<BookingFlowState> emit,
   ) {
+    if (state.isCheckoutLocked) return;
     emit(state.copyWith(selectedPickupPoint: event.point));
   }
 
@@ -189,6 +205,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     SelectDropoffPointEvent event,
     Emitter<BookingFlowState> emit,
   ) {
+    if (state.isCheckoutLocked) return;
     emit(state.copyWith(selectedDropoffPoint: event.point));
   }
 
@@ -196,6 +213,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     UpdatePassengerInfoEvent event,
     Emitter<BookingFlowState> emit,
   ) {
+    if (state.isCheckoutLocked) return;
     emit(
       state.copyWith(
         passengerName: event.name,
@@ -211,6 +229,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     ApplyVoucherEvent event,
     Emitter<BookingFlowState> emit,
   ) {
+    if (state.isCheckoutLocked) return;
     emit(state.copyWith(appliedVoucher: event.voucher));
   }
 
@@ -218,6 +237,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     RemoveVoucherEvent event,
     Emitter<BookingFlowState> emit,
   ) {
+    if (state.isCheckoutLocked) return;
     emit(state.copyWith(clearVoucher: true));
   }
 
@@ -225,30 +245,77 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     SelectPaymentMethodEvent event,
     Emitter<BookingFlowState> emit,
   ) {
+    if (state.isCheckoutLocked) return;
     emit(state.copyWith(selectedPaymentMethod: event.method));
   }
 
-  void _onTickCountdown(
+  int _remainingSeconds(DateTime expiresAt) {
+    final millis = expiresAt.difference(_now()).inMilliseconds;
+    return millis <= 0 ? 0 : (millis + 999) ~/ 1000;
+  }
+
+  Future<void> _onTickCountdown(
     TickCountdownEvent event,
     Emitter<BookingFlowState> emit,
-  ) {
-    if (state.countdownSeconds > 1) {
-      emit(state.copyWith(countdownSeconds: state.countdownSeconds - 1));
-    } else {
-      _stopCountdown();
-      final hold = state.seatHold;
-      if (hold != null) {
-        seatRepository.releaseSeatHold(hold.holdToken);
-      }
+  ) async {
+    final hold = state.seatHold;
+    if (hold == null ||
+        state.pendingBookingId != null ||
+        state.bookingOutcomeUnknown) {
+      return;
+    }
+    final remaining = _remainingSeconds(hold.expiresAt);
+    if (remaining > 0) {
+      emit(state.copyWith(countdownSeconds: remaining));
+      return;
+    }
+    _stopCountdown();
+    emit(
+      state.copyWith(
+        countdownSeconds: 0,
+        status: BookingFlowStatus.failure,
+        errorMessage: 'Hết thời gian giữ ghế. Vui lòng chọn lại chỗ ngồi.',
+        step: BookingStep.seatSelection,
+        clearSeatHold: true,
+        selectedSeats: const [],
+      ),
+    );
+    try {
+      await seatRepository.releaseSeatHold(hold.holdToken);
+    } catch (_) {}
+    await _refreshInventory(emit);
+  }
+
+  Future<void> _refreshInventory(Emitter<BookingFlowState> emit) async {
+    final trip = state.trip;
+    final tripId = trip?.numericTripId ?? int.tryParse(trip?.id ?? '');
+    if (trip == null || tripId == null) return;
+    try {
+      final seats = await seatRepository.getTripSeats(tripId);
+      if (_closing || emit.isDone || state.isCheckoutLocked) return;
+      final price = trip.discountPrice > 0
+          ? trip.discountPrice
+          : trip.originalPrice;
+      final priced = seats
+          .map(
+            (seat) => seat.price != null && seat.price! > 0
+                ? seat
+                : seat.copyWith(price: price > 0 ? price : null),
+          )
+          .toList();
       emit(
         state.copyWith(
-          countdownSeconds: 0,
-          status: BookingFlowStatus.failure,
-          errorMessage: 'Hết thời gian giữ ghế. Vui lòng chọn lại chỗ ngồi.',
-          step: BookingStep.seatSelection,
-          clearSeatHold: true,
+          seatLayout: SeatLayoutModel(
+            vehicleType: trip.vehicleType,
+            hasTwoFloors: priced.any((s) => s.floor == 2),
+            lowerFloor: priced.where((s) => s.floor == 1).toList(),
+            upperFloor: priced.where((s) => s.floor == 2).toList(),
+          ),
         ),
       );
+    } catch (_) {
+      // Keep the original actionable error. Selection is cleared, so stale
+      // inventory cannot proceed without a new backend hold.
     }
   }
 
@@ -256,7 +323,12 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     NextStepEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
-    if (!state.canProceed) return;
+    if (!state.canProceed ||
+        state.isCheckoutLocked ||
+        _holdBusy ||
+        state.status == BookingFlowStatus.loading) {
+      return;
+    }
 
     // Moving from seatSelection: reserve seats via SeatHold API
     if (state.step == BookingStep.seatSelection && state.seatHold == null) {
@@ -287,13 +359,20 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         return;
       }
 
-      emit(state.copyWith(status: BookingFlowStatus.loading));
+      _holdBusy = true;
+      emit(
+        state.copyWith(status: BookingFlowStatus.loading, errorMessage: null),
+      );
       try {
         final hold = await seatRepository.createSeatHold(
           tripId: tripId,
           seatIds: seatIds,
         );
-        if (hold.remainingSeconds <= 0) {
+        if (_closing || emit.isDone) {
+          await seatRepository.releaseSeatHold(hold.holdToken);
+          return;
+        }
+        if (_remainingSeconds(hold.expiresAt) <= 0) {
           emit(
             state.copyWith(
               status: BookingFlowStatus.failure,
@@ -307,7 +386,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           state.copyWith(
             status: BookingFlowStatus.loaded,
             seatHold: hold,
-            countdownSeconds: hold.remainingSeconds,
+            countdownSeconds: _remainingSeconds(hold.expiresAt),
             step: BookingStep.pickupPoint,
             errorMessage: null,
           ),
@@ -315,35 +394,18 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         _startCountdown();
         return;
       } on ApiException catch (e) {
+        if (_closing || emit.isDone) return;
         emit(
           state.copyWith(
             status: BookingFlowStatus.failure,
             errorMessage: e.message,
           ),
         );
-        if (state.trip != null) {
-          final tripId =
-              state.trip!.numericTripId ?? int.tryParse(state.trip!.id);
-          if (tripId != null && tripId > 0) {
-            final realSeats = await seatRepository.getTripSeats(tripId);
-            if (realSeats.isNotEmpty) {
-              final lower = realSeats.where((s) => s.floor == 1).toList();
-              final upper = realSeats.where((s) => s.floor == 2).toList();
-              emit(
-                state.copyWith(
-                  seatLayout: SeatLayoutModel(
-                    vehicleType: state.trip!.vehicleType,
-                    hasTwoFloors: upper.isNotEmpty,
-                    lowerFloor: lower,
-                    upperFloor: upper,
-                  ),
-                ),
-              );
-            }
-          }
-        }
+        emit(state.copyWith(selectedSeats: const []));
+        await _refreshInventory(emit);
         return;
       } catch (e) {
+        if (_closing || emit.isDone) return;
         emit(
           state.copyWith(
             status: BookingFlowStatus.failure,
@@ -351,6 +413,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           ),
         );
         return;
+      } finally {
+        _holdBusy = false;
       }
     }
 
@@ -365,6 +429,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     ReleaseSeatHoldEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
+    if (_holdBusy || _confirmBusy || state.isCheckoutLocked) return;
     if (state.seatHold != null) {
       try {
         await seatRepository.releaseSeatHold(state.seatHold!.holdToken);
@@ -378,6 +443,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     PreviousStepEvent event,
     Emitter<BookingFlowState> emit,
   ) {
+    if (state.isCheckoutLocked || _holdBusy) return;
     final prevIndex = state.step.index - 1;
     if (prevIndex >= 0) {
       emit(
@@ -387,6 +453,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   }
 
   void _onGoToStep(GoToStepEvent event, Emitter<BookingFlowState> emit) {
+    if (state.isCheckoutLocked || _holdBusy) return;
     if (event.stepIndex >= 0 && event.stepIndex < BookingStep.values.length) {
       // Allow going back to previous steps without re-validation
       if (event.stepIndex <= state.step.index || state.canProceed) {
@@ -403,291 +470,241 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     ConfirmPaymentEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
+    if (_confirmBusy ||
+        _holdBusy ||
+        state.status == BookingFlowStatus.success ||
+        state.status == BookingFlowStatus.blockedByBackend) {
+      return;
+    }
+    if (state.bookingOutcomeUnknown) {
+      emit(
+        state.copyWith(
+          status: BookingFlowStatus.failure,
+          errorMessage:
+              'Kết quả tạo đơn chưa xác định. Không gửi lại yêu cầu; vui lòng kiểm tra Vé của tôi hoặc liên hệ hỗ trợ.',
+        ),
+      );
+      return;
+    }
     final trip = state.trip;
     if (trip == null) return;
-
-    emit(state.copyWith(status: BookingFlowStatus.submitting));
-
-    // Simulate safe payment gateway processing delay
-    await Future.delayed(const Duration(milliseconds: 1200));
-
-    // If there is an existing pending payment, poll its status and NEVER create a duplicate booking
-    if (state.pendingPaymentId != null) {
-      try {
-        final paymentStatus = await bookingRepository.getPaymentStatus(
-          state.pendingPaymentId!,
+    if (state.pendingBookingId == null &&
+        (!state.isSeatsValid ||
+            !state.isPickupValid ||
+            !state.isDropoffValid ||
+            !state.isPassengerValid ||
+            state.seatHold == null)) {
+      emit(
+        state.copyWith(
+          status: BookingFlowStatus.failure,
+          errorMessage:
+              'Vui lòng hoàn tất thông tin hành khách và giữ chỗ trước khi thanh toán.',
+        ),
+      );
+      return;
+    }
+    if (state.pendingBookingId == null &&
+        _remainingSeconds(state.seatHold!.expiresAt) <= 0) {
+      await _onTickCountdown(const TickCountdownEvent(), emit);
+      return;
+    }
+    _confirmBusy = true;
+    final draft = state;
+    emit(
+      state.copyWith(status: BookingFlowStatus.submitting, errorMessage: null),
+    );
+    try {
+      // Only the explicitly selected mock repository may produce demo fixtures.
+      if (bookingRepository is MockBookingRepository) {
+        final ticket = await bookingRepository.createBooking(
+          trip: _buildTripSummary(draft),
+          seats: draft.selectedSeats.map((s) => s.name).toList(),
+          seatIds: draft.selectedSeats.map((s) => s.numericSeatId!).toList(),
+          holdToken: draft.holdToken,
+          totalAmount: draft.seatsTotalAmount!,
+          discountAmount: draft.discountAmount,
+          finalAmount: draft.finalAmount!,
+          paymentMethod: draft.selectedPaymentMethod,
+          passenger: PassengerInfo(
+            fullName: draft.passengerName.trim(),
+            phone: draft.passengerPhone.trim(),
+            email: draft.passengerEmail.trim(),
+          ),
+          promotionCode: draft.appliedVoucher?.code,
         );
-        if (paymentStatus.isSuccess) {
-          _stopCountdown();
-          final resolvedTicket =
-              state.createdTicket ??
-              await _resolveAuthoritativeTicket(
-                trip,
-                state,
-                state.pendingBookingId,
-              );
+        if (_closing || emit.isDone) return;
+        _stopCountdown();
+        emit(
+          state.copyWith(
+            status: BookingFlowStatus.success,
+            createdTicket: ticket,
+            createdTickets: [ticket],
+            clearSeatHold: true,
+          ),
+        );
+        return;
+      }
+      final provider = PaymentProviderMapper.toBackendProvider(
+        draft.selectedPaymentMethod,
+      );
+      if (state.pendingBookingId == null) {
+        // Once dispatched, a lost POST response is an unknown outcome. Backend
+        // has no idempotency key contract, so never automatically replay it.
+        emit(state.copyWith(bookingOutcomeUnknown: true));
+        final booking = await bookingRepository.createApiBooking(
+          tripId: trip.numericTripId ?? int.parse(trip.id),
+          seatIds: draft.selectedSeats.map((s) => s.numericSeatId!).toList(),
+          pickupPoint: draft.selectedPickupPoint!.name,
+          dropoffPoint: draft.selectedDropoffPoint!.name,
+          contact: PassengerInfo(
+            fullName: draft.passengerName.trim(),
+            phone: draft.passengerPhone.trim(),
+            email: draft.passengerEmail.trim(),
+          ),
+          holdToken: draft.holdToken,
+          promotionCode: draft.appliedVoucher?.code,
+        );
+        if (_closing || emit.isDone) return;
+        if (booking.bookingId <= 0)
+          throw StateError('Máy chủ không trả mã đơn hợp lệ.');
+        _stopCountdown();
+        emit(
+          state.copyWith(
+            pendingBookingId: booking.bookingId,
+            bookingOutcomeUnknown: false,
+            clearSeatHold: true,
+          ),
+        );
+      }
+      if (state.pendingPaymentId == null) {
+        final payment = await bookingRepository.createPayment(
+          bookingId: state.pendingBookingId!,
+          provider: provider,
+        );
+        if (_closing || emit.isDone) return;
+        if (payment.paymentId <= 0 ||
+            payment.bookingId != state.pendingBookingId ||
+            payment.amount <= 0) {
+          throw StateError('Máy chủ trả thông tin thanh toán không hợp lệ.');
+        }
+        emit(
+          state.copyWith(
+            pendingPaymentId: payment.paymentId,
+            pendingPaymentAmount: payment.amount,
+            pendingPaymentUrl: payment.paymentUrl,
+            pendingQrCodeUrl: payment.qrCodeUrl,
+            pendingDeeplink: payment.deeplink,
+          ),
+        );
+        if (!ApiConfig.isDemoMode && payment.isDemo) {
           emit(
             state.copyWith(
-              status: BookingFlowStatus.success,
-              createdTicket: resolvedTicket,
-              clearPendingPayment: true,
-            ),
-          );
-          return;
-        } else if (paymentStatus.isPending) {
-          emit(
-            state.copyWith(
-              status: BookingFlowStatus.paymentPending,
+              status: BookingFlowStatus.blockedByBackend,
               errorMessage:
-                  'Giao dịch thanh toán đang chờ xử lý. Vui lòng hoàn tất thanh toán.',
-            ),
-          );
-          return;
-        } else {
-          emit(
-            state.copyWith(
-              status: BookingFlowStatus.failure,
-              clearPendingPayment: true,
-              errorMessage:
-                  paymentStatus.failureReason ??
-                  'Giao dịch thanh toán thất bại.',
+                  'BLOCKED_BY_BACKEND: Máy chủ chỉ hỗ trợ cổng thanh toán thử nghiệm, chưa hỗ trợ thanh toán thực tế.',
             ),
           );
           return;
         }
-      } catch (e) {
-        emit(
-          state.copyWith(
-            status: BookingFlowStatus.failure,
-            errorMessage: 'Không thể kiểm tra trạng thái thanh toán: $e',
-          ),
-        );
-        return;
       }
-    }
-
-    try {
-      final date = state.date ?? DateTime.now();
-      final dateFormatted =
-          '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-
-      final summary = TicketTripSummary(
-        id: trip.id,
-        operatorName: trip.operatorName,
-        vehicleType: trip.vehicleType,
-        departureTime: state.selectedPickupPoint?.time ?? trip.departureTime,
-        departureDate: dateFormatted,
-        arrivalTime: state.selectedDropoffPoint?.time ?? trip.arrivalTime,
-        arrivalDate: dateFormatted,
-        fromCity: trip.fromCityName,
-        toCity: trip.toCityName,
-        pickupPoint: state.selectedPickupPoint?.name ?? trip.pickupPoint,
-        pickupAddress: state.selectedPickupPoint?.address ?? trip.pickupAddress,
-        dropoffPoint: state.selectedDropoffPoint?.name ?? trip.dropoffPoint,
-        dropoffAddress:
-            state.selectedDropoffPoint?.address ?? trip.dropoffAddress,
-      );
-
-      final passenger = PassengerInfo(
-        fullName: state.passengerName.trim(),
-        phone: state.passengerPhone.trim(),
-        email: state.passengerEmail.trim(),
-      );
-
-      final seatNames = state.selectedSeats.map((s) => s.name).toList();
-      final seatIds = state.selectedSeats
-          .map((s) => s.numericSeatId ?? int.tryParse(s.id))
-          .whereType<int>()
-          .toList();
-
-      if (seatIds.length != state.selectedSeats.length || seatIds.isEmpty) {
-        emit(
-          state.copyWith(
-            status: BookingFlowStatus.failure,
-            errorMessage:
-                'Danh sách ghế không hợp lệ. Vui lòng chọn lại chỗ ngồi.',
-          ),
+      if (!state.paymentConfirmed) {
+        final payment = await bookingRepository.getPaymentStatus(
+          state.pendingPaymentId!,
         );
-        return;
+        if (_closing || emit.isDone) return;
+        if (payment.paymentId != state.pendingPaymentId ||
+            payment.bookingId != state.pendingBookingId ||
+            payment.amount != state.pendingPaymentAmount ||
+            (!ApiConfig.isDemoMode && payment.isDemo)) {
+          throw StateError('Kết quả thanh toán không khớp với đơn hiện tại.');
+        }
+        if (!payment.isSuccess) {
+          emit(
+            state.copyWith(
+              status: payment.isPending
+                  ? BookingFlowStatus.paymentPending
+                  : BookingFlowStatus.failure,
+              errorMessage: payment.isPending
+                  ? 'Thanh toán đang chờ xử lý. Hoàn tất tại cổng thanh toán rồi kiểm tra lại.'
+                  : 'Thanh toán không thành công. Đơn và giao dịch hiện tại được giữ để kiểm tra, không tạo lại đơn.',
+            ),
+          );
+          return;
+        }
+        emit(state.copyWith(paymentConfirmed: true));
       }
-
-      if (state.seatsTotalAmount == null || state.seatsTotalAmount! <= 0) {
-        emit(
-          state.copyWith(
-            status: BookingFlowStatus.failure,
-            errorMessage:
-                'Giá vé chuyến đi chưa được xác định. Không thể tiếp tục thanh toán.',
-          ),
-        );
-        return;
-      }
-
-      final holdToken = state.seatHold?.holdToken;
-
-      final createdTicket = await bookingRepository.createBooking(
-        trip: summary,
-        seats: seatNames,
-        seatIds: seatIds,
-        holdToken: holdToken,
-        promotionCode: state.appliedVoucher?.code,
-        totalAmount: state.seatsTotalAmount!,
-        discountAmount: state.discountAmount,
-        finalAmount: state.finalAmount ?? 0,
-        paymentMethod: state.selectedPaymentMethod,
-        passenger: passenger,
+      final tickets = await resolvePaidBookingTickets(
+        bookingRepository,
+        state.pendingBookingId!,
       );
-
-      _stopCountdown();
-
+      if (_closing || emit.isDone) return;
       emit(
         state.copyWith(
           status: BookingFlowStatus.success,
-          createdTicket: createdTicket,
-          clearPendingPayment: true,
+          createdTicket: tickets.first,
+          createdTickets: tickets,
+          errorMessage: null,
         ),
       );
-    } on PaymentFailedException catch (e) {
+    } on ApiException catch (error) {
+      if (_closing || emit.isDone) return;
+      final definiteRejection =
+          state.pendingBookingId == null &&
+          error.statusCode >= 400 &&
+          error.statusCode < 500;
+      final blocked =
+          error.errorCode == 'BLOCKED_BY_BACKEND_GUEST_CHECKOUT' ||
+          error.statusCode == 503;
+      emit(
+        state.copyWith(
+          status: blocked
+              ? BookingFlowStatus.blockedByBackend
+              : BookingFlowStatus.failure,
+          bookingOutcomeUnknown: definiteRejection
+              ? false
+              : state.bookingOutcomeUnknown,
+          errorMessage: blocked
+              ? (error.statusCode == 503
+                    ? 'BLOCKED_BY_BACKEND: Cổng thanh toán chưa khả dụng trên máy chủ. Đơn hiện tại được giữ để kiểm tra.'
+                    : error.message)
+              : error.message,
+        ),
+      );
+    } catch (error) {
+      if (_closing || emit.isDone) return;
       emit(
         state.copyWith(
           status: BookingFlowStatus.failure,
-          clearPendingPayment: true,
-          errorMessage: e.message,
+          errorMessage: state.bookingOutcomeUnknown
+              ? 'Kết quả tạo đơn chưa xác định do lỗi kết nối. Không gửi lại yêu cầu; kiểm tra Vé của tôi hoặc liên hệ hỗ trợ.'
+              : 'Chưa xác minh được thanh toán hoặc vé. Vui lòng kiểm tra lại đơn hiện tại.',
         ),
       );
-    } on PaymentPendingException catch (e) {
-      emit(
-        state.copyWith(
-          status: BookingFlowStatus.paymentPending,
-          pendingBookingId: e.bookingId ?? state.pendingBookingId,
-          pendingPaymentId: e.paymentId,
-          pendingPaymentUrl: e.paymentUrl ?? state.pendingPaymentUrl,
-          pendingQrCodeUrl: e.qrCodeUrl ?? state.pendingQrCodeUrl,
-          pendingDeeplink: e.deeplink ?? state.pendingDeeplink,
-          errorMessage: e.message,
-        ),
-      );
-    } on ApiException catch (e) {
-      emit(
-        state.copyWith(
-          status: BookingFlowStatus.failure,
-          errorMessage: e.message,
-        ),
-      );
-    } on NetworkException catch (e) {
-      emit(
-        state.copyWith(
-          status: BookingFlowStatus.failure,
-          errorMessage: e.message,
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: BookingFlowStatus.failure,
-          errorMessage: 'Giao dịch thanh toán không thành công: $e',
-        ),
-      );
+    } finally {
+      _confirmBusy = false;
     }
   }
 
-  TicketTripSummary _buildTripSummary(TripModel trip, BookingFlowState state) {
-    final date = state.date ?? DateTime.now();
-    final dateFormatted =
+  TicketTripSummary _buildTripSummary(BookingFlowState draft) {
+    final trip = draft.trip!;
+    final date = draft.date ?? _now();
+    final formatted =
         '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-
     return TicketTripSummary(
       id: trip.id,
       operatorName: trip.operatorName,
       vehicleType: trip.vehicleType,
-      departureTime: state.selectedPickupPoint?.time ?? trip.departureTime,
-      departureDate: dateFormatted,
-      arrivalTime: state.selectedDropoffPoint?.time ?? trip.arrivalTime,
-      arrivalDate: dateFormatted,
+      departureTime: draft.selectedPickupPoint?.time ?? trip.departureTime,
+      departureDate: formatted,
+      arrivalTime: draft.selectedDropoffPoint?.time ?? trip.arrivalTime,
+      arrivalDate: formatted,
       fromCity: trip.fromCityName,
       toCity: trip.toCityName,
-      pickupPoint: state.selectedPickupPoint?.name ?? trip.pickupPoint,
-      pickupAddress: state.selectedPickupPoint?.address ?? trip.pickupAddress,
-      dropoffPoint: state.selectedDropoffPoint?.name ?? trip.dropoffPoint,
+      pickupPoint: draft.selectedPickupPoint?.name ?? trip.pickupPoint,
+      pickupAddress: draft.selectedPickupPoint?.address ?? trip.pickupAddress,
+      dropoffPoint: draft.selectedDropoffPoint?.name ?? trip.dropoffPoint,
       dropoffAddress:
-          state.selectedDropoffPoint?.address ?? trip.dropoffAddress,
-    );
-  }
-
-  Future<TicketModel> _resolveAuthoritativeTicket(
-    TripModel trip,
-    BookingFlowState state,
-    int? bookingId,
-  ) async {
-    final summary = _buildTripSummary(trip, state);
-    final seatNames = state.selectedSeats.map((s) => s.name).toList();
-    final passenger = PassengerInfo(
-      fullName: state.passengerName.trim(),
-      phone: state.passengerPhone.trim(),
-      email: state.passengerEmail.trim(),
-    );
-
-    if (bookingId != null && bookingId > 0) {
-      try {
-        final booking = await bookingRepository.getBookingById(
-          bookingId.toString(),
-        );
-        if (booking != null) {
-          if (booking.tickets.isNotEmpty) {
-            return booking.tickets.first;
-          }
-          final now = DateTime.now();
-          final bookingDateStr =
-              '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-          return TicketModel(
-            id: 'TKT_${booking.bookingCode}',
-            ticketCode: booking.bookingCode,
-            bookingId: booking.bookingId,
-            bookingCode: booking.bookingCode,
-            status: TicketStatus.upcoming,
-            bookingDate: bookingDateStr,
-            trip: summary,
-            seats: booking.seats.isNotEmpty ? booking.seats : seatNames,
-            totalAmount: booking.totalAmount,
-            discountAmount: booking.discountAmount,
-            finalAmount: booking.totalAmount,
-            paymentMethod: state.selectedPaymentMethod,
-            passenger: passenger,
-          );
-        }
-      } catch (_) {}
-
-      try {
-        final myTickets = await bookingRepository.getMyTickets();
-        final found = myTickets
-            .where((t) => t.bookingId == bookingId)
-            .firstOrNull;
-        if (found != null) {
-          return found;
-        }
-      } catch (_) {}
-    }
-
-    final now = DateTime.now();
-    final bookingDateStr =
-        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-    final code = bookingId != null
-        ? 'VXG-$bookingId'
-        : 'VXG-${now.millisecondsSinceEpoch}';
-
-    return TicketModel(
-      id: 'TKT_$code',
-      ticketCode: code,
-      bookingId: bookingId,
-      bookingCode: code,
-      status: TicketStatus.upcoming,
-      bookingDate: bookingDateStr,
-      trip: summary,
-      seats: seatNames,
-      totalAmount: state.seatsTotalAmount ?? (state.finalAmount ?? 0),
-      discountAmount: state.discountAmount,
-      finalAmount: state.finalAmount ?? 0,
-      paymentMethod: state.selectedPaymentMethod,
-      passenger: passenger,
+          draft.selectedDropoffPoint?.address ?? trip.dropoffAddress,
     );
   }
 
@@ -703,11 +720,21 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     _countdownTimer = null;
   }
 
+  Future<void> _releaseOnClose(String token) async {
+    try {
+      await seatRepository.releaseSeatHold(token);
+    } catch (_) {}
+  }
+
   @override
   Future<void> close() {
+    _closing = true;
     _stopCountdown();
-    if (state.seatHold != null && state.createdTicket == null) {
-      seatRepository.releaseSeatHold(state.seatHold!.holdToken);
+    if (state.seatHold != null &&
+        state.createdTicket == null &&
+        !state.isCheckoutLocked &&
+        !_confirmBusy) {
+      unawaited(_releaseOnClose(state.seatHold!.holdToken));
     }
     return super.close();
   }

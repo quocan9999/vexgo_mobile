@@ -166,6 +166,8 @@ class TicketModel extends Equatable {
   final String? seatPosition;
   final dynamic bookingId;
   final String? bookingCode;
+  final String? bookingStatus;
+  final String? paymentStatus;
 
   const TicketModel({
     required this.id,
@@ -189,6 +191,8 @@ class TicketModel extends Equatable {
     this.seatPosition,
     this.bookingId,
     this.bookingCode,
+    this.bookingStatus,
+    this.paymentStatus,
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
@@ -344,6 +348,8 @@ class TicketModel extends Equatable {
       seatPosition: json['seatPosition'] as String?,
       bookingId: json['bookingId'],
       bookingCode: json['bookingCode'] as String?,
+      bookingStatus: json['bookingStatus'] as String?,
+      paymentStatus: json['paymentStatus'] as String?,
     );
   }
 
@@ -369,6 +375,8 @@ class TicketModel extends Equatable {
     if (seatPosition != null) 'seatPosition': seatPosition,
     if (bookingId != null) 'bookingId': bookingId,
     if (bookingCode != null) 'bookingCode': bookingCode,
+    if (bookingStatus != null) 'bookingStatus': bookingStatus,
+    if (paymentStatus != null) 'paymentStatus': paymentStatus,
   };
 
   TicketModel copyWith({
@@ -393,6 +401,8 @@ class TicketModel extends Equatable {
     String? seatPosition,
     dynamic bookingId,
     String? bookingCode,
+    String? bookingStatus,
+    String? paymentStatus,
   }) {
     return TicketModel(
       id: id ?? this.id,
@@ -416,8 +426,36 @@ class TicketModel extends Equatable {
       seatPosition: seatPosition ?? this.seatPosition,
       bookingId: bookingId ?? this.bookingId,
       bookingCode: bookingCode ?? this.bookingCode,
+      bookingStatus: bookingStatus ?? this.bookingStatus,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
     );
   }
+
+  /// A reserved seat (DA_DAT) is created before payment. Only authoritative
+  /// booking AND order settlement permits a boarding credential.
+  bool get isPaid =>
+      bookingStatus?.toUpperCase() == 'DA_THANH_TOAN' &&
+      paymentStatus?.toUpperCase() == 'DA_THANH_TOAN';
+
+  bool get canShowQr =>
+      isPaid &&
+      status == TicketStatus.upcoming &&
+      (int.tryParse(id) ?? 0) > 0 &&
+      ticketCode.trim().isNotEmpty;
+
+  bool get hasFullDetails =>
+      (int.tryParse(id) ?? 0) > 0 &&
+      ticketCode.trim().isNotEmpty &&
+      trip.operatorName.isNotEmpty &&
+      trip.fromCity.isNotEmpty &&
+      trip.toCity.isNotEmpty &&
+      trip.departureDate.isNotEmpty &&
+      trip.departureTime.isNotEmpty &&
+      seats.isNotEmpty &&
+      passenger.fullName.isNotEmpty &&
+      passenger.phone.isNotEmpty &&
+      cancellation != null &&
+      finalAmount > 0;
 
   /// Parse departure date and time into a DateTime object
   DateTime? get departureDateTime {
@@ -495,5 +533,8 @@ class TicketModel extends Equatable {
     finalAmount,
     review,
     cancelReason,
+    bookingStatus,
+    paymentStatus,
+    cancellation,
   ];
 }

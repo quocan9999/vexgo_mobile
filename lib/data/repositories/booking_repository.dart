@@ -15,6 +15,151 @@ import '../models/promotion_validation_model.dart';
 import '../models/ticket_model.dart';
 import '../models/voucher_model.dart';
 
+/// Keeps recovery identifiers when a later checkout stage fails. Never permits
+/// a network retry to silently recreate a committed booking.
+class CheckoutProgressException implements Exception {
+  final String message;
+  final int? bookingId;
+  final int? paymentId;
+  final bool bookingOutcomeUnknown;
+  final bool blockedByBackend;
+  const CheckoutProgressException(
+    this.message, {
+    this.bookingId,
+    this.paymentId,
+    this.bookingOutcomeUnknown = false,
+    this.blockedByBackend = false,
+  });
+  @override
+  String toString() => message;
+}
+
+/// Booking endpoints contain ticket summaries. Boarding passes must come from
+/// the full ticket endpoint, including settlement and cancellation information.
+Future<List<TicketModel>> resolvePaidBookingTickets(
+  BookingRepository repository,
+  int bookingId,
+) async {
+  final booking = await repository.getBookingById(bookingId);
+  if (booking == null ||
+      booking.bookingId != bookingId ||
+      booking.tickets.isEmpty ||
+      (booking.ticketCount > 0 &&
+          booking.ticketCount != booking.tickets.length)) {
+    throw StateError(
+      'Chưa tải được đầy đủ vé của đơn đặt chỗ. Vui lòng kiểm tra lại.',
+    );
+  }
+  final tickets = <TicketModel>[];
+  final ids = <String>{};
+  for (final summary in booking.tickets) {
+    if ((int.tryParse(summary.id) ?? 0) <= 0 || !ids.add(summary.id)) {
+      throw StateError('Thông tin mã vé từ máy chủ không hợp lệ.');
+    }
+    final ticket = await repository.getTicketById(summary.id);
+    if (ticket == null ||
+        ticket.id != summary.id ||
+        ticket.bookingId?.toString() != bookingId.toString() ||
+        !ticket.hasFullDetails ||
+        !ticket.canShowQr) {
+      throw StateError(
+        'Máy chủ chưa xác nhận vé đã thanh toán đầy đủ. Vui lòng kiểm tra lại.',
+      );
+    }
+    tickets.add(ticket);
+  }
+  return List.unmodifiable(tickets);
+}
+
+Future<TicketModel> _createVerifiedBookingTicket({
+  required BookingRepository repository,
+  required BookingRemoteDataSource bookings,
+  required PaymentRemoteDataSource payments,
+  required TicketTripSummary trip,
+  required List<String> seats,
+  required String paymentMethod,
+  required PassengerInfo passenger,
+  List<int>? seatIds,
+  String? holdToken,
+  String? promotionCode,
+}) async {
+  final tripId = int.tryParse(trip.id);
+  final ids = seatIds ?? seats.map(int.tryParse).whereType<int>().toList();
+  if (tripId == null ||
+      tripId <= 0 ||
+      ids.isEmpty ||
+      ids.length != seats.length ||
+      ids.any((id) => id <= 0)) {
+    throw ArgumentError('Thông tin chuyến đi hoặc danh sách ghế không hợp lệ.');
+  }
+  // Resolve the provider before creating any order.
+  final provider = PaymentProviderMapper.toBackendProvider(paymentMethod);
+  BookingModel? booking;
+  PaymentTransactionModel? payment;
+  try {
+    booking = await bookings.createBooking(
+      tripId: tripId,
+      seatIds: ids,
+      pickupPoint: trip.pickupPoint,
+      dropoffPoint: trip.dropoffPoint,
+      contact: passenger,
+      holdToken: holdToken,
+      promotionCode: promotionCode,
+    );
+    payment = await payments.createPayment(
+      bookingId: booking.bookingId,
+      provider: provider,
+    );
+    if (!ApiConfig.isDemoMode && payment.isDemo) {
+      throw CheckoutProgressException(
+        'BLOCKED_BY_BACKEND: Máy chủ chỉ hỗ trợ cổng thanh toán thử nghiệm.',
+        bookingId: booking.bookingId,
+        paymentId: payment.paymentId,
+        blockedByBackend: true,
+      );
+    }
+    final status = await payments.getPaymentStatus(payment.paymentId);
+    if (status.paymentId != payment.paymentId ||
+        status.bookingId != booking.bookingId ||
+        status.amount != payment.amount ||
+        (!ApiConfig.isDemoMode && status.isDemo)) {
+      throw StateError('Thông tin giao dịch thanh toán không khớp.');
+    }
+    if (!status.isSuccess) {
+      throw PaymentPendingException(
+        message: status.isPending
+            ? 'Giao dịch thanh toán chưa hoàn tất.'
+            : 'Giao dịch không thành công. Kiểm tra đơn hiện tại trước khi thử lại.',
+        paymentId: payment.paymentId,
+        bookingId: booking.bookingId,
+        paymentUrl: payment.paymentUrl ?? status.paymentUrl,
+        qrCodeUrl: payment.qrCodeUrl ?? status.qrCodeUrl,
+        deeplink: payment.deeplink ?? status.deeplink,
+      );
+    }
+    return (await resolvePaidBookingTickets(
+      repository,
+      booking.bookingId,
+    )).first;
+  } on PaymentPendingException {
+    rethrow;
+  } on CheckoutProgressException {
+    rethrow;
+  } catch (error) {
+    if (booking != null ||
+        error is NetworkException ||
+        (error is ApiException && error.statusCode >= 500)) {
+      throw CheckoutProgressException(
+        'Chưa xác minh được kết quả đặt vé. Vui lòng kiểm tra đơn hiện tại trước khi thử lại.',
+        bookingId: booking?.bookingId,
+        paymentId: payment?.paymentId,
+        bookingOutcomeUnknown: booking == null,
+      );
+    }
+    rethrow;
+  }
+}
+
 abstract class BookingRepository {
   Future<List<VoucherModel>> getVouchers();
   Future<List<TicketModel>> getMyTickets();
@@ -336,7 +481,7 @@ class MockBookingRepository implements BookingRepository {
     try {
       return tickets.firstWhere((t) => t.ticketCode == ticketCode);
     } catch (_) {
-      return null;
+      rethrow;
     }
   }
 }
@@ -424,112 +569,18 @@ class HybridBookingRepository implements BookingRepository {
     String? holdToken,
     String? promotionCode,
   }) async {
-    final tripId = int.tryParse(trip.id);
-    if (tripId == null || tripId <= 0) {
-      throw ArgumentError('Mã chuyến đi không hợp lệ (${trip.id})');
-    }
-
-    final resolvedSeatIds =
-        seatIds ?? seats.map((s) => int.tryParse(s)).whereType<int>().toList();
-
-    if (resolvedSeatIds.length != seats.length ||
-        resolvedSeatIds.isEmpty ||
-        resolvedSeatIds.any((id) => id <= 0)) {
-      throw ArgumentError('Danh sách ghế không hợp lệ ($seats)');
-    }
-
-    try {
-      final booking = await remoteBookingDataSource.createBooking(
-        tripId: tripId,
-        seatIds: resolvedSeatIds,
-        pickupPoint: trip.pickupPoint,
-        dropoffPoint: trip.dropoffPoint,
-        contact: passenger,
-        holdToken: holdToken,
-        promotionCode: promotionCode,
-      );
-
-      // Create and verify payment transaction in MySQL
-      final backendProvider = PaymentProviderMapper.toBackendProvider(
-        paymentMethod,
-      );
-      final payment = await remotePaymentDataSource.createPayment(
-        bookingId: booking.bookingId,
-        provider: backendProvider,
-      );
-
-      final paymentStatus = await remotePaymentDataSource.getPaymentStatus(
-        payment.paymentId,
-      );
-
-      final resolvedPaymentId = paymentStatus.paymentId > 0
-          ? paymentStatus.paymentId
-          : payment.paymentId;
-
-      if (paymentStatus.isFailed) {
-        throw PaymentFailedException(
-          message:
-              paymentStatus.failureReason ?? 'Giao dịch thanh toán thất bại.',
-          failureReason: paymentStatus.failureReason,
-          paymentId: resolvedPaymentId,
-        );
-      }
-
-      if (paymentStatus.isPending) {
-        throw PaymentPendingException(
-          message: 'Giao dịch thanh toán đang được xử lý hoặc chưa hoàn tất.',
-          paymentId: resolvedPaymentId,
-          bookingId: booking.bookingId,
-          paymentUrl: payment.paymentUrl ?? paymentStatus.paymentUrl,
-          qrCodeUrl: payment.qrCodeUrl ?? paymentStatus.qrCodeUrl,
-          deeplink: payment.deeplink ?? paymentStatus.deeplink,
-        );
-      }
-
-      if (!paymentStatus.isSuccess) {
-        throw PaymentFailedException(
-          message:
-              'Trạng thái thanh toán không hợp lệ: ${paymentStatus.status.name}',
-          paymentId: resolvedPaymentId,
-        );
-      }
-
-      final now = DateTime.now();
-      final bookingDateStr =
-          '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-
-      // Use authoritative pricing calculated by backend BookingModel
-      final authoritativeTotal = booking.originalAmount > 0
-          ? booking.originalAmount
-          : (booking.totalAmount + booking.discountAmount);
-      final authoritativeDiscount = booking.discountAmount;
-      final authoritativeFinal = booking.totalAmount;
-
-      final newTicket = TicketModel(
-        id: 'TKT_${booking.bookingCode}',
-        ticketCode: booking.bookingCode,
-        bookingId: booking.bookingId,
-        bookingCode: booking.bookingCode,
-        status: TicketStatus.upcoming,
-        bookingDate: bookingDateStr,
-        trip: trip,
-        seats: booking.seats.isNotEmpty ? booking.seats : seats,
-        totalAmount: authoritativeTotal,
-        discountAmount: authoritativeDiscount,
-        finalAmount: authoritativeFinal,
-        paymentMethod: paymentMethod,
-        passenger: passenger,
-        licensePlate: null,
-        driverPhone: null,
-      );
-
-      return newTicket;
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('[HybridBookingRepository] Remote booking failed: $e');
-      }
-      rethrow;
-    }
+    return _createVerifiedBookingTicket(
+      repository: this,
+      bookings: remoteBookingDataSource,
+      payments: remotePaymentDataSource,
+      trip: trip,
+      seats: seats,
+      paymentMethod: paymentMethod,
+      passenger: passenger,
+      seatIds: seatIds,
+      holdToken: holdToken,
+      promotionCode: promotionCode,
+    );
   }
 
   @override
@@ -733,7 +784,7 @@ class HybridBookingRepository implements BookingRepository {
           '[HybridBookingRepository] Remote getBookingById failed: $e',
         );
       }
-      return null;
+      rethrow;
     }
   }
 }
@@ -789,100 +840,17 @@ class RealBookingRepository implements BookingRepository {
     String? holdToken,
     String? promotionCode,
   }) async {
-    final tripId = int.tryParse(trip.id);
-    if (tripId == null || tripId <= 0) {
-      throw ArgumentError('Mã chuyến đi không hợp lệ (${trip.id})');
-    }
-
-    final resolvedSeatIds =
-        seatIds ?? seats.map((s) => int.tryParse(s)).whereType<int>().toList();
-
-    if (resolvedSeatIds.length != seats.length ||
-        resolvedSeatIds.isEmpty ||
-        resolvedSeatIds.any((id) => id <= 0)) {
-      throw ArgumentError('Danh sách ghế không hợp lệ ($seats)');
-    }
-
-    final booking = await remoteBookingDataSource.createBooking(
-      tripId: tripId,
-      seatIds: resolvedSeatIds,
-      pickupPoint: trip.pickupPoint,
-      dropoffPoint: trip.dropoffPoint,
-      contact: passenger,
-      holdToken: holdToken,
-      promotionCode: promotionCode,
-    );
-
-    final backendProvider = PaymentProviderMapper.toBackendProvider(
-      paymentMethod,
-    );
-    final payment = await remotePaymentDataSource.createPayment(
-      bookingId: booking.bookingId,
-      provider: backendProvider,
-    );
-
-    final paymentStatus = await remotePaymentDataSource.getPaymentStatus(
-      payment.paymentId,
-    );
-
-    final resolvedPaymentId = paymentStatus.paymentId > 0
-        ? paymentStatus.paymentId
-        : payment.paymentId;
-
-    if (paymentStatus.isFailed) {
-      throw PaymentFailedException(
-        message:
-            paymentStatus.failureReason ?? 'Giao dịch thanh toán thất bại.',
-        failureReason: paymentStatus.failureReason,
-        paymentId: resolvedPaymentId,
-      );
-    }
-
-    if (paymentStatus.isPending) {
-      throw PaymentPendingException(
-        message: 'Giao dịch thanh toán đang được xử lý hoặc chưa hoàn tất.',
-        paymentId: resolvedPaymentId,
-        bookingId: booking.bookingId,
-        paymentUrl: payment.paymentUrl ?? paymentStatus.paymentUrl,
-        qrCodeUrl: payment.qrCodeUrl ?? paymentStatus.qrCodeUrl,
-        deeplink: payment.deeplink ?? paymentStatus.deeplink,
-      );
-    }
-
-    if (!paymentStatus.isSuccess) {
-      throw PaymentFailedException(
-        message:
-            'Trạng thái thanh toán không hợp lệ: ${paymentStatus.status.name}',
-        paymentId: resolvedPaymentId,
-      );
-    }
-
-    final now = DateTime.now();
-    final bookingDateStr =
-        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-
-    final authoritativeTotal = booking.originalAmount > 0
-        ? booking.originalAmount
-        : (booking.totalAmount + booking.discountAmount);
-    final authoritativeDiscount = booking.discountAmount;
-    final authoritativeFinal = booking.totalAmount;
-
-    return TicketModel(
-      id: 'TKT_${booking.bookingCode}',
-      ticketCode: booking.bookingCode,
-      bookingId: booking.bookingId,
-      bookingCode: booking.bookingCode,
-      status: TicketStatus.upcoming,
-      bookingDate: bookingDateStr,
+    return _createVerifiedBookingTicket(
+      repository: this,
+      bookings: remoteBookingDataSource,
+      payments: remotePaymentDataSource,
       trip: trip,
-      seats: booking.seats.isNotEmpty ? booking.seats : seats,
-      totalAmount: authoritativeTotal,
-      discountAmount: authoritativeDiscount,
-      finalAmount: authoritativeFinal,
+      seats: seats,
       paymentMethod: paymentMethod,
       passenger: passenger,
-      licensePlate: null,
-      driverPhone: null,
+      seatIds: seatIds,
+      holdToken: holdToken,
+      promotionCode: promotionCode,
     );
   }
 
@@ -988,7 +956,7 @@ class RealBookingRepository implements BookingRepository {
     try {
       return await remoteBookingDataSource.getBookingById(bookingId);
     } catch (_) {
-      return null;
+      rethrow;
     }
   }
 }

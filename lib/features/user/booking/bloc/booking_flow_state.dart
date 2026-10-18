@@ -15,6 +15,7 @@ enum BookingFlowStatus {
   success,
   paymentPending,
   failure,
+  blockedByBackend,
 }
 
 enum BookingStep {
@@ -64,6 +65,8 @@ extension BookingStepExtension on BookingStep {
   }
 }
 
+const _unchangedError = Object();
+
 class BookingFlowState extends Equatable {
   final BookingFlowStatus status;
   final BookingStep step;
@@ -88,6 +91,10 @@ class BookingFlowState extends Equatable {
   final int countdownSeconds;
   final SeatHoldModel? seatHold;
   final TicketModel? createdTicket;
+  final List<TicketModel> createdTickets;
+  final bool bookingOutcomeUnknown;
+  final int? pendingPaymentAmount;
+  final bool paymentConfirmed;
   final String? errorMessage;
   final int? pendingBookingId;
   final int? pendingPaymentId;
@@ -119,6 +126,10 @@ class BookingFlowState extends Equatable {
     this.countdownSeconds = 600,
     this.seatHold,
     this.createdTicket,
+    this.createdTickets = const [],
+    this.bookingOutcomeUnknown = false,
+    this.pendingPaymentAmount,
+    this.paymentConfirmed = false,
     this.errorMessage,
     this.pendingBookingId,
     this.pendingPaymentId,
@@ -126,6 +137,13 @@ class BookingFlowState extends Equatable {
     this.pendingQrCodeUrl,
     this.pendingDeeplink,
   });
+
+  bool get isCheckoutLocked =>
+      pendingBookingId != null ||
+      bookingOutcomeUnknown ||
+      status == BookingFlowStatus.submitting ||
+      status == BookingFlowStatus.blockedByBackend ||
+      status == BookingFlowStatus.success;
 
   bool get hasValidSeatPricing =>
       selectedSeats.isNotEmpty &&
@@ -217,7 +235,11 @@ class BookingFlowState extends Equatable {
     SeatHoldModel? seatHold,
     bool clearSeatHold = false,
     TicketModel? createdTicket,
-    String? errorMessage,
+    List<TicketModel>? createdTickets,
+    bool? bookingOutcomeUnknown,
+    int? pendingPaymentAmount,
+    bool? paymentConfirmed,
+    Object? errorMessage = _unchangedError,
     int? pendingBookingId,
     int? pendingPaymentId,
     String? pendingPaymentUrl,
@@ -254,7 +276,14 @@ class BookingFlowState extends Equatable {
       countdownSeconds: countdownSeconds ?? this.countdownSeconds,
       seatHold: clearSeatHold ? null : (seatHold ?? this.seatHold),
       createdTicket: createdTicket ?? this.createdTicket,
-      errorMessage: errorMessage ?? this.errorMessage,
+      createdTickets: createdTickets ?? this.createdTickets,
+      bookingOutcomeUnknown:
+          bookingOutcomeUnknown ?? this.bookingOutcomeUnknown,
+      pendingPaymentAmount: pendingPaymentAmount ?? this.pendingPaymentAmount,
+      paymentConfirmed: paymentConfirmed ?? this.paymentConfirmed,
+      errorMessage: identical(errorMessage, _unchangedError)
+          ? this.errorMessage
+          : errorMessage as String?,
       pendingBookingId: clearPendingPayment
           ? null
           : (pendingBookingId ?? this.pendingBookingId),
@@ -294,6 +323,10 @@ class BookingFlowState extends Equatable {
     countdownSeconds,
     seatHold,
     createdTicket,
+    createdTickets,
+    bookingOutcomeUnknown,
+    pendingPaymentAmount,
+    paymentConfirmed,
     errorMessage,
     pendingBookingId,
     pendingPaymentId,

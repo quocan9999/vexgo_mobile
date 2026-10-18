@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum SeatStatus { available, booked, selected, held }
+enum SeatStatus { available, booked, selected, held, unavailable }
 
 class SeatModel extends Equatable {
   final String id;
@@ -55,8 +55,9 @@ class SeatModel extends Equatable {
           return SeatStatus.selected;
         case 'AVAILABLE':
         case 'TRONG':
-        default:
           return SeatStatus.available;
+        default:
+          return SeatStatus.unavailable;
       }
     }
 

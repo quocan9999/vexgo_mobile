@@ -162,7 +162,9 @@ class BoardingPassCard extends StatelessWidget {
 
                 // QR Code Tap Box
                 GestureDetector(
-                  onTap: () => TicketQrModal.show(context, ticket),
+                  onTap: ticket.canShowQr
+                      ? () => TicketQrModal.show(context, ticket)
+                      : null,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -176,12 +178,15 @@ class BoardingPassCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        QrImageView(
-                          data: 'VEXGO:${ticket.ticketCode}:${ticket.id}',
-                          version: QrVersions.auto,
-                          size: 72.0,
-                          backgroundColor: Colors.transparent,
-                        ),
+                        if (ticket.canShowQr)
+                          QrImageView(
+                            data: 'VEXGO:${ticket.ticketCode}:${ticket.id}',
+                            version: QrVersions.auto,
+                            size: 72.0,
+                            backgroundColor: Colors.transparent,
+                          )
+                        else
+                          const Icon(Icons.lock_clock, size: 54),
                         const SizedBox(width: AppDimensions.base),
                         Expanded(
                           child: Column(
@@ -205,7 +210,9 @@ class BoardingPassCard extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Chạm để phóng to mã QR',
+                                    ticket.canShowQr
+                                        ? 'Chạm để phóng to mã QR'
+                                        : 'Chưa có xác nhận thanh toán',
                                     style: AppTextStyles.caption.copyWith(
                                       color: AppColors.primary,
                                       fontWeight: FontWeight.w600,

@@ -14,8 +14,13 @@ import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_event.dart';
 
 class BookingSuccessScreen extends StatefulWidget {
   final TicketModel ticket;
+  final List<TicketModel> tickets;
 
-  const BookingSuccessScreen({super.key, required this.ticket});
+  const BookingSuccessScreen({
+    super.key,
+    required this.ticket,
+    this.tickets = const [],
+  });
 
   @override
   State<BookingSuccessScreen> createState() => _BookingSuccessScreenState();
@@ -27,7 +32,10 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
-        context.read<MyTicketsBloc>().add(AddNewTicketEvent(widget.ticket));
+        for (final ticket
+            in widget.tickets.isEmpty ? [widget.ticket] : widget.tickets) {
+          context.read<MyTicketsBloc>().add(AddNewTicketEvent(ticket));
+        }
       } catch (_) {}
     });
   }
@@ -166,12 +174,26 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                     const SizedBox(height: AppDimensions.lg),
 
                     // QR Code
-                    QrImageView(
-                      data: 'VEXGO:${ticket.ticketCode}:${ticket.id}',
-                      version: QrVersions.auto,
-                      size: 160.0,
-                      backgroundColor: Colors.white,
-                    ),
+                    for (final issued
+                        in widget.tickets.isEmpty ? [ticket] : widget.tickets)
+                      if (issued.canShowQr)
+                        Column(
+                          children: [
+                            QrImageView(
+                              data: 'VEXGO:${issued.ticketCode}:${issued.id}',
+                              version: QrVersions.auto,
+                              size: 160,
+                              backgroundColor: Colors.white,
+                            ),
+                            Text(
+                              '${issued.ticketCode} • ${issued.seats.join(', ')}',
+                            ),
+                          ],
+                        )
+                      else
+                        const Text(
+                          'Chưa có xác nhận thanh toán để hiển thị mã lên xe.',
+                        ),
 
                     const SizedBox(height: 8),
                     Text(

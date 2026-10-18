@@ -12,6 +12,7 @@ class TicketQrModal extends StatelessWidget {
   const TicketQrModal({super.key, required this.ticket});
 
   static void show(BuildContext context, TicketModel ticket) {
+    if (!ticket.canShowQr) return;
     showDialog(
       context: context,
       builder: (ctx) => TicketQrModal(ticket: ticket),
@@ -20,6 +21,11 @@ class TicketQrModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!ticket.canShowQr) {
+      return const AlertDialog(
+        content: Text('Chưa có xác nhận thanh toán để hiển thị mã lên xe.'),
+      );
+    }
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),

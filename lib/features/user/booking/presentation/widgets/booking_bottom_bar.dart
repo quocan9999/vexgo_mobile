@@ -229,20 +229,27 @@ class BookingBottomBar extends StatelessWidget {
           child: CustomButton(
             text: 'Quay lại',
             type: ButtonType.outline,
-            onPressed: isSubmitting ? null : onBack,
+            onPressed: state.isCheckoutLocked ? null : onBack,
           ),
         ),
         const SizedBox(width: AppDimensions.sm),
         Expanded(
           child: CustomButton(
-            text: 'Thanh toán ${CurrencyFormatter.format(state.finalAmount)}',
+            text: state.pendingBookingId != null
+                ? 'Kiểm tra đơn hiện tại'
+                : 'Thanh toán ${CurrencyFormatter.format(state.finalAmount)}',
             isLoading: isSubmitting,
             prefixIcon: const Icon(
               Icons.shield_rounded,
               color: Colors.white,
               size: 18,
             ),
-            onPressed: isSubmitting ? null : onConfirmPayment,
+            onPressed:
+                isSubmitting ||
+                    state.bookingOutcomeUnknown ||
+                    state.status == BookingFlowStatus.blockedByBackend
+                ? null
+                : onConfirmPayment,
           ),
         ),
       ],

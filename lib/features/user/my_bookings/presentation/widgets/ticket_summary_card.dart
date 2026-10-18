@@ -390,9 +390,9 @@ class TicketSummaryCard extends StatelessWidget {
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(
-                                ticket.status == TicketStatus.cancelled
-                                    ? 'Xem chi tiết'
-                                    : 'Xem vé & QR',
+                                ticket.canShowQr
+                                    ? 'Xem vé & QR'
+                                    : 'Xem chi tiết',
                                 style: AppTextStyles.caption.copyWith(
                                   color: ticket.status == TicketStatus.cancelled
                                       ? AppColors.neutral700
@@ -426,7 +426,7 @@ class TicketSummaryCard extends StatelessWidget {
       case TicketStatus.upcoming:
         bg = AppColors.primaryLight;
         text = AppColors.primary;
-        label = 'Sắp đi';
+        label = ticket.isPaid ? 'Sắp đi' : 'Chưa xác nhận thanh toán';
         break;
       case TicketStatus.completed:
         bg = AppColors.successLight;

@@ -19,6 +19,7 @@ class PaymentTransactionModel extends Equatable {
   final DateTime? paidAt;
   final String? transactionCode;
   final String? failureReason;
+  final String? mode;
 
   const PaymentTransactionModel({
     required this.paymentId,
@@ -34,6 +35,7 @@ class PaymentTransactionModel extends Equatable {
     this.paidAt,
     this.transactionCode,
     this.failureReason,
+    this.mode,
   });
 
   PaymentTransactionModel copyWith({
@@ -50,6 +52,7 @@ class PaymentTransactionModel extends Equatable {
     DateTime? paidAt,
     String? transactionCode,
     String? failureReason,
+    String? mode,
   }) {
     return PaymentTransactionModel(
       paymentId: paymentId ?? this.paymentId,
@@ -65,6 +68,7 @@ class PaymentTransactionModel extends Equatable {
       paidAt: paidAt ?? this.paidAt,
       transactionCode: transactionCode ?? this.transactionCode,
       failureReason: failureReason ?? this.failureReason,
+      mode: mode ?? this.mode,
     );
   }
 
@@ -113,6 +117,7 @@ class PaymentTransactionModel extends Equatable {
       deeplink: json['deeplink'] as String? ?? json['deeplinkUrl'] as String?,
       qrCodeUrl: json['qrCodeUrl'] as String?,
       status: parseStatus(json['status'] as String?),
+      mode: json['mode'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,
@@ -137,6 +142,7 @@ class PaymentTransactionModel extends Equatable {
     if (deeplink != null) 'deeplink': deeplink,
     if (qrCodeUrl != null) 'qrCodeUrl': qrCodeUrl,
     'status': status.name.toUpperCase(),
+    if (mode != null) 'mode': mode,
     if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
     if (expiresAt != null) 'expiresAt': expiresAt!.toIso8601String(),
     if (paidAt != null) 'paidAt': paidAt!.toIso8601String(),
@@ -145,6 +151,7 @@ class PaymentTransactionModel extends Equatable {
   };
 
   /// Status helpers
+  bool get isDemo => mode?.toUpperCase() == 'DEMO';
   bool get isPending => status == PaymentStatus.pending;
   bool get isSuccess => status == PaymentStatus.success;
   bool get isFailed => status == PaymentStatus.failed;
@@ -159,5 +166,6 @@ class PaymentTransactionModel extends Equatable {
     amount,
     status,
     transactionCode,
+    mode,
   ];
 }

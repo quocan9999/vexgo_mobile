@@ -21,6 +21,21 @@ class Step6Payment extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (state.errorMessage != null &&
+              (state.isCheckoutLocked ||
+                  state.status == BookingFlowStatus.blockedByBackend))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(
+                state.errorMessage!,
+                style: const TextStyle(color: AppColors.error),
+              ),
+            ),
+          if (state.pendingBookingId != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text('Đơn đặt chỗ: #${state.pendingBookingId}'),
+            ),
           // Pending Payment Notification Card
           if (state.pendingPaymentId != null ||
               state.status == BookingFlowStatus.paymentPending) ...[
@@ -119,9 +134,11 @@ class Step6Payment extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        bloc.add(const ConfirmPaymentEvent());
-                      },
+                      onPressed:
+                          state.status == BookingFlowStatus.submitting ||
+                              state.status == BookingFlowStatus.blockedByBackend
+                          ? null
+                          : () => bloc.add(const ConfirmPaymentEvent()),
                       icon: const Icon(Icons.refresh, size: 18),
                       label: const Text('Kiểm tra kết quả thanh toán'),
                       style: ElevatedButton.styleFrom(
@@ -136,68 +153,69 @@ class Step6Payment extends StatelessWidget {
             const SizedBox(height: AppDimensions.base),
           ],
 
-          // Countdown Timer Card
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.warningLight.withValues(alpha: 0.8),
-                  Colors.white,
+          // Countdown applies only to an unconsumed hold.
+          if (state.seatHold != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.warningLight.withValues(alpha: 0.8),
+                    Colors.white,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                border: Border.all(
+                  color: AppColors.warning.withValues(alpha: 0.4),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: AppColors.warning,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.timer_outlined,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: AppDimensions.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Thời gian giữ chỗ còn lại:',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.neutral700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          state.countdownFormatted,
+                          style: AppTextStyles.h3.copyWith(
+                            color: AppColors.warningDark,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '10:00 phút',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.neutral500,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-              border: Border.all(
-                color: AppColors.warning.withValues(alpha: 0.4),
-              ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: AppColors.warning,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.timer_outlined,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Thời gian giữ chỗ còn lại:',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.neutral700,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        state.countdownFormatted,
-                        style: AppTextStyles.h3.copyWith(
-                          color: AppColors.warningDark,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  '10:00 phút',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neutral500,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           const SizedBox(height: AppDimensions.base),
 

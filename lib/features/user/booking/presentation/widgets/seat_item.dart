@@ -17,7 +17,8 @@ class SeatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBooked = seat.status == SeatStatus.booked;
+    final unavailable = seat.status == SeatStatus.unavailable;
+    final isBooked = seat.status == SeatStatus.booked || unavailable;
     final isHeld = seat.status == SeatStatus.held;
     final isDisabled = isBooked || isHeld;
 
@@ -120,7 +121,9 @@ class SeatItem extends StatelessWidget {
 
             // Seat Price
             Text(
-              isBooked ? 'Đã bán' : (priceShort.isNotEmpty ? priceShort : '--'),
+              isBooked
+                  ? (unavailable ? 'Chưa mở bán' : 'Đã bán')
+                  : (priceShort.isNotEmpty ? priceShort : '--'),
               style: AppTextStyles.caption.copyWith(
                 color: priceColor,
                 fontSize: 10,

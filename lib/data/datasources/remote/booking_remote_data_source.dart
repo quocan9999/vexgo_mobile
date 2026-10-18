@@ -4,6 +4,8 @@ import '../../models/promotion_validation_model.dart';
 import '../../models/ticket_model.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
+import '../../../core/network/token_storage.dart';
+import '../../../core/network/api_exceptions.dart';
 
 abstract class BookingRemoteDataSource {
   Future<BookingQuoteModel> getBookingQuote({
@@ -91,6 +93,14 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     String? promotionCode,
     String? holdToken,
   }) async {
+    if (!await TokenStorage.hasAccessToken()) {
+      throw UnauthorizedException(
+        errorCode: 'BLOCKED_BY_BACKEND_GUEST_CHECKOUT',
+        message:
+            'BLOCKED_BY_BACKEND: Máy chủ chưa hỗ trợ đặt vé không đăng nhập.',
+      );
+    }
+
     final body = {
       'tripId': tripId,
       'seatIds': seatIds,
