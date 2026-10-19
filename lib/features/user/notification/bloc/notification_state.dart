@@ -20,7 +20,12 @@ class NotificationState extends Equatable {
 
   int get unreadCount => notifications.where((n) => !n.isRead).length;
 
+  bool get hasCategories =>
+      notifications.isNotEmpty &&
+      notifications.every((n) => n.category != NotificationCategory.unknown);
+
   List<NotificationModel> get filteredNotifications {
+    if (!hasCategories) return notifications;
     switch (activeTabIndex) {
       case 1:
         return notifications

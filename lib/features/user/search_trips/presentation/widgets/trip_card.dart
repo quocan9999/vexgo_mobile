@@ -85,10 +85,11 @@ class TripCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    RatingBadge(
-                      rating: trip.rating,
-                      reviewCount: trip.reviewCount,
-                    ),
+                    if (trip.rating != null)
+                      RatingBadge(
+                        rating: trip.rating!,
+                        reviewCount: trip.reviewCount,
+                      ),
                   ],
                 ),
 

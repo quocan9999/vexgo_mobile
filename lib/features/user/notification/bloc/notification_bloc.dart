@@ -48,7 +48,11 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       final list = await notificationRepository.getNotifications();
       if (generation != _generation) return;
       emit(
-        state.copyWith(status: NotificationStatus.loaded, notifications: list),
+        state.copyWith(
+          status: NotificationStatus.loaded,
+          notifications: list,
+          activeTabIndex: 0,
+        ),
       );
     } catch (e) {
       if (generation != _generation) return;
@@ -65,6 +69,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     ChangeNotificationTabEvent event,
     Emitter<NotificationState> emit,
   ) {
+    if (!state.hasCategories) return;
     emit(state.copyWith(activeTabIndex: event.tabIndex));
   }
 

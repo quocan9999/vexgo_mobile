@@ -54,52 +54,53 @@ class NotificationsScreen extends StatelessWidget {
           body: Column(
             children: [
               // 1. Category Tabs
-              Container(
-                height: 48,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: AppColors.neutral200),
+              if (state.hasCategories)
+                Container(
+                  height: 48,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(color: AppColors.neutral200),
+                    ),
+                  ),
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.base,
+                      vertical: 6,
+                    ),
+                    children: [
+                      _buildTab(
+                        context,
+                        title: 'Tất cả',
+                        count: unreadCount,
+                        index: 0,
+                        activeIndex: state.activeTabIndex,
+                      ),
+                      const SizedBox(width: AppDimensions.xs),
+                      _buildTab(
+                        context,
+                        title: 'Chuyến đi',
+                        index: 1,
+                        activeIndex: state.activeTabIndex,
+                      ),
+                      const SizedBox(width: AppDimensions.xs),
+                      _buildTab(
+                        context,
+                        title: 'Ưu đãi',
+                        index: 2,
+                        activeIndex: state.activeTabIndex,
+                      ),
+                      const SizedBox(width: AppDimensions.xs),
+                      _buildTab(
+                        context,
+                        title: 'Hệ thống',
+                        index: 3,
+                        activeIndex: state.activeTabIndex,
+                      ),
+                    ],
                   ),
                 ),
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.base,
-                    vertical: 6,
-                  ),
-                  children: [
-                    _buildTab(
-                      context,
-                      title: 'Tất cả',
-                      count: unreadCount,
-                      index: 0,
-                      activeIndex: state.activeTabIndex,
-                    ),
-                    const SizedBox(width: AppDimensions.xs),
-                    _buildTab(
-                      context,
-                      title: 'Chuyến đi',
-                      index: 1,
-                      activeIndex: state.activeTabIndex,
-                    ),
-                    const SizedBox(width: AppDimensions.xs),
-                    _buildTab(
-                      context,
-                      title: 'Ưu đãi',
-                      index: 2,
-                      activeIndex: state.activeTabIndex,
-                    ),
-                    const SizedBox(width: AppDimensions.xs),
-                    _buildTab(
-                      context,
-                      title: 'Hệ thống',
-                      index: 3,
-                      activeIndex: state.activeTabIndex,
-                    ),
-                  ],
-                ),
-              ),
 
               // 2. Notification List
               Expanded(
@@ -263,6 +264,8 @@ class _NotificationItemCard extends StatelessWidget {
           return Icons.card_giftcard_rounded;
         case NotificationCategory.system:
           return Icons.info_outline_rounded;
+        case NotificationCategory.unknown:
+          return Icons.notifications_outlined;
       }
     }
 
@@ -274,6 +277,8 @@ class _NotificationItemCard extends StatelessWidget {
           return AppColors.secondary;
         case NotificationCategory.system:
           return const Color(0xFF0F9D58);
+        case NotificationCategory.unknown:
+          return AppColors.primary;
       }
     }
 

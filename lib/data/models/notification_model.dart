@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum NotificationCategory { trip, promo, system }
+enum NotificationCategory { trip, promo, system, unknown }
 
 class NotificationModel extends Equatable {
   final String id;
@@ -54,7 +54,8 @@ class NotificationModel extends Equatable {
       if (s == 'PROMO' || s == 'KHUYEN_MAI') {
         return NotificationCategory.promo;
       }
-      return NotificationCategory.system;
+      if (s == 'SYSTEM') return NotificationCategory.system;
+      return NotificationCategory.unknown;
     }
 
     final id =
@@ -76,11 +77,8 @@ class NotificationModel extends Equatable {
       id: id,
       title: title,
       message: message,
-      category: parseCategory(
-        json['category'] as String? ??
-            json['type'] as String? ??
-            json['trangThai'] as String?,
-      ),
+      // Backend `type`/`trangThai` describe delivery, not content category.
+      category: parseCategory(json['category'] as String?),
       createdAt: createdAt,
       isRead: isRead,
       ticketCode: json['ticketCode'] as String?,
@@ -99,6 +97,9 @@ class NotificationModel extends Equatable {
         break;
       case NotificationCategory.system:
         catStr = 'SYSTEM';
+        break;
+      case NotificationCategory.unknown:
+        catStr = 'UNKNOWN';
         break;
     }
 

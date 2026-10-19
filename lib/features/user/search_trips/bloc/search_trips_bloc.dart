@@ -194,7 +194,11 @@ class SearchTripsBloc extends Bloc<SearchTripsEvent, SearchTripsState> {
         result.sort((a, b) => b.discountPrice.compareTo(a.discountPrice));
         break;
       case TripSortType.ratingDesc:
-        result.sort((a, b) => b.rating.compareTo(a.rating));
+        result.sort((a, b) {
+          if (a.rating == null) return b.rating == null ? 0 : 1;
+          if (b.rating == null) return -1;
+          return b.rating!.compareTo(a.rating!);
+        });
         break;
     }
 

@@ -118,12 +118,30 @@ class CancellationQuote extends Equatable {
   });
 
   factory CancellationQuote.fromJson(Map<String, dynamic> json) {
+    final rate = json['cancelFeeRate'];
+    final fee = json['cancelFee'];
+    final refund = json['refundAmount'];
+    if (json['eligible'] is! bool ||
+        rate is! num ||
+        !rate.isFinite ||
+        rate < 0 ||
+        rate > 1 ||
+        fee is! num ||
+        !fee.isFinite ||
+        fee < 0 ||
+        fee != fee.roundToDouble() ||
+        refund is! num ||
+        !refund.isFinite ||
+        refund < 0 ||
+        refund != refund.roundToDouble()) {
+      throw const FormatException('Thông tin phí hủy vé không hợp lệ.');
+    }
     return CancellationQuote(
-      eligible: json['eligible'] as bool? ?? false,
+      eligible: json['eligible'] as bool,
       reason: json['reason'] as String?,
-      cancelFeeRate: (json['cancelFeeRate'] as num?)?.toDouble() ?? 0.0,
-      cancelFee: (json['cancelFee'] as num?)?.toInt() ?? 0,
-      refundAmount: (json['refundAmount'] as num?)?.toInt() ?? 0,
+      cancelFeeRate: rate.toDouble(),
+      cancelFee: fee.toInt(),
+      refundAmount: refund.toInt(),
     );
   }
 

@@ -99,7 +99,7 @@ void main() {
           'id': 42, // Integer ID from Prisma
           'tieuDe': 'Đặt vé thành công',
           'noiDung': 'Mã vé VXG-123456 đã được xác nhận.',
-          'trangThai': 'CHUYEN_XE',
+          'trangThai': 'DA_GUI',
           'thoiGian': '2026-10-09T08:00:00.000Z',
           'daDoc': false,
         };
@@ -108,7 +108,7 @@ void main() {
         expect(notif.id, equals('42'));
         expect(notif.title, equals('Đặt vé thành công'));
         expect(notif.message, equals('Mã vé VXG-123456 đã được xác nhận.'));
-        expect(notif.category, equals(NotificationCategory.trip));
+        expect(notif.category, equals(NotificationCategory.unknown));
         expect(notif.isRead, isFalse);
       },
     );

@@ -156,11 +156,13 @@ class _TripDetailContent extends StatelessWidget {
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            RatingBadge(
-                              rating: trip.rating,
-                              reviewCount: trip.reviewCount,
-                            ),
-                            const SizedBox(width: AppDimensions.xs),
+                            if (trip.rating != null) ...[
+                              RatingBadge(
+                                rating: trip.rating!,
+                                reviewCount: trip.reviewCount,
+                              ),
+                              const SizedBox(width: AppDimensions.xs),
+                            ],
                             Flexible(
                               child: Text(
                                 '• ${trip.vehicleType}',

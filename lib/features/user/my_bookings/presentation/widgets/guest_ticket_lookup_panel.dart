@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/my_tickets_bloc.dart';
 import '../../bloc/ticket_read_cubit.dart';
 import 'boarding_pass_card.dart';
+import 'guest_cancel_ticket_sheet.dart';
+import 'package:vexgo_app/data/models/ticket_model.dart';
 
 class GuestTicketLookupPanel extends StatefulWidget {
   const GuestTicketLookupPanel({super.key});
@@ -66,6 +68,7 @@ class _GuestTicketLookupPanelState extends State<GuestTicketLookupPanel> {
                 controller: _code,
                 enabled:
                     state.status != TicketReadStatus.loading &&
+                    state.status != TicketReadStatus.cancelling &&
                     state.status != TicketReadStatus.invalidated,
                 textCapitalization: TextCapitalization.characters,
                 decoration: const InputDecoration(labelText: 'Mã vé'),
@@ -79,6 +82,7 @@ class _GuestTicketLookupPanelState extends State<GuestTicketLookupPanel> {
                 controller: _phone,
                 enabled:
                     state.status != TicketReadStatus.loading &&
+                    state.status != TicketReadStatus.cancelling &&
                     state.status != TicketReadStatus.invalidated,
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
@@ -95,6 +99,7 @@ class _GuestTicketLookupPanelState extends State<GuestTicketLookupPanel> {
               FilledButton(
                 onPressed:
                     state.status == TicketReadStatus.loading ||
+                        state.status == TicketReadStatus.cancelling ||
                         state.status == TicketReadStatus.invalidated
                     ? null
                     : _lookup,
@@ -103,7 +108,8 @@ class _GuestTicketLookupPanelState extends State<GuestTicketLookupPanel> {
             ],
           ),
         ),
-        if (state.status == TicketReadStatus.loading)
+        if (state.status == TicketReadStatus.loading ||
+            state.status == TicketReadStatus.cancelling)
           const Padding(
             padding: EdgeInsets.all(20),
             child: Center(child: CircularProgressIndicator()),
@@ -112,6 +118,11 @@ class _GuestTicketLookupPanelState extends State<GuestTicketLookupPanel> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Text(state.error!),
+          ),
+        if (state.message != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(state.message!),
           ),
         if (state.status == TicketReadStatus.failure)
           TextButton(onPressed: _lookup, child: const Text('Thử lại')),
@@ -122,6 +133,11 @@ class _GuestTicketLookupPanelState extends State<GuestTicketLookupPanel> {
             onPressed: _reader.refresh,
             child: const Text('Cập nhật trạng thái vé'),
           ),
+          if (state.ticket!.status == TicketStatus.upcoming)
+            OutlinedButton(
+              onPressed: () => GuestCancelTicketSheet.show(context, _reader),
+              child: const Text('Hủy vé'),
+            ),
         ],
       ],
     ),

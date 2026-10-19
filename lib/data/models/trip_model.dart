@@ -26,7 +26,7 @@ class TripModel extends Equatable {
   final int availableSeats;
   final int totalSeats;
   final String seatLayoutType;
-  final double rating;
+  final double? rating;
   final int reviewCount;
   final List<String> amenities;
   final List<String> images;
@@ -271,7 +271,7 @@ class TripModel extends Equatable {
       availableSeats: json['availableSeats'] as int? ?? 0,
       totalSeats: totalSeats,
       seatLayoutType: json['seatLayoutType'] as String? ?? 'SLEEPER_34',
-      rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
+      rating: (json['rating'] as num?)?.toDouble(),
       reviewCount: json['reviewCount'] as int? ?? 0,
       amenities: amenities,
       images:
@@ -337,5 +337,7 @@ class TripModel extends Equatable {
     discountPrice,
     routeId,
     durationMinutes,
+    rating,
+    reviewCount,
   ];
 }
