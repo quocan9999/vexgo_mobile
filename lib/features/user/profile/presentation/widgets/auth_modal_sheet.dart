@@ -435,7 +435,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
             shape: BoxShape.circle,
           ),
           child: const Icon(
-            Icons.mark_email_read_rounded,
+            Icons.sms_outlined,
             color: AppColors.primary,
             size: 28,
           ),
@@ -453,7 +453,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md),
           child: Text(
-            'Mã xác thực gồm 6 chữ số đã được gửi đến số điện thoại ${_phoneController.text.trim()}',
+            'Nhập mã xác thực gồm 6 chữ số cho số điện thoại ${_phoneController.text.trim()}',
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.neutral600,
             ),
@@ -468,7 +468,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           width: 220,
           child: CustomTextField(
             controller: _otpController,
-            hintText: '123456',
+            hintText: '6 chữ số',
             keyboardType: TextInputType.number,
             textAlign: TextAlign.center,
           ),
