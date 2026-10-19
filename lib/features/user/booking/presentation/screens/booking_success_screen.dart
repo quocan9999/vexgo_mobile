@@ -130,28 +130,38 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Mã vé: ',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.neutral600,
-                            ),
-                          ),
-                          Text(
-                            ticket.ticketCode,
-                            style: AppTextStyles.h4.copyWith(
-                              color: AppColors.primary,
-                              letterSpacing: 1.2,
-                              fontWeight: FontWeight.w800,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Mã vé:',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.neutral600,
+                                  ),
+                                ),
+                                Text(
+                                  ticket.ticketCode,
+                                  softWrap: true,
+                                  style: AppTextStyles.h4.copyWith(
+                                    color: AppColors.primary,
+                                    letterSpacing: 1.2,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              Clipboard.setData(
+                          IconButton(
+                            tooltip: 'Sao chép mã vé',
+                            onPressed: () async {
+                              await Clipboard.setData(
                                 ClipboardData(text: ticket.ticketCode),
                               );
+                              if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
@@ -161,7 +171,7 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                                 ),
                               );
                             },
-                            child: const Icon(
+                            icon: const Icon(
                               Icons.copy_rounded,
                               size: 16,
                               color: AppColors.primary,
@@ -234,25 +244,29 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                             style: AppTextStyles.h4.copyWith(fontSize: 16),
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.successLight,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Đã thanh toán',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 11,
-                            ),
+                      ],
+                    ),
+                    const SizedBox(height: AppDimensions.sm),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.successLight,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Đã thanh toán',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
                           ),
                         ),
-                      ],
+                      ),
                     ),
 
                     const SizedBox(height: AppDimensions.sm),
@@ -305,7 +319,7 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
 
               const SizedBox(height: AppDimensions.base),
 
-              // Email notice
+              // Retrieval instructions; payment success does not prove email delivery.
               Container(
                 padding: const EdgeInsets.all(AppDimensions.md),
                 decoration: BoxDecoration(
@@ -315,14 +329,14 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                 child: Row(
                   children: [
                     const Icon(
-                      Icons.email_outlined,
+                      Icons.confirmation_number_outlined,
                       color: AppColors.primary,
                       size: 20,
                     ),
                     const SizedBox(width: AppDimensions.sm),
                     Expanded(
                       child: Text(
-                        'Chi tiết vé điện tử đã được gửi tới email ${ticket.passenger.email}.',
+                        'Lưu mã vé và số điện thoại đã dùng khi đặt vé để tra cứu vé không cần đăng nhập.',
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.neutral700,
                         ),

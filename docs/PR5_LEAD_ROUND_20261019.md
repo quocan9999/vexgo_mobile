@@ -44,7 +44,26 @@ The earlier physical Android / SePay Test Mode happy path belongs to source
 `c29613e`; it is not evidence that this new cancellation UI ran on a real device.
 Device verification of this revision remains separate.
 
-The long ticket-code overflow observed on the payment success screen remains a
-separate UI finding. This change addresses the three Lead findings only. Review
-threads remain for the reviewer to verify and resolve; no merge/release approval
-is inferred.
+## Success-screen follow-up
+
+Lead verified and resolved the three findings above at `85be8db`. The two
+subsequent success-screen findings are addressed in the follow-up commit:
+
+- The full ticket code wraps inside the available width, with a separate fixed
+  copy button. Copy preserves the original code. The payment badge sits below
+  the operator row so larger text also fits on a narrow screen.
+- The unconditional email-delivery claim is replaced by instructions to save the
+  ticket code and booking phone number for guest lookup. Neither a supplied email
+  nor payment success proves mail delivery.
+- Five new widget regressions cover 320/360dp, empty/provided email, full-code
+  clipboard output, and multiple tickets at 150% text size on 320dp. Full local
+  suite: **304 passed**; analyze: **no issues**. Initial enlarged-text regression
+  exposed a 7.8px overflow in the operator/payment row; that layout was fixed
+  without weakening the assertion.
+
+Physical guest cancellation at `85be8db` was subsequently verified on Android:
+ticket347/booking835 cancelled, A02 released; refund746 remains pending. This is
+separate evidence from the new success-screen widget regressions. No new live
+booking, payment, email delivery or bank refund is claimed for this follow-up.
+Review threads remain for the reviewer to verify and resolve; no merge/release
+approval is inferred.
