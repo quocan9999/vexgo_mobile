@@ -14,6 +14,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
   String? _sessionKey;
   bool _sessionInitialized = false;
   bool _authenticated;
+  bool _reviewSubmitting = false;
 
   void setSession(String? key) {
     if (_sessionInitialized &&
@@ -25,6 +26,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     _sessionKey = key;
     _authenticated = key != null;
     _generation++;
+    _reviewSubmitting = false;
     // Clear synchronously before pending account requests can complete.
     // ignore: invalid_use_of_visible_for_testing_member
     emit(MyTicketsState(requiresLogin: !_authenticated));
@@ -216,7 +218,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     SubmitTicketReviewEvent event,
     Emitter<MyTicketsState> emit,
   ) async {
-    if (!_authenticated) return;
+    if (!_authenticated || _reviewSubmitting) return;
     final generation = _generation;
     final ticketIndex = state.tickets.indexWhere(
       (t) => t.id == event.ticketId || t.ticketCode == event.ticketId,
@@ -246,6 +248,8 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       return;
     }
 
+    _reviewSubmitting = true;
+    emit(state.copyWith(clearMessages: true));
     try {
       // Resolve tripId authoritatively: check ticket.trip.id, or query booking
       int? tripId;
@@ -257,7 +261,9 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
           ticket.bookingId,
         );
         if (generation != _generation) return;
-        if (booking != null && booking.tripId > 0) {
+        if (booking != null &&
+            booking.bookingId.toString() == ticket.bookingId.toString() &&
+            booking.tripId > 0) {
           tripId = booking.tripId;
         }
       }
@@ -272,14 +278,14 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
         return;
       }
 
-      await reviewRemoteDataSource.createReview(
+      final savedReview = await reviewRemoteDataSource.createReview(
         tripId: tripId,
         rating: event.review.rating.round(),
         comment: event.review.comment,
       );
 
       if (generation != _generation) return;
-      final updatedTicket = ticket.copyWith(review: event.review);
+      final updatedTicket = ticket.copyWith(review: savedReview);
       final updatedList = List<TicketModel>.from(state.tickets);
       final currentIndex = updatedList.indexWhere((t) => t.id == ticket.id);
       if (currentIndex < 0) return;
@@ -300,6 +306,8 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
               'Tính năng đánh giá chuyến đi chưa khả dụng trên máy chủ hiện tại ($e).',
         ),
       );
+    } finally {
+      if (generation == _generation) _reviewSubmitting = false;
     }
   }
 }

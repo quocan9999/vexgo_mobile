@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
@@ -190,55 +191,57 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
 
               const SizedBox(height: AppDimensions.base),
 
-              // Quick Tags (Wrap for 360dp safety)
-              Text(
-                'Điểm bạn hài lòng nhất',
-                style: AppTextStyles.bodySmall.copyWith(
-                  fontWeight: FontWeight.w700,
+              // Tags are local-only in Demo Mode; the real API cannot save them.
+              if (ApiConfig.isDemoMode) ...[
+                Text(
+                  'Điểm bạn hài lòng nhất',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                children: _availableTags.map((tag) {
-                  final isSelected = _selectedTags.contains(tag);
-                  return FilterChip(
-                    label: Text(tag),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _selectedTags.add(tag);
-                        } else {
-                          _selectedTags.remove(tag);
-                        }
-                      });
-                    },
-                    selectedColor: AppColors.primaryLight,
-                    checkmarkColor: AppColors.primary,
-                    labelStyle: AppTextStyles.caption.copyWith(
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.neutral700,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                    ),
-                    backgroundColor: AppColors.neutral100,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: _availableTags.map((tag) {
+                    final isSelected = _selectedTags.contains(tag);
+                    return FilterChip(
+                      label: Text(tag),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            _selectedTags.add(tag);
+                          } else {
+                            _selectedTags.remove(tag);
+                          }
+                        });
+                      },
+                      selectedColor: AppColors.primaryLight,
+                      checkmarkColor: AppColors.primary,
+                      labelStyle: AppTextStyles.caption.copyWith(
                         color: isSelected
                             ? AppColors.primary
-                            : AppColors.neutral200,
+                            : AppColors.neutral700,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
+                      backgroundColor: AppColors.neutral100,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.neutral200,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
 
-              const SizedBox(height: AppDimensions.base),
+                const SizedBox(height: AppDimensions.base),
+              ],
 
               // Comment text field
               Text(
@@ -285,10 +288,10 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                     ).format(DateTime.now());
                     final review = ReviewModel(
                       rating: _rating,
-                      comment: _commentCtrl.text.trim().isEmpty
-                          ? 'Dịch vụ ${_getRatingLabel(_rating).toLowerCase()}'
-                          : _commentCtrl.text.trim(),
-                      tags: _selectedTags.toList(),
+                      comment: _commentCtrl.text.trim(),
+                      tags: ApiConfig.isDemoMode
+                          ? _selectedTags.toList()
+                          : const [],
                       createdAt: nowStr,
                     );
 

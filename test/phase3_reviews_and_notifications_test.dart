@@ -19,7 +19,7 @@ class FakeReviewRemoteDataSource implements ReviewRemoteDataSource {
   bool shouldThrow = false;
 
   @override
-  Future<bool> createReview({
+  Future<ReviewModel> createReview({
     required int tripId,
     required int rating,
     String? comment,
@@ -27,7 +27,11 @@ class FakeReviewRemoteDataSource implements ReviewRemoteDataSource {
     called = true;
     lastBody = {'tripId': tripId, 'rating': rating, 'comment': comment};
     if (shouldThrow) throw Exception('Review submit failed');
-    return true;
+    return ReviewModel(
+      rating: rating,
+      comment: comment ?? '',
+      createdAt: '2026-10-09T00:00:00.000Z',
+    );
   }
 }
 
@@ -73,37 +77,22 @@ void main() {
     late FakeNotificationRemoteDataSource fakeNotifDataSource;
     late HybridNotificationRepository hybridNotifRepo;
 
-    final completedTicket = TicketModel(
-      id: 'TKT_COMPLETED_1',
-      ticketCode: 'VXG-999888',
-      status: TicketStatus.completed,
-      bookingDate: '01/10/2026 08:00',
-      trip: const TicketTripSummary(
-        id: '25',
-        operatorName: 'Phương Trang',
-        vehicleType: 'Limousine',
-        departureTime: '08:00',
-        departureDate: '01/10/2026',
-        arrivalTime: '14:00',
-        arrivalDate: '01/10/2026',
-        fromCity: 'TP. Hồ Chí Minh',
-        toCity: 'Đà Lạt',
-        pickupPoint: 'BX Miền Đông',
-        pickupAddress: 'Bình Thạnh',
-        dropoffPoint: 'BX Đà Lạt',
-        dropoffAddress: 'Tô Hiến Thành',
-      ),
-      seats: const ['A05'],
-      totalAmount: 300000,
-      discountAmount: 0,
-      finalAmount: 300000,
-      paymentMethod: 'MoMo',
-      passenger: const PassengerInfo(
-        fullName: 'Nguyễn Văn An',
-        phone: '0901234567',
-        email: 'an@gmail.com',
-      ),
-    );
+    // Flat TicketsService response after Backend PR #39; no hand-built trip model.
+    final completedTicket = TicketModel.fromJson({
+      'ticketId': 501,
+      'ticketCode': 'VXG-999888',
+      'bookingId': 101,
+      'tripId': 25,
+      'status': 'HOAN_TAT',
+      'busCompanyName': 'Phương Trang',
+      'origin': 'TP. Hồ Chí Minh',
+      'destination': 'Đà Lạt',
+      'departureTime': '2026-10-01T01:00:00.000Z',
+      'arrivalTime': '2026-10-01T07:00:00.000Z',
+      'seatNumber': 'A05',
+      'price': 300000,
+      'createdAt': '2026-09-29T01:00:00.000Z',
+    });
 
     setUp(() {
       fakeReviewDataSource = FakeReviewRemoteDataSource();
@@ -129,19 +118,14 @@ void main() {
         );
 
         bloc.add(
-          const SubmitTicketReviewEvent(
-            ticketId: 'TKT_COMPLETED_1',
-            review: review,
-          ),
+          const SubmitTicketReviewEvent(ticketId: '501', review: review),
         );
 
         await expectLater(
           bloc.stream,
           emitsThrough(
             predicate<MyTicketsState>((state) {
-              final t = state.tickets.firstWhere(
-                (t) => t.id == 'TKT_COMPLETED_1',
-              );
+              final t = state.tickets.firstWhere((t) => t.id == '501');
               return t.review != null &&
                   t.review!.rating == 5 &&
                   state.successMessage != null;
@@ -179,19 +163,14 @@ void main() {
         );
 
         bloc.add(
-          const SubmitTicketReviewEvent(
-            ticketId: 'TKT_COMPLETED_1',
-            review: review,
-          ),
+          const SubmitTicketReviewEvent(ticketId: '501', review: review),
         );
 
         await expectLater(
           bloc.stream,
           emitsThrough(
             predicate<MyTicketsState>((state) {
-              final t = state.tickets.firstWhere(
-                (t) => t.id == 'TKT_COMPLETED_1',
-              );
+              final t = state.tickets.firstWhere((t) => t.id == '501');
               return t.review == null &&
                   state.errorMessage != null &&
                   state.errorMessage!.contains('chưa khả dụng');

@@ -219,7 +219,10 @@ class TicketModel extends Equatable {
   factory TicketModel.fromJson(Map<String, dynamic> json) {
     TicketStatus parseStatus(String? statusStr) {
       final s = statusStr?.toUpperCase() ?? '';
-      if (s == 'COMPLETED' || s == 'HOAN_THANH' || s == 'DA_SU_DUNG') {
+      if (s == 'COMPLETED' ||
+          s == 'HOAN_THANH' ||
+          s == 'HOAN_TAT' ||
+          s == 'DA_SU_DUNG') {
         return TicketStatus.completed;
       }
       if (s == 'CANCELLED' || s == 'HUY' || s == 'DA_HUY' || s == 'HET_HAN') {

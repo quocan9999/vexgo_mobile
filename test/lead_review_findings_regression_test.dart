@@ -37,7 +37,7 @@ import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_state.dart';
 
 class FailingReviewRemoteDataSource implements ReviewRemoteDataSource {
   @override
-  Future<bool> createReview({
+  Future<ReviewModel> createReview({
     required int tripId,
     required int rating,
     String? comment,
