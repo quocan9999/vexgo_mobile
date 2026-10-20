@@ -12,6 +12,8 @@ enum AuthStatus {
 
 enum PasswordChangeStatus { idle, submitting, success, failure }
 
+enum ProfileUpdateStatus { idle, submitting, success, failure }
+
 class AuthState extends Equatable {
   final AuthStatus status;
   final UserModel? user;
@@ -25,6 +27,8 @@ class AuthState extends Equatable {
   final bool pushEnabled;
   final PasswordChangeStatus passwordChangeStatus;
   final String? passwordChangeError;
+  final ProfileUpdateStatus profileUpdateStatus;
+  final String? profileUpdateError;
 
   const AuthState({
     this.status = AuthStatus.initial,
@@ -39,6 +43,8 @@ class AuthState extends Equatable {
     this.pushEnabled = true,
     this.passwordChangeStatus = PasswordChangeStatus.idle,
     this.passwordChangeError,
+    this.profileUpdateStatus = ProfileUpdateStatus.idle,
+    this.profileUpdateError,
   });
 
   bool get isAuthenticated =>
@@ -60,6 +66,8 @@ class AuthState extends Equatable {
     bool clearMessages = false,
     PasswordChangeStatus? passwordChangeStatus,
     String? passwordChangeError,
+    ProfileUpdateStatus? profileUpdateStatus,
+    String? profileUpdateError,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -86,6 +94,10 @@ class AuthState extends Equatable {
           ? PasswordChangeStatus.idle
           : (passwordChangeStatus ?? this.passwordChangeStatus),
       passwordChangeError: passwordChangeError,
+      profileUpdateStatus: clearUser
+          ? ProfileUpdateStatus.idle
+          : profileUpdateStatus ?? this.profileUpdateStatus,
+      profileUpdateError: profileUpdateError,
     );
   }
 
@@ -103,5 +115,7 @@ class AuthState extends Equatable {
     pushEnabled,
     passwordChangeStatus,
     passwordChangeError,
+    profileUpdateStatus,
+    profileUpdateError,
   ];
 }

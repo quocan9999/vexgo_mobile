@@ -8,6 +8,7 @@ import 'package:vexgo_app/core/widgets/custom_text_field.dart';
 import 'package:vexgo_app/data/models/user_model.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
+import '../../bloc/auth_state.dart';
 
 class EditProfileDialog extends StatefulWidget {
   final UserModel user;
@@ -18,6 +19,8 @@ class EditProfileDialog extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
       backgroundColor: Colors.transparent,
       builder: (context) => EditProfileDialog(user: user),
     );
@@ -32,6 +35,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
   late TextEditingController _emailController;
   late TextEditingController _cccdController;
   late TextEditingController _dobController;
+  bool _submitted = false;
 
   @override
   void initState() {
@@ -52,6 +56,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
   }
 
   void _onSave() {
+    if (context.read<AuthBloc>().state.profileUpdateStatus ==
+        ProfileUpdateStatus.submitting) {
+      return;
+    }
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Họ và tên không được để trống')),
@@ -72,12 +80,40 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
           : _dobController.text.trim(),
     );
 
+    setState(() => _submitted = true);
     context.read<AuthBloc>().add(UpdateProfileEvent(updated));
-    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocConsumer<AuthBloc, AuthState>(
+      listenWhen: (previous, current) =>
+          previous.profileUpdateStatus != current.profileUpdateStatus ||
+          previous.user?.taiKhoanId != current.user?.taiKhoanId ||
+          previous.isAuthenticated != current.isAuthenticated,
+      listener: (context, state) {
+        if (!state.isAuthenticated ||
+            state.user?.taiKhoanId != widget.user.taiKhoanId ||
+            (_submitted &&
+                state.profileUpdateStatus == ProfileUpdateStatus.success)) {
+          Navigator.of(context).pop();
+        }
+      },
+      builder: (context, state) {
+        final busy =
+            state.profileUpdateStatus == ProfileUpdateStatus.submitting;
+        return PopScope(
+          canPop: !busy,
+          child: AbsorbPointer(
+            absorbing: busy,
+            child: _buildForm(context, state, busy),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildForm(BuildContext context, AuthState state, bool busy) {
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -291,11 +327,19 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
               const SizedBox(height: AppDimensions.xl),
 
               // Save button
+              if (_submitted && state.profileUpdateError != null) ...[
+                Text(
+                  state.profileUpdateError!,
+                  style: const TextStyle(color: AppColors.error),
+                ),
+                const SizedBox(height: AppDimensions.sm),
+              ],
               CustomButton(
                 text: 'LƯU THAY ĐỔI',
                 width: double.infinity,
                 type: ButtonType.primary,
-                onPressed: _onSave,
+                isLoading: busy,
+                onPressed: busy ? null : _onSave,
               ),
               const SizedBox(height: AppDimensions.sm),
             ],

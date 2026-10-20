@@ -131,7 +131,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           pendingFullName: event.fullName,
           pendingPassword: event.password,
           pendingChallengeId: challengeId.isNotEmpty ? challengeId : null,
-          successMessage: 'Mã xác thực OTP đã được gửi đến số ${event.phone}',
+          successMessage:
+              'Yêu cầu xác thực OTP đã được tạo cho số ${event.phone}',
         ),
       );
     } catch (e) {
@@ -183,23 +184,48 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     UpdateProfileEvent event,
     Emitter<AuthState> emit,
   ) async {
+    if (!state.isAuthenticated ||
+        state.profileUpdateStatus == ProfileUpdateStatus.submitting ||
+        event.updatedUser.taiKhoanId != state.user!.taiKhoanId) {
+      return;
+    }
     final generation = _generation;
-    emit(state.copyWith(status: AuthStatus.loading, clearMessages: true));
+    final sessionVersion = TokenStorage.sessionVersion;
+    final accountId = state.user!.taiKhoanId;
+    emit(
+      state.copyWith(
+        status: AuthStatus.loading,
+        profileUpdateStatus: ProfileUpdateStatus.submitting,
+        clearMessages: true,
+      ),
+    );
     try {
       final updated = await authRepository.updateProfile(event.updatedUser);
-      if (generation != _generation) return;
+      if (generation != _generation ||
+          sessionVersion != TokenStorage.sessionVersion) {
+        return;
+      }
+      if (updated.taiKhoanId != accountId) {
+        throw const FormatException('Hồ sơ trả về không khớp tài khoản.');
+      }
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
           user: updated,
+          profileUpdateStatus: ProfileUpdateStatus.success,
           successMessage: 'Cập nhật thông tin cá nhân thành công!',
         ),
       );
     } catch (e) {
-      if (generation != _generation) return;
+      if (generation != _generation ||
+          sessionVersion != TokenStorage.sessionVersion) {
+        return;
+      }
       emit(
         state.copyWith(
           status: AuthStatus.failure,
+          profileUpdateStatus: ProfileUpdateStatus.failure,
+          profileUpdateError: e.toString().replaceAll('Exception: ', ''),
           errorMessage: e.toString().replaceAll('Exception: ', ''),
         ),
       );
