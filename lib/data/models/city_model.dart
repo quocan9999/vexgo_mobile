@@ -19,11 +19,7 @@ class StationModel extends Equatable {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'address': address,
-  };
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'address': address};
 
   @override
   List<Object?> get props => [id, name, address];
@@ -50,8 +46,11 @@ class CityModel extends Equatable {
       name: json['name'] as String? ?? '',
       region: json['region'] as String? ?? '',
       isPopular: json['isPopular'] as bool? ?? false,
-      stations: (json['stations'] as List<dynamic>?)
-              ?.map((item) => StationModel.fromJson(item as Map<String, dynamic>))
+      stations:
+          (json['stations'] as List<dynamic>?)
+              ?.map(
+                (item) => StationModel.fromJson(item as Map<String, dynamic>),
+              )
               .toList() ??
           const [],
     );

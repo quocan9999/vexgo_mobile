@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
+import '../../bloc/my_tickets_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../bloc/ticket_read_cubit.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -7,13 +12,86 @@ import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'ticket_qr_modal.dart';
 
-class BoardingPassCard extends StatelessWidget {
+class BoardingPassCard extends StatefulWidget {
   final TicketModel ticket;
+  final TicketReadCubit? ticketReader;
 
-  const BoardingPassCard({super.key, required this.ticket});
+  const BoardingPassCard({super.key, required this.ticket, this.ticketReader});
+
+  @override
+  State<BoardingPassCard> createState() => _BoardingPassCardState();
+}
+
+class _BoardingPassCardState extends State<BoardingPassCard> {
+  late final int _tokenVersion;
+  late final MyTicketsBloc? _owner;
+  int? _sessionGeneration;
+  bool _invalidated = false;
+  final List<StreamSubscription<dynamic>> _subscriptions = [];
+  TicketModel get ticket => widget.ticket;
+  TicketReadCubit? get ticketReader => widget.ticketReader;
+
+  bool get _authorized {
+    final owner = _owner;
+    final reader = ticketReader;
+    return !_invalidated &&
+        _tokenVersion == TokenStorage.sessionVersion &&
+        (owner == null ||
+            (!owner.isClosed &&
+                owner.sessionGeneration == _sessionGeneration)) &&
+        (reader == null ||
+            (!reader.isClosed &&
+                reader.state.status == TicketReadStatus.loaded &&
+                identical(reader.state.ticket, ticket)));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _tokenVersion = TokenStorage.sessionVersion;
+    _owner = ticketReader?.owner ?? context.read<MyTicketsBloc?>();
+    _sessionGeneration = _owner?.sessionGeneration;
+    _subscriptions.add(
+      TokenStorage.sessionInvalidations.listen((_) => _checkAuthorization()),
+    );
+    final reader = ticketReader;
+    if (reader != null) {
+      _subscriptions.add(
+        reader.stream.listen(
+          (_) => _checkAuthorization(),
+          onDone: _checkAuthorization,
+        ),
+      );
+    }
+    final owner = _owner;
+    if (owner != null) {
+      _subscriptions.add(
+        owner.stream.listen(
+          (_) => _checkAuthorization(),
+          onDone: _checkAuthorization,
+        ),
+      );
+    }
+  }
+
+  void _checkAuthorization() {
+    if (!mounted || _authorized || _invalidated) return;
+    setState(() => _invalidated = true);
+  }
+
+  @override
+  void dispose() {
+    for (final subscription in _subscriptions) {
+      subscription.cancel();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (!_authorized) {
+      return const Text('Phiên đã thay đổi. Vui lòng mở lại thông tin vé.');
+    }
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -63,7 +141,9 @@ class BoardingPassCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             ticket.trip.vehicleType,
-                            style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.neutral500,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -87,7 +167,9 @@ class BoardingPassCard extends StatelessWidget {
                         children: [
                           Text(
                             'Điểm đi',
-                            style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.neutral500,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -127,7 +209,9 @@ class BoardingPassCard extends StatelessWidget {
                         children: [
                           Text(
                             'Điểm đến',
-                            style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.neutral500,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -156,9 +240,18 @@ class BoardingPassCard extends StatelessWidget {
 
                 // QR Code Tap Box
                 GestureDetector(
-                  onTap: () => TicketQrModal.show(context, ticket),
+                  onTap: ticket.canShowQr
+                      ? () => TicketQrModal.show(
+                          context,
+                          ticket,
+                          ticketReader: ticketReader,
+                        )
+                      : null,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.neutral100.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
@@ -167,12 +260,15 @@ class BoardingPassCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        QrImageView(
-                          data: 'VEXGO:${ticket.ticketCode}:${ticket.id}',
-                          version: QrVersions.auto,
-                          size: 72.0,
-                          backgroundColor: Colors.transparent,
-                        ),
+                        if (ticket.canShowQr)
+                          QrImageView(
+                            data: 'VEXGO:${ticket.ticketCode}:${ticket.id}',
+                            version: QrVersions.auto,
+                            size: 72.0,
+                            backgroundColor: Colors.transparent,
+                          )
+                        else
+                          const Icon(Icons.lock_clock, size: 54),
                         const SizedBox(width: AppDimensions.base),
                         Expanded(
                           child: Column(
@@ -189,10 +285,16 @@ class BoardingPassCard extends StatelessWidget {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.fullscreen_rounded, size: 16, color: AppColors.primary),
+                                  const Icon(
+                                    Icons.fullscreen_rounded,
+                                    size: 16,
+                                    color: AppColors.primary,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Chạm để phóng to mã QR',
+                                    ticket.canShowQr
+                                        ? 'Chạm để phóng to mã QR'
+                                        : 'Chưa có xác nhận thanh toán',
                                     style: AppTextStyles.caption.copyWith(
                                       color: AppColors.primary,
                                       fontWeight: FontWeight.w600,
@@ -276,7 +378,8 @@ class BoardingPassCard extends StatelessWidget {
                 // Passenger and Contact
                 _buildInfoLine(
                   label: 'Hành khách:',
-                  value: '${ticket.passenger.fullName} · ${ticket.passenger.phone}',
+                  value:
+                      '${ticket.passenger.fullName} · ${ticket.passenger.phone}',
                 ),
                 const SizedBox(height: 8),
                 _buildInfoLine(
@@ -301,10 +404,10 @@ class BoardingPassCard extends StatelessWidget {
                 if (ticket.status == TicketStatus.cancelled) ...[
                   const SizedBox(height: 8),
                   _buildInfoLine(
-                    label: 'Số tiền hoàn lại:',
+                    label: 'Số tiền hoàn (chưa xác nhận):',
                     value: ticket.refundAmount != null
                         ? CurrencyFormatter.format(ticket.refundAmount!)
-                        : 'Đang xử lý',
+                        : 'Chưa có dữ liệu',
                     valueColor: AppColors.success,
                     isBold: true,
                   ),
@@ -334,7 +437,8 @@ class BoardingPassCard extends StatelessWidget {
             builder: (context, constraints) {
               const dashWidth = 6.0;
               const dashSpace = 4.0;
-              final dashCount = (constraints.maxWidth / (dashWidth + dashSpace)).floor();
+              final dashCount = (constraints.maxWidth / (dashWidth + dashSpace))
+                  .floor();
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(dashCount, (_) {
@@ -342,7 +446,9 @@ class BoardingPassCard extends StatelessWidget {
                     width: dashWidth,
                     height: 1.5,
                     color: AppColors.neutral300,
-                    margin: const EdgeInsets.symmetric(horizontal: dashSpace / 2),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: dashSpace / 2,
+                    ),
                   );
                 }),
               );
@@ -396,7 +502,9 @@ class BoardingPassCard extends StatelessWidget {
           width: 50,
           child: Text(
             time,
-            style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         const SizedBox(width: AppDimensions.xs),
@@ -406,14 +514,18 @@ class BoardingPassCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
               Text(
                 address,
-                style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.neutral500,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

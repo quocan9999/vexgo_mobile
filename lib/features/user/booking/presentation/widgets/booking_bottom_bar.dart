@@ -39,10 +39,7 @@ class BookingBottomBar extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(
-        top: false,
-        child: _buildContentByStep(context),
-      ),
+      child: SafeArea(top: false, child: _buildContentByStep(context)),
     );
   }
 
@@ -80,7 +77,9 @@ class BookingBottomBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                hasSeats ? 'Ghế: $seatNames (${state.selectedSeats.length} chỗ)' : 'Vui lòng chọn chỗ',
+                hasSeats
+                    ? 'Ghế: $seatNames (${state.selectedSeats.length} chỗ)'
+                    : 'Vui lòng chọn chỗ',
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   color: hasSeats ? AppColors.primary : AppColors.neutral500,
@@ -90,7 +89,11 @@ class BookingBottomBar extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                hasSeats ? CurrencyFormatter.format(state.seatsTotalAmount) : '0 đ',
+                hasSeats
+                    ? (state.seatsTotalAmount != null
+                          ? CurrencyFormatter.format(state.seatsTotalAmount!)
+                          : 'Chưa có giá vé')
+                    : '0 đ',
                 style: AppTextStyles.price.copyWith(fontSize: 18),
               ),
             ],
@@ -101,7 +104,12 @@ class BookingBottomBar extends StatelessWidget {
           width: 140,
           child: CustomButton(
             text: 'Tiếp tục',
-            onPressed: hasSeats ? onNext : null,
+            onPressed:
+                (hasSeats &&
+                    state.seatsTotalAmount != null &&
+                    state.seatsTotalAmount! > 0)
+                ? onNext
+                : null,
           ),
         ),
       ],
@@ -187,11 +195,15 @@ class BookingBottomBar extends StatelessWidget {
             children: [
               Text(
                 'Tổng thanh toán:',
-                style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.neutral500,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
-                CurrencyFormatter.format(state.finalAmount),
+                state.finalAmount == null
+                    ? 'Đang xác minh giá'
+                    : CurrencyFormatter.format(state.finalAmount),
                 style: AppTextStyles.price.copyWith(
                   fontSize: 19,
                   color: AppColors.secondary,
@@ -205,7 +217,7 @@ class BookingBottomBar extends StatelessWidget {
           width: 170,
           child: CustomButton(
             text: 'Thanh toán',
-            onPressed: onNext,
+            onPressed: state.canProceed ? onNext : null,
           ),
         ),
       ],
@@ -222,16 +234,31 @@ class BookingBottomBar extends StatelessWidget {
           child: CustomButton(
             text: 'Quay lại',
             type: ButtonType.outline,
-            onPressed: isSubmitting ? null : onBack,
+            onPressed: state.isCheckoutLocked ? null : onBack,
           ),
         ),
         const SizedBox(width: AppDimensions.sm),
         Expanded(
           child: CustomButton(
-            text: 'Thanh toán ${CurrencyFormatter.format(state.finalAmount)}',
+            text: state.pendingBookingId != null
+                ? 'Kiểm tra đơn hiện tại'
+                : state.finalAmount == null
+                ? 'Đang xác minh giá'
+                : 'Thanh toán ${CurrencyFormatter.format(state.finalAmount)}',
             isLoading: isSubmitting,
-            prefixIcon: const Icon(Icons.shield_rounded, color: Colors.white, size: 18),
-            onPressed: isSubmitting ? null : onConfirmPayment,
+            prefixIcon: const Icon(
+              Icons.shield_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
+            onPressed:
+                isSubmitting ||
+                    state.bookingOutcomeUnknown ||
+                    state.quoteLoading ||
+                    (state.pendingBookingId == null && !state.hasUsableQuote) ||
+                    state.status == BookingFlowStatus.blockedByBackend
+                ? null
+                : onConfirmPayment,
           ),
         ),
       ],

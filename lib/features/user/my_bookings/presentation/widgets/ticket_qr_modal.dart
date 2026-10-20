@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../bloc/my_tickets_bloc.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
+import '../../bloc/ticket_read_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -6,20 +11,126 @@ import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 
-class TicketQrModal extends StatelessWidget {
+class TicketQrModal extends StatefulWidget {
   final TicketModel ticket;
+  final TicketReadCubit? ticketReader;
+  final MyTicketsBloc? owner;
 
-  const TicketQrModal({super.key, required this.ticket});
+  const TicketQrModal({
+    super.key,
+    required this.ticket,
+    this.ticketReader,
+    this.owner,
+  });
 
-  static void show(BuildContext context, TicketModel ticket) {
+  static void show(
+    BuildContext context,
+    TicketModel ticket, {
+    TicketReadCubit? ticketReader,
+  }) {
+    if (!ticket.canShowQr ||
+        (ticketReader != null &&
+            (ticketReader.state.status != TicketReadStatus.loaded ||
+                !identical(ticketReader.state.ticket, ticket)))) {
+      return;
+    }
+    final owner = ticketReader?.owner ?? context.read<MyTicketsBloc?>();
     showDialog(
       context: context,
-      builder: (ctx) => TicketQrModal(ticket: ticket),
+      builder: (ctx) => TicketQrModal(
+        ticket: ticket,
+        ticketReader: ticketReader,
+        owner: owner,
+      ),
     );
   }
 
   @override
+  State<TicketQrModal> createState() => _TicketQrModalState();
+}
+
+class _TicketQrModalState extends State<TicketQrModal> {
+  late final int _tokenVersion;
+  int? _sessionGeneration;
+  MyTicketsBloc? _owner;
+  bool _invalidated = false;
+  final List<StreamSubscription<dynamic>> _subscriptions = [];
+  TicketModel get ticket => widget.ticket;
+
+  bool get _authorized {
+    final reader = widget.ticketReader;
+    final owner = _owner;
+    return !_invalidated &&
+        _tokenVersion == TokenStorage.sessionVersion &&
+        (owner == null ||
+            (!owner.isClosed &&
+                owner.sessionGeneration == _sessionGeneration)) &&
+        (reader == null ||
+            (!reader.isClosed &&
+                reader.state.status == TicketReadStatus.loaded &&
+                identical(reader.state.ticket, ticket) &&
+                reader.state.ticket!.canShowQr));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _tokenVersion = TokenStorage.sessionVersion;
+    final reader = widget.ticketReader;
+    _owner = widget.owner ?? reader?.owner ?? context.read<MyTicketsBloc?>();
+    _sessionGeneration = _owner?.sessionGeneration;
+    _subscriptions.add(
+      TokenStorage.sessionInvalidations.listen((_) => _checkAuthorization()),
+    );
+    if (reader != null) {
+      _subscriptions.add(
+        reader.stream.listen(
+          (_) => _checkAuthorization(),
+          onDone: _checkAuthorization,
+        ),
+      );
+    }
+    final owner = _owner;
+    if (owner != null) {
+      _subscriptions.add(
+        owner.stream.listen(
+          (_) => _checkAuthorization(),
+          onDone: _checkAuthorization,
+        ),
+      );
+    }
+  }
+
+  void _checkAuthorization() {
+    if (!mounted || _authorized || _invalidated) return;
+    // Blank credential content before removing the route, including when a
+    // different dialog is now on top. Never pop an unrelated navigation page.
+    setState(() => _invalidated = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final route = ModalRoute.of(context);
+      if (route is PopupRoute && route.isActive) {
+        route.navigator?.removeRoute(route);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    for (final subscription in _subscriptions) {
+      subscription.cancel();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_authorized) return const SizedBox.shrink();
+    if (!ticket.canShowQr) {
+      return const AlertDialog(
+        content: Text('Chưa có xác nhận thanh toán để hiển thị mã lên xe.'),
+      );
+    }
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
@@ -89,7 +200,9 @@ class TicketQrModal extends StatelessWidget {
                 children: [
                   Text(
                     'Mã vé: ',
-                    style: AppTextStyles.caption.copyWith(color: AppColors.neutral700),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.neutral700,
+                    ),
                   ),
                   Text(
                     ticket.ticketCode,
@@ -102,6 +215,10 @@ class TicketQrModal extends StatelessWidget {
                   const SizedBox(width: 8),
                   GestureDetector(
                     onTap: () {
+                      if (!_authorized) {
+                        _checkAuthorization();
+                        return;
+                      }
                       Clipboard.setData(ClipboardData(text: ticket.ticketCode));
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -110,7 +227,11 @@ class TicketQrModal extends StatelessWidget {
                         ),
                       );
                     },
-                    child: const Icon(Icons.copy_rounded, size: 16, color: AppColors.primary),
+                    child: const Icon(
+                      Icons.copy_rounded,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
               ),

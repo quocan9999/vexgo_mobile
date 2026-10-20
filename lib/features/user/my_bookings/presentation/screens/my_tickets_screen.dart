@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/guest_ticket_lookup_panel.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
@@ -70,82 +71,103 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
             title: 'Vé của tôi',
             automaticallyImplyLeading: false,
           ),
-          body: Column(
-            children: [
-              // Search & Lookup Bar
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.fromLTRB(
-                  AppDimensions.base,
-                  AppDimensions.sm,
-                  AppDimensions.base,
-                  AppDimensions.sm,
-                ),
-                child: TextField(
-                  controller: _searchCtrl,
-                  onChanged: (val) => bloc.add(SearchTicketsEvent(val)),
-                  decoration: InputDecoration(
-                    hintText: 'Nhập mã vé (VXG-...) hoặc SĐT tra cứu...',
-                    hintStyle: AppTextStyles.caption.copyWith(color: AppColors.neutral400),
-                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.neutral500, size: 20),
-                    suffixIcon: _searchCtrl.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _searchCtrl.clear();
-                              bloc.add(const SearchTicketsEvent(''));
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: AppColors.neutral100,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-
-              // 3 Status Tabs
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base, vertical: 8),
-                child: Row(
+          body: state.requiresLogin
+              ? _buildTicketsList(context, state, bloc)
+              : Column(
                   children: [
-                    _buildTabItem(
-                      title: 'Sắp đi',
-                      count: state.upcomingTickets.length,
-                      isSelected: state.selectedTab == TicketStatus.upcoming,
-                      onTap: () => bloc.add(const ChangeTabEvent(TicketStatus.upcoming)),
+                    // Search & Lookup Bar
+                    Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.fromLTRB(
+                        AppDimensions.base,
+                        AppDimensions.sm,
+                        AppDimensions.base,
+                        AppDimensions.sm,
+                      ),
+                      child: TextField(
+                        controller: _searchCtrl,
+                        onChanged: (val) => bloc.add(SearchTicketsEvent(val)),
+                        decoration: InputDecoration(
+                          hintText: 'Nhập mã vé (VXG-...) hoặc SĐT tra cứu...',
+                          hintStyle: AppTextStyles.caption.copyWith(
+                            color: AppColors.neutral400,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: AppColors.neutral500,
+                            size: 20,
+                          ),
+                          suffixIcon: _searchCtrl.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  onPressed: () {
+                                    _searchCtrl.clear();
+                                    bloc.add(const SearchTicketsEvent(''));
+                                  },
+                                )
+                              : null,
+                          filled: true,
+                          fillColor: AppColors.neutral100,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: AppDimensions.sm),
-                    _buildTabItem(
-                      title: 'Đã đi',
-                      count: state.completedTickets.length,
-                      isSelected: state.selectedTab == TicketStatus.completed,
-                      onTap: () => bloc.add(const ChangeTabEvent(TicketStatus.completed)),
+
+                    // 3 Status Tabs
+                    Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimensions.base,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        children: [
+                          _buildTabItem(
+                            title: 'Sắp đi',
+                            count: state.upcomingTickets.length,
+                            isSelected:
+                                state.selectedTab == TicketStatus.upcoming,
+                            onTap: () => bloc.add(
+                              const ChangeTabEvent(TicketStatus.upcoming),
+                            ),
+                          ),
+                          const SizedBox(width: AppDimensions.sm),
+                          _buildTabItem(
+                            title: 'Đã đi',
+                            count: state.completedTickets.length,
+                            isSelected:
+                                state.selectedTab == TicketStatus.completed,
+                            onTap: () => bloc.add(
+                              const ChangeTabEvent(TicketStatus.completed),
+                            ),
+                          ),
+                          const SizedBox(width: AppDimensions.sm),
+                          _buildTabItem(
+                            title: 'Đã hủy',
+                            count: state.cancelledTickets.length,
+                            isSelected:
+                                state.selectedTab == TicketStatus.cancelled,
+                            onTap: () => bloc.add(
+                              const ChangeTabEvent(TicketStatus.cancelled),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: AppDimensions.sm),
-                    _buildTabItem(
-                      title: 'Đã hủy',
-                      count: state.cancelledTickets.length,
-                      isSelected: state.selectedTab == TicketStatus.cancelled,
-                      onTap: () => bloc.add(const ChangeTabEvent(TicketStatus.cancelled)),
-                    ),
+
+                    const Divider(height: 1, color: AppColors.neutral200),
+
+                    // Tickets List / Empty State
+                    Expanded(child: _buildTicketsList(context, state, bloc)),
                   ],
                 ),
-              ),
-
-              const Divider(height: 1, color: AppColors.neutral200),
-
-              // Tickets List / Empty State
-              Expanded(
-                child: _buildTicketsList(context, state, bloc),
-              ),
-            ],
-          ),
         );
       },
     );
@@ -180,9 +202,14 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
               if (count > 0) ...[
                 const SizedBox(width: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 1,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white.withValues(alpha: 0.25) : AppColors.neutral300,
+                    color: isSelected
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : AppColors.neutral300,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -207,6 +234,36 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
     MyTicketsState state,
     MyTicketsBloc bloc,
   ) {
+    if (state.requiresLogin) {
+      return Column(
+        children: [
+          Expanded(
+            child: GuestTicketLookupPanel(
+              key: ValueKey(bloc.sessionGeneration),
+            ),
+          ),
+          TextButton(
+            onPressed: () => context.go('/profile'),
+            child: const Text('Đăng nhập để xem tất cả vé'),
+          ),
+        ],
+      );
+    }
+
+    if (state.status == MyTicketsStatus.error) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Không thể tải vé. Vui lòng thử lại.'),
+            TextButton(
+              onPressed: () => bloc.add(const LoadMyTicketsEvent()),
+              child: const Text('Thử lại'),
+            ),
+          ],
+        ),
+      );
+    }
     if (state.status == MyTicketsStatus.loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -214,12 +271,24 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
     final tickets = state.filteredTickets;
 
     if (tickets.isEmpty) {
-      return _buildEmptyState(context, state.selectedTab);
+      return Column(
+        children: [
+          Expanded(child: _buildEmptyState(context, state.selectedTab)),
+          TextButton(
+            onPressed: () => bloc.add(const LoadMyTicketsEvent()),
+            child: const Text('Tải lại'),
+          ),
+        ],
+      );
     }
 
     return RefreshIndicator(
       onRefresh: () async {
+        final completed = bloc.stream.firstWhere(
+          (s) => s.status != MyTicketsStatus.loading,
+        );
         bloc.add(const LoadMyTicketsEvent());
+        await completed;
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(AppDimensions.base),
@@ -256,18 +325,21 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
       case TicketStatus.upcoming:
         icon = Icons.confirmation_number_outlined;
         title = 'Chưa có chuyến xe nào sắp đi';
-        subtitle = 'Khám phá ngay hàng trăm chuyến xe khách liên tỉnh chất lượng cao với giá ưu đãi!';
+        subtitle =
+            'Khám phá ngay hàng trăm chuyến xe khách liên tỉnh chất lượng cao với giá ưu đãi!';
         showAction = true;
         break;
       case TicketStatus.completed:
         icon = Icons.history_rounded;
         title = 'Chưa có lịch sử chuyến đi';
-        subtitle = 'Các chuyến xe bạn đã hoàn thành sẽ hiển thị tại đây để bạn có thể xem lại hoặc đánh giá.';
+        subtitle =
+            'Các chuyến xe bạn đã hoàn thành sẽ hiển thị tại đây để bạn có thể xem lại hoặc đánh giá.';
         break;
       case TicketStatus.cancelled:
         icon = Icons.cancel_presentation_rounded;
         title = 'Không có vé nào bị hủy';
-        subtitle = 'Mọi giao dịch hủy vé và hoàn tiền theo chính sách nhà xe sẽ được ghi nhận tại đây.';
+        subtitle =
+            'Mọi giao dịch hủy vé và hoàn tiền theo chính sách nhà xe sẽ được ghi nhận tại đây.';
         break;
     }
 
@@ -294,7 +366,10 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
             const SizedBox(height: 6),
             Text(
               subtitle,
-              style: AppTextStyles.caption.copyWith(color: AppColors.neutral500, height: 1.4),
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.neutral500,
+                height: 1.4,
+              ),
               textAlign: TextAlign.center,
             ),
             if (showAction) ...[

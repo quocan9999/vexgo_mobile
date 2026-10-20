@@ -17,7 +17,10 @@ class SeatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBooked = seat.status == SeatStatus.booked;
+    final unavailable = seat.status == SeatStatus.unavailable;
+    final isBooked = seat.status == SeatStatus.booked || unavailable;
+    final isHeld = seat.status == SeatStatus.held;
+    final isDisabled = isBooked || isHeld;
 
     Color bgColor = Colors.white;
     Color borderColor = AppColors.neutral300;
@@ -29,6 +32,11 @@ class SeatItem extends StatelessWidget {
       borderColor = AppColors.neutral300;
       textColor = AppColors.neutral400;
       priceColor = AppColors.neutral400;
+    } else if (isHeld) {
+      bgColor = AppColors.warning.withValues(alpha: 0.12);
+      borderColor = AppColors.warning.withValues(alpha: 0.4);
+      textColor = AppColors.warning;
+      priceColor = AppColors.warning;
     } else if (isSelected) {
       bgColor = AppColors.primary;
       borderColor = AppColors.primary;
@@ -37,10 +45,12 @@ class SeatItem extends StatelessWidget {
     }
 
     // Price string in short (e.g. 290k)
-    final priceShort = '${seat.price ~/ 1000}k';
+    final priceShort = (seat.price != null && seat.price! > 0)
+        ? '${seat.price! ~/ 1000}k'
+        : '';
 
     return GestureDetector(
-      onTap: isBooked ? null : onTap,
+      onTap: isDisabled ? null : onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeInOut,
@@ -48,10 +58,7 @@ class SeatItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 2 : 1.2,
-          ),
+          border: Border.all(color: borderColor, width: isSelected ? 2 : 1.2),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -73,7 +80,9 @@ class SeatItem extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.6)
-                    : (isBooked ? AppColors.neutral300 : AppColors.primaryLight),
+                    : (isBooked
+                          ? AppColors.neutral300
+                          : AppColors.primaryLight),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -83,11 +92,19 @@ class SeatItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (isBooked)
-                  const Icon(Icons.close_rounded, size: 13, color: AppColors.neutral400)
+                  const Icon(
+                    Icons.close_rounded,
+                    size: 13,
+                    color: AppColors.neutral400,
+                  )
                 else if (isSelected)
                   const Icon(Icons.check_rounded, size: 14, color: Colors.white)
                 else
-                  const Icon(Icons.airline_seat_recline_extra_rounded, size: 13, color: AppColors.primary),
+                  const Icon(
+                    Icons.airline_seat_recline_extra_rounded,
+                    size: 13,
+                    color: AppColors.primary,
+                  ),
                 const SizedBox(width: 2),
                 Text(
                   seat.name,
@@ -104,7 +121,9 @@ class SeatItem extends StatelessWidget {
 
             // Seat Price
             Text(
-              isBooked ? 'Đã bán' : priceShort,
+              isBooked
+                  ? (unavailable ? 'Chưa mở bán' : 'Đã bán')
+                  : (priceShort.isNotEmpty ? priceShort : '--'),
               style: AppTextStyles.caption.copyWith(
                 color: priceColor,
                 fontSize: 10,

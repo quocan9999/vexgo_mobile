@@ -13,11 +13,18 @@ import '../features/user/notification/presentation/screens/notifications_screen.
 import '../features/user/profile/presentation/screens/profile_screen.dart';
 import '../features/user/search_trips/presentation/screens/search_trips_screen.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
-final GlobalKey<NavigatorState> _ticketsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'tickets');
-final GlobalKey<NavigatorState> _notificationsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'notifications');
-final GlobalKey<NavigatorState> _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
+final GlobalKey<NavigatorState> _homeNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'home',
+);
+final GlobalKey<NavigatorState> _ticketsNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'tickets');
+final GlobalKey<NavigatorState> _notificationsNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'notifications');
+final GlobalKey<NavigatorState> _profileNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'profile');
 
 class AppRoutes {
   AppRoutes._();
@@ -42,11 +49,43 @@ class AppRoutes {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
+          final query = state.uri.queryParameters;
+
+          CityModel? fromCity = extra?['fromCity'] as CityModel?;
+          if (fromCity == null && query.containsKey('fromCityId')) {
+            fromCity = CityModel(
+              id: query['fromCityId']!,
+              name: query['fromCityName'] ?? query['fromCityId']!,
+              region: '',
+              isPopular: false,
+            );
+          }
+
+          CityModel? toCity = extra?['toCity'] as CityModel?;
+          if (toCity == null && query.containsKey('toCityId')) {
+            toCity = CityModel(
+              id: query['toCityId']!,
+              name: query['toCityName'] ?? query['toCityId']!,
+              region: '',
+              isPopular: false,
+            );
+          }
+
+          DateTime? date = extra?['date'] as DateTime?;
+          if (date == null && query.containsKey('date')) {
+            date = DateTime.tryParse(query['date']!);
+          }
+
+          final ticketCount =
+              extra?['ticketCount'] as int? ??
+              int.tryParse(query['ticketCount'] ?? '1') ??
+              1;
+
           return SearchTripsScreen(
-            fromCity: extra?['fromCity'] as CityModel?,
-            toCity: extra?['toCity'] as CityModel?,
-            date: extra?['date'] as DateTime?,
-            ticketCount: extra?['ticketCount'] as int? ?? 1,
+            fromCity: fromCity,
+            toCity: toCity,
+            date: date,
+            ticketCount: ticketCount,
           );
         },
       ),
@@ -71,7 +110,14 @@ class AppRoutes {
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           final ticket = extra?['ticket'] as TicketModel;
-          return BookingSuccessScreen(ticket: ticket);
+          return BookingSuccessScreen(
+            ticket: ticket,
+            tickets:
+                (extra?['tickets'] as List?)
+                    ?.whereType<TicketModel>()
+                    .toList() ??
+                const [],
+          );
         },
       ),
       GoRoute(
@@ -95,9 +141,8 @@ class AppRoutes {
             routes: [
               GoRoute(
                 path: home,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: HomeScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: HomeScreen()),
               ),
             ],
           ),
@@ -108,9 +153,8 @@ class AppRoutes {
             routes: [
               GoRoute(
                 path: myTickets,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: MyTicketsScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: MyTicketsScreen()),
               ),
             ],
           ),
@@ -121,9 +165,8 @@ class AppRoutes {
             routes: [
               GoRoute(
                 path: notifications,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: NotificationsScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: NotificationsScreen()),
               ),
             ],
           ),
@@ -134,9 +177,8 @@ class AppRoutes {
             routes: [
               GoRoute(
                 path: profile,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: ProfileScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: ProfileScreen()),
               ),
             ],
           ),

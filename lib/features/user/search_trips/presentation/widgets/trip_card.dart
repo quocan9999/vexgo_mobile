@@ -10,13 +10,9 @@ import 'trip_detail_sheet.dart';
 
 class TripCard extends StatelessWidget {
   final TripModel trip;
-  final VoidCallback onSelect;
+  final ValueChanged<TripModel> onSelect;
 
-  const TripCard({
-    super.key,
-    required this.trip,
-    required this.onSelect,
-  });
+  const TripCard({super.key, required this.trip, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +36,7 @@ class TripCard extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
         child: InkWell(
-          onTap: onSelect,
+          onTap: () => onSelect(trip),
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           child: Padding(
             padding: const EdgeInsets.all(AppDimensions.base),
@@ -89,7 +85,11 @@ class TripCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    RatingBadge(rating: trip.rating, reviewCount: trip.reviewCount),
+                    if (trip.rating != null)
+                      RatingBadge(
+                        rating: trip.rating!,
+                        reviewCount: trip.reviewCount,
+                      ),
                   ],
                 ),
 
@@ -123,7 +123,9 @@ class TripCard extends StatelessWidget {
 
                     // Route Line Icon
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimensions.md,
+                      ),
                       child: Column(
                         children: [
                           Container(
@@ -221,9 +223,14 @@ class TripCard extends StatelessWidget {
                             spacing: AppDimensions.xs + 2,
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 1.5,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isLowSeats ? AppColors.errorLight : AppColors.successLight,
+                                  color: isLowSeats
+                                      ? AppColors.errorLight
+                                      : AppColors.successLight,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -231,7 +238,9 @@ class TripCard extends StatelessWidget {
                                       ? 'Chỉ còn ${trip.availableSeats} chỗ'
                                       : 'Còn ${trip.availableSeats} chỗ trống',
                                   style: AppTextStyles.caption.copyWith(
-                                    color: isLowSeats ? AppColors.error : AppColors.success,
+                                    color: isLowSeats
+                                        ? AppColors.error
+                                        : AppColors.success,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 10.5,
                                   ),
@@ -245,7 +254,10 @@ class TripCard extends StatelessWidget {
                                 ),
                                 borderRadius: BorderRadius.circular(4),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 2,
+                                  ),
                                   child: Text(
                                     'Chi tiết',
                                     style: AppTextStyles.caption.copyWith(
@@ -267,7 +279,7 @@ class TripCard extends StatelessWidget {
                       text: 'Chọn chuyến',
                       height: 36,
                       type: ButtonType.secondary,
-                      onPressed: onSelect,
+                      onPressed: () => onSelect(trip),
                     ),
                   ],
                 ),

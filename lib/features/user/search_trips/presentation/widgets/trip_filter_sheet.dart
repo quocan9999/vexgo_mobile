@@ -56,7 +56,9 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
     super.initState();
     _selectedTimeSlots = List.from(widget.initialFilter.selectedTimeSlots);
     _selectedOperators = List.from(widget.initialFilter.selectedOperators);
-    _selectedVehicleTypes = List.from(widget.initialFilter.selectedVehicleTypes);
+    _selectedVehicleTypes = List.from(
+      widget.initialFilter.selectedVehicleTypes,
+    );
     _selectedAmenities = List.from(widget.initialFilter.selectedAmenities);
     _priceRange = RangeValues(
       widget.initialFilter.minPrice,
@@ -90,7 +92,10 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
           // Drag handle
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: AppDimensions.md, bottom: AppDimensions.xs),
+              margin: const EdgeInsets.only(
+                top: AppDimensions.md,
+                bottom: AppDimensions.xs,
+              ),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
@@ -112,7 +117,9 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 Expanded(
                   child: Text(
                     'Bộ lọc tìm kiếm',
-                    style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
+                    style: AppTextStyles.h3.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -158,11 +165,17 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                       selectedColor: AppColors.primaryLight,
                       backgroundColor: AppColors.neutral50,
                       labelStyle: AppTextStyles.bodySmall.copyWith(
-                        color: isSelected ? AppColors.primary : AppColors.neutral700,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.neutral700,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                       side: BorderSide(
-                        color: isSelected ? AppColors.primary : AppColors.neutral200,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.neutral200,
                       ),
                       onSelected: (selected) {
                         setState(() {
@@ -252,7 +265,9 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                       title: Text(
                         operatorName,
                         style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: isChecked ? FontWeight.w600 : FontWeight.w400,
+                          fontWeight: isChecked
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                         ),
                       ),
                       value: isChecked,
@@ -292,7 +307,9 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                       title: Text(
                         vType,
                         style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: isChecked ? FontWeight.w600 : FontWeight.w400,
+                          fontWeight: isChecked
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                         ),
                       ),
                       value: isChecked,
@@ -334,11 +351,17 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                         selectedColor: AppColors.primaryLight,
                         backgroundColor: AppColors.neutral50,
                         labelStyle: AppTextStyles.bodySmall.copyWith(
-                          color: isSelected ? AppColors.primary : AppColors.neutral700,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.neutral700,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                         ),
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : AppColors.neutral200,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.neutral200,
                         ),
                         onSelected: (selected) {
                           setState(() {

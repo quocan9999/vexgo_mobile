@@ -5,12 +5,14 @@ enum NotificationStatus { initial, loading, loaded, failure }
 
 class NotificationState extends Equatable {
   final NotificationStatus status;
+  final bool requiresLogin;
   final List<NotificationModel> notifications;
   final int activeTabIndex;
   final String? errorMessage;
 
   const NotificationState({
     this.status = NotificationStatus.initial,
+    this.requiresLogin = false,
     this.notifications = const [],
     this.activeTabIndex = 0,
     this.errorMessage,
@@ -18,14 +20,25 @@ class NotificationState extends Equatable {
 
   int get unreadCount => notifications.where((n) => !n.isRead).length;
 
+  bool get hasCategories =>
+      notifications.isNotEmpty &&
+      notifications.every((n) => n.category != NotificationCategory.unknown);
+
   List<NotificationModel> get filteredNotifications {
+    if (!hasCategories) return notifications;
     switch (activeTabIndex) {
       case 1:
-        return notifications.where((n) => n.category == NotificationCategory.trip).toList();
+        return notifications
+            .where((n) => n.category == NotificationCategory.trip)
+            .toList();
       case 2:
-        return notifications.where((n) => n.category == NotificationCategory.promo).toList();
+        return notifications
+            .where((n) => n.category == NotificationCategory.promo)
+            .toList();
       case 3:
-        return notifications.where((n) => n.category == NotificationCategory.system).toList();
+        return notifications
+            .where((n) => n.category == NotificationCategory.system)
+            .toList();
       case 0:
       default:
         return notifications;
@@ -34,23 +47,27 @@ class NotificationState extends Equatable {
 
   NotificationState copyWith({
     NotificationStatus? status,
+    bool? requiresLogin,
+    bool clearError = false,
     List<NotificationModel>? notifications,
     int? activeTabIndex,
     String? errorMessage,
   }) {
     return NotificationState(
       status: status ?? this.status,
+      requiresLogin: requiresLogin ?? this.requiresLogin,
       notifications: notifications ?? this.notifications,
       activeTabIndex: activeTabIndex ?? this.activeTabIndex,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        notifications,
-        activeTabIndex,
-        errorMessage,
-      ];
+    status,
+    requiresLogin,
+    notifications,
+    activeTabIndex,
+    errorMessage,
+  ];
 }

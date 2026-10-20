@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
@@ -10,6 +11,7 @@ import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
 import '../widgets/auth_modal_sheet.dart';
 import '../widgets/edit_profile_dialog.dart';
+import '../widgets/change_password_dialog.dart';
 import '../widgets/loyalty_card_widget.dart';
 import '../widgets/loyalty_history_sheet.dart';
 
@@ -46,10 +48,22 @@ class ProfileScreen extends StatelessWidget {
 
           return SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base, vertical: AppDimensions.md),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+                vertical: AppDimensions.md,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (state.status == AuthStatus.loading)
+                    const LinearProgressIndicator(),
+                  if (state.status == AuthStatus.failure && state.user == null)
+                    TextButton(
+                      onPressed: () => context.read<AuthBloc>().add(
+                        const CheckAuthStatusEvent(),
+                      ),
+                      child: const Text('Thử tải lại phiên đăng nhập'),
+                    ),
                   // 1. Profile Header
                   if (isAuthenticated && user != null)
                     _buildUserHeader(context, user)
@@ -60,8 +74,10 @@ class ProfileScreen extends StatelessWidget {
 
                   // 2. Loyalty VIP Card (If authenticated)
                   if (isAuthenticated && user != null) ...[
-                    LoyaltyCardWidget(user: user),
-                    const SizedBox(height: AppDimensions.base),
+                    if (ApiConfig.isDemoMode) ...[
+                      LoyaltyCardWidget(user: user),
+                      const SizedBox(height: AppDimensions.base),
+                    ],
                     _buildQuickStats(context, user),
                     const SizedBox(height: AppDimensions.base),
                   ],
@@ -74,23 +90,19 @@ class ProfileScreen extends StatelessWidget {
                         icon: Icons.person_outline_rounded,
                         title: 'Thông tin cá nhân',
                         subtitle: 'Họ tên, email, CCCD, ngày sinh',
-                        onTap: () => EditProfileDialog.show(context, user: user),
+                        onTap: () =>
+                            EditProfileDialog.show(context, user: user),
                       ),
                       _MenuItem(
                         icon: Icons.lock_outline_rounded,
                         title: 'Đổi mật khẩu',
                         subtitle: 'Cập nhật mật khẩu định kỳ để an toàn',
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Tính năng Đổi mật khẩu đã sẵn sàng!')),
-                          );
-                        },
+                        onTap: () => ChangePasswordDialog.show(context),
                       ),
                       _MenuItem(
                         icon: Icons.people_outline_rounded,
                         title: 'Danh sách hành khách thường xuyên',
-                        subtitle: 'Lưu thông tin để đặt vé nhanh hơn',
-                        onTap: () {},
+                        subtitle: 'Chưa hỗ trợ lưu hành khách trên máy chủ',
                       ),
                     ]),
                     const SizedBox(height: AppDimensions.base),
@@ -101,15 +113,19 @@ class ProfileScreen extends StatelessWidget {
                         icon: Icons.stars_rounded,
                         iconColor: AppColors.secondary,
                         title: 'Lịch sử điểm VexGo Points',
-                        subtitle: 'Tích điểm mỗi chuyến đi, đổi voucher giảm giá',
-                        onTap: () => LoyaltyHistorySheet.show(context, user: user),
+                        subtitle: ApiConfig.isDemoMode
+                            ? 'Tích điểm mỗi chuyến đi, đổi voucher giảm giá'
+                            : 'Máy chủ chưa cung cấp lịch sử và đổi điểm',
+                        onTap: !ApiConfig.isDemoMode
+                            ? null
+                            : () =>
+                                  LoyaltyHistorySheet.show(context, user: user),
                       ),
                       _MenuItem(
                         icon: Icons.confirmation_number_outlined,
                         iconColor: AppColors.primary,
                         title: 'Ví Voucher & Khuyến mãi',
-                        subtitle: 'Mã giảm giá đang có hiệu lực',
-                        onTap: () {},
+                        subtitle: 'Nhập mã khuyến mãi tại bước xác nhận đặt vé',
                       ),
                     ]),
                     const SizedBox(height: AppDimensions.base),
@@ -120,6 +136,9 @@ class ProfileScreen extends StatelessWidget {
                     _MenuItem(
                       icon: Icons.language_rounded,
                       title: 'Ngôn ngữ (Language)',
+                      subtitle: ApiConfig.isDemoMode
+                          ? null
+                          : 'Hiện hỗ trợ Tiếng Việt',
                       trailing: Text(
                         state.language == 'en' ? 'English' : 'Tiếng Việt',
                         style: AppTextStyles.bodyMedium.copyWith(
@@ -127,29 +146,41 @@ class ProfileScreen extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      onTap: () {
-                        final next = state.language == 'vi' ? 'en' : 'vi';
-                        context.read<AuthBloc>().add(ToggleLanguageEvent(next));
-                      },
+                      onTap: !ApiConfig.isDemoMode
+                          ? null
+                          : () {
+                              final next = state.language == 'vi' ? 'en' : 'vi';
+                              context.read<AuthBloc>().add(
+                                ToggleLanguageEvent(next),
+                              );
+                            },
                     ),
                     _MenuItem(
                       icon: Icons.notifications_none_rounded,
                       title: 'Thông báo đẩy',
+                      subtitle: ApiConfig.isDemoMode
+                          ? null
+                          : 'Chưa tích hợp thông báo đẩy; xem thông báo trong ứng dụng',
                       trailing: Switch(
-                        value: state.pushEnabled,
+                        value: ApiConfig.isDemoMode && state.pushEnabled,
                         activeThumbColor: AppColors.primary,
-                        onChanged: (val) {
-                          context.read<AuthBloc>().add(TogglePushNotificationEvent(val));
-                        },
+                        onChanged: !ApiConfig.isDemoMode
+                            ? null
+                            : (val) {
+                                context.read<AuthBloc>().add(
+                                  TogglePushNotificationEvent(val),
+                                );
+                              },
                       ),
                     ),
                     _MenuItem(
                       icon: Icons.fingerprint_rounded,
                       title: 'Đăng nhập sinh trắc học',
+                      subtitle: 'Chưa hỗ trợ',
                       trailing: Switch(
-                        value: true,
+                        value: false,
                         activeThumbColor: AppColors.primary,
-                        onChanged: (_) {},
+                        onChanged: null,
                       ),
                     ),
                   ]),
@@ -160,13 +191,15 @@ class ProfileScreen extends StatelessWidget {
                     _MenuItem(
                       icon: Icons.headset_mic_outlined,
                       title: 'Tổng đài chăm sóc khách hàng',
-                      subtitle: '1900 8888 (24/7, 1.000đ/phút)',
+                      subtitle: 'Chưa cấu hình tổng đài chính thức',
                       onTap: () {
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
                             title: const Text('Tổng đài hỗ trợ VexGo'),
-                            content: const Text('Quý khách vui lòng gọi 1900 8888 để được giải đáp thắc mắc và hỗ trợ đặt vé khẩn cấp.'),
+                            content: const Text(
+                              'Liên hệ nhà xe theo thông tin được cung cấp trên vé của bạn.',
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(ctx).pop(),
@@ -180,7 +213,8 @@ class ProfileScreen extends StatelessWidget {
                     _MenuItem(
                       icon: Icons.policy_outlined,
                       title: 'Quy chế hoạt động & Chính sách',
-                      onTap: () {},
+                      subtitle:
+                          'Chưa có nội dung công bố; xem chính sách vé trước khi hủy',
                     ),
                     _MenuItem(
                       icon: Icons.info_outline_rounded,
@@ -196,7 +230,10 @@ class ProfileScreen extends StatelessWidget {
                     Center(
                       child: TextButton.icon(
                         onPressed: () => _confirmLogout(context),
-                        icon: const Icon(Icons.logout_rounded, color: AppColors.error),
+                        icon: const Icon(
+                          Icons.logout_rounded,
+                          color: AppColors.error,
+                        ),
                         label: Text(
                           'Đăng xuất tài khoản',
                           style: AppTextStyles.bodyMedium.copyWith(
@@ -247,18 +284,23 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: AppColors.success,
-                    shape: BoxShape.circle,
+              if (user.daXacThucSoDienThoai)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(
+                      color: AppColors.success,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      size: 12,
+                      color: Colors.white,
+                    ),
                   ),
-                  child: const Icon(Icons.check, size: 12, color: Colors.white),
                 ),
-              ),
             ],
           ),
           const SizedBox(width: AppDimensions.md),
@@ -281,19 +323,28 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.verified_rounded, color: AppColors.primary, size: 16),
+                    if (user.daXacThucSoDienThoai)
+                      const Icon(
+                        Icons.verified_rounded,
+                        color: AppColors.primary,
+                        size: 16,
+                      ),
                   ],
                 ),
                 const SizedBox(height: 2),
                 Text(
                   user.soDienThoai,
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.neutral600),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.neutral600,
+                  ),
                 ),
                 if (user.email != null) ...[
                   const SizedBox(height: 2),
                   Text(
                     user.email!,
-                    style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.neutral500,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -304,7 +355,11 @@ class ProfileScreen extends StatelessWidget {
 
           IconButton(
             onPressed: () => EditProfileDialog.show(context, user: user),
-            icon: const Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 26),
+            icon: const Icon(
+              Icons.edit_note_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
             tooltip: 'Chỉnh sửa hồ sơ',
           ),
         ],
@@ -331,7 +386,11 @@ class ProfileScreen extends StatelessWidget {
                   color: AppColors.neutral100,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.person_outline_rounded, color: AppColors.neutral500, size: 28),
+                child: const Icon(
+                  Icons.person_outline_rounded,
+                  color: AppColors.neutral500,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: AppDimensions.md),
               Expanded(
@@ -340,12 +399,16 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Chào mừng bạn đến với VexGo',
-                      style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w700),
+                      style: AppTextStyles.titleMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Đăng nhập để tích điểm và nhận ưu đãi độc quyền',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.neutral500,
+                      ),
                     ),
                   ],
                 ),
@@ -366,7 +429,10 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildQuickStats(BuildContext context, UserModel user) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppDimensions.md, horizontal: AppDimensions.sm),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppDimensions.md,
+        horizontal: AppDimensions.sm,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
@@ -375,22 +441,42 @@ class ProfileScreen extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _buildStatItem('12', 'Chuyến đã đi', Icons.directions_bus_rounded, AppColors.primary),
+            child: _buildStatItem(
+              ApiConfig.isDemoMode ? '12' : '—',
+              'Chuyến đã đi',
+              Icons.directions_bus_rounded,
+              AppColors.primary,
+            ),
           ),
           Container(width: 1, height: 32, color: AppColors.neutral200),
           Expanded(
-            child: _buildStatItem('${user.diemTichLuy}', 'Điểm VexGo', Icons.stars_rounded, AppColors.secondary),
+            child: _buildStatItem(
+              '${user.diemTichLuy}',
+              'Điểm VexGo',
+              Icons.stars_rounded,
+              AppColors.secondary,
+            ),
           ),
           Container(width: 1, height: 32, color: AppColors.neutral200),
           Expanded(
-            child: _buildStatItem('3', 'Voucher', Icons.card_giftcard_rounded, const Color(0xFF0F9D58)),
+            child: _buildStatItem(
+              ApiConfig.isDemoMode ? '3' : '—',
+              'Voucher',
+              Icons.card_giftcard_rounded,
+              const Color(0xFF0F9D58),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String value, String label, IconData icon, Color color) {
+  Widget _buildStatItem(
+    String value,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -398,11 +484,16 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w800),
+          style: AppTextStyles.titleMedium.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
         ),
         Text(
           label,
-          style: AppTextStyles.caption.copyWith(color: AppColors.neutral500, fontSize: 11),
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.neutral500,
+            fontSize: 11,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -442,8 +533,12 @@ class ProfileScreen extends StatelessWidget {
               InkWell(
                 onTap: item.onTap,
                 borderRadius: BorderRadius.vertical(
-                  top: idx == 0 ? const Radius.circular(AppDimensions.radiusLg) : Radius.zero,
-                  bottom: isLast ? const Radius.circular(AppDimensions.radiusLg) : Radius.zero,
+                  top: idx == 0
+                      ? const Radius.circular(AppDimensions.radiusLg)
+                      : Radius.zero,
+                  bottom: isLast
+                      ? const Radius.circular(AppDimensions.radiusLg)
+                      : Radius.zero,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -455,7 +550,8 @@ class ProfileScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: (item.iconColor ?? AppColors.primary).withValues(alpha: 0.1),
+                          color: (item.iconColor ?? AppColors.primary)
+                              .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
@@ -515,7 +611,9 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản VexGo không?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản VexGo không?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -528,7 +626,10 @@ class ProfileScreen extends StatelessWidget {
             },
             child: const Text(
               'Đăng xuất',
-              style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

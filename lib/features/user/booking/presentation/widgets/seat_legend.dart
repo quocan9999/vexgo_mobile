@@ -18,26 +18,36 @@ class SeatLegend extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
         border: Border.all(color: AppColors.neutral200),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildItem(
-            color: Colors.white,
-            borderColor: AppColors.neutral400,
-            label: 'Ghế trống',
-          ),
-          _buildItem(
-            color: AppColors.primary,
-            borderColor: AppColors.primary,
-            label: 'Đang chọn',
-          ),
-          _buildItem(
-            color: AppColors.neutral200,
-            borderColor: AppColors.neutral300,
-            label: 'Đã bán',
-            hasLock: true,
-          ),
-        ],
+      child: Center(
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: AppDimensions.md,
+          runSpacing: AppDimensions.xs,
+          children: [
+            _buildItem(
+              color: Colors.white,
+              borderColor: AppColors.neutral400,
+              label: 'Ghế trống',
+            ),
+            _buildItem(
+              color: AppColors.primary,
+              borderColor: AppColors.primary,
+              label: 'Đang chọn',
+            ),
+            _buildItem(
+              color: AppColors.warning.withValues(alpha: 0.2),
+              borderColor: AppColors.warning,
+              label: 'Đang giữ',
+            ),
+            _buildItem(
+              color: AppColors.neutral200,
+              borderColor: AppColors.neutral300,
+              label: 'Đã bán',
+              hasLock: true,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -60,7 +70,11 @@ class SeatLegend extends StatelessWidget {
             border: Border.all(color: borderColor, width: 1.5),
           ),
           child: hasLock
-              ? const Icon(Icons.close_rounded, size: 14, color: AppColors.neutral500)
+              ? const Icon(
+                  Icons.close_rounded,
+                  size: 14,
+                  color: AppColors.neutral500,
+                )
               : null,
         ),
         const SizedBox(width: 6),

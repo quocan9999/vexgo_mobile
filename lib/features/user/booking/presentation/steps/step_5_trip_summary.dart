@@ -13,16 +13,14 @@ class Step5TripSummary extends StatelessWidget {
   final BookingFlowState state;
   final BookingFlowBloc bloc;
 
-  const Step5TripSummary({
-    super.key,
-    required this.state,
-    required this.bloc,
-  });
+  const Step5TripSummary({super.key, required this.state, required this.bloc});
 
   @override
   Widget build(BuildContext context) {
     final trip = state.trip;
-    final dateStr = state.date != null ? DateFormatter.formatFullDate(state.date!) : '';
+    final dateStr = state.date != null
+        ? DateFormatter.formatFullDate(state.date!)
+        : '';
     final seatNames = state.selectedSeats.map((s) => s.name).join(', ');
 
     return SingleChildScrollView(
@@ -30,6 +28,24 @@ class Step5TripSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (state.quoteLoading)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: LinearProgressIndicator(),
+            ),
+          if (state.quoteError != null) ...[
+            Text(
+              state.quoteError!,
+              style: const TextStyle(color: AppColors.error),
+            ),
+            TextButton.icon(
+              onPressed: state.quoteLoading
+                  ? null
+                  : () => bloc.add(const RefreshBookingQuoteEvent()),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Cập nhật giá vé'),
+            ),
+          ],
           // Section Title
           Text('Xem lại thông tin chuyến đi', style: AppTextStyles.h4),
           const SizedBox(height: AppDimensions.sm),
@@ -52,7 +68,11 @@ class Step5TripSummary extends StatelessWidget {
                         color: AppColors.primaryLight,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.directions_bus_rounded, color: AppColors.primary, size: 20),
+                      child: const Icon(
+                        Icons.directions_bus_rounded,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: AppDimensions.sm),
                     Expanded(
@@ -65,7 +85,9 @@ class Step5TripSummary extends StatelessWidget {
                           ),
                           Text(
                             '${trip?.vehicleType ?? ""} • $dateStr',
-                            style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.neutral500,
+                            ),
                           ),
                         ],
                       ),
@@ -83,9 +105,21 @@ class Step5TripSummary extends StatelessWidget {
                   children: [
                     Column(
                       children: [
-                        const Icon(Icons.radio_button_checked, size: 16, color: AppColors.primary),
-                        Container(width: 2, height: 36, color: AppColors.neutral300),
-                        const Icon(Icons.location_on, size: 16, color: AppColors.secondary),
+                        const Icon(
+                          Icons.radio_button_checked,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
+                        Container(
+                          width: 2,
+                          height: 36,
+                          color: AppColors.neutral300,
+                        ),
+                        const Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: AppColors.secondary,
+                        ),
                       ],
                     ),
                     const SizedBox(width: AppDimensions.sm),
@@ -100,8 +134,12 @@ class Step5TripSummary extends StatelessWidget {
                               SizedBox(
                                 width: 50,
                                 child: Text(
-                                  state.selectedPickupPoint?.time ?? trip?.departureTime ?? '',
-                                  style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+                                  state.selectedPickupPoint?.time ??
+                                      trip?.departureTime ??
+                                      '',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: AppDimensions.xs),
@@ -110,15 +148,23 @@ class Step5TripSummary extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      state.selectedPickupPoint?.name ?? trip?.pickupPoint ?? '',
-                                      style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                                      state.selectedPickupPoint?.name ??
+                                          trip?.pickupPoint ??
+                                          '',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      state.selectedPickupPoint?.address ?? trip?.pickupAddress ?? '',
-                                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                                      state.selectedPickupPoint?.address ??
+                                          trip?.pickupAddress ??
+                                          '',
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.neutral500,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -137,8 +183,12 @@ class Step5TripSummary extends StatelessWidget {
                               SizedBox(
                                 width: 50,
                                 child: Text(
-                                  state.selectedDropoffPoint?.time ?? trip?.arrivalTime ?? '',
-                                  style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+                                  state.selectedDropoffPoint?.time ??
+                                      trip?.arrivalTime ??
+                                      '',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: AppDimensions.xs),
@@ -147,15 +197,23 @@ class Step5TripSummary extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      state.selectedDropoffPoint?.name ?? trip?.dropoffPoint ?? '',
-                                      style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                                      state.selectedDropoffPoint?.name ??
+                                          trip?.dropoffPoint ??
+                                          '',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      state.selectedDropoffPoint?.address ?? trip?.dropoffAddress ?? '',
-                                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                                      state.selectedDropoffPoint?.address ??
+                                          trip?.dropoffAddress ??
+                                          '',
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.neutral500,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -216,16 +274,24 @@ class Step5TripSummary extends StatelessWidget {
           // Voucher selector card
           _buildCard(
             child: InkWell(
-              onTap: () {
-                VoucherSelectionSheet.show(
-                  context,
-                  vouchers: state.availableVouchers,
-                  currentVoucher: state.appliedVoucher,
-                  currentOrderAmount: state.seatsTotalAmount,
-                  onVoucherSelected: (v) => bloc.add(ApplyVoucherEvent(v)),
-                  onVoucherRemoved: () => bloc.add(const RemoveVoucherEvent()),
-                );
-              },
+              onTap: state.isCheckoutLocked || state.quoteLoading
+                  ? null
+                  : () {
+                      if (state.requiresAuthoritativeQuote) {
+                        _enterPromotion(context);
+                        return;
+                      }
+                      VoucherSelectionSheet.show(
+                        context,
+                        vouchers: state.availableVouchers,
+                        currentVoucher: state.appliedVoucher,
+                        currentOrderAmount: state.seatsTotalAmount ?? 0,
+                        onVoucherSelected: (v) =>
+                            bloc.add(ApplyVoucherEvent(v)),
+                        onVoucherRemoved: () =>
+                            bloc.add(const RemoveVoucherEvent()),
+                      );
+                    },
               child: Row(
                 children: [
                   Container(
@@ -234,7 +300,11 @@ class Step5TripSummary extends StatelessWidget {
                       color: AppColors.secondaryLight,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.discount_outlined, color: AppColors.secondary, size: 22),
+                    child: const Icon(
+                      Icons.discount_outlined,
+                      color: AppColors.secondary,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: AppDimensions.md),
                   Expanded(
@@ -247,19 +317,27 @@ class Step5TripSummary extends StatelessWidget {
                               : 'Chọn hoặc nhập mã khuyến mãi',
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: state.appliedVoucher != null ? AppColors.secondary : AppColors.neutral800,
+                            color: state.appliedVoucher != null
+                                ? AppColors.secondary
+                                : AppColors.neutral800,
                           ),
                         ),
                         Text(
                           state.appliedVoucher != null
                               ? 'Tiết kiệm được ${CurrencyFormatter.format(state.discountAmount)}'
-                              : 'Ưu đãi đến 50.000đ cho chuyến đi',
-                          style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                              : 'Nhập mã để hệ thống kiểm tra điều kiện',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.neutral500,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.neutral400),
+                  const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                    color: AppColors.neutral400,
+                  ),
                 ],
               ),
             ),
@@ -272,16 +350,23 @@ class Step5TripSummary extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Chi tiết thanh toán', style: AppTextStyles.h4.copyWith(fontSize: 15)),
+                Text(
+                  'Chi tiết thanh toán',
+                  style: AppTextStyles.h4.copyWith(fontSize: 15),
+                ),
                 const SizedBox(height: AppDimensions.md),
                 _buildPriceRow(
                   label: 'Giá vé (${state.selectedSeats.length} chỗ)',
-                  value: CurrencyFormatter.format(state.seatsTotalAmount),
+                  value: state.quotedSubtotal != null
+                      ? CurrencyFormatter.format(state.quotedSubtotal!)
+                      : 'Chưa có giá vé',
                 ),
                 const SizedBox(height: 6),
                 _buildPriceRow(
                   label: 'Phí dịch vụ',
-                  value: '0 đ (Miễn phí)',
+                  value: state.quotedServiceFee == null
+                      ? 'Đang xác minh'
+                      : CurrencyFormatter.format(state.quotedServiceFee!),
                   valueColor: AppColors.success,
                 ),
                 if (state.discountAmount > 0) ...[
@@ -297,7 +382,9 @@ class Step5TripSummary extends StatelessWidget {
                 const SizedBox(height: AppDimensions.sm),
                 _buildPriceRow(
                   label: 'Tổng tiền cần thanh toán',
-                  value: CurrencyFormatter.format(state.finalAmount),
+                  value: state.finalAmount != null
+                      ? CurrencyFormatter.format(state.finalAmount!)
+                      : 'Chưa có giá vé',
                   valueColor: AppColors.secondary,
                   isTotal: true,
                 ),
@@ -313,15 +400,21 @@ class Step5TripSummary extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.successLight.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-              border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.2),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.verified_user_rounded, color: AppColors.success, size: 22),
+                const Icon(
+                  Icons.verified_user_rounded,
+                  color: AppColors.success,
+                  size: 22,
+                ),
                 const SizedBox(width: AppDimensions.sm),
                 Expanded(
                   child: Text(
-                    'Cam kết 100% giữ đúng chỗ đã chọn hoặc hoàn tiền 150% nếu nhà xe không cung cấp dịch vụ.',
+                    'Giá vé và ưu đãi được hệ thống xác nhận theo ghế, chuyến đi và thông tin liên hệ. Vé chỉ có hiệu lực sau khi xác minh thanh toán.',
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.neutral700,
                       fontWeight: FontWeight.w500,
@@ -333,6 +426,45 @@ class Step5TripSummary extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _enterPromotion(BuildContext context) async {
+    var code = state.requestedPromotionCode;
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Mã khuyến mãi'),
+        content: TextFormField(
+          initialValue: code,
+          autofocus: true,
+          textCapitalization: TextCapitalization.characters,
+          decoration: const InputDecoration(labelText: 'Nhập mã khuyến mãi'),
+          onChanged: (value) => code = value,
+          onFieldSubmitted: (value) => Navigator.of(dialogContext).pop(value),
+        ),
+        actions: [
+          if (state.requestedPromotionCode.isNotEmpty)
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(''),
+              child: const Text('Bỏ mã'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Đóng'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(code),
+            child: const Text('Kiểm tra mã'),
+          ),
+        ],
+      ),
+    );
+    if (selected == null || bloc.isClosed) return;
+    bloc.add(
+      selected.trim().isEmpty
+          ? const RemoveVoucherEvent()
+          : ApplyPromotionCodeEvent(selected),
     );
   }
 

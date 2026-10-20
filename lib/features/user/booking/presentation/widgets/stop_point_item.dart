@@ -25,7 +25,9 @@ class StopPointItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: AppDimensions.sm),
         padding: const EdgeInsets.all(AppDimensions.base),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight.withValues(alpha: 0.35) : Colors.white,
+          color: isSelected
+              ? AppColors.primaryLight.withValues(alpha: 0.35)
+              : Colors.white,
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.neutral200,
@@ -82,9 +84,14 @@ class StopPointItem extends StatelessWidget {
                     runSpacing: 4,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : AppColors.neutral100,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.neutral100,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -93,13 +100,17 @@ class StopPointItem extends StatelessWidget {
                             Icon(
                               Icons.access_time_rounded,
                               size: 13,
-                              color: isSelected ? Colors.white : AppColors.neutral700,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.neutral700,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               point.time,
                               style: AppTextStyles.caption.copyWith(
-                                color: isSelected ? Colors.white : AppColors.neutral900,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.neutral900,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 13,
                               ),
@@ -108,9 +119,14 @@ class StopPointItem extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: _getTypeColor(point.type).withValues(alpha: 0.12),
+                          color: _getTypeColor(
+                            point.type,
+                          ).withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -173,14 +189,21 @@ class StopPointItem extends StatelessWidget {
                   if (point.type == 'transfer') ...[
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.warningLight,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline, size: 14, color: AppColors.warning),
+                          const Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: AppColors.warning,
+                          ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(

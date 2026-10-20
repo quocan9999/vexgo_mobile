@@ -62,11 +62,14 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
     final code = _codeController.text.trim().toUpperCase();
     if (code.isEmpty) return;
 
-    final match = widget.vouchers.where((v) => v.code.toUpperCase() == code).firstOrNull;
+    final match = widget.vouchers
+        .where((v) => v.code.toUpperCase() == code)
+        .firstOrNull;
     if (match != null) {
       if (widget.currentOrderAmount < match.minOrderAmount) {
         setState(() {
-          _inputError = 'Đơn hàng chưa đạt mức tối thiểu ${CurrencyFormatter.format(match.minOrderAmount)}';
+          _inputError =
+              'Đơn hàng chưa đạt mức tối thiểu ${CurrencyFormatter.format(match.minOrderAmount)}';
         });
         return;
       }
@@ -104,7 +107,10 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
 
           // Header
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.base,
+              vertical: 8,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -136,17 +142,28 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                         textCapitalization: TextCapitalization.characters,
                         decoration: InputDecoration(
                           hintText: 'Nhập mã khuyến mãi...',
-                          prefixIcon: const Icon(Icons.confirmation_number_outlined, color: AppColors.primary),
+                          prefixIcon: const Icon(
+                            Icons.confirmation_number_outlined,
+                            color: AppColors.primary,
+                          ),
                           filled: true,
                           fillColor: AppColors.neutral50,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: AppColors.neutral300),
+                            borderSide: const BorderSide(
+                              color: AppColors.neutral300,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
                           ),
                         ),
                       ),
@@ -163,7 +180,9 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                   const SizedBox(height: 6),
                   Text(
                     _inputError!,
-                    style: AppTextStyles.caption.copyWith(color: AppColors.error),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.error,
+                    ),
                   ),
                 ],
               ],
@@ -173,7 +192,9 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
           // Active Voucher removal banner
           if (widget.currentVoucher != null) ...[
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.successLight,
@@ -181,7 +202,11 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle, size: 16, color: AppColors.success),
+                  const Icon(
+                    Icons.check_circle,
+                    size: 16,
+                    color: AppColors.success,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -197,7 +222,10 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                       widget.onVoucherRemoved();
                       Navigator.pop(context);
                     },
-                    child: const Text('Gỡ bỏ', style: TextStyle(color: AppColors.error, fontSize: 13)),
+                    child: const Text(
+                      'Gỡ bỏ',
+                      style: TextStyle(color: AppColors.error, fontSize: 13),
+                    ),
                   ),
                 ],
               ),
@@ -208,12 +236,15 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
           // Voucher list
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+              ),
               itemCount: widget.vouchers.length,
               itemBuilder: (context, index) {
                 final voucher = widget.vouchers[index];
                 final isSelected = widget.currentVoucher?.code == voucher.code;
-                final isEligible = widget.currentOrderAmount >= voucher.minOrderAmount;
+                final isEligible =
+                    widget.currentOrderAmount >= voucher.minOrderAmount;
 
                 return Opacity(
                   opacity: isEligible ? 1.0 : 0.6,
@@ -221,10 +252,14 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                     margin: const EdgeInsets.only(bottom: AppDimensions.sm),
                     padding: const EdgeInsets.all(AppDimensions.base),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primaryLight.withValues(alpha: 0.3) : Colors.white,
+                      color: isSelected
+                          ? AppColors.primaryLight.withValues(alpha: 0.3)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected ? AppColors.primary : AppColors.neutral300,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.neutral300,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -265,14 +300,19 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                               const SizedBox(height: 4),
                               Text(
                                 voucher.description,
-                                style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.neutral500,
+                                ),
                               ),
                               const SizedBox(height: 6),
                               Row(
                                 children: [
                                   Text(
                                     'HSD: ${voucher.expiryDate}',
-                                    style: AppTextStyles.caption.copyWith(color: AppColors.neutral400, fontSize: 11),
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: AppColors.neutral400,
+                                      fontSize: 11,
+                                    ),
                                   ),
                                   const Spacer(),
                                   if (!isEligible)
@@ -285,9 +325,13 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                                     )
                                   else
                                     CustomButton(
-                                      text: isSelected ? 'Đã chọn' : 'Dùng ngay',
+                                      text: isSelected
+                                          ? 'Đã chọn'
+                                          : 'Dùng ngay',
                                       height: 32,
-                                      type: isSelected ? ButtonType.outline : ButtonType.primary,
+                                      type: isSelected
+                                          ? ButtonType.outline
+                                          : ButtonType.primary,
                                       onPressed: () {
                                         widget.onVoucherSelected(voucher);
                                         Navigator.pop(context);

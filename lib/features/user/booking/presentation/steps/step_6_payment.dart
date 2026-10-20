@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
+import 'package:vexgo_app/core/network/vietqr_config.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
@@ -11,11 +14,7 @@ class Step6Payment extends StatelessWidget {
   final BookingFlowState state;
   final BookingFlowBloc bloc;
 
-  const Step6Payment({
-    super.key,
-    required this.state,
-    required this.bloc,
-  });
+  const Step6Payment({super.key, required this.state, required this.bloc});
 
   @override
   Widget build(BuildContext context) {
@@ -24,60 +23,247 @@ class Step6Payment extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Countdown Timer Card
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.warningLight.withValues(alpha: 0.8),
-                  Colors.white,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-              border: Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
+          if (state.quoteError != null && state.pendingBookingId == null) ...[
+            Text(
+              state.quoteError!,
+              style: const TextStyle(color: AppColors.error),
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: AppColors.warning,
-                    shape: BoxShape.circle,
+            TextButton(
+              onPressed: state.quoteLoading
+                  ? null
+                  : () => bloc.add(const RefreshBookingQuoteEvent()),
+              child: const Text('Cập nhật giá vé'),
+            ),
+          ],
+          if (state.errorMessage != null &&
+              (state.isCheckoutLocked ||
+                  state.status == BookingFlowStatus.blockedByBackend))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(
+                state.errorMessage!,
+                style: const TextStyle(color: AppColors.error),
+              ),
+            ),
+          if (state.pendingBookingId != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text('Đơn đặt chỗ: #${state.pendingBookingId}'),
+            ),
+          if (state.checkoutBooking != null) ...[
+            SelectableText('Mã đặt vé: ${state.checkoutBooking!.bookingCode}'),
+            for (final ticket in state.checkoutBooking!.tickets)
+              if (ticket.ticketCode.isNotEmpty)
+                SelectableText('Mã vé: ${ticket.ticketCode}'),
+            const SizedBox(height: 8),
+            const Text(
+              'Lưu mã vé và tra cứu bằng số điện thoại liên hệ để kiểm tra đơn sau khi rời màn hình.',
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (state.selectedPaymentMethod == 'vietqr' &&
+              state.status == BookingFlowStatus.paymentPending &&
+              state.checkoutBooking != null) ...[
+            SelectableText(
+              'Nội dung chuyển khoản: ${state.checkoutBooking!.orderCode ?? ''}',
+            ),
+            const SizedBox(height: 8),
+            Text('Ngân hàng: ${VietQrConfig.bankId}'),
+            SelectableText('Số tài khoản: ${VietQrConfig.accountNumber}'),
+            Text('Chủ tài khoản: ${VietQrConfig.accountName}'),
+            if (state.pendingQrCodeUrl != null)
+              Image.network(
+                state.pendingQrCodeUrl!,
+                height: 260,
+                errorBuilder: (_, _, _) => const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Text(
+                    'Không tải được QR. Bạn có thể chuyển khoản theo thông tin và nội dung bên trên.',
                   ),
-                  child: const Icon(Icons.timer_outlined, color: Colors.white, size: 20),
                 ),
-                const SizedBox(width: AppDimensions.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            const SizedBox(height: 12),
+          ],
+          // Pending Payment Notification Card
+          if (state.pendingPaymentId != null &&
+              state.status != BookingFlowStatus.blockedByBackend) ...[
+            Container(
+              padding: const EdgeInsets.all(AppDimensions.base),
+              decoration: BoxDecoration(
+                color: AppColors.infoLight.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                border: Border.all(color: AppColors.info),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Text(
-                        'Thời gian giữ chỗ còn lại:',
-                        style: AppTextStyles.caption.copyWith(color: AppColors.neutral700),
+                      const Icon(
+                        Icons.hourglass_top_rounded,
+                        color: AppColors.info,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        state.countdownFormatted,
-                        style: AppTextStyles.h3.copyWith(
-                          color: AppColors.warningDark,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 20,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Giao dịch thanh toán đang chờ xử lý',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.neutral800,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                Text(
-                  '10:00 phút',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neutral500,
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(height: 8),
+                  Text(
+                    'Mã giao dịch: #${state.pendingPaymentId}',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.neutral600,
+                    ),
                   ),
-                ),
-              ],
+                  if (state.pendingPaymentUrl != null &&
+                      state.pendingPaymentUrl!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () {
+                        Clipboard.setData(
+                          ClipboardData(text: state.pendingPaymentUrl!),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Đã sao chép đường dẫn cổng thanh toán vào bộ nhớ tạm!',
+                            ),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.neutral300),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.link,
+                              size: 18,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                state.pendingPaymentUrl!,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.primary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.copy,
+                              size: 16,
+                              color: AppColors.neutral500,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed:
+                          state.status == BookingFlowStatus.submitting ||
+                              state.status == BookingFlowStatus.blockedByBackend
+                          ? null
+                          : () => bloc.add(const ConfirmPaymentEvent()),
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('Kiểm tra kết quả thanh toán'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+            const SizedBox(height: AppDimensions.base),
+          ],
+
+          // Countdown applies only to an unconsumed hold.
+          if (state.seatHold != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.warningLight.withValues(alpha: 0.8),
+                    Colors.white,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                border: Border.all(
+                  color: AppColors.warning.withValues(alpha: 0.4),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: AppColors.warning,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.timer_outlined,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: AppDimensions.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Thời gian giữ chỗ còn lại:',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.neutral700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          state.countdownFormatted,
+                          style: AppTextStyles.h3.copyWith(
+                            color: AppColors.warningDark,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '10:00 phút',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.neutral500,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
           const SizedBox(height: AppDimensions.base),
 
@@ -97,11 +283,15 @@ class Step6Payment extends StatelessWidget {
                   children: [
                     Text(
                       'Số tiền thanh toán',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.neutral500,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      CurrencyFormatter.format(state.finalAmount),
+                      CurrencyFormatter.format(
+                        state.pendingPaymentAmount ?? state.finalAmount,
+                      ),
                       style: AppTextStyles.price.copyWith(
                         color: AppColors.secondary,
                         fontSize: 22,
@@ -111,7 +301,10 @@ class Step6Payment extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primaryLight,
                     borderRadius: BorderRadius.circular(12),
@@ -183,11 +376,15 @@ class Step6Payment extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_rounded, size: 14, color: AppColors.neutral500),
+                const Icon(
+                  Icons.lock_rounded,
+                  size: 14,
+                  color: AppColors.neutral500,
+                ),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
-                    'Bảo mật thông tin thanh toán chuẩn quốc tế PCI DSS',
+                    'Chỉ xuất vé sau khi hệ thống xác nhận thanh toán',
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.neutral500,
                       fontSize: 11,
@@ -211,16 +408,23 @@ class Step6Payment extends StatelessWidget {
     required Color iconColor,
     String? badgeText,
   }) {
+    if (!ApiConfig.isDemoMode && methodId != 'vietqr') {
+      return const SizedBox.shrink();
+    }
     final isSelected = state.selectedPaymentMethod == methodId;
 
     return GestureDetector(
-      onTap: () => bloc.add(SelectPaymentMethodEvent(methodId)),
+      onTap: state.isCheckoutLocked
+          ? null
+          : () => bloc.add(SelectPaymentMethodEvent(methodId)),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         margin: const EdgeInsets.only(bottom: AppDimensions.sm),
         padding: const EdgeInsets.all(AppDimensions.base),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight.withValues(alpha: 0.3) : Colors.white,
+          color: isSelected
+              ? AppColors.primaryLight.withValues(alpha: 0.3)
+              : Colors.white,
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.neutral200,
@@ -296,7 +500,10 @@ class Step6Payment extends StatelessWidget {
                       if (badgeText != null) ...[
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.secondaryLight,
                             borderRadius: BorderRadius.circular(4),

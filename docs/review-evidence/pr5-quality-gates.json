@@ -1,0 +1,49 @@
+{
+  "committedSource": "a7fba6f9febc69b4fe87d7d1ad8307142e92acff",
+  "originalGateSnapshotBase": "0a58e3f59cd8214f3e4e3d18c5d70a0118c61f2b",
+  "originalSearchPatchSha256": "09BCE155D78C2BC4350E1456091DED68628BA2438BF5EC3D5F7C782CA30A6EF1",
+  "committedSearchPatchMatchesTestedPatch": true,
+  "gates": [
+    {
+      "gate": "dart format --output=none --set-exit-if-changed .",
+      "exit": 0,
+      "startUtc": "2026-10-18T18:21:24.5539254Z",
+      "endUtc": "2026-10-18T18:21:26.879865Z"
+    },
+    {
+      "gate": "flutter analyze",
+      "exit": 0,
+      "startUtc": "2026-10-18T18:21:33.945327Z",
+      "endUtc": "2026-10-18T18:21:41.6623241Z"
+    },
+    {
+      "gate": "flutter test",
+      "exit": 0,
+      "startUtc": "2026-10-18T18:21:48.1321461Z",
+      "endUtc": "2026-10-18T18:22:12.6216916Z"
+    },
+    {
+      "gate": "flutter build apk --debug --dart-define-from-file=.dart_tool/vietqr-defines.json",
+      "exit": 0,
+      "startUtc": "2026-10-18T18:22:19.9918701Z",
+      "endUtc": "2026-10-18T18:25:39.9348599Z"
+    }
+  ],
+  "cleanCommitRecheck": {
+    "analyzeExit": 0,
+    "passedTests": 283,
+    "testExit": 0
+  },
+  "apk": {
+    "hosting": "Local QA artifact, not uploaded to GitHub",
+    "name": "app-debug-final.apk",
+    "sha256": "189C493BB9F7ACE3BCB738002DAF11682294D53E09301658898B30D1B05F8E21",
+    "bytes": 157963377
+  },
+  "limitations": [
+    "No Android device E2E",
+    "No real bank/provider settlement E2E",
+    "Live quote 404 on existing future trips",
+    "Local API inactive at final health check"
+  ]
+}

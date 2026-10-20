@@ -1,12 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum TripSortType {
-  earliest,
-  latest,
-  priceAsc,
-  priceDesc,
-  ratingDesc,
-}
+enum TripSortType { earliest, latest, priceAsc, priceDesc, ratingDesc }
 
 extension TripSortTypeExt on TripSortType {
   String get label {
@@ -47,10 +41,22 @@ extension TimeSlotExt on TimeSlot {
   }
 
   bool matches(String timeStr) {
-    // timeStr format "HH:mm"
-    final parts = timeStr.split(':');
-    if (parts.isEmpty) return false;
-    final hour = int.tryParse(parts[0]) ?? 0;
+    if (timeStr.isEmpty) return false;
+    int hour = 0;
+    if (timeStr.contains('T')) {
+      final parsed = DateTime.tryParse(timeStr);
+      if (parsed != null) {
+        final vnTime = parsed.isUtc
+            ? parsed.add(const Duration(hours: 7))
+            : parsed;
+        hour = vnTime.hour;
+      }
+    } else {
+      final parts = timeStr.split(':');
+      if (parts.isNotEmpty) {
+        hour = int.tryParse(parts[0].trim()) ?? 0;
+      }
+    }
     switch (this) {
       case TimeSlot.earlyMorning:
         return hour >= 0 && hour < 6;
@@ -119,11 +125,11 @@ class TripFilterModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        selectedTimeSlots,
-        selectedOperators,
-        selectedVehicleTypes,
-        selectedAmenities,
-        minPrice,
-        maxPrice,
-      ];
+    selectedTimeSlots,
+    selectedOperators,
+    selectedVehicleTypes,
+    selectedAmenities,
+    minPrice,
+    maxPrice,
+  ];
 }

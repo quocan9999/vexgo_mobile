@@ -11,7 +11,7 @@ class DateFormatter {
       'Thứ 5',
       'Thứ 6',
       'Thứ 7',
-      'Chủ nhật'
+      'Chủ nhật',
     ];
     final String weekday = weekdays[date.weekday - 1];
     final String formattedDate = DateFormat('dd/MM/yyyy').format(date);
@@ -34,7 +34,7 @@ class DateFormatter {
       'Thứ 5',
       'Thứ 6',
       'Thứ 7',
-      'CN'
+      'CN',
     ];
     return weekdays[date.weekday - 1];
   }

@@ -9,7 +9,10 @@ class TripSortSheet extends StatelessWidget {
 
   const TripSortSheet({super.key, required this.currentSort});
 
-  static Future<TripSortType?> show(BuildContext context, TripSortType currentSort) {
+  static Future<TripSortType?> show(
+    BuildContext context,
+    TripSortType currentSort,
+  ) {
     return showModalBottomSheet<TripSortType>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -66,7 +69,11 @@ class TripSortSheet extends StatelessWidget {
                 ),
               ),
               trailing: isSelected
-                  ? const Icon(Icons.check_rounded, color: AppColors.primary, size: 22)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    )
                   : null,
               onTap: () => Navigator.of(context).pop(sort),
             );

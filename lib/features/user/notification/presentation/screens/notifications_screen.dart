@@ -17,7 +17,15 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<NotificationBloc, NotificationState>(
+    return BlocConsumer<NotificationBloc, NotificationState>(
+      listenWhen: (previous, current) =>
+          current.errorMessage != null &&
+          current.errorMessage != previous.errorMessage,
+      listener: (context, state) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+      },
       builder: (context, state) {
         final bloc = context.read<NotificationBloc>();
         final unreadCount = state.unreadCount;
@@ -31,7 +39,8 @@ class NotificationsScreen extends StatelessWidget {
             actions: [
               if (unreadCount > 0)
                 TextButton(
-                  onPressed: () => bloc.add(const MarkAllNotificationsAsReadEvent()),
+                  onPressed: () =>
+                      bloc.add(const MarkAllNotificationsAsReadEvent()),
                   child: Text(
                     'Đọc tất cả',
                     style: AppTextStyles.bodySmall.copyWith(
@@ -45,56 +54,135 @@ class NotificationsScreen extends StatelessWidget {
           body: Column(
             children: [
               // 1. Category Tabs
-              Container(
-                height: 48,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: AppColors.neutral200),
+              if (state.hasCategories)
+                Container(
+                  height: 48,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(color: AppColors.neutral200),
+                    ),
+                  ),
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.base,
+                      vertical: 6,
+                    ),
+                    children: [
+                      _buildTab(
+                        context,
+                        title: 'Tất cả',
+                        count: unreadCount,
+                        index: 0,
+                        activeIndex: state.activeTabIndex,
+                      ),
+                      const SizedBox(width: AppDimensions.xs),
+                      _buildTab(
+                        context,
+                        title: 'Chuyến đi',
+                        index: 1,
+                        activeIndex: state.activeTabIndex,
+                      ),
+                      const SizedBox(width: AppDimensions.xs),
+                      _buildTab(
+                        context,
+                        title: 'Ưu đãi',
+                        index: 2,
+                        activeIndex: state.activeTabIndex,
+                      ),
+                      const SizedBox(width: AppDimensions.xs),
+                      _buildTab(
+                        context,
+                        title: 'Hệ thống',
+                        index: 3,
+                        activeIndex: state.activeTabIndex,
+                      ),
+                    ],
                   ),
                 ),
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base, vertical: 6),
-                  children: [
-                    _buildTab(context, title: 'Tất cả', count: unreadCount, index: 0, activeIndex: state.activeTabIndex),
-                    const SizedBox(width: AppDimensions.xs),
-                    _buildTab(context, title: 'Chuyến đi', index: 1, activeIndex: state.activeTabIndex),
-                    const SizedBox(width: AppDimensions.xs),
-                    _buildTab(context, title: 'Ưu đãi', index: 2, activeIndex: state.activeTabIndex),
-                    const SizedBox(width: AppDimensions.xs),
-                    _buildTab(context, title: 'Hệ thống', index: 3, activeIndex: state.activeTabIndex),
-                  ],
-                ),
-              ),
 
               // 2. Notification List
               Expanded(
-                child: state.status == NotificationStatus.loading
-                    ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                child: state.requiresLogin
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Đăng nhập để xem thông báo.'),
+                            TextButton(
+                              onPressed: () => context.go('/profile'),
+                              child: const Text('Đăng nhập'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : state.status == NotificationStatus.failure
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Không thể tải thông báo.'),
+                            TextButton(
+                              onPressed: () =>
+                                  bloc.add(const LoadNotificationsEvent()),
+                              child: const Text('Thử lại'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : state.status == NotificationStatus.loading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      )
                     : list.isEmpty
-                        ? EmptyState(
-                            icon: Icons.notifications_off_outlined,
-                            title: 'Chưa có thông báo nào',
-                            message: 'Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.',
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.all(AppDimensions.base),
-                            itemCount: list.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: AppDimensions.sm),
-                            itemBuilder: (context, index) {
-                              final item = list[index];
-                              return _NotificationItemCard(
-                                item: item,
-                                onTap: () {
-                                  bloc.add(MarkNotificationAsReadEvent(item.id));
-                                  if (item.ticketCode != null) {
-                                    context.push('/my-tickets');
-                                  }
-                                },
-                              );
-                            },
+                    ? Column(
+                        children: [
+                          Expanded(
+                            child: EmptyState(
+                              icon: Icons.notifications_off_outlined,
+                              title: 'Chưa có thông báo nào',
+                              message:
+                                  'Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.',
+                            ),
                           ),
+                          TextButton(
+                            onPressed: () =>
+                                bloc.add(const LoadNotificationsEvent()),
+                            child: const Text('Tải lại'),
+                          ),
+                        ],
+                      )
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          final completed = bloc.stream.firstWhere(
+                            (s) => s.status != NotificationStatus.loading,
+                          );
+                          bloc.add(const LoadNotificationsEvent());
+                          await completed;
+                        },
+                        child: ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.all(AppDimensions.base),
+                          itemCount: list.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: AppDimensions.sm),
+                          itemBuilder: (context, index) {
+                            final item = list[index];
+                            return _NotificationItemCard(
+                              item: item,
+                              onTap: () {
+                                bloc.add(MarkNotificationAsReadEvent(item.id));
+                                if (item.ticketCode != null) {
+                                  context.push('/my-tickets');
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      ),
               ),
             ],
           ),
@@ -113,7 +201,9 @@ class NotificationsScreen extends StatelessWidget {
     final isSelected = index == activeIndex;
 
     return InkWell(
-      onTap: () => context.read<NotificationBloc>().add(ChangeNotificationTabEvent(index)),
+      onTap: () => context.read<NotificationBloc>().add(
+        ChangeNotificationTabEvent(index),
+      ),
       borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -162,10 +252,7 @@ class _NotificationItemCard extends StatelessWidget {
   final NotificationModel item;
   final VoidCallback onTap;
 
-  const _NotificationItemCard({
-    required this.item,
-    required this.onTap,
-  });
+  const _NotificationItemCard({required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -177,6 +264,8 @@ class _NotificationItemCard extends StatelessWidget {
           return Icons.card_giftcard_rounded;
         case NotificationCategory.system:
           return Icons.info_outline_rounded;
+        case NotificationCategory.unknown:
+          return Icons.notifications_outlined;
       }
     }
 
@@ -188,6 +277,8 @@ class _NotificationItemCard extends StatelessWidget {
           return AppColors.secondary;
         case NotificationCategory.system:
           return const Color(0xFF0F9D58);
+        case NotificationCategory.unknown:
+          return AppColors.primary;
       }
     }
 
@@ -199,10 +290,14 @@ class _NotificationItemCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.md),
         decoration: BoxDecoration(
-          color: item.isRead ? Colors.white : AppColors.primaryLight.withValues(alpha: 0.15),
+          color: item.isRead
+              ? Colors.white
+              : AppColors.primaryLight.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           border: Border.all(
-            color: item.isRead ? AppColors.neutral200 : AppColors.primary.withValues(alpha: 0.3),
+            color: item.isRead
+                ? AppColors.neutral200
+                : AppColors.primary.withValues(alpha: 0.3),
           ),
           boxShadow: [
             BoxShadow(
@@ -238,8 +333,12 @@ class _NotificationItemCard extends StatelessWidget {
                         child: Text(
                           item.title,
                           style: AppTextStyles.titleSmall.copyWith(
-                            fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w800,
-                            color: item.isRead ? AppColors.neutral900 : AppColors.primary,
+                            fontWeight: item.isRead
+                                ? FontWeight.w600
+                                : FontWeight.w800,
+                            color: item.isRead
+                                ? AppColors.neutral900
+                                : AppColors.primary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

@@ -16,10 +16,7 @@ class LoginWithPhoneEvent extends AuthEvent {
   final String phone;
   final String password;
 
-  const LoginWithPhoneEvent({
-    required this.phone,
-    required this.password,
-  });
+  const LoginWithPhoneEvent({required this.phone, required this.password});
 
   @override
   List<Object?> get props => [phone, password];
@@ -45,16 +42,18 @@ class VerifyOtpAndRegisterEvent extends AuthEvent {
   final String otp;
   final String fullName;
   final String password;
+  final String? challengeId;
 
   const VerifyOtpAndRegisterEvent({
     required this.phone,
     required this.otp,
     required this.fullName,
     required this.password,
+    this.challengeId,
   });
 
   @override
-  List<Object?> get props => [phone, otp, fullName, password];
+  List<Object?> get props => [phone, otp, fullName, password, challengeId];
 }
 
 class UpdateProfileEvent extends AuthEvent {
@@ -66,14 +65,23 @@ class UpdateProfileEvent extends AuthEvent {
   List<Object?> get props => [updatedUser];
 }
 
+class ChangePasswordEvent extends AuthEvent {
+  final String oldPassword;
+  final String newPassword;
+  const ChangePasswordEvent({
+    required this.oldPassword,
+    required this.newPassword,
+  });
+
+  @override
+  String toString() => 'ChangePasswordEvent([redacted])';
+}
+
 class RedeemPointsEvent extends AuthEvent {
   final int points;
   final String rewardTitle;
 
-  const RedeemPointsEvent({
-    required this.points,
-    required this.rewardTitle,
-  });
+  const RedeemPointsEvent({required this.points, required this.rewardTitle});
 
   @override
   List<Object?> get props => [points, rewardTitle];
@@ -99,4 +107,8 @@ class TogglePushNotificationEvent extends AuthEvent {
 
 class LogoutEvent extends AuthEvent {
   const LogoutEvent();
+}
+
+class ClearPendingRegistrationEvent extends AuthEvent {
+  const ClearPendingRegistrationEvent();
 }

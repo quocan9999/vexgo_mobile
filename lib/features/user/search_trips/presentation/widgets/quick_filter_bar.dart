@@ -28,9 +28,7 @@ class QuickFilterBar extends StatelessWidget {
       height: 48,
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: AppColors.neutral200),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.neutral200)),
       ),
       child: ListView(
         scrollDirection: Axis.horizontal,
@@ -46,10 +44,14 @@ class QuickFilterBar extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: activeCount > 0 ? AppColors.primaryLight : AppColors.neutral100,
+                color: activeCount > 0
+                    ? AppColors.primaryLight
+                    : AppColors.neutral100,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                 border: Border.all(
-                  color: activeCount > 0 ? AppColors.primary : AppColors.neutral300,
+                  color: activeCount > 0
+                      ? AppColors.primary
+                      : AppColors.neutral300,
                 ),
               ),
               child: Row(
@@ -57,13 +59,17 @@ class QuickFilterBar extends StatelessWidget {
                   Icon(
                     Icons.tune_rounded,
                     size: 16,
-                    color: activeCount > 0 ? AppColors.primary : AppColors.neutral700,
+                    color: activeCount > 0
+                        ? AppColors.primary
+                        : AppColors.neutral700,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     'Bộ lọc',
                     style: AppTextStyles.caption.copyWith(
-                      color: activeCount > 0 ? AppColors.primary : AppColors.neutral700,
+                      color: activeCount > 0
+                          ? AppColors.primary
+                          : AppColors.neutral700,
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
                     ),
@@ -107,7 +113,11 @@ class QuickFilterBar extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.swap_vert_rounded, size: 16, color: AppColors.neutral700),
+                  const Icon(
+                    Icons.swap_vert_rounded,
+                    size: 16,
+                    color: AppColors.neutral700,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     currentSort.label,
@@ -127,15 +137,21 @@ class QuickFilterBar extends StatelessWidget {
           // Quick Filter: Sáng (06-12h)
           _buildQuickChip(
             label: 'Sáng (06:00 - 12:00)',
-            isSelected: currentFilter.selectedTimeSlots.contains(TimeSlot.morning),
+            isSelected: currentFilter.selectedTimeSlots.contains(
+              TimeSlot.morning,
+            ),
             onTap: () {
-              final newSlots = List<TimeSlot>.from(currentFilter.selectedTimeSlots);
+              final newSlots = List<TimeSlot>.from(
+                currentFilter.selectedTimeSlots,
+              );
               if (newSlots.contains(TimeSlot.morning)) {
                 newSlots.remove(TimeSlot.morning);
               } else {
                 newSlots.add(TimeSlot.morning);
               }
-              onFilterChanged(currentFilter.copyWith(selectedTimeSlots: newSlots));
+              onFilterChanged(
+                currentFilter.copyWith(selectedTimeSlots: newSlots),
+              );
             },
           ),
 
@@ -144,15 +160,21 @@ class QuickFilterBar extends StatelessWidget {
           // Quick Filter: Tối (18-24h)
           _buildQuickChip(
             label: 'Tối (18:00 - 24:00)',
-            isSelected: currentFilter.selectedTimeSlots.contains(TimeSlot.evening),
+            isSelected: currentFilter.selectedTimeSlots.contains(
+              TimeSlot.evening,
+            ),
             onTap: () {
-              final newSlots = List<TimeSlot>.from(currentFilter.selectedTimeSlots);
+              final newSlots = List<TimeSlot>.from(
+                currentFilter.selectedTimeSlots,
+              );
               if (newSlots.contains(TimeSlot.evening)) {
                 newSlots.remove(TimeSlot.evening);
               } else {
                 newSlots.add(TimeSlot.evening);
               }
-              onFilterChanged(currentFilter.copyWith(selectedTimeSlots: newSlots));
+              onFilterChanged(
+                currentFilter.copyWith(selectedTimeSlots: newSlots),
+              );
             },
           ),
 
@@ -161,15 +183,21 @@ class QuickFilterBar extends StatelessWidget {
           // Quick Filter: Limousine
           _buildQuickChip(
             label: 'Xe Limousine',
-            isSelected: currentFilter.selectedVehicleTypes.any((v) => v.contains('Limousine')),
+            isSelected: currentFilter.selectedVehicleTypes.any(
+              (v) => v.contains('Limousine'),
+            ),
             onTap: () {
-              final newTypes = List<String>.from(currentFilter.selectedVehicleTypes);
+              final newTypes = List<String>.from(
+                currentFilter.selectedVehicleTypes,
+              );
               if (newTypes.any((v) => v.contains('Limousine'))) {
                 newTypes.removeWhere((v) => v.contains('Limousine'));
               } else {
                 newTypes.add('Limousine 34 Phòng VIP');
               }
-              onFilterChanged(currentFilter.copyWith(selectedVehicleTypes: newTypes));
+              onFilterChanged(
+                currentFilter.copyWith(selectedVehicleTypes: newTypes),
+              );
             },
           ),
         ],

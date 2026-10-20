@@ -5,6 +5,8 @@ enum MyTicketsStatus { initial, loading, loaded, error }
 
 class MyTicketsState extends Equatable {
   final MyTicketsStatus status;
+  final int detailsRevision;
+  final bool requiresLogin;
   final List<TicketModel> tickets;
   final TicketStatus selectedTab;
   final String searchQuery;
@@ -13,6 +15,8 @@ class MyTicketsState extends Equatable {
 
   const MyTicketsState({
     this.status = MyTicketsStatus.initial,
+    this.detailsRevision = 0,
+    this.requiresLogin = false,
     this.tickets = const [],
     this.selectedTab = TicketStatus.upcoming,
     this.searchQuery = '',
@@ -48,6 +52,8 @@ class MyTicketsState extends Equatable {
 
   MyTicketsState copyWith({
     MyTicketsStatus? status,
+    int? detailsRevision,
+    bool? requiresLogin,
     List<TicketModel>? tickets,
     TicketStatus? selectedTab,
     String? searchQuery,
@@ -57,21 +63,27 @@ class MyTicketsState extends Equatable {
   }) {
     return MyTicketsState(
       status: status ?? this.status,
+      detailsRevision: detailsRevision ?? this.detailsRevision,
+      requiresLogin: requiresLogin ?? this.requiresLogin,
       tickets: tickets ?? this.tickets,
       selectedTab: selectedTab ?? this.selectedTab,
       searchQuery: searchQuery ?? this.searchQuery,
       errorMessage: clearMessages ? null : (errorMessage ?? this.errorMessage),
-      successMessage: clearMessages ? null : (successMessage ?? this.successMessage),
+      successMessage: clearMessages
+          ? null
+          : (successMessage ?? this.successMessage),
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        tickets,
-        selectedTab,
-        searchQuery,
-        errorMessage,
-        successMessage,
-      ];
+    status,
+    detailsRevision,
+    requiresLogin,
+    tickets,
+    selectedTab,
+    searchQuery,
+    errorMessage,
+    successMessage,
+  ];
 }

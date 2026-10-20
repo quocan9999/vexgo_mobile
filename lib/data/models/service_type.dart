@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 
-enum ServiceType { bus, flight, train, carRental }
+enum ServiceType { bus, cargo, ticketLookup }
 
 extension ServiceTypeExt on ServiceType {
   String get label {
     switch (this) {
       case ServiceType.bus:
-        return 'Xe khách';
-      case ServiceType.flight:
-        return 'Máy bay';
-      case ServiceType.train:
-        return 'Tàu hỏa';
-      case ServiceType.carRental:
-        return 'Thuê xe';
+        return 'Vé xe khách';
+      case ServiceType.cargo:
+        return 'Gửi hàng hóa';
+      case ServiceType.ticketLookup:
+        return 'Tra cứu vé';
     }
   }
 
@@ -20,23 +18,20 @@ extension ServiceTypeExt on ServiceType {
     switch (this) {
       case ServiceType.bus:
         return Icons.directions_bus_rounded;
-      case ServiceType.flight:
-        return Icons.flight_rounded;
-      case ServiceType.train:
-        return Icons.train_rounded;
-      case ServiceType.carRental:
-        return Icons.directions_car_rounded;
+      case ServiceType.cargo:
+        return Icons.local_shipping_rounded;
+      case ServiceType.ticketLookup:
+        return Icons.receipt_long_rounded;
     }
   }
 
   bool get isAvailable {
     switch (this) {
       case ServiceType.bus:
-      case ServiceType.flight:
-      case ServiceType.train:
+      case ServiceType.ticketLookup:
         return true;
-      case ServiceType.carRental:
-        return false; // Coming soon
+      case ServiceType.cargo:
+        return false; // Dịch vụ gửi hàng theo xe khách (Coming soon)
     }
   }
 }

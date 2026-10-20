@@ -1,20 +1,32 @@
 import 'dart:math';
+import 'package:vexgo_app/data/models/booking_quote_model.dart';
 import 'package:equatable/equatable.dart';
+import 'package:vexgo_app/data/models/seat_hold_model.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/data/models/trip_model.dart';
+import 'package:vexgo_app/data/models/booking_model.dart';
 import 'package:vexgo_app/data/models/voucher_model.dart';
 
-enum BookingFlowStatus { initial, loading, loaded, submitting, success, failure }
+enum BookingFlowStatus {
+  initial,
+  loading,
+  loaded,
+  submitting,
+  success,
+  paymentPending,
+  failure,
+  blockedByBackend,
+}
 
 enum BookingStep {
-  seatSelection,   // 0: Chọn chỗ ngồi
-  pickupPoint,     // 1: Chọn điểm đón
-  dropoffPoint,    // 2: Chọn điểm trả
-  passengerInfo,   // 3: Nhập thông tin hành khách
-  tripSummary,     // 4: Thông tin chuyến đi & Voucher
-  payment,         // 5: Thanh toán
+  seatSelection, // 0: Chọn chỗ ngồi
+  pickupPoint, // 1: Chọn điểm đón
+  dropoffPoint, // 2: Chọn điểm trả
+  passengerInfo, // 3: Nhập thông tin hành khách
+  tripSummary, // 4: Thông tin chuyến đi & Voucher
+  payment, // 5: Thanh toán
 }
 
 extension BookingStepExtension on BookingStep {
@@ -55,6 +67,8 @@ extension BookingStepExtension on BookingStep {
   }
 }
 
+const _unchangedError = Object();
+
 class BookingFlowState extends Equatable {
   final BookingFlowStatus status;
   final BookingStep step;
@@ -74,11 +88,27 @@ class BookingFlowState extends Equatable {
   final String passengerNote;
   final bool savePassengerInfo;
   final VoucherModel? appliedVoucher;
+  final BookingQuoteModel? quote;
+  final bool requiresAuthoritativeQuote;
+  final bool quoteLoading;
+  final String? quoteError;
+  final String requestedPromotionCode;
   final List<VoucherModel> availableVouchers;
   final String selectedPaymentMethod;
   final int countdownSeconds;
+  final SeatHoldModel? seatHold;
   final TicketModel? createdTicket;
+  final List<TicketModel> createdTickets;
+  final bool bookingOutcomeUnknown;
+  final int? pendingPaymentAmount;
+  final bool paymentConfirmed;
+  final BookingModel? checkoutBooking;
   final String? errorMessage;
+  final int? pendingBookingId;
+  final int? pendingPaymentId;
+  final String? pendingPaymentUrl;
+  final String? pendingQrCodeUrl;
+  final String? pendingDeeplink;
 
   const BookingFlowState({
     this.status = BookingFlowStatus.initial,
@@ -93,30 +123,71 @@ class BookingFlowState extends Equatable {
     this.selectedPickupPoint,
     this.availableDropoffPoints = const [],
     this.selectedDropoffPoint,
-    this.passengerName = 'Nguyễn Văn An',
-    this.passengerPhone = '0987654321',
-    this.passengerEmail = 'nguyenvanan@gmail.com',
+    this.passengerName = '',
+    this.passengerPhone = '',
+    this.passengerEmail = '',
     this.passengerNote = '',
     this.savePassengerInfo = true,
     this.appliedVoucher,
+    this.quote,
+    this.requiresAuthoritativeQuote = false,
+    this.quoteLoading = false,
+    this.quoteError,
+    this.requestedPromotionCode = '',
     this.availableVouchers = const [],
     this.selectedPaymentMethod = 'momo',
     this.countdownSeconds = 600,
+    this.seatHold,
     this.createdTicket,
+    this.createdTickets = const [],
+    this.bookingOutcomeUnknown = false,
+    this.pendingPaymentAmount,
+    this.paymentConfirmed = false,
+    this.checkoutBooking,
     this.errorMessage,
+    this.pendingBookingId,
+    this.pendingPaymentId,
+    this.pendingPaymentUrl,
+    this.pendingQrCodeUrl,
+    this.pendingDeeplink,
   });
 
-  int get seatsTotalAmount =>
-      selectedSeats.fold(0, (sum, seat) => sum + seat.price);
+  bool get isCheckoutLocked =>
+      pendingBookingId != null ||
+      bookingOutcomeUnknown ||
+      status == BookingFlowStatus.submitting ||
+      status == BookingFlowStatus.blockedByBackend ||
+      status == BookingFlowStatus.success;
+
+  bool get hasValidSeatPricing =>
+      selectedSeats.isNotEmpty &&
+      selectedSeats.every((s) => s.price != null && s.price! > 0);
+
+  int? get seatsTotalAmount {
+    if (selectedSeats.isEmpty) return 0;
+    if (!hasValidSeatPricing) return null;
+    return selectedSeats.fold<int>(0, (sum, seat) => sum + seat.price!);
+  }
+
+  int? get quotedSubtotal =>
+      quote?.originalTotal ??
+      (requiresAuthoritativeQuote ? null : seatsTotalAmount);
+  int? get quotedServiceFee =>
+      quote?.serviceFee ?? (requiresAuthoritativeQuote ? null : 0);
+  bool get hasUsableQuote =>
+      !requiresAuthoritativeQuote ||
+      (quote != null && !quoteLoading && quoteError == null);
 
   int get discountAmount {
+    if (requiresAuthoritativeQuote) return quote?.discountAmount ?? 0;
     if (appliedVoucher == null) return 0;
     final total = seatsTotalAmount;
-    if (total < appliedVoucher!.minOrderAmount) return 0;
+    if (total == null || total < appliedVoucher!.minOrderAmount) return 0;
 
     if (appliedVoucher!.discountPercent > 0) {
       final calc = (total * appliedVoucher!.discountPercent / 100).round();
-      if (appliedVoucher!.maxDiscount != null && appliedVoucher!.maxDiscount! > 0) {
+      if (appliedVoucher!.maxDiscount != null &&
+          appliedVoucher!.maxDiscount! > 0) {
         return min(calc, appliedVoucher!.maxDiscount!);
       }
       return calc;
@@ -124,15 +195,25 @@ class BookingFlowState extends Equatable {
     return appliedVoucher!.discountAmount;
   }
 
-  int get finalAmount => max(0, seatsTotalAmount - discountAmount);
+  int? get finalAmount {
+    if (checkoutBooking != null) return checkoutBooking!.totalAmount;
+    if (requiresAuthoritativeQuote) return quote?.finalTotal;
+    final seatsTotal = seatsTotalAmount;
+    if (seatsTotal == null) return null;
+    return max(0, seatsTotal - discountAmount);
+  }
 
-  bool get isSeatsValid => selectedSeats.isNotEmpty;
+  bool get isSeatsValid => selectedSeats.isNotEmpty && hasValidSeatPricing;
+  String? get holdToken => seatHold?.holdToken;
   bool get isPickupValid => selectedPickupPoint != null;
   bool get isDropoffValid => selectedDropoffPoint != null;
   bool get isPassengerValid =>
       passengerName.trim().length >= 2 &&
-      RegExp(r'^(0[3|5|7|8|9])+([0-9]{8})$').hasMatch(passengerPhone.trim()) &&
-      passengerEmail.trim().contains('@');
+      RegExp(r'^(?:0|\+84)[35789][0-9]{8}$').hasMatch(passengerPhone.trim()) &&
+      (passengerEmail.trim().isEmpty ||
+          RegExp(
+            r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+          ).hasMatch(passengerEmail.trim()));
 
   bool get canProceed {
     switch (step) {
@@ -145,9 +226,9 @@ class BookingFlowState extends Equatable {
       case BookingStep.passengerInfo:
         return isPassengerValid;
       case BookingStep.tripSummary:
-        return true;
+        return hasUsableQuote;
       case BookingStep.payment:
-        return selectedPaymentMethod.isNotEmpty;
+        return selectedPaymentMethod.isNotEmpty && hasUsableQuote;
     }
   }
 
@@ -176,12 +257,31 @@ class BookingFlowState extends Equatable {
     String? passengerNote,
     bool? savePassengerInfo,
     VoucherModel? appliedVoucher,
+    BookingQuoteModel? quote,
+    bool clearQuote = false,
+    bool? requiresAuthoritativeQuote,
+    bool? quoteLoading,
+    Object? quoteError = _unchangedError,
+    String? requestedPromotionCode,
     bool clearVoucher = false,
     List<VoucherModel>? availableVouchers,
     String? selectedPaymentMethod,
     int? countdownSeconds,
+    SeatHoldModel? seatHold,
+    bool clearSeatHold = false,
     TicketModel? createdTicket,
-    String? errorMessage,
+    List<TicketModel>? createdTickets,
+    bool? bookingOutcomeUnknown,
+    int? pendingPaymentAmount,
+    bool? paymentConfirmed,
+    BookingModel? checkoutBooking,
+    Object? errorMessage = _unchangedError,
+    int? pendingBookingId,
+    int? pendingPaymentId,
+    String? pendingPaymentUrl,
+    String? pendingQrCodeUrl,
+    String? pendingDeeplink,
+    bool clearPendingPayment = false,
   }) {
     return BookingFlowState(
       status: status ?? this.status,
@@ -192,44 +292,98 @@ class BookingFlowState extends Equatable {
       seatLayout: seatLayout ?? this.seatLayout,
       selectedFloor: selectedFloor ?? this.selectedFloor,
       selectedSeats: selectedSeats ?? this.selectedSeats,
-      availablePickupPoints: availablePickupPoints ?? this.availablePickupPoints,
+      availablePickupPoints:
+          availablePickupPoints ?? this.availablePickupPoints,
       selectedPickupPoint: selectedPickupPoint ?? this.selectedPickupPoint,
-      availableDropoffPoints: availableDropoffPoints ?? this.availableDropoffPoints,
+      availableDropoffPoints:
+          availableDropoffPoints ?? this.availableDropoffPoints,
       selectedDropoffPoint: selectedDropoffPoint ?? this.selectedDropoffPoint,
       passengerName: passengerName ?? this.passengerName,
       passengerPhone: passengerPhone ?? this.passengerPhone,
       passengerEmail: passengerEmail ?? this.passengerEmail,
       passengerNote: passengerNote ?? this.passengerNote,
       savePassengerInfo: savePassengerInfo ?? this.savePassengerInfo,
-      appliedVoucher: clearVoucher ? null : (appliedVoucher ?? this.appliedVoucher),
+      quote: clearQuote ? null : (quote ?? this.quote),
+      requiresAuthoritativeQuote:
+          requiresAuthoritativeQuote ?? this.requiresAuthoritativeQuote,
+      quoteLoading: quoteLoading ?? this.quoteLoading,
+      quoteError: identical(quoteError, _unchangedError)
+          ? this.quoteError
+          : quoteError as String?,
+      requestedPromotionCode:
+          requestedPromotionCode ?? this.requestedPromotionCode,
+      appliedVoucher: clearVoucher
+          ? null
+          : (appliedVoucher ?? this.appliedVoucher),
       availableVouchers: availableVouchers ?? this.availableVouchers,
-      selectedPaymentMethod: selectedPaymentMethod ?? this.selectedPaymentMethod,
+      selectedPaymentMethod:
+          selectedPaymentMethod ?? this.selectedPaymentMethod,
       countdownSeconds: countdownSeconds ?? this.countdownSeconds,
+      seatHold: clearSeatHold ? null : (seatHold ?? this.seatHold),
       createdTicket: createdTicket ?? this.createdTicket,
-      errorMessage: errorMessage ?? this.errorMessage,
+      createdTickets: createdTickets ?? this.createdTickets,
+      bookingOutcomeUnknown:
+          bookingOutcomeUnknown ?? this.bookingOutcomeUnknown,
+      pendingPaymentAmount: pendingPaymentAmount ?? this.pendingPaymentAmount,
+      paymentConfirmed: paymentConfirmed ?? this.paymentConfirmed,
+      checkoutBooking: checkoutBooking ?? this.checkoutBooking,
+      errorMessage: identical(errorMessage, _unchangedError)
+          ? this.errorMessage
+          : errorMessage as String?,
+      pendingBookingId: clearPendingPayment
+          ? null
+          : (pendingBookingId ?? this.pendingBookingId),
+      pendingPaymentId: clearPendingPayment
+          ? null
+          : (pendingPaymentId ?? this.pendingPaymentId),
+      pendingPaymentUrl: clearPendingPayment
+          ? null
+          : (pendingPaymentUrl ?? this.pendingPaymentUrl),
+      pendingQrCodeUrl: clearPendingPayment
+          ? null
+          : (pendingQrCodeUrl ?? this.pendingQrCodeUrl),
+      pendingDeeplink: clearPendingPayment
+          ? null
+          : (pendingDeeplink ?? this.pendingDeeplink),
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        step,
-        trip,
-        date,
-        seatLayout,
-        selectedFloor,
-        selectedSeats,
-        selectedPickupPoint,
-        selectedDropoffPoint,
-        passengerName,
-        passengerPhone,
-        passengerEmail,
-        passengerNote,
-        savePassengerInfo,
-        appliedVoucher,
-        selectedPaymentMethod,
-        countdownSeconds,
-        createdTicket,
-        errorMessage,
-      ];
+    status,
+    step,
+    trip,
+    date,
+    seatLayout,
+    selectedFloor,
+    selectedSeats,
+    selectedPickupPoint,
+    selectedDropoffPoint,
+    passengerName,
+    passengerPhone,
+    passengerEmail,
+    passengerNote,
+    savePassengerInfo,
+    appliedVoucher,
+    quote,
+    requiresAuthoritativeQuote,
+    quoteLoading,
+    quoteError,
+    requestedPromotionCode,
+    selectedPaymentMethod,
+    countdownSeconds,
+    seatHold,
+    createdTicket,
+    createdTickets,
+    bookingOutcomeUnknown,
+    pendingPaymentAmount,
+    paymentConfirmed,
+    checkoutBooking,
+    errorMessage,
+    pendingBookingId,
+    pendingPaymentId,
+    pendingPaymentUrl,
+    pendingQrCodeUrl,
+    pendingDeeplink,
+  ];
 }

@@ -31,10 +31,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: elevation,
       centerTitle: true,
       automaticallyImplyLeading: automaticallyImplyLeading,
-      leading: leading ??
+      leading:
+          leading ??
           (automaticallyImplyLeading && Navigator.of(context).canPop()
               ? IconButton(
-                  icon: Icon(Icons.arrow_back_ios_new_rounded, color: titleColor, size: 20),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: titleColor,
+                    size: 20,
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 )
               : null),

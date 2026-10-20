@@ -51,5 +51,10 @@ class VoucherModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [code, discountAmount, discountPercent, minOrderAmount];
+  List<Object?> get props => [
+    code,
+    discountAmount,
+    discountPercent,
+    minOrderAmount,
+  ];
 }

@@ -12,10 +12,7 @@ import '../../bloc/auth_event.dart';
 class LoyaltyHistorySheet extends StatelessWidget {
   final UserModel user;
 
-  const LoyaltyHistorySheet({
-    super.key,
-    required this.user,
-  });
+  const LoyaltyHistorySheet({super.key, required this.user});
 
   static void show(BuildContext context, {required UserModel user}) {
     showModalBottomSheet(
@@ -26,17 +23,35 @@ class LoyaltyHistorySheet extends StatelessWidget {
     );
   }
 
-  void _redeemReward(BuildContext context, {required int points, required String title}) {
-    context.read<AuthBloc>().add(RedeemPointsEvent(points: points, rewardTitle: title));
+  void _redeemReward(
+    BuildContext context, {
+    required int points,
+    required String title,
+  }) {
+    context.read<AuthBloc>().add(
+      RedeemPointsEvent(points: points, rewardTitle: title),
+    );
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final vouchersToRedeem = [
-      {'title': 'Voucher 30.000đ mọi chuyến xe', 'points': 60, 'code': 'VEXGO30K'},
-      {'title': 'Voucher 50.000đ chặng Đà Lạt/Vũng Tàu', 'points': 100, 'code': 'VEXGO50K'},
-      {'title': 'Voucher 100.000đ chặng Bắc - Nam', 'points': 200, 'code': 'VEXGO100K'},
+      {
+        'title': 'Voucher 30.000đ mọi chuyến xe',
+        'points': 60,
+        'code': 'VEXGO30K',
+      },
+      {
+        'title': 'Voucher 50.000đ chặng Đà Lạt/Vũng Tàu',
+        'points': 100,
+        'code': 'VEXGO50K',
+      },
+      {
+        'title': 'Voucher 100.000đ chặng Bắc - Nam',
+        'points': 200,
+        'code': 'VEXGO100K',
+      },
     ];
 
     return Container(
@@ -53,7 +68,10 @@ class LoyaltyHistorySheet extends StatelessWidget {
           // Drag handle
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: AppDimensions.md, bottom: AppDimensions.xs),
+              margin: const EdgeInsets.only(
+                top: AppDimensions.md,
+                bottom: AppDimensions.xs,
+              ),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
@@ -75,7 +93,11 @@ class LoyaltyHistorySheet extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      const Icon(Icons.stars_rounded, color: AppColors.secondary, size: 24),
+                      const Icon(
+                        Icons.stars_rounded,
+                        color: AppColors.secondary,
+                        size: 24,
+                      ),
                       const SizedBox(width: AppDimensions.xs),
                       Expanded(
                         child: Text(
@@ -93,7 +115,10 @@ class LoyaltyHistorySheet extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close_rounded, color: AppColors.neutral600),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: AppColors.neutral600,
+                  ),
                 ),
               ],
             ),
@@ -110,7 +135,9 @@ class LoyaltyHistorySheet extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.primaryLight.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -120,7 +147,9 @@ class LoyaltyHistorySheet extends StatelessWidget {
                         children: [
                           Text(
                             'Khả dụng để đổi thưởng',
-                            style: AppTextStyles.caption.copyWith(color: AppColors.neutral600),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.neutral600,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -133,10 +162,15 @@ class LoyaltyHistorySheet extends StatelessWidget {
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.secondary,
-                          borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                          borderRadius: BorderRadius.circular(
+                            AppDimensions.radiusFull,
+                          ),
                         ),
                         child: Text(
                           'Hạng ${user.tierName}',
@@ -171,7 +205,9 @@ class LoyaltyHistorySheet extends StatelessWidget {
                     padding: const EdgeInsets.all(AppDimensions.md),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusMd,
+                      ),
                       border: Border.all(color: AppColors.neutral200),
                     ),
                     child: Row(
@@ -180,12 +216,16 @@ class LoyaltyHistorySheet extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: canRedeem ? AppColors.secondaryLight : AppColors.neutral100,
+                            color: canRedeem
+                                ? AppColors.secondaryLight
+                                : AppColors.neutral100,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             Icons.card_giftcard_rounded,
-                            color: canRedeem ? AppColors.secondary : AppColors.neutral400,
+                            color: canRedeem
+                                ? AppColors.secondary
+                                : AppColors.neutral400,
                             size: 20,
                           ),
                         ),
@@ -207,7 +247,9 @@ class LoyaltyHistorySheet extends StatelessWidget {
                               Text(
                                 'Cần: $cost điểm',
                                 style: AppTextStyles.caption.copyWith(
-                                  color: canRedeem ? AppColors.secondary : AppColors.neutral400,
+                                  color: canRedeem
+                                      ? AppColors.secondary
+                                      : AppColors.neutral400,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -218,13 +260,15 @@ class LoyaltyHistorySheet extends StatelessWidget {
                         CustomButton(
                           text: 'Đổi mã',
                           height: 32,
-                          type: canRedeem ? ButtonType.secondary : ButtonType.outline,
+                          type: canRedeem
+                              ? ButtonType.secondary
+                              : ButtonType.outline,
                           onPressed: canRedeem
                               ? () => _redeemReward(
-                                    context,
-                                    points: cost,
-                                    title: voucher['title'] as String,
-                                  )
+                                  context,
+                                  points: cost,
+                                  title: voucher['title'] as String,
+                                )
                               : null,
                         ),
                       ],
@@ -248,11 +292,15 @@ class LoyaltyHistorySheet extends StatelessWidget {
                 const SizedBox(height: AppDimensions.sm),
                 if (user.pointHistory.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppDimensions.xl),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppDimensions.xl,
+                    ),
                     child: Center(
                       child: Text(
                         'Chưa có lịch sử giao dịch điểm.',
-                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.neutral500),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.neutral500,
+                        ),
                       ),
                     ),
                   )
@@ -260,19 +308,25 @@ class LoyaltyHistorySheet extends StatelessWidget {
                   ...user.pointHistory.map((tx) {
                     final isEarn = tx.points > 0;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppDimensions.sm),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppDimensions.sm,
+                      ),
                       child: Row(
                         children: [
                           Container(
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: isEarn ? AppColors.successLight : AppColors.errorLight,
+                              color: isEarn
+                                  ? AppColors.successLight
+                                  : AppColors.errorLight,
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               isEarn ? Icons.add_rounded : Icons.remove_rounded,
-                              color: isEarn ? AppColors.success : AppColors.error,
+                              color: isEarn
+                                  ? AppColors.success
+                                  : AppColors.error,
                               size: 20,
                             ),
                           ),
@@ -305,7 +359,9 @@ class LoyaltyHistorySheet extends StatelessWidget {
                           Text(
                             '${isEarn ? '+' : ''}${tx.points} điểm',
                             style: AppTextStyles.titleSmall.copyWith(
-                              color: isEarn ? AppColors.success : AppColors.error,
+                              color: isEarn
+                                  ? AppColors.success
+                                  : AppColors.error,
                               fontWeight: FontWeight.w800,
                             ),
                           ),

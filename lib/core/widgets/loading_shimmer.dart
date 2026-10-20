@@ -71,7 +71,11 @@ class TripCardShimmer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
                 LoadingShimmer(width: 100, height: 14),
-                LoadingShimmer(width: 90, height: 36, borderRadius: AppDimensions.radiusMd),
+                LoadingShimmer(
+                  width: 90,
+                  height: 36,
+                  borderRadius: AppDimensions.radiusMd,
+                ),
               ],
             ),
           ],

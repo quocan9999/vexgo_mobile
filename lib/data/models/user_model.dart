@@ -3,6 +3,8 @@ import 'point_transaction_model.dart';
 
 enum MembershipTier { silver, gold, diamond }
 
+const _unchangedProfileField = Object();
+
 class UserModel extends Equatable {
   final int taiKhoanId;
   final String maKhachHang;
@@ -26,10 +28,10 @@ class UserModel extends Equatable {
     this.email,
     this.cccd,
     this.ngaySinh,
-    this.daXacThucSoDienThoai = true,
+    this.daXacThucSoDienThoai = false,
     this.trangThai = 'HOAT_DONG',
     this.diemTichLuy = 0,
-    this.hangThanhVien = 'BẠC',
+    this.hangThanhVien = '',
     this.diemToiHangTiepTheo = 1000,
     this.pointHistory = const [],
   });
@@ -41,6 +43,7 @@ class UserModel extends Equatable {
   }
 
   String get tierName {
+    if (hangThanhVien.isNotEmpty) return hangThanhVien;
     switch (tier) {
       case MembershipTier.diamond:
         return 'KIM CƯƠNG';
@@ -63,21 +66,50 @@ class UserModel extends Equatable {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final historyJson = json['pointHistory'] as List<dynamic>? ?? [];
+    final accountId =
+        (json['taiKhoanId'] ?? json['accountId'] ?? json['id'] as num?)
+            ?.toInt() ??
+        0;
+    final customerCode =
+        json['maKhachHang'] as String? ?? json['customerCode'] as String? ?? '';
+    final fullName =
+        json['hoTen'] as String? ?? json['fullName'] as String? ?? '';
+    final phone =
+        json['soDienThoai'] as String? ??
+        json['phoneNumber'] as String? ??
+        json['phone'] as String? ??
+        '';
+    final citizenId = json['cccd'] as String? ?? json['citizenId'] as String?;
+    final dob = json['ngaySinh'] as String? ?? json['dateOfBirth'] as String?;
+    final email = json['email'] as String?;
+    final points =
+        (json['diemTichLuy'] ?? json['loyaltyPoints'] as num?)?.toInt() ?? 0;
+    final status =
+        json['trangThai'] as String? ??
+        json['status'] as String? ??
+        'HOAT_DONG';
+
     return UserModel(
-      taiKhoanId: json['taiKhoanId'] as int? ?? 1,
-      maKhachHang: json['maKhachHang'] as String? ?? 'KH-001',
-      hoTen: json['hoTen'] as String? ?? 'Khách Hàng',
-      soDienThoai: json['soDienThoai'] as String? ?? '',
-      email: json['email'] as String?,
-      cccd: json['cccd'] as String?,
-      ngaySinh: json['ngaySinh'] as String?,
-      daXacThucSoDienThoai: json['daXacThucSoDienThoai'] as bool? ?? true,
-      trangThai: json['trangThai'] as String? ?? 'HOAT_DONG',
-      diemTichLuy: json['diemTichLuy'] as int? ?? 0,
-      hangThanhVien: json['hangThanhVien'] as String? ?? 'BẠC',
+      taiKhoanId: accountId,
+      maKhachHang: customerCode,
+      hoTen: fullName,
+      soDienThoai: phone,
+      email: email,
+      cccd: citizenId,
+      ngaySinh: dob,
+      daXacThucSoDienThoai:
+          json['daXacThucSoDienThoai'] as bool? ??
+          json['phoneVerified'] as bool? ??
+          false,
+      trangThai: status,
+      diemTichLuy: points,
+      hangThanhVien: json['hangThanhVien'] as String? ?? '',
       diemToiHangTiepTheo: json['diemToiHangTiepTheo'] as int? ?? 1000,
       pointHistory: historyJson
-          .map((item) => PointTransactionModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                PointTransactionModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
     );
   }
@@ -105,9 +137,9 @@ class UserModel extends Equatable {
     String? maKhachHang,
     String? hoTen,
     String? soDienThoai,
-    String? email,
-    String? cccd,
-    String? ngaySinh,
+    Object? email = _unchangedProfileField,
+    Object? cccd = _unchangedProfileField,
+    Object? ngaySinh = _unchangedProfileField,
     bool? daXacThucSoDienThoai,
     String? trangThai,
     int? diemTichLuy,
@@ -120,9 +152,15 @@ class UserModel extends Equatable {
       maKhachHang: maKhachHang ?? this.maKhachHang,
       hoTen: hoTen ?? this.hoTen,
       soDienThoai: soDienThoai ?? this.soDienThoai,
-      email: email ?? this.email,
-      cccd: cccd ?? this.cccd,
-      ngaySinh: ngaySinh ?? this.ngaySinh,
+      email: identical(email, _unchangedProfileField)
+          ? this.email
+          : email as String?,
+      cccd: identical(cccd, _unchangedProfileField)
+          ? this.cccd
+          : cccd as String?,
+      ngaySinh: identical(ngaySinh, _unchangedProfileField)
+          ? this.ngaySinh
+          : ngaySinh as String?,
       daXacThucSoDienThoai: daXacThucSoDienThoai ?? this.daXacThucSoDienThoai,
       trangThai: trangThai ?? this.trangThai,
       diemTichLuy: diemTichLuy ?? this.diemTichLuy,
@@ -134,18 +172,18 @@ class UserModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        taiKhoanId,
-        maKhachHang,
-        hoTen,
-        soDienThoai,
-        email,
-        cccd,
-        ngaySinh,
-        daXacThucSoDienThoai,
-        trangThai,
-        diemTichLuy,
-        hangThanhVien,
-        diemToiHangTiepTheo,
-        pointHistory,
-      ];
+    taiKhoanId,
+    maKhachHang,
+    hoTen,
+    soDienThoai,
+    email,
+    cccd,
+    ngaySinh,
+    daXacThucSoDienThoai,
+    trangThai,
+    diemTichLuy,
+    hangThanhVien,
+    diemToiHangTiepTheo,
+    pointHistory,
+  ];
 }

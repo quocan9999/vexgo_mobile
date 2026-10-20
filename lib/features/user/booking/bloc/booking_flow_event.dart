@@ -15,15 +15,28 @@ class InitBookingFlowEvent extends BookingFlowEvent {
   final TripModel trip;
   final DateTime date;
   final int ticketCount;
+  final String? passengerName;
+  final String? passengerPhone;
+  final String? passengerEmail;
 
   const InitBookingFlowEvent({
     required this.trip,
     required this.date,
     this.ticketCount = 1,
+    this.passengerName,
+    this.passengerPhone,
+    this.passengerEmail,
   });
 
   @override
-  List<Object?> get props => [trip, date, ticketCount];
+  List<Object?> get props => [
+    trip,
+    date,
+    ticketCount,
+    passengerName,
+    passengerPhone,
+    passengerEmail,
+  ];
 }
 
 class ToggleSeatEvent extends BookingFlowEvent {
@@ -126,4 +139,20 @@ class GoToStepEvent extends BookingFlowEvent {
 
 class ConfirmPaymentEvent extends BookingFlowEvent {
   const ConfirmPaymentEvent();
+}
+
+class ReleaseSeatHoldEvent extends BookingFlowEvent {
+  const ReleaseSeatHoldEvent();
+}
+
+/// Uses the quote endpoint to validate a code against seats and customer identity.
+class ApplyPromotionCodeEvent extends BookingFlowEvent {
+  final String code;
+  const ApplyPromotionCodeEvent(this.code);
+  @override
+  List<Object?> get props => [code];
+}
+
+class RefreshBookingQuoteEvent extends BookingFlowEvent {
+  const RefreshBookingQuoteEvent();
 }

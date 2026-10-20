@@ -1,17 +1,17 @@
+import 'package:flutter/foundation.dart';
+import '../../core/network/api_client.dart';
 import '../../core/utils/json_loader.dart';
+import '../adapters/city_search_adapter.dart';
+import '../datasources/remote/trip_remote_data_source.dart';
 import '../models/city_model.dart';
-import '../models/flight_search_model.dart';
 import '../models/operator_model.dart';
 import '../models/popular_route_model.dart';
-import '../models/train_search_model.dart';
 import '../models/trip_model.dart';
 
 abstract class TripRepository {
   Future<List<CityModel>> getCities();
   Future<List<PopularRouteModel>> getPopularRoutes();
   Future<List<OperatorModel>> getOperators();
-  Future<List<AirportModel>> getAirports();
-  Future<List<TrainStationModel>> getTrainStations();
   Future<List<TripModel>> searchTrips({
     required String fromCityId,
     required String toCityId,
@@ -24,15 +24,14 @@ class MockTripRepository implements TripRepository {
   List<CityModel>? _cachedCities;
   List<PopularRouteModel>? _cachedRoutes;
   List<OperatorModel>? _cachedOperators;
-  List<AirportModel>? _cachedAirports;
-  List<TrainStationModel>? _cachedTrainStations;
   List<TripModel>? _cachedTrips;
 
   @override
   Future<List<CityModel>> getCities() async {
     if (_cachedCities != null) return _cachedCities!;
-    final List<Map<String, dynamic>> rawList =
-        await JsonLoader.loadJsonList('assets/mock_data/cities.json');
+    final List<Map<String, dynamic>> rawList = await JsonLoader.loadJsonList(
+      'assets/mock_data/cities.json',
+    );
     _cachedCities = rawList.map((item) => CityModel.fromJson(item)).toList();
     return _cachedCities!;
   }
@@ -40,37 +39,25 @@ class MockTripRepository implements TripRepository {
   @override
   Future<List<PopularRouteModel>> getPopularRoutes() async {
     if (_cachedRoutes != null) return _cachedRoutes!;
-    final List<Map<String, dynamic>> rawList =
-        await JsonLoader.loadJsonList('assets/mock_data/popular_routes.json');
-    _cachedRoutes = rawList.map((item) => PopularRouteModel.fromJson(item)).toList();
+    final List<Map<String, dynamic>> rawList = await JsonLoader.loadJsonList(
+      'assets/mock_data/popular_routes.json',
+    );
+    _cachedRoutes = rawList
+        .map((item) => PopularRouteModel.fromJson(item))
+        .toList();
     return _cachedRoutes!;
   }
 
   @override
   Future<List<OperatorModel>> getOperators() async {
     if (_cachedOperators != null) return _cachedOperators!;
-    final List<Map<String, dynamic>> rawList =
-        await JsonLoader.loadJsonList('assets/mock_data/operators.json');
-    _cachedOperators = rawList.map((item) => OperatorModel.fromJson(item)).toList();
+    final List<Map<String, dynamic>> rawList = await JsonLoader.loadJsonList(
+      'assets/mock_data/operators.json',
+    );
+    _cachedOperators = rawList
+        .map((item) => OperatorModel.fromJson(item))
+        .toList();
     return _cachedOperators!;
-  }
-
-  @override
-  Future<List<AirportModel>> getAirports() async {
-    if (_cachedAirports != null) return _cachedAirports!;
-    final List<Map<String, dynamic>> rawList =
-        await JsonLoader.loadJsonList('assets/mock_data/airports.json');
-    _cachedAirports = rawList.map((item) => AirportModel.fromJson(item)).toList();
-    return _cachedAirports!;
-  }
-
-  @override
-  Future<List<TrainStationModel>> getTrainStations() async {
-    if (_cachedTrainStations != null) return _cachedTrainStations!;
-    final List<Map<String, dynamic>> rawList =
-        await JsonLoader.loadJsonList('assets/mock_data/train_stations.json');
-    _cachedTrainStations = rawList.map((item) => TrainStationModel.fromJson(item)).toList();
-    return _cachedTrainStations!;
   }
 
   @override
@@ -80,8 +67,9 @@ class MockTripRepository implements TripRepository {
     String? date,
   }) async {
     if (_cachedTrips == null) {
-      final List<Map<String, dynamic>> rawList =
-          await JsonLoader.loadJsonList('assets/mock_data/trips.json');
+      final List<Map<String, dynamic>> rawList = await JsonLoader.loadJsonList(
+        'assets/mock_data/trips.json',
+      );
       _cachedTrips = rawList.map((item) => TripModel.fromJson(item)).toList();
     }
 
@@ -101,8 +89,9 @@ class MockTripRepository implements TripRepository {
   @override
   Future<TripModel?> getTripById(String id) async {
     if (_cachedTrips == null) {
-      final List<Map<String, dynamic>> rawList =
-          await JsonLoader.loadJsonList('assets/mock_data/trips.json');
+      final List<Map<String, dynamic>> rawList = await JsonLoader.loadJsonList(
+        'assets/mock_data/trips.json',
+      );
       _cachedTrips = rawList.map((item) => TripModel.fromJson(item)).toList();
     }
     try {
@@ -110,5 +99,142 @@ class MockTripRepository implements TripRepository {
     } catch (_) {
       return null;
     }
+  }
+}
+
+/// Hybrid repository: queries live backend API with seamless mock fallback
+class HybridTripRepository implements TripRepository {
+  final TripRemoteDataSource remoteDataSource;
+  final MockTripRepository mockFallback;
+
+  HybridTripRepository({
+    TripRemoteDataSource? remoteDataSource,
+    MockTripRepository? mockFallback,
+  }) : remoteDataSource =
+           remoteDataSource ?? TripRemoteDataSourceImpl(client: ApiClient()),
+       mockFallback = mockFallback ?? MockTripRepository();
+
+  @override
+  Future<List<CityModel>> getCities() => mockFallback.getCities();
+
+  @override
+  Future<List<PopularRouteModel>> getPopularRoutes() async {
+    try {
+      final remoteList = await remoteDataSource.getPopularRoutes();
+      if (remoteList.isNotEmpty) {
+        return remoteList;
+      }
+      return await mockFallback.getPopularRoutes();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          '[HybridTripRepository] Remote getPopularRoutes failed: $e, fallback to mock',
+        );
+      }
+      return await mockFallback.getPopularRoutes();
+    }
+  }
+
+  @override
+  Future<List<OperatorModel>> getOperators() async {
+    try {
+      final remoteList = await remoteDataSource.getBusCompanies();
+      if (remoteList.isNotEmpty) {
+        return remoteList;
+      }
+      return await mockFallback.getOperators();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          '[HybridTripRepository] Remote getOperators failed: $e, fallback to mock',
+        );
+      }
+      return await mockFallback.getOperators();
+    }
+  }
+
+  @override
+  Future<List<TripModel>> searchTrips({
+    required String fromCityId,
+    required String toCityId,
+    String? date,
+  }) async {
+    final resolvedFrom = CitySearchAdapter.resolveBackendSearchCity(fromCityId);
+    final resolvedTo = CitySearchAdapter.resolveBackendSearchCity(toCityId);
+    try {
+      return await remoteDataSource.searchTrips(
+        from: resolvedFrom,
+        to: resolvedTo,
+        departureDate: date,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[HybridTripRepository] Remote search failed: $e');
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<TripModel?> getTripById(String id) async {
+    try {
+      return await remoteDataSource.getTripById(id);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[HybridTripRepository] Remote getTripById failed: $e');
+      }
+      rethrow;
+    }
+  }
+}
+
+/// Real trip repository: 100% live remote backend data, zero mock fallback
+class RealTripRepository implements TripRepository {
+  final TripRemoteDataSource remoteDataSource;
+
+  RealTripRepository({TripRemoteDataSource? remoteDataSource})
+    : remoteDataSource =
+          remoteDataSource ?? TripRemoteDataSourceImpl(client: ApiClient());
+
+  List<CityModel>? _cachedCities;
+
+  @override
+  Future<List<CityModel>> getCities() async {
+    if (_cachedCities != null) return _cachedCities!;
+    final List<Map<String, dynamic>> rawList = await JsonLoader.loadJsonList(
+      'assets/mock_data/cities.json',
+    );
+    _cachedCities = rawList.map((item) => CityModel.fromJson(item)).toList();
+    return _cachedCities!;
+  }
+
+  @override
+  Future<List<PopularRouteModel>> getPopularRoutes() async {
+    return await remoteDataSource.getPopularRoutes();
+  }
+
+  @override
+  Future<List<OperatorModel>> getOperators() async {
+    return await remoteDataSource.getBusCompanies();
+  }
+
+  @override
+  Future<List<TripModel>> searchTrips({
+    required String fromCityId,
+    required String toCityId,
+    String? date,
+  }) async {
+    final resolvedFrom = CitySearchAdapter.resolveBackendSearchCity(fromCityId);
+    final resolvedTo = CitySearchAdapter.resolveBackendSearchCity(toCityId);
+    return await remoteDataSource.searchTrips(
+      from: resolvedFrom,
+      to: resolvedTo,
+      departureDate: date,
+    );
+  }
+
+  @override
+  Future<TripModel?> getTripById(String id) async {
+    return await remoteDataSource.getTripById(id);
   }
 }

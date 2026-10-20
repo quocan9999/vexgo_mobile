@@ -35,7 +35,9 @@ class FeaturedOperatorsSection extends StatelessWidget {
                   height: 4,
                   decoration: BoxDecoration(
                     color: AppColors.neutral300,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.radiusFull,
+                    ),
                   ),
                 ),
               ),
@@ -47,7 +49,9 @@ class FeaturedOperatorsSection extends StatelessWidget {
                     height: 52,
                     decoration: BoxDecoration(
                       color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusMd,
+                      ),
                     ),
                     child: const Icon(
                       Icons.directions_bus_rounded,
@@ -61,48 +65,69 @@ class FeaturedOperatorsSection extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(op.name, style: AppTextStyles.h3),
-                        const SizedBox(height: 2),
-                        RatingBadge(rating: op.rating, reviewCount: op.reviewCount),
+                        if (op.rating != null) ...[
+                          const SizedBox(height: 2),
+                          RatingBadge(
+                            rating: op.rating!,
+                            reviewCount: op.reviewCount,
+                          ),
+                        ],
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppDimensions.lg),
-              const Divider(),
-              const SizedBox(height: AppDimensions.md),
-              Row(
-                children: [
-                  const Icon(Icons.phone_in_talk_rounded, color: AppColors.secondary, size: 20),
-                  const SizedBox(width: AppDimensions.sm),
-                  Text('Hotline: ', style: AppTextStyles.bodyMedium),
-                  Flexible(
-                    child: Text(
-                      op.hotline,
-                      style: AppTextStyles.titleSmall.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
+              if (op.hotline != null || op.policy != null) ...[
+                const SizedBox(height: AppDimensions.lg),
+                const Divider(),
+                const SizedBox(height: AppDimensions.md),
+              ],
+              if (op.hotline != null && op.hotline!.isNotEmpty) ...[
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.phone_in_talk_rounded,
+                      color: AppColors.secondary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppDimensions.sm),
+                    Text('Hotline: ', style: AppTextStyles.bodyMedium),
+                    Flexible(
+                      child: Text(
+                        op.hotline!,
+                        style: AppTextStyles.titleSmall.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppDimensions.sm),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.info_outline_rounded, color: AppColors.neutral500, size: 20),
-                  const SizedBox(width: AppDimensions.sm),
-                  Expanded(
-                    child: Text(
-                      'Chính sách: ${op.policy}',
-                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.neutral600),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.sm),
+              ],
+              if (op.policy != null && op.policy!.isNotEmpty) ...[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      color: AppColors.neutral500,
+                      size: 20,
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: AppDimensions.sm),
+                    Expanded(
+                      child: Text(
+                        'Chính sách: ${op.policy!}',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.neutral600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: AppDimensions.xl),
             ],
           ),
@@ -124,14 +149,18 @@ class FeaturedOperatorsSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
                       'Nhà xe uy tín đối tác',
-                      style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
+                      style: AppTextStyles.h3.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -154,9 +183,12 @@ class FeaturedOperatorsSection extends StatelessWidget {
               height: 125,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.base,
+                ),
                 itemCount: operators.length,
-                separatorBuilder: (context, index) => const SizedBox(width: AppDimensions.md),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(width: AppDimensions.md),
                 itemBuilder: (context, index) {
                   final op = operators[index];
                   return InkWell(
@@ -167,7 +199,9 @@ class FeaturedOperatorsSection extends StatelessWidget {
                       padding: const EdgeInsets.all(AppDimensions.md),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusLg,
+                        ),
                         border: Border.all(color: AppColors.neutral200),
                         boxShadow: const [
                           BoxShadow(
@@ -188,7 +222,9 @@ class FeaturedOperatorsSection extends StatelessWidget {
                                 height: 36,
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryLight,
-                                  borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                                  borderRadius: BorderRadius.circular(
+                                    AppDimensions.radiusSm,
+                                  ),
                                 ),
                                 child: const Icon(
                                   Icons.directions_bus_rounded,
@@ -210,18 +246,25 @@ class FeaturedOperatorsSection extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: AppDimensions.sm),
-                          RatingBadge(rating: op.rating, reviewCount: op.reviewCount),
-                          const SizedBox(height: AppDimensions.xs),
-                          Text(
-                            'Hotline: ${op.hotline}',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.neutral500,
-                              fontSize: 11,
+                          if (op.rating != null) ...[
+                            const SizedBox(height: AppDimensions.sm),
+                            RatingBadge(
+                              rating: op.rating!,
+                              reviewCount: op.reviewCount,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          ],
+                          if (op.hotline != null && op.hotline!.isNotEmpty) ...[
+                            const SizedBox(height: AppDimensions.xs),
+                            Text(
+                              'Hotline: ${op.hotline!}',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.neutral500,
+                                fontSize: 11,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ],
                       ),
                     ),

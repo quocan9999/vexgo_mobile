@@ -23,13 +23,16 @@ class SeatMapView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentFloorSeats =
-        selectedFloor == 1 ? layout.lowerFloor : layout.upperFloor;
+    final currentFloorSeats = selectedFloor == 1
+        ? layout.lowerFloor
+        : layout.upperFloor;
 
-    final lowerAvailCount =
-        layout.lowerFloor.where((s) => s.status == SeatStatus.available).length;
-    final upperAvailCount =
-        layout.upperFloor.where((s) => s.status == SeatStatus.available).length;
+    final lowerAvailCount = layout.lowerFloor
+        .where((s) => s.status == SeatStatus.available)
+        .length;
+    final upperAvailCount = layout.upperFloor
+        .where((s) => s.status == SeatStatus.available)
+        .length;
 
     return Column(
       children: [
@@ -264,7 +267,8 @@ class SeatMapView extends StatelessWidget {
 
     return Column(
       children: sortedRowKeys.map((rowKey) {
-        final rowSeats = rowsMap[rowKey]!..sort((a, b) => a.col.compareTo(b.col));
+        final rowSeats = rowsMap[rowKey]!
+          ..sort((a, b) => a.col.compareTo(b.col));
         return _buildRow(rowSeats);
       }).toList(),
     );
@@ -272,9 +276,79 @@ class SeatMapView extends StatelessWidget {
 
   Widget _buildRow(List<SeatModel> rowSeats) {
     // Check max column count in this row to determine spacing/aisle
-    final maxCol = rowSeats.map((s) => s.col).fold(1, (prev, curr) => curr > prev ? curr : prev);
+    final maxCol = rowSeats
+        .map((s) => s.col)
+        .fold(1, (prev, curr) => curr > prev ? curr : prev);
 
-    if (maxCol == 2) {
+    if (maxCol == 4) {
+      // 4 columns (2 Left - Central Aisle - 2 Right) standard for seater buses
+      final col1 = rowSeats.where((s) => s.col == 1).firstOrNull;
+      final col2 = rowSeats.where((s) => s.col == 2).firstOrNull;
+      final col3 = rowSeats.where((s) => s.col == 3).firstOrNull;
+      final col4 = rowSeats.where((s) => s.col == 4).firstOrNull;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: col1 != null
+                  ? SeatItem(
+                      seat: col1,
+                      isSelected: selectedSeats.any((s) => s.id == col1.id),
+                      onTap: () => onSeatToggled(col1),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              flex: 3,
+              child: col2 != null
+                  ? SeatItem(
+                      seat: col2,
+                      isSelected: selectedSeats.any((s) => s.id == col2.id),
+                      onTap: () => onSeatToggled(col2),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            Expanded(
+              flex: 2,
+              child: Center(
+                child: Text(
+                  'Lối đi',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.neutral300,
+                    fontSize: 9,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: col3 != null
+                  ? SeatItem(
+                      seat: col3,
+                      isSelected: selectedSeats.any((s) => s.id == col3.id),
+                      onTap: () => onSeatToggled(col3),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              flex: 3,
+              child: col4 != null
+                  ? SeatItem(
+                      seat: col4,
+                      isSelected: selectedSeats.any((s) => s.id == col4.id),
+                      onTap: () => onSeatToggled(col4),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      );
+    } else if (maxCol == 2) {
       // 2 columns with central aisle (Left - Aisle - Right)
       final leftSeat = rowSeats.where((s) => s.col == 1).firstOrNull;
       final rightSeat = rowSeats.where((s) => s.col == 2).firstOrNull;
@@ -310,7 +384,9 @@ class SeatMapView extends StatelessWidget {
               child: rightSeat != null
                   ? SeatItem(
                       seat: rightSeat,
-                      isSelected: selectedSeats.any((s) => s.id == rightSeat.id),
+                      isSelected: selectedSeats.any(
+                        (s) => s.id == rightSeat.id,
+                      ),
                       onTap: () => onSeatToggled(rightSeat),
                     )
                   : const SizedBox.shrink(),
