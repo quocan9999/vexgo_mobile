@@ -230,6 +230,12 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
 
     final ticket = state.tickets[ticketIndex];
 
+    if (ticket.review != null) {
+      emit(state.copyWith(clearMessages: true));
+      emit(state.copyWith(errorMessage: 'Bạn đã đánh giá chuyến đi này rồi.'));
+      return;
+    }
+
     if (ApiConfig.isDemoMode) {
       if (generation != _generation) return;
       final updatedTicket = ticket.copyWith(review: event.review);
@@ -285,11 +291,16 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       );
 
       if (generation != _generation) return;
-      final updatedTicket = ticket.copyWith(review: savedReview);
       final updatedList = List<TicketModel>.from(state.tickets);
       final currentIndex = updatedList.indexWhere((t) => t.id == ticket.id);
       if (currentIndex < 0) return;
-      updatedList[currentIndex] = updatedTicket;
+      for (var i = 0; i < updatedList.length; i++) {
+        final current = updatedList[i];
+        if (current.id == ticket.id ||
+            int.tryParse(current.trip.id) == tripId) {
+          updatedList[i] = current.copyWith(review: savedReview);
+        }
+      }
 
       emit(
         state.copyWith(

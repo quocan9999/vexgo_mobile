@@ -261,14 +261,23 @@ class _TicketDetailContent extends StatelessWidget {
                   },
                 )
               else
-                CustomButton(
-                  text: 'Đặt lại chuyến xe này',
-                  prefixIcon: const Icon(
-                    Icons.refresh_rounded,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                  onPressed: () => context.go('/search-trips'),
+                Column(
+                  children: [
+                    Text(
+                      'Đã đánh giá • ${ticket.review!.rating}/5',
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                    const SizedBox(height: AppDimensions.sm),
+                    CustomButton(
+                      text: 'Đặt lại chuyến xe này',
+                      prefixIcon: const Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      onPressed: () => context.go('/search-trips'),
+                    ),
+                  ],
                 ),
             ],
 

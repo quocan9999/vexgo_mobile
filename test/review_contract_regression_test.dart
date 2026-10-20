@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:vexgo_app/core/network/api_client.dart';
 import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
@@ -16,6 +18,9 @@ import 'package:vexgo_app/data/repositories/booking_repository.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_bloc.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_event.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_state.dart';
+import 'package:vexgo_app/features/user/my_bookings/bloc/ticket_read_cubit.dart';
+import 'package:vexgo_app/features/user/my_bookings/presentation/screens/ticket_detail_screen.dart';
+import 'package:vexgo_app/features/user/my_bookings/presentation/widgets/ticket_summary_card.dart';
 import 'package:vexgo_app/features/user/my_bookings/presentation/widgets/review_bottom_sheet.dart';
 
 // Contract fixtures from TicketsService/BookingsService at vexgo develop@045ba69.
@@ -36,6 +41,15 @@ Map<String, dynamic> flatTicket({int? tripId = 902}) => {
   'departureTime': '2026-10-01T01:00:00.000Z',
   'seatNumber': 'A05',
   'price': 260000,
+  'passengerName': 'Contract fixture passenger',
+  'passengerPhone': '0900000001',
+  'cancellation': {
+    'eligible': false,
+    'reason': 'ALREADY_DEPARTED',
+    'cancelFeeRate': 0,
+    'cancelFee': 0,
+    'refundAmount': 0,
+  },
   'createdAt': '2026-09-29T01:00:00.000Z',
 };
 
@@ -61,6 +75,9 @@ class ReviewHarness {
   Map<String, dynamic>? receiptOverride;
   int reviewStatus = 201;
   int bookingReads = 0;
+  int detailReads = 0;
+  Map<String, dynamic>? savedReview;
+  bool secondSeat = false;
   final posts = <Map<String, dynamic>>[];
   final reviewStarted = Completer<void>();
   Completer<void>? responseGate;
@@ -75,12 +92,32 @@ class ReviewHarness {
   );
 
   Future<http.Response> handle(http.Request request) async {
-    expect(request.headers['Authorization'], 'Bearer fixture-access');
+    expectSync(request.headers['Authorization'], 'Bearer fixture-access');
     if (request.method == 'GET' && request.url.path.endsWith('/tickets')) {
       return http.Response(
         jsonEncode({
-          'data': [ticket],
+          'data': [
+            {...ticket, 'review': savedReview},
+            if (secondSeat)
+              {
+                ...ticket,
+                'ticketId': 502,
+                'ticketCode': 'TEST-TICKET-502',
+                'seatNumber': 'A06',
+                'review': savedReview,
+              },
+          ],
           'meta': {'totalPages': 1},
+        }),
+        200,
+        headers: jsonHeaders,
+      );
+    }
+    if (request.method == 'GET' && request.url.path.endsWith('/tickets/501')) {
+      detailReads++;
+      return http.Response(
+        jsonEncode({
+          'data': {...ticket, 'review': savedReview},
         }),
         200,
         headers: jsonHeaders,
@@ -106,19 +143,18 @@ class ReviewHarness {
           headers: jsonHeaders,
         );
       }
+      savedReview =
+          receiptOverride ??
+          {
+            'reviewId': 71,
+            'tripId': body['tripId'],
+            'rating': body['rating'],
+            'comment': (body['comment'] as String?)?.trim(),
+            'createdAt': '2026-10-20T08:00:00.000Z',
+            'status': 'HIEN_THI',
+          };
       return http.Response(
-        jsonEncode({
-          'data':
-              receiptOverride ??
-              {
-                'reviewId': 71,
-                'tripId': body['tripId'],
-                'rating': body['rating'],
-                'comment': (body['comment'] as String?)?.trim(),
-                'createdAt': '2026-10-20T08:00:00.000Z',
-                'status': 'HIEN_THI',
-              },
-        }),
+        jsonEncode({'data': savedReview}),
         201,
         headers: jsonHeaders,
       );
@@ -154,6 +190,7 @@ class ReviewHarness {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
   setUp(() async {
     ApiConfig.isDemoMode = false;
     TokenStorage.setStorageAdapterForTesting(InMemorySecureStorageAdapter());
@@ -177,7 +214,7 @@ void main() {
   );
 
   test(
-    'flat ticket HTTP -> one POST -> server receipt; reload never restores unsupported tags',
+    'POST then list/detail reload retains the server review without unsupported tags',
     () async {
       final h = ReviewHarness();
       addTearDown(h.bloc.close);
@@ -193,8 +230,128 @@ void main() {
       expect(saved.createdAt, '2026-10-20T08:00:00.000Z');
       expect(saved.tags, isEmpty);
       await h.load();
-      // Current ticket API does not hydrate reviews; do not manufacture one on reload.
-      expect(h.bloc.state.tickets.single.review, isNull);
+      expect(h.bloc.state.tickets.single.review, saved);
+      final reader = TicketReadCubit(owner: h.bloc);
+      addTearDown(reader.close);
+      await reader.loadTicket(h.bloc.state.tickets.single);
+      expect(reader.state.status, TicketReadStatus.loaded);
+      expect(reader.state.ticket!.review, saved);
+      await reader.refresh();
+      expect(reader.state.ticket!.review, saved);
+      final duplicate = await h.submit();
+      expect(duplicate.errorMessage, contains('đã đánh giá'));
+      expect(h.posts, hasLength(1));
+    },
+  );
+
+  test(
+    'all seats of a customer/trip reflect one saved review after submit and reload',
+    () async {
+      final h = ReviewHarness()..secondSeat = true;
+      addTearDown(h.bloc.close);
+      await h.load();
+      await h.submit();
+      expect(h.bloc.state.tickets.every((t) => t.review?.rating == 4), isTrue);
+      await h.load();
+      expect(h.bloc.state.tickets, hasLength(2));
+      expect(h.bloc.state.tickets.every((t) => t.review?.rating == 4), isTrue);
+      expect(h.posts, hasLength(1));
+    },
+  );
+
+  test(
+    'unknown ticket status remains rejected by the shared parser and reader',
+    () async {
+      final h = ReviewHarness();
+      h.ticket['status'] = 'UNRECOGNIZED';
+      addTearDown(h.bloc.close);
+      final reader = TicketReadCubit(owner: h.bloc);
+      addTearDown(reader.close);
+      await reader.loadTicket(TicketModel.fromJson(h.ticket));
+      expect(reader.state.status, TicketReadStatus.failure);
+      expect(reader.state.error, contains('Trạng thái vé chưa được hỗ trợ'));
+    },
+  );
+
+  test(
+    'malformed persisted review cannot silently become a new unreviewed ticket',
+    () async {
+      final h = ReviewHarness()..savedReview = {'reviewId': 71, 'tripId': 777};
+      addTearDown(h.bloc.close);
+      final reader = TicketReadCubit(owner: h.bloc);
+      addTearDown(reader.close);
+      await reader.loadTicket(TicketModel.fromJson(h.ticket));
+      expect(reader.state.status, TicketReadStatus.failure);
+    },
+  );
+
+  testWidgets(
+    'HOAN_TAT opens detail; post-success refresh and reopen keep reviewed UI',
+    (tester) async {
+      final h = ReviewHarness();
+      addTearDown(h.bloc.close);
+      await h.load();
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: h.bloc,
+          child: MaterialApp(
+            home: TicketDetailScreen(
+              initialTicket: h.bloc.state.tickets.single,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Chi tiết vé xe'), findsOneWidget);
+      expect(find.text('Đánh giá chuyến đi'), findsOneWidget);
+      h.bloc.add(
+        const SubmitTicketReviewEvent(ticketId: '501', review: submittedReview),
+      );
+      for (var i = 0; i < 30 && h.detailReads < 2; i++) {
+        await tester.pump(const Duration(milliseconds: 20));
+      }
+      await tester.pumpAndSettle();
+      expect(
+        h.detailReads,
+        greaterThanOrEqualTo(2),
+        reason:
+            'POST count=${h.posts.length}; bloc error=${h.bloc.state.errorMessage}',
+      );
+      expect(find.textContaining('Đã đánh giá'), findsOneWidget);
+      expect(find.text('Đánh giá chuyến đi'), findsNothing);
+      await tester.tap(find.byTooltip('Cập nhật trạng thái vé'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Đã đánh giá'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: h.bloc,
+          child: MaterialApp(
+            home: TicketDetailScreen(
+              initialTicket: h.bloc.state.tickets.single,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Đã đánh giá'), findsOneWidget);
+      expect(find.text('Đánh giá chuyến đi'), findsNothing);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TicketSummaryCard(
+              ticket: h.bloc.state.tickets.single,
+              onTap: () {},
+              onCancel: () {},
+              onReview: () {},
+              onRebook: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Đã đánh giá'), findsOneWidget);
+      expect(find.text('Đánh giá'), findsNothing);
       expect(h.posts, hasLength(1));
     },
   );

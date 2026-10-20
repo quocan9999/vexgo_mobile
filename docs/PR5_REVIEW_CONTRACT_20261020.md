@@ -26,15 +26,34 @@ reads this field; no route/date-derived ID or mock fallback is introduced.
 
 ## Validation and limits
 
-- New regression file: 18 tests passed.
-- Full local Flutter suite: 322 tests passed.
+- Review regression file: 22 tests passed after the readback follow-up below.
+- Full local Flutter suite: 326 tests passed.
 - New tests use HTTP fixtures, not live customer reviews. Backend PR #39 separately
   ran the real MySQL/HTTP review-persistence regression and passed Backend CI.
-- POST then GET reload is exercised. The current ticket API does **not** return
-  saved reviews, so review hydration across reload/restart remains a Backend
-  contract gap. Tests explicitly expect no invented review/tags after reload;
-  this is not a claim of complete review read-back support. Duplicate review
-  rejection remains enforced by Backend.
+- The initial follow-up documented review loss after reload. That expectation was
+  insufficient UX and is replaced: the companion Backend readback change returns
+  persisted own-customer/per-trip reviews in authenticated ticket list/detail.
+  Tests now require the accepted review to survive refresh and screen reopening,
+  with the badge retained and submit CTA suppressed. Backend readback must be
+  deployed before merging this Mobile follow-up.
 - This follow-up changes Mobile only and creates no real booking, review,
   payment or refund. Device review E2E is not claimed. Account changes stay in
-  the separate PR #6. Reviewer verifies and resolves the three open threads.
+  the separate PR #6. Reviewer verifies and resolves outstanding threads.
+
+## Completed-ticket detail and readback follow-up
+
+Depends on Backend [PR #40](https://github.com/quocan9999/vexgo/pull/40),
+`f024217`: deploy its authenticated ticket review readback before Mobile merge.
+
+- Model and TicketReadCubit share a supported-status parser including `HOAN_TAT`.
+  Unknown states still fail closed in detail reads.
+- Server review hydration uses the same strict parser as POST receipts. Invalid
+  identity, rating or timestamp cannot silently become an unreviewed ticket.
+- One accepted receipt updates current tickets for the trip. Already reviewed
+  tickets reject local duplicate submit clearly; Backend enforces the rule across
+  sessions. Unsupported tags stay absent.
+- A real datasource/repository/Cubit/detail widget regression opens `HOAN_TAT`,
+  submits, observes automatic refresh, manually refreshes, reopens detail and
+  checks the list badge. The review stays and another submit is suppressed.
+  Multiple seats and malformed readback are separate regressions. HTTP fixtures
+  are not claimed as physical-device E2E.

@@ -216,21 +216,24 @@ class TicketModel extends Equatable {
     this.rawStatus,
   });
 
-  factory TicketModel.fromJson(Map<String, dynamic> json) {
-    TicketStatus parseStatus(String? statusStr) {
-      final s = statusStr?.toUpperCase() ?? '';
-      if (s == 'COMPLETED' ||
-          s == 'HOAN_THANH' ||
-          s == 'HOAN_TAT' ||
-          s == 'DA_SU_DUNG') {
-        return TicketStatus.completed;
-      }
-      if (s == 'CANCELLED' || s == 'HUY' || s == 'DA_HUY' || s == 'HET_HAN') {
-        return TicketStatus.cancelled;
-      }
+  static TicketStatus? parseSupportedStatus(String? statusStr) {
+    final s = statusStr?.toUpperCase() ?? '';
+    if (s == 'COMPLETED' ||
+        s == 'HOAN_THANH' ||
+        s == 'HOAN_TAT' ||
+        s == 'DA_SU_DUNG') {
+      return TicketStatus.completed;
+    }
+    if (s == 'CANCELLED' || s == 'HUY' || s == 'DA_HUY' || s == 'HET_HAN') {
+      return TicketStatus.cancelled;
+    }
+    if (s == 'DA_DAT' || s == 'DA_THANH_TOAN' || s == 'UPCOMING') {
       return TicketStatus.upcoming;
     }
+    return null;
+  }
 
+  factory TicketModel.fromJson(Map<String, dynamic> json) {
     final id = json['ticketId']?.toString() ?? json['id']?.toString() ?? '';
     final ticketCode =
         json['ticketCode'] as String? ?? json['maVe'] as String? ?? '';
@@ -351,7 +354,9 @@ class TicketModel extends Equatable {
     return TicketModel(
       id: id,
       ticketCode: ticketCode,
-      status: parseStatus(json['status'] as String?),
+      status:
+          parseSupportedStatus(json['status'] as String?) ??
+          TicketStatus.upcoming,
       bookingDate: bookingDateStr,
       trip: tripSummary,
       seats: seatsList,
@@ -365,7 +370,12 @@ class TicketModel extends Equatable {
       cancelReason: json['cancelReason'] as String?,
       refundAmount: json['refundAmount'] as int?,
       review: json['review'] != null
-          ? ReviewModel.fromJson(json['review'] as Map<String, dynamic>)
+          ? (json['trip'] is Map<String, dynamic>
+                ? ReviewModel.fromJson(json['review'] as Map<String, dynamic>)
+                : ReviewModel.fromServerJson(
+                    json['review'] as Map<String, dynamic>,
+                    tripId: int.tryParse(tripSummary.id) ?? 0,
+                  ))
           : null,
       cancellation: cancellation,
       seatNumber: json['seatNumber']?.toString(),

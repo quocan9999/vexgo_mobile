@@ -25,6 +25,31 @@ class ReviewModel extends Equatable {
     );
   }
 
+  factory ReviewModel.fromServerJson(
+    Map<String, dynamic> json, {
+    required int tripId,
+  }) {
+    final rating = json['rating'];
+    final createdAt = json['createdAt'];
+    if (tripId <= 0 ||
+        json['tripId'] != tripId ||
+        json['reviewId'] is! int ||
+        (json['reviewId'] as int) <= 0 ||
+        rating is! int ||
+        rating < 1 ||
+        rating > 5 ||
+        (json['comment'] != null && json['comment'] is! String) ||
+        createdAt is! String ||
+        DateTime.tryParse(createdAt) == null) {
+      throw const FormatException('Máy chủ chưa xác nhận đánh giá hợp lệ.');
+    }
+    return ReviewModel(
+      rating: rating,
+      comment: json['comment'] as String? ?? '',
+      createdAt: createdAt,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
     'rating': rating,
     'comment': comment,

@@ -124,20 +124,8 @@ class TicketReadCubit extends Cubit<TicketReadState> {
           (!ApiConfig.isDemoMode && !ticket.hasFullDetails)) {
         throw StateError('Thông tin vé trả về không đầy đủ.');
       }
-      const supported = [
-        'DA_DAT',
-        'DA_THANH_TOAN',
-        'DA_SU_DUNG',
-        'HOAN_THANH',
-        'HUY',
-        'DA_HUY',
-        'HET_HAN',
-        'UPCOMING',
-        'COMPLETED',
-        'CANCELLED',
-      ];
       if (!ApiConfig.isDemoMode &&
-          !supported.contains(ticket.rawStatus?.toUpperCase())) {
+          TicketModel.parseSupportedStatus(ticket.rawStatus) == null) {
         throw StateError(
           'Trạng thái vé chưa được hỗ trợ. Vui lòng liên hệ nhà xe.',
         );

@@ -33,24 +33,10 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     );
 
     final data = res is Map<String, dynamic> ? res['data'] ?? res : null;
-    if (data is! Map<String, dynamic> ||
-        data['reviewId'] is! int ||
-        (data['reviewId'] as int) <= 0 ||
-        data['tripId'] != tripId ||
-        data['rating'] is! int ||
-        data['rating'] != rating ||
-        rating < 1 ||
-        rating > 5 ||
-        (data['comment'] != null && data['comment'] is! String) ||
-        data['createdAt'] is! String ||
-        DateTime.tryParse(data['createdAt'] as String) == null) {
+    if (data is! Map<String, dynamic> || data['rating'] != rating) {
       throw const FormatException('Máy chủ chưa xác nhận đánh giá hợp lệ.');
     }
     // Only fields confirmed by the review API; tags are not persisted by it.
-    return ReviewModel(
-      rating: data['rating'] as int,
-      comment: data['comment'] as String? ?? '',
-      createdAt: data['createdAt'] as String,
-    );
+    return ReviewModel.fromServerJson(data, tripId: tripId);
   }
 }
