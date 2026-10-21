@@ -636,4 +636,213 @@ void main() {
       expect(cubit.state.creating, isFalse);
     },
   );
+
+  group('Lead PR7: foreground guards at socket connection await boundaries', () {
+    test(
+      'activate does not read credentials or connect after its list resolves in background',
+      () async {
+        final list = Completer<ChatPage<ChatConversation>>();
+        repo.onConversations = (_) => list.future;
+        var tokenReads = 0;
+        final transport = FakeSocket();
+        final other = SupportChatCubit(
+          repository: repo,
+          socket: transport,
+          sessionVersion: () => 0,
+          accessToken: () async {
+            tokenReads++;
+            return 'foreground-token';
+          },
+        );
+        other.setSession('7');
+        final activation = other.activate();
+        other.setForeground(false);
+        list.complete(const ChatPage([], 0));
+        await activation;
+        expect(tokenReads, 0);
+        expect(transport.connects, 0);
+        await other.close();
+      },
+    );
+
+    test(
+      'activate does not connect after its credentials resolve in background',
+      () async {
+        final token = Completer<String?>();
+        final transport = FakeSocket();
+        final other = SupportChatCubit(
+          repository: repo,
+          socket: transport,
+          sessionVersion: () => 0,
+          accessToken: () => token.future,
+        );
+        other.setSession('7');
+        final activation = other.activate();
+        await tick();
+        other.setForeground(false);
+        token.complete('foreground-token');
+        await activation;
+        expect(transport.connects, 0);
+        await other.close();
+      },
+    );
+
+    test(
+      'authentication recovery does not connect when its list resolves in background',
+      () async {
+        final list = Completer<ChatPage<ChatConversation>>();
+        repo.onConversations = (_) => list.future;
+        final before = socket.connects;
+        socket.incoming('support.error', {'error': 'ACCESS_TOKEN_INVALID'});
+        cubit.setForeground(false);
+        list.complete(const ChatPage([], 0));
+        for (var i = 0; i < 4; i++) {
+          await tick();
+        }
+        expect(socket.connects, before);
+      },
+    );
+
+    test(
+      'authentication recovery does not connect when credentials resolve in background',
+      () async {
+        final token = Completer<String?>();
+        var reads = 0;
+        final transport = FakeSocket();
+        final other = SupportChatCubit(
+          repository: repo,
+          socket: transport,
+          sessionVersion: () => 0,
+          accessToken: () async => ++reads == 1 ? 'old-token' : token.future,
+        );
+        other.setSession('7');
+        await other.activate();
+        transport.incoming('support.error', {'error': 'ACCESS_TOKEN_INVALID'});
+        await tick();
+        expect(reads, 2);
+        other.setForeground(false);
+        token.complete('new-token');
+        for (var i = 0; i < 4; i++) {
+          await tick();
+        }
+        expect(transport.tokens, ['old-token']);
+        await other.close();
+      },
+    );
+
+    test(
+      'a suspended activation cannot replace the newer resumed connection',
+      () async {
+        final oldToken = Completer<String?>();
+        var reads = 0;
+        final transport = FakeSocket();
+        final other = SupportChatCubit(
+          repository: repo,
+          socket: transport,
+          sessionVersion: () => 0,
+          accessToken: () async =>
+              ++reads == 1 ? oldToken.future : 'resumed-token',
+        );
+        other.setSession('7');
+        final activation = other.activate();
+        await tick();
+        other.setForeground(false);
+        other.setForeground(true);
+        for (var i = 0; i < 4; i++) {
+          await tick();
+        }
+        expect(transport.tokens, ['resumed-token']);
+        oldToken.complete('suspended-token');
+        await activation;
+        expect(transport.tokens, ['resumed-token']);
+        await other.close();
+      },
+    );
+  });
+
+  group('Lead PR7: realtime summaries retain loaded conversation pagination', () {
+    test(
+      'deferred reordered first page retains loaded rows and continues with the next unfetched page',
+      () async {
+        final requested = <int>[];
+        final refreshPage = Completer<ChatPage<ChatConversation>>();
+        var refreshed = false;
+        final initial = List.generate(60, (i) => fixtureConversation(i + 1));
+        final reordered = [
+          fixtureConversation(40),
+          fixtureConversation(61),
+          ...initial.where((c) => c.id != 40),
+        ];
+        repo.onConversations = (page) async {
+          requested.add(page);
+          if (refreshed && page == 1) return refreshPage.future;
+          final all = refreshed ? reordered : initial;
+          return ChatPage(
+            all.skip((page - 1) * 20).take(20).toList(),
+            refreshed ? 4 : 3,
+          );
+        };
+        await cubit.loadConversations();
+        await cubit.loadConversations(more: true);
+        expect(cubit.state.conversations.length, 40);
+        refreshed = true;
+        socket.incoming(
+          'support.message.new',
+          messageJson(900, conversation: 40, sender: 8),
+        );
+        expect(cubit.state.conversations.length, 40);
+        refreshPage.complete(ChatPage(reordered.take(20).toList(), 4));
+        for (var i = 0; i < 4; i++) {
+          await tick();
+        }
+        expect(cubit.state.conversations.length, 41);
+        expect(
+          cubit.state.conversations.take(20).map((c) => c.id),
+          reordered.take(20).map((c) => c.id),
+        );
+        expect(
+          cubit.state.conversations
+              .map((c) => c.id)
+              .toSet()
+              .containsAll(List.generate(40, (i) => i + 1)),
+          isTrue,
+        );
+        await cubit.loadConversations(more: true);
+        await cubit.loadConversations(more: true);
+        expect(requested, [1, 2, 1, 3, 4]);
+        expect(cubit.state.conversations.length, 61);
+        expect(cubit.state.conversations.map((c) => c.id).toSet().length, 61);
+        expect(cubit.state.hasMore, isFalse);
+      },
+    );
+
+    test(
+      'refreshing a reordered first page does not reopen already exhausted pagination',
+      () async {
+        final requested = <int>[];
+        var refreshed = false;
+        final all = List.generate(40, (i) => fixtureConversation(i + 1));
+        repo.onConversations = (page) async {
+          requested.add(page);
+          final ordered = refreshed ? [all.last, ...all.take(39)] : all;
+          return ChatPage(ordered.skip((page - 1) * 20).take(20).toList(), 2);
+        };
+        await cubit.loadConversations();
+        await cubit.loadConversations(more: true);
+        expect(cubit.state.hasMore, isFalse);
+        refreshed = true;
+        socket.incoming(
+          'support.message.new',
+          messageJson(901, conversation: 40, sender: 8),
+        );
+        for (var i = 0; i < 4; i++) {
+          await tick();
+        }
+        expect(cubit.state.conversations.length, 40);
+        expect(cubit.state.hasMore, isFalse);
+        await cubit.loadConversations(more: true);
+        expect(requested, [1, 2, 1]);
+      },
+    );
+  });
 }

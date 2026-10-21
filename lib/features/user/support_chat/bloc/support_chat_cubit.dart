@@ -75,6 +75,7 @@ class SupportChatCubit extends Cubit<SupportChatState> {
   late final StreamSubscription<void> _invalidations;
   int _epoch = 0, _selection = 0, _page = 0, _lifecycleRevision = 0;
   int? _tokenVersion;
+  int _connectionGeneration = 0;
   bool _active = false, _foreground = true;
   Object? _resyncOperation;
   final Set<String> _sending = {};
@@ -103,6 +104,11 @@ class SupportChatCubit extends Cubit<SupportChatState> {
       state.session != null &&
       epoch == _epoch &&
       _tokenVersion == sessionVersion();
+  bool _canConnect(int epoch, int generation) =>
+      _valid(epoch) &&
+      _active &&
+      _foreground &&
+      generation == _connectionGeneration;
   bool _view(int epoch, int selection, int id) =>
       _valid(epoch) &&
       _active &&
@@ -113,6 +119,7 @@ class SupportChatCubit extends Cubit<SupportChatState> {
     final version = sessionVersion();
     if (state.session == key && _tokenVersion == version) return;
     _epoch++;
+    _connectionGeneration++;
     _selection++;
     _tokenVersion = version;
     _page = 0;
@@ -135,17 +142,18 @@ class SupportChatCubit extends Cubit<SupportChatState> {
   Future<void> activate() async {
     _active = true;
     if (state.session == null || !_foreground) return;
-    final epoch = _epoch;
-    await loadConversations();
-    if (!_valid(epoch) || !_active) return;
+    final epoch = _epoch, generation = _connectionGeneration;
+    await loadConversations(preserveLoadedPages: true);
+    if (!_canConnect(epoch, generation)) return;
     final token = await accessToken();
-    if (!_valid(epoch) || !_active || token == null) return;
+    if (!_canConnect(epoch, generation) || token == null) return;
     if (!socket.connected) socket.connect(token);
   }
 
   void deactivate() {
     if (isClosed) return;
     _active = false;
+    _connectionGeneration++;
     _resyncOperation = null;
     _historyInFlight = null;
     _historyWatermark = null;
@@ -166,6 +174,7 @@ class SupportChatCubit extends Cubit<SupportChatState> {
   void setForeground(bool foreground) {
     _foreground = foreground;
     if (!foreground) {
+      _connectionGeneration++;
       _selection++;
       _resyncOperation = null;
       _reading.clear();
@@ -192,17 +201,26 @@ class SupportChatCubit extends Cubit<SupportChatState> {
     }
   }
 
-  Future<void> loadConversations({bool more = false}) {
+  Future<void> loadConversations({
+    bool more = false,
+    bool preserveLoadedPages = false,
+  }) {
     final pending = _listInFlight;
     if (pending != null) return pending;
-    final operation = _loadConversations(more: more);
+    final operation = _loadConversations(
+      more: more,
+      preserveLoadedPages: preserveLoadedPages,
+    );
     _listInFlight = operation;
     return operation.whenComplete(() {
       if (identical(_listInFlight, operation)) _listInFlight = null;
     });
   }
 
-  Future<void> _loadConversations({bool more = false}) async {
+  Future<void> _loadConversations({
+    bool more = false,
+    bool preserveLoadedPages = false,
+  }) async {
     if (state.session == null || state.loading || (more && !state.hasMore)) {
       return;
     }
@@ -211,17 +229,25 @@ class SupportChatCubit extends Cubit<SupportChatState> {
     try {
       final result = await repository.conversations(page);
       if (!_valid(epoch)) return;
-      final merged = {
-        for (final c in more ? state.conversations : <ChatConversation>[])
-          c.id: c,
-        for (final c in result.items) c.id: c,
-      };
-      _page = page;
+      final fetched = {for (final c in result.items) c.id: c};
+      // Realtime refreshes reorder page 1, but do not invalidate rows/cursors from
+      // pages already fetched. The next offset page can overlap after reordering;
+      // deduplicate by conversation ID instead of rewinding its cursor.
+      final retainPages = preserveLoadedPages && result.totalPages > 0;
+      final merged = more
+          ? {for (final c in state.conversations) c.id: c, ...fetched}
+          : {
+              ...fetched,
+              if (retainPages)
+                for (final c in state.conversations)
+                  if (!fetched.containsKey(c.id)) c.id: c,
+            };
+      _page = retainPages && !more ? max(_page, page) : page;
       emit(
         state.copy(
           conversations: merged.values.toList(),
           loading: false,
-          hasMore: page < result.totalPages,
+          hasMore: _page < result.totalPages,
         ),
       );
     } catch (_) {
@@ -677,7 +703,7 @@ class SupportChatCubit extends Cubit<SupportChatState> {
             ),
           );
         }
-        unawaited(loadConversations());
+        unawaited(loadConversations(preserveLoadedPages: true));
         return;
       }
       if (id != state.selected?.id) return;
@@ -719,7 +745,7 @@ class SupportChatCubit extends Cubit<SupportChatState> {
         );
         _lifecycleRevision++;
         emit(state.copy(selected: conversation, typing: false));
-        unawaited(loadConversations());
+        unawaited(loadConversations(preserveLoadedPages: true));
       }
     } catch (_) {
       emit(state.copy(error: 'Dữ liệu chat chưa hợp lệ. Vui lòng tải lại.'));
@@ -732,7 +758,7 @@ class SupportChatCubit extends Cubit<SupportChatState> {
     _resyncOperation = operation;
     final epoch = _epoch, selection = _selection, id = state.selected?.id;
     try {
-      await loadConversations();
+      await loadConversations(preserveLoadedPages: true);
       if (id != null && _view(epoch, selection, id)) {
         await socket.request('support.conversation.join', {
           'cuocTroChuyenId': id,
@@ -748,12 +774,13 @@ class SupportChatCubit extends Cubit<SupportChatState> {
   }
 
   Future<void> _recoverAuthentication() async {
-    final epoch = _epoch;
-    await loadConversations(); // ApiClient refreshes expired access tokens over REST.
-    if (!_valid(epoch) || !_active) return;
+    final epoch = _epoch, generation = _connectionGeneration;
+    await loadConversations(
+      preserveLoadedPages: true,
+    ); // ApiClient rotates expired access tokens over REST.
+    if (!_canConnect(epoch, generation)) return;
     final token = await accessToken();
-    if (!_valid(epoch) ||
-        !_active ||
+    if (!_canConnect(epoch, generation) ||
         token == null ||
         token == _rejectedToken) {
       return;

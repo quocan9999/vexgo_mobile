@@ -41,3 +41,15 @@ The regressions cover a slow history response racing realtime, conversation/sess
 The 358-test suite consists of automated contract/HTTP-fixture/widget tests. The separate 10-check run uses the real Dart adapter and local NestJS/MySQL. Neither result claims physical-device E2E. The first widget harness failures (settling the old FAB animation, delivering a fixture stream from setUp's real async zone, and a dispose callback after an already closed Cubit) were corrected; the real source disposal path now safely ignores a closed Cubit. Private command logs are outside Git in `mobile-qa-evidence/`.
 
 QA debug build uses `--dart-define=DEMO_MODE=false --dart-define=API_BASE_URL=http://127.0.0.1:4000/api/v1`. Device QA requires forwarding phone port 4000 to the dedicated local chat API port (currently 4012). No shared database migration/reset/seed is part of this mobile change. No PR merge or review-thread resolution is authorized by these checks.
+
+
+## PR #7 Lead review follow-up
+
+Baseline: `5c7ea756592f19305a9da83108528284a83f4554`. Seven deterministic regressions were added and executed against the baseline implementation first; all seven failed for the reported behavior before the implementation fix.
+
+- Socket activation and authentication recovery now check the current foreground connection generation after both the conversation-list await and the token await. Backgrounding, leaving chat, or changing sessions invalidates pending connection work. An old activation cannot reconnect with its suspended token after a newer foreground activation has already connected.
+- Automatic conversation summary refreshes retain previously loaded pages and the highest fetched page cursor. The latest server page is ordered first, cached rows from later pages remain available, and offset-page overlaps after a reorder are deduplicated by conversation ID. The next load-more fetch continues with the next unfetched page; a realtime event does not reopen exhausted pagination. Explicit list refresh retains its existing page-reset behavior.
+
+The new pagination regression defers the reordered first-page response after loading 40 rows, introduces a new conversation while promoting an existing older row, then verifies the retained 41 rows and page sequence `1, 2, 1, 3, 4` until all 61 unique rows are loaded. A separate exhausted-pagination regression covers reordering without adding rows. Foreground regressions cover each activation/recovery await boundary and a suspended activation racing the resumed connection.
+
+Executed after the fixes: **39 focused chat tests**, **365 full Flutter tests**, analyzer **0 issues**, format **162 files / 0 changes**, and the Real Mode debug APK build **passed** (121.9 seconds). These checks use fixtures and controlled Futures; they do not claim a new physical-device run or replay the earlier live API integration. No shared database writes, APK installation, merge, commit, or push is part of this follow-up validation. Red/green logs are kept outside Git under `mobile-qa-evidence/chat-qa/mobile-pr7-lead-*`.
