@@ -1,3 +1,5 @@
+import 'package:go_router/go_router.dart';
+import '../../../../../app/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/network/api_config.dart';
@@ -188,6 +190,12 @@ class ProfileScreen extends StatelessWidget {
 
                   _buildSectionTitle('HỖ TRỢ & THÔNG TIN'),
                   _buildMenuCard([
+                    _MenuItem(
+                      icon: Icons.chat_bubble_outline_rounded,
+                      title: 'Chat với nhà xe',
+                      subtitle: 'Nhắn tin và theo dõi hỗ trợ',
+                      onTap: () => context.push(AppRoutes.supportChat),
+                    ),
                     _MenuItem(
                       icon: Icons.headset_mic_outlined,
                       title: 'Tổng đài chăm sóc khách hàng',
