@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vexgo_app/features/user/receipts/presentation/receipt_entry_button.dart';
 import 'package:flutter/services.dart';
 import '../../bloc/ticket_read_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -109,6 +110,8 @@ class _TicketDetailContent extends StatelessWidget {
               ticketReader: context.read<TicketReadCubit>(),
             ),
 
+            const SizedBox(height: AppDimensions.sm),
+            ReceiptEntryButton(ticket: ticket),
             const SizedBox(height: AppDimensions.base),
 
             // Driver & Hotline Card

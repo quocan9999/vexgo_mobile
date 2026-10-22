@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vexgo_app/features/user/receipts/presentation/receipt_entry_button.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -349,6 +350,8 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
               const SizedBox(height: AppDimensions.lg),
 
               // Action Buttons
+              ReceiptEntryButton(ticket: ticket),
+              const SizedBox(height: AppDimensions.sm),
               CustomButton(
                 text: 'Xem vé của tôi',
                 prefixIcon: const Icon(
