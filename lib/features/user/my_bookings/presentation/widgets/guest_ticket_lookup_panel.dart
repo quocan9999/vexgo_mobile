@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vexgo_app/features/user/receipts/presentation/receipt_entry_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/my_tickets_bloc.dart';
 import '../../bloc/ticket_read_cubit.dart';
@@ -129,6 +130,7 @@ class _GuestTicketLookupPanelState extends State<GuestTicketLookupPanel> {
         if (state.ticket != null) ...[
           const SizedBox(height: 20),
           BoardingPassCard(ticket: state.ticket!, ticketReader: _reader),
+          ReceiptEntryButton(ticket: state.ticket!),
           TextButton(
             onPressed: _reader.refresh,
             child: const Text('Cập nhật trạng thái vé'),

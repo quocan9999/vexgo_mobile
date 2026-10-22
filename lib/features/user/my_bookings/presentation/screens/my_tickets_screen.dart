@@ -67,9 +67,16 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
 
         return Scaffold(
           backgroundColor: const Color(0xFFF4F6F8),
-          appBar: const CustomAppBar(
+          appBar: CustomAppBar(
             title: 'Vé của tôi',
             automaticallyImplyLeading: false,
+            actions: [
+              IconButton(
+                tooltip: 'Tra cứu chứng từ thanh toán',
+                icon: const Icon(Icons.receipt_long_outlined),
+                onPressed: () => context.push('/booking-receipt'),
+              ),
+            ],
           ),
           body: state.requiresLogin
               ? _buildTicketsList(context, state, bloc)
