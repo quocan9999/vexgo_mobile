@@ -1,7 +1,6 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/features/user/search_trips/data/models/trip_filter_model.dart';
 
 class QuickFilterBar extends StatelessWidget {
@@ -25,10 +24,10 @@ class QuickFilterBar extends StatelessWidget {
     final activeCount = currentFilter.activeFilterCount;
 
     return Container(
-      height: 48,
+      height: 36 + MediaQuery.textScalerOf(context).scale(20),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: AppColors.neutral200)),
+        border: Border(bottom: BorderSide(color: DiscoveryColors.neutral200)),
       ),
       child: ListView(
         scrollDirection: Axis.horizontal,
@@ -45,13 +44,13 @@ class QuickFilterBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: activeCount > 0
-                    ? AppColors.primaryLight
-                    : AppColors.neutral100,
+                    ? DiscoveryColors.primaryLight
+                    : DiscoveryColors.neutral100,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                 border: Border.all(
                   color: activeCount > 0
-                      ? AppColors.primary
-                      : AppColors.neutral300,
+                      ? DiscoveryColors.primary
+                      : DiscoveryColors.neutral300,
                 ),
               ),
               child: Row(
@@ -60,16 +59,16 @@ class QuickFilterBar extends StatelessWidget {
                     Icons.tune_rounded,
                     size: 16,
                     color: activeCount > 0
-                        ? AppColors.primary
-                        : AppColors.neutral700,
+                        ? DiscoveryColors.primary
+                        : DiscoveryColors.neutral700,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     'Bộ lọc',
-                    style: AppTextStyles.caption.copyWith(
+                    style: DiscoveryTextStyles.caption.copyWith(
                       color: activeCount > 0
-                          ? AppColors.primary
-                          : AppColors.neutral700,
+                          ? DiscoveryColors.primary
+                          : DiscoveryColors.neutral700,
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
                     ),
@@ -79,7 +78,7 @@ class QuickFilterBar extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
-                        color: AppColors.primary,
+                        color: DiscoveryColors.primary,
                         shape: BoxShape.circle,
                       ),
                       child: Text(
@@ -107,22 +106,22 @@ class QuickFilterBar extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.neutral100,
+                color: DiscoveryColors.neutral100,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(color: AppColors.neutral300),
+                border: Border.all(color: DiscoveryColors.neutral300),
               ),
               child: Row(
                 children: [
                   const Icon(
                     Icons.swap_vert_rounded,
                     size: 16,
-                    color: AppColors.neutral700,
+                    color: DiscoveryColors.neutral700,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     currentSort.label,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.neutral700,
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      color: DiscoveryColors.neutral700,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -216,17 +215,21 @@ class QuickFilterBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight : Colors.white,
+          color: isSelected ? DiscoveryColors.primaryLight : Colors.white,
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.neutral300,
+            color: isSelected
+                ? DiscoveryColors.primary
+                : DiscoveryColors.neutral300,
           ),
         ),
         child: Center(
           child: Text(
             label,
-            style: AppTextStyles.caption.copyWith(
-              color: isSelected ? AppColors.primary : AppColors.neutral700,
+            style: DiscoveryTextStyles.caption.copyWith(
+              color: isSelected
+                  ? DiscoveryColors.primary
+                  : DiscoveryColors.neutral700,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               fontSize: 12,
             ),

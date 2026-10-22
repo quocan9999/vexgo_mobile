@@ -1,11 +1,9 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
-import 'package:vexgo_app/core/widgets/custom_app_bar.dart';
 import 'package:vexgo_app/core/widgets/empty_state.dart';
 import 'package:vexgo_app/core/widgets/loading_shimmer.dart';
 import 'package:vexgo_app/data/models/city_model.dart';
@@ -39,19 +37,22 @@ class SearchTripsScreen extends StatelessWidget {
     final effectiveToCity = toCity?.id ?? 'DL';
     final effectiveDate = date ?? DateTime.now().add(const Duration(days: 1));
 
-    return BlocProvider<SearchTripsBloc>(
-      create: (context) =>
-          SearchTripsBloc(tripRepository: context.read<TripRepository>())..add(
-            LoadTripsEvent(
-              fromCityId: effectiveFromCity,
-              toCityId: effectiveToCity,
-              date: effectiveDate,
-            ),
-          ),
-      child: _SearchTripsView(
-        fromCityName: fromCity?.name ?? 'TP. Hồ Chí Minh',
-        toCityName: toCity?.name ?? 'Đà Lạt',
-        ticketCount: ticketCount,
+    return DiscoveryTheme(
+      child: BlocProvider<SearchTripsBloc>(
+        create: (context) =>
+            SearchTripsBloc(tripRepository: context.read<TripRepository>())
+              ..add(
+                LoadTripsEvent(
+                  fromCityId: effectiveFromCity,
+                  toCityId: effectiveToCity,
+                  date: effectiveDate,
+                ),
+              ),
+        child: _SearchTripsView(
+          fromCityName: fromCity?.name ?? 'TP. Hồ Chí Minh',
+          toCityName: toCity?.name ?? 'Đà Lạt',
+          ticketCount: ticketCount,
+        ),
       ),
     );
   }
@@ -76,16 +77,13 @@ class _SearchTripsView extends StatelessWidget {
         final dateStr = DateFormatter.formatFullDate(state.selectedDate);
 
         return Scaffold(
-          backgroundColor: AppColors.background,
-          appBar: CustomAppBar(
+          backgroundColor: DiscoveryColors.background,
+          appBar: DiscoveryAppBar(
             title: '$fromCityName - $toCityName',
             subtitle: '$dateStr • $ticketCount vé',
             actions: [
               IconButton(
-                icon: const Icon(
-                  Icons.tune_rounded,
-                  color: AppColors.neutral900,
-                ),
+                icon: const Icon(Icons.tune_rounded, color: Colors.white),
                 tooltip: 'Bộ lọc',
                 onPressed: () async {
                   final newFilter = await TripFilterSheet.show(
@@ -151,15 +149,17 @@ class _SearchTripsView extends StatelessWidget {
                   AppDimensions.base,
                   AppDimensions.xs,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     Text(
                       state.status == SearchTripsStatus.loading
                           ? 'Đang tìm kiếm chuyến xe...'
                           : 'Tìm thấy ${state.filteredTrips.length} chuyến xe',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.neutral600,
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: DiscoveryColors.neutral600,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -171,13 +171,13 @@ class _SearchTripsView extends StatelessWidget {
                             const Icon(
                               Icons.close_rounded,
                               size: 14,
-                              color: AppColors.secondary,
+                              color: DiscoveryColors.secondary,
                             ),
                             const SizedBox(width: 2),
                             Text(
                               'Xóa lọc (${state.currentFilter.activeFilterCount})',
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.secondary,
+                              style: DiscoveryTextStyles.caption.copyWith(
+                                color: DiscoveryColors.secondary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),

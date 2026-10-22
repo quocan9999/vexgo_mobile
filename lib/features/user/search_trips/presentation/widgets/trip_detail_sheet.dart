@@ -1,12 +1,10 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/data/repositories/trip_repository.dart';
 import '../../bloc/trip_detail_cubit.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
-import 'package:vexgo_app/core/widgets/custom_button.dart';
 import 'package:vexgo_app/core/widgets/rating_badge.dart';
 import 'package:vexgo_app/data/models/trip_model.dart';
 
@@ -111,7 +109,7 @@ class _TripDetailContent extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.neutral300,
+                  color: DiscoveryColors.neutral300,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
                 ),
               ),
@@ -129,14 +127,14 @@ class _TripDetailContent extends StatelessWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
+                      color: DiscoveryColors.primaryLight,
                       borderRadius: BorderRadius.circular(
                         AppDimensions.radiusSm,
                       ),
                     ),
                     child: const Icon(
                       Icons.directions_bus_rounded,
-                      color: AppColors.primary,
+                      color: DiscoveryColors.primary,
                       size: 24,
                     ),
                   ),
@@ -147,7 +145,7 @@ class _TripDetailContent extends StatelessWidget {
                       children: [
                         Text(
                           trip.operatorName,
-                          style: AppTextStyles.titleMedium.copyWith(
+                          style: DiscoveryTextStyles.titleMedium.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
                           maxLines: 1,
@@ -166,8 +164,8 @@ class _TripDetailContent extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 '• ${trip.vehicleType}',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.neutral600,
+                                style: DiscoveryTextStyles.caption.copyWith(
+                                  color: DiscoveryColors.neutral600,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -189,9 +187,9 @@ class _TripDetailContent extends StatelessWidget {
             // Tab bar
             const TabBar(
               isScrollable: true,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.neutral500,
-              indicatorColor: AppColors.primary,
+              labelColor: DiscoveryColors.primary,
+              unselectedLabelColor: DiscoveryColors.neutral500,
+              indicatorColor: DiscoveryColors.primary,
               indicatorWeight: 2.5,
               tabs: [
                 Tab(text: 'Hình ảnh xe'),
@@ -243,19 +241,21 @@ class _TripDetailContent extends StatelessWidget {
                       children: [
                         Text(
                           'Giá chỉ từ',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.neutral500,
+                          style: DiscoveryTextStyles.caption.copyWith(
+                            color: DiscoveryColors.neutral500,
                           ),
                         ),
                         Text(
                           CurrencyFormatter.format(trip.discountPrice),
-                          style: AppTextStyles.price.copyWith(fontSize: 18),
+                          style: DiscoveryTextStyles.price.copyWith(
+                            fontSize: 18,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(width: AppDimensions.base),
                     Expanded(
-                      child: CustomButton(
+                      child: DiscoveryButton(
                         text: trip.availableSeats > 0
                             ? 'CHỌN CHUYẾN NÀY'
                             : 'CHUYẾN XE ĐÃ HẾT CHỖ',
@@ -289,7 +289,7 @@ class _TripDetailContent extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                color: AppColors.neutral100,
+                color: DiscoveryColors.neutral100,
               ),
               clipBehavior: Clip.antiAlias,
               child: Image.network(
@@ -299,7 +299,7 @@ class _TripDetailContent extends StatelessWidget {
                   child: Icon(
                     Icons.directions_bus_rounded,
                     size: 50,
-                    color: AppColors.primary,
+                    color: DiscoveryColors.primary,
                   ),
                 ),
               ),
@@ -327,19 +327,19 @@ class _TripDetailContent extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppDimensions.xs + 2),
                 decoration: BoxDecoration(
-                  color: AppColors.successLight,
+                  color: DiscoveryColors.successLight,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                 ),
                 child: const Icon(
                   Icons.check_rounded,
-                  color: AppColors.success,
+                  color: DiscoveryColors.success,
                   size: 16,
                 ),
               ),
               const SizedBox(width: AppDimensions.md),
               Text(
                 amenity,
-                style: AppTextStyles.bodyMedium.copyWith(
+                style: DiscoveryTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -364,11 +364,15 @@ class _TripDetailContent extends StatelessWidget {
                   width: 12,
                   height: 12,
                   decoration: const BoxDecoration(
-                    color: AppColors.primary,
+                    color: DiscoveryColors.primary,
                     shape: BoxShape.circle,
                   ),
                 ),
-                Container(width: 2, height: 60, color: AppColors.primaryLight),
+                Container(
+                  width: 2,
+                  height: 60,
+                  color: DiscoveryColors.primaryLight,
+                ),
               ],
             ),
             const SizedBox(width: AppDimensions.md),
@@ -381,8 +385,8 @@ class _TripDetailContent extends StatelessWidget {
                     children: [
                       Text(
                         'Điểm đón • ${trip.departureTime}',
-                        style: AppTextStyles.titleSmall.copyWith(
-                          color: AppColors.primary,
+                        style: DiscoveryTextStyles.titleSmall.copyWith(
+                          color: DiscoveryColors.primary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -391,15 +395,15 @@ class _TripDetailContent extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     trip.pickupPoint,
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: DiscoveryTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     trip.pickupAddress,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.neutral500,
+                    style: DiscoveryTextStyles.bodySmall.copyWith(
+                      color: DiscoveryColors.neutral500,
                     ),
                   ),
                 ],
@@ -416,7 +420,7 @@ class _TripDetailContent extends StatelessWidget {
               width: 12,
               height: 12,
               decoration: const BoxDecoration(
-                color: AppColors.secondary,
+                color: DiscoveryColors.secondary,
                 shape: BoxShape.circle,
               ),
             ),
@@ -430,8 +434,8 @@ class _TripDetailContent extends StatelessWidget {
                     children: [
                       Text(
                         'Điểm trả • ${trip.arrivalTime}',
-                        style: AppTextStyles.titleSmall.copyWith(
-                          color: AppColors.secondary,
+                        style: DiscoveryTextStyles.titleSmall.copyWith(
+                          color: DiscoveryColors.secondary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -440,15 +444,15 @@ class _TripDetailContent extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     trip.dropoffPoint,
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: DiscoveryTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     trip.dropoffAddress,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.neutral500,
+                    style: DiscoveryTextStyles.bodySmall.copyWith(
+                      color: DiscoveryColors.neutral500,
                     ),
                   ),
                 ],
@@ -472,22 +476,22 @@ class _TripDetailContent extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppDimensions.md),
           decoration: BoxDecoration(
-            color: AppColors.warningLight,
+            color: DiscoveryColors.warningLight,
             borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           ),
           child: Row(
             children: [
               const Icon(
                 Icons.warning_amber_rounded,
-                color: AppColors.warning,
+                color: DiscoveryColors.warning,
                 size: 20,
               ),
               const SizedBox(width: AppDimensions.sm),
               Expanded(
                 child: Text(
                   'Lưu ý: Vào dịp Lễ/Tết chính sách hoàn hủy vé sẽ tuân theo quy định riêng của nhà xe.',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neutral800,
+                  style: DiscoveryTextStyles.caption.copyWith(
+                    color: DiscoveryColors.neutral800,
                   ),
                 ),
               ),
@@ -504,7 +508,7 @@ class _TripDetailContent extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.circle, size: 8, color: AppColors.primary),
+          const Icon(Icons.circle, size: 8, color: DiscoveryColors.primary),
           const SizedBox(width: AppDimensions.sm),
           Expanded(
             child: Column(
@@ -512,15 +516,15 @@ class _TripDetailContent extends StatelessWidget {
               children: [
                 Text(
                   time,
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: DiscoveryTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   rule,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.neutral600,
+                  style: DiscoveryTextStyles.bodySmall.copyWith(
+                    color: DiscoveryColors.neutral600,
                   ),
                 ),
               ],

@@ -1,8 +1,7 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/widgets/rating_badge.dart';
 import 'package:vexgo_app/data/models/operator_model.dart';
 import '../../bloc/home_bloc.dart';
@@ -34,7 +33,7 @@ class FeaturedOperatorsSection extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.neutral300,
+                    color: DiscoveryColors.neutral300,
                     borderRadius: BorderRadius.circular(
                       AppDimensions.radiusFull,
                     ),
@@ -48,14 +47,14 @@ class FeaturedOperatorsSection extends StatelessWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
+                      color: DiscoveryColors.primaryLight,
                       borderRadius: BorderRadius.circular(
                         AppDimensions.radiusMd,
                       ),
                     ),
                     child: const Icon(
                       Icons.directions_bus_rounded,
-                      color: AppColors.primary,
+                      color: DiscoveryColors.primary,
                       size: 28,
                     ),
                   ),
@@ -64,7 +63,7 @@ class FeaturedOperatorsSection extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(op.name, style: AppTextStyles.h3),
+                        Text(op.name, style: DiscoveryTextStyles.h3),
                         if (op.rating != null) ...[
                           const SizedBox(height: 2),
                           RatingBadge(
@@ -87,16 +86,16 @@ class FeaturedOperatorsSection extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.phone_in_talk_rounded,
-                      color: AppColors.secondary,
+                      color: DiscoveryColors.secondary,
                       size: 20,
                     ),
                     const SizedBox(width: AppDimensions.sm),
-                    Text('Hotline: ', style: AppTextStyles.bodyMedium),
+                    Text('Hotline: ', style: DiscoveryTextStyles.bodyMedium),
                     Flexible(
                       child: Text(
                         op.hotline!,
-                        style: AppTextStyles.titleSmall.copyWith(
-                          color: AppColors.primary,
+                        style: DiscoveryTextStyles.titleSmall.copyWith(
+                          color: DiscoveryColors.primary,
                           fontWeight: FontWeight.w700,
                         ),
                         maxLines: 1,
@@ -113,15 +112,15 @@ class FeaturedOperatorsSection extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.info_outline_rounded,
-                      color: AppColors.neutral500,
+                      color: DiscoveryColors.neutral500,
                       size: 20,
                     ),
                     const SizedBox(width: AppDimensions.sm),
                     Expanded(
                       child: Text(
                         'Chính sách: ${op.policy!}',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.neutral600,
+                        style: DiscoveryTextStyles.bodySmall.copyWith(
+                          color: DiscoveryColors.neutral600,
                         ),
                       ),
                     ),
@@ -158,23 +157,14 @@ class FeaturedOperatorsSection extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Nhà xe uy tín đối tác',
-                      style: AppTextStyles.h3.copyWith(
+                      style: DiscoveryTextStyles.h3.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Xem thêm',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  const SizedBox.shrink(),
                 ],
               ),
             ),
@@ -202,7 +192,7 @@ class FeaturedOperatorsSection extends StatelessWidget {
                         borderRadius: BorderRadius.circular(
                           AppDimensions.radiusLg,
                         ),
-                        border: Border.all(color: AppColors.neutral200),
+                        border: Border.all(color: DiscoveryColors.neutral200),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x08000000),
@@ -221,14 +211,14 @@ class FeaturedOperatorsSection extends StatelessWidget {
                                 width: 36,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryLight,
+                                  color: DiscoveryColors.primaryLight,
                                   borderRadius: BorderRadius.circular(
                                     AppDimensions.radiusSm,
                                   ),
                                 ),
                                 child: const Icon(
                                   Icons.directions_bus_rounded,
-                                  color: AppColors.primary,
+                                  color: DiscoveryColors.primary,
                                   size: 20,
                                 ),
                               ),
@@ -236,10 +226,11 @@ class FeaturedOperatorsSection extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   op.shortName,
-                                  style: AppTextStyles.titleSmall.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
-                                  ),
+                                  style: DiscoveryTextStyles.titleSmall
+                                      .copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 13,
+                                      ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -257,8 +248,8 @@ class FeaturedOperatorsSection extends StatelessWidget {
                             const SizedBox(height: AppDimensions.xs),
                             Text(
                               'Hotline: ${op.hotline!}',
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.neutral500,
+                              style: DiscoveryTextStyles.caption.copyWith(
+                                color: DiscoveryColors.neutral500,
                                 fontSize: 11,
                               ),
                               maxLines: 1,

@@ -1,11 +1,9 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
-import 'package:vexgo_app/core/widgets/custom_button.dart';
 import '../../bloc/home_bloc.dart';
 import '../../bloc/home_event.dart';
 import '../../bloc/home_state.dart';
@@ -30,9 +28,9 @@ class SearchFormCard extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
+              primary: DiscoveryColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.neutral900,
+              onSurface: DiscoveryColors.neutral900,
             ),
           ),
           child: child!,
@@ -61,7 +59,7 @@ class SearchFormCard extends StatelessWidget {
                 offset: Offset(0, 4),
               ),
             ],
-            border: Border.all(color: AppColors.neutral200),
+            border: Border.all(color: DiscoveryColors.neutral200),
           ),
           child: Column(
             children: [
@@ -82,7 +80,7 @@ class SearchFormCard extends StatelessWidget {
                         _buildCityRow(
                           context,
                           icon: Icons.trip_origin_rounded,
-                          iconColor: AppColors.primary,
+                          iconColor: DiscoveryColors.primary,
                           label: 'Điểm xuất phát',
                           cityName: state.departureCity?.name ?? 'Chọn điểm đi',
                           province: state.departureCity?.region,
@@ -103,7 +101,7 @@ class SearchFormCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 36, right: 48),
                           child: const Divider(
                             height: 1,
-                            color: AppColors.neutral200,
+                            color: DiscoveryColors.neutral200,
                           ),
                         ),
 
@@ -111,7 +109,7 @@ class SearchFormCard extends StatelessWidget {
                         _buildCityRow(
                           context,
                           icon: Icons.location_on_rounded,
-                          iconColor: AppColors.secondary,
+                          iconColor: DiscoveryColors.secondary,
                           label: 'Điểm đến',
                           cityName:
                               state.destinationCity?.name ?? 'Chọn điểm đến',
@@ -145,15 +143,17 @@ class SearchFormCard extends StatelessWidget {
                           customBorder: const CircleBorder(),
                           onTap: () => homeBloc.add(const SwapCitiesEvent()),
                           child: Container(
-                            width: 40,
-                            height: 40,
+                            width: 48,
+                            height: 48,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.neutral200),
+                              border: Border.all(
+                                color: DiscoveryColors.neutral200,
+                              ),
                             ),
                             child: const Icon(
                               Icons.swap_vert_rounded,
-                              color: AppColors.primary,
+                              color: DiscoveryColors.primary,
                               size: 22,
                             ),
                           ),
@@ -164,7 +164,7 @@ class SearchFormCard extends StatelessWidget {
                 ),
               ),
 
-              const Divider(height: 1, color: AppColors.neutral200),
+              const Divider(height: 1, color: DiscoveryColors.neutral200),
 
               // Date Selection Section
               Padding(
@@ -172,7 +172,9 @@ class SearchFormCard extends StatelessWidget {
                 child: Column(
                   children: [
                     // One-way / Round-trip selector
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
                         _buildTripTypeChip(
                           label: 'Một chiều',
@@ -212,18 +214,20 @@ class SearchFormCard extends StatelessWidget {
                                 AppDimensions.sm + 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.neutral50,
+                                color: DiscoveryColors.neutral50,
                                 borderRadius: BorderRadius.circular(
                                   AppDimensions.radiusMd,
                                 ),
-                                border: Border.all(color: AppColors.neutral200),
+                                border: Border.all(
+                                  color: DiscoveryColors.neutral200,
+                                ),
                               ),
                               child: Row(
                                 children: [
                                   const Icon(
                                     Icons.calendar_today_rounded,
                                     size: 18,
-                                    color: AppColors.primary,
+                                    color: DiscoveryColors.primary,
                                   ),
                                   const SizedBox(width: AppDimensions.sm),
                                   Expanded(
@@ -233,16 +237,18 @@ class SearchFormCard extends StatelessWidget {
                                       children: [
                                         Text(
                                           'Ngày đi',
-                                          style: AppTextStyles.caption.copyWith(
-                                            color: AppColors.neutral500,
-                                          ),
+                                          style: DiscoveryTextStyles.caption
+                                              .copyWith(
+                                                color:
+                                                    DiscoveryColors.neutral500,
+                                              ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           DateFormatter.formatFullDate(
                                             state.departureDate,
                                           ),
-                                          style: AppTextStyles.titleSmall
+                                          style: DiscoveryTextStyles.titleSmall
                                               .copyWith(
                                                 fontWeight: FontWeight.w700,
                                               ),
@@ -282,12 +288,12 @@ class SearchFormCard extends StatelessWidget {
                                   AppDimensions.sm + 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.neutral50,
+                                  color: DiscoveryColors.neutral50,
                                   borderRadius: BorderRadius.circular(
                                     AppDimensions.radiusMd,
                                   ),
                                   border: Border.all(
-                                    color: AppColors.neutral200,
+                                    color: DiscoveryColors.neutral200,
                                   ),
                                 ),
                                 child: Row(
@@ -295,7 +301,7 @@ class SearchFormCard extends StatelessWidget {
                                     const Icon(
                                       Icons.event_repeat_rounded,
                                       size: 18,
-                                      color: AppColors.secondary,
+                                      color: DiscoveryColors.secondary,
                                     ),
                                     const SizedBox(width: AppDimensions.sm),
                                     Expanded(
@@ -305,9 +311,10 @@ class SearchFormCard extends StatelessWidget {
                                         children: [
                                           Text(
                                             'Ngày về',
-                                            style: AppTextStyles.caption
+                                            style: DiscoveryTextStyles.caption
                                                 .copyWith(
-                                                  color: AppColors.neutral500,
+                                                  color: DiscoveryColors
+                                                      .neutral500,
                                                 ),
                                           ),
                                           const SizedBox(height: 2),
@@ -317,7 +324,8 @@ class SearchFormCard extends StatelessWidget {
                                                     state.returnDate!,
                                                   )
                                                 : 'Chọn ngày về',
-                                            style: AppTextStyles.titleSmall
+                                            style: DiscoveryTextStyles
+                                                .titleSmall
                                                 .copyWith(
                                                   fontWeight: FontWeight.w700,
                                                 ),
@@ -339,7 +347,9 @@ class SearchFormCard extends StatelessWidget {
                     const SizedBox(height: AppDimensions.sm),
 
                     // Quick date chips: Hôm nay, Ngày mai
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
                         _buildQuickDateChip(
                           label: 'Hôm nay',
@@ -364,7 +374,7 @@ class SearchFormCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const Spacer(),
+
                         // Number of tickets
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -372,7 +382,7 @@ class SearchFormCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.neutral100,
+                            color: DiscoveryColors.neutral100,
                             borderRadius: BorderRadius.circular(
                               AppDimensions.radiusFull,
                             ),
@@ -380,14 +390,14 @@ class SearchFormCard extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              GestureDetector(
-                                onTap: () => homeBloc.add(
+                              IconButton(
+                                tooltip: 'Giảm số vé',
+                                onPressed: () => homeBloc.add(
                                   UpdateTicketCountEvent(state.ticketCount - 1),
                                 ),
-                                child: const Icon(
+                                icon: const Icon(
                                   Icons.remove_circle_outline_rounded,
-                                  size: 18,
-                                  color: AppColors.neutral700,
+                                  color: DiscoveryColors.neutral700,
                                 ),
                               ),
                               Padding(
@@ -396,20 +406,20 @@ class SearchFormCard extends StatelessWidget {
                                 ),
                                 child: Text(
                                   '${state.ticketCount} vé',
-                                  style: AppTextStyles.caption.copyWith(
+                                  style: DiscoveryTextStyles.caption.copyWith(
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.neutral900,
+                                    color: DiscoveryColors.neutral900,
                                   ),
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () => homeBloc.add(
+                              IconButton(
+                                tooltip: 'Tăng số vé',
+                                onPressed: () => homeBloc.add(
                                   UpdateTicketCountEvent(state.ticketCount + 1),
                                 ),
-                                child: const Icon(
+                                icon: const Icon(
                                   Icons.add_circle_outline_rounded,
-                                  size: 18,
-                                  color: AppColors.neutral700,
+                                  color: DiscoveryColors.neutral700,
                                 ),
                               ),
                             ],
@@ -421,8 +431,9 @@ class SearchFormCard extends StatelessWidget {
                     const SizedBox(height: AppDimensions.base),
 
                     // Primary Search Button
-                    CustomButton(
-                      text: 'Tìm Chuyến Xe Khách',
+                    DiscoveryButton(
+                      text: 'Tìm chuyến',
+                      type: ButtonType.secondary,
                       prefixIcon: const Icon(
                         Icons.directions_bus_rounded,
                         color: Colors.white,
@@ -506,16 +517,16 @@ class SearchFormCard extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.neutral500,
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      color: DiscoveryColors.neutral500,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     cityName,
-                    style: AppTextStyles.titleMedium.copyWith(
+                    style: DiscoveryTextStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.neutral900,
+                      color: DiscoveryColors.neutral900,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -528,13 +539,13 @@ class SearchFormCard extends StatelessWidget {
                 margin: const EdgeInsets.only(right: 48),
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.neutral100,
+                  color: DiscoveryColors.neutral100,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   province,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neutral600,
+                  style: DiscoveryTextStyles.caption.copyWith(
+                    color: DiscoveryColors.neutral600,
                     fontSize: 10,
                   ),
                 ),
@@ -558,18 +569,22 @@ class SearchFormCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.1)
+              ? DiscoveryColors.primary.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.neutral300,
+            color: isSelected
+                ? DiscoveryColors.primary
+                : DiscoveryColors.neutral300,
             width: isSelected ? 1.5 : 1.0,
           ),
         ),
         child: Text(
           label,
-          style: AppTextStyles.caption.copyWith(
-            color: isSelected ? AppColors.primary : AppColors.neutral600,
+          style: DiscoveryTextStyles.caption.copyWith(
+            color: isSelected
+                ? DiscoveryColors.primary
+                : DiscoveryColors.neutral600,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
@@ -588,13 +603,15 @@ class SearchFormCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.neutral100,
+          color: isSelected
+              ? DiscoveryColors.primary
+              : DiscoveryColors.neutral100,
           borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
         ),
         child: Text(
           label,
-          style: AppTextStyles.caption.copyWith(
-            color: isSelected ? Colors.white : AppColors.neutral700,
+          style: DiscoveryTextStyles.caption.copyWith(
+            color: isSelected ? Colors.white : DiscoveryColors.neutral700,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             fontSize: 11,
           ),

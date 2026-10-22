@@ -1,7 +1,6 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/features/user/search_trips/data/models/trip_filter_model.dart';
 
 class TripSortSheet extends StatelessWidget {
@@ -40,7 +39,7 @@ class TripSortSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.neutral300,
+                color: DiscoveryColors.neutral300,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
               ),
             ),
@@ -48,7 +47,7 @@ class TripSortSheet extends StatelessWidget {
           const SizedBox(height: AppDimensions.md),
           Text(
             'Sắp xếp theo',
-            style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
+            style: DiscoveryTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: AppDimensions.sm),
           const Divider(),
@@ -58,20 +57,24 @@ class TripSortSheet extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               leading: Icon(
                 _getSortIcon(sort),
-                color: isSelected ? AppColors.primary : AppColors.neutral500,
+                color: isSelected
+                    ? DiscoveryColors.primary
+                    : DiscoveryColors.neutral500,
                 size: 20,
               ),
               title: Text(
                 sort.label,
-                style: AppTextStyles.bodyMedium.copyWith(
+                style: DiscoveryTextStyles.bodyMedium.copyWith(
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? AppColors.primary : AppColors.neutral900,
+                  color: isSelected
+                      ? DiscoveryColors.primary
+                      : DiscoveryColors.neutral900,
                 ),
               ),
               trailing: isSelected
                   ? const Icon(
                       Icons.check_rounded,
-                      color: AppColors.primary,
+                      color: DiscoveryColors.primary,
                       size: 22,
                     )
                   : null,

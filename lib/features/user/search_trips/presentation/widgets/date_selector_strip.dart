@@ -1,8 +1,7 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 
 class DateSelectorStrip extends StatelessWidget {
   final DateTime selectedDate;
@@ -23,10 +22,10 @@ class DateSelectorStrip extends StatelessWidget {
     final days = List.generate(14, (i) => today.add(Duration(days: i)));
 
     return Container(
-      height: 76,
+      height: 44 + MediaQuery.textScalerOf(context).scale(32),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: AppColors.neutral200)),
+        border: Border(bottom: BorderSide(color: DiscoveryColors.neutral200)),
       ),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
@@ -77,19 +76,25 @@ class DateSelectorStrip extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 82,
+              width: 60 + MediaQuery.textScalerOf(context).scale(22),
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.neutral50,
+                color: isSelected
+                    ? DiscoveryColors.primary
+                    : DiscoveryColors.neutral50,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.neutral200,
+                  color: isSelected
+                      ? DiscoveryColors.primary
+                      : DiscoveryColors.neutral200,
                   width: isSelected ? 1.5 : 1,
                 ),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.25),
+                          color: DiscoveryColors.primary.withValues(
+                            alpha: 0.25,
+                          ),
                           blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
@@ -102,8 +107,10 @@ class DateSelectorStrip extends StatelessWidget {
                 children: [
                   Text(
                     dateTitle,
-                    style: AppTextStyles.caption.copyWith(
-                      color: isSelected ? Colors.white : AppColors.neutral700,
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      color: isSelected
+                          ? Colors.white
+                          : DiscoveryColors.neutral700,
                       fontWeight: isSelected
                           ? FontWeight.w700
                           : FontWeight.w500,
@@ -116,8 +123,10 @@ class DateSelectorStrip extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     priceK,
-                    style: AppTextStyles.caption.copyWith(
-                      color: isSelected ? Colors.white : AppColors.secondary,
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      color: isSelected
+                          ? Colors.white
+                          : DiscoveryColors.secondary,
                       fontWeight: FontWeight.w800,
                       fontSize: 12,
                     ),
