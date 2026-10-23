@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/features/user/search_trips/presentation/widgets/trip_card.dart';
+import 'package:vexgo_app/features/user/search_trips/presentation/widgets/trip_detail_sheet.dart';
 import 'package:vexgo_app/features/user/search_trips/presentation/widgets/date_selector_strip.dart';
 import 'package:vexgo_app/features/user/search_trips/presentation/widgets/quick_filter_bar.dart';
 import 'package:vexgo_app/data/models/city_model.dart';
@@ -19,6 +20,7 @@ import 'package:vexgo_app/features/user/search_trips/presentation/widgets/trip_f
 
 class _Trips implements TripRepository {
   bool fail = false;
+  TripModel? tripToReturn;
   @override
   Future<List<CityModel>> getCities() async {
     if (fail) throw Exception('offline');
@@ -44,7 +46,10 @@ class _Trips implements TripRepository {
     String? date,
   }) async => [];
   @override
-  Future<TripModel?> getTripById(String id) async => null;
+  Future<TripModel?> getTripById(String id) async {
+    if (fail) throw Exception('offline');
+    return tripToReturn;
+  }
 }
 
 void main() {
@@ -221,5 +226,232 @@ void main() {
     await tester.tap(find.text('ÁP DỤNG BỘ LỌC'));
     await tester.pumpAndSettle();
     expect(result!.selectedTimeSlots, [TimeSlot.morning]);
+  });
+
+  testWidgets(
+    'Round trip toggle switch enables return date picker when on and hides it when off',
+    (tester) async {
+      await tester.pumpWidget(
+        RepositoryProvider<TripRepository>(
+          create: (_) => _Trips(),
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tra cứu vé và xem vé của tôi'), findsNothing);
+      expect(find.text('Hôm nay'), findsNothing);
+      expect(find.text('Ngày mai'), findsNothing);
+
+      expect(find.text('Khứ hồi'), findsOneWidget);
+      final switchFinder = find.byType(Switch);
+      expect(switchFinder, findsOneWidget);
+      expect((tester.widget(switchFinder) as Switch).value, isFalse);
+
+      expect(find.text('Ngày đi'), findsOneWidget);
+      expect(find.text('Ngày về'), findsNothing);
+
+      await tester.tap(switchFinder);
+      await tester.pumpAndSettle();
+
+      expect((tester.widget(switchFinder) as Switch).value, isTrue);
+      expect(find.text('Ngày đi'), findsOneWidget);
+      expect(find.text('Ngày về'), findsOneWidget);
+
+      await tester.tap(switchFinder);
+      await tester.pumpAndSettle();
+
+      expect((tester.widget(switchFinder) as Switch).value, isFalse);
+      expect(find.text('Ngày đi'), findsOneWidget);
+      expect(find.text('Ngày về'), findsNothing);
+    },
+  );
+
+  testWidgets('TripCard disables CTA button when sold out', (tester) async {
+    const soldOutTrip = TripModel(
+      id: 'trip_sold_out',
+      operatorId: 'op_1',
+      operatorName: 'Phương Trang',
+      vehicleType: 'Limousine 34 giường',
+      fromCityId: 'HCM',
+      fromCityName: 'TP. Hồ Chí Minh',
+      toCityId: 'DL',
+      toCityName: 'Đà Lạt',
+      departureTime: '08:00',
+      arrivalTime: '14:00',
+      duration: '6 giờ',
+      pickupPoint: 'Bến xe Miền Tây',
+      pickupAddress: '395 Kinh Dương Vương, An Lạc, Bình Tân',
+      dropoffPoint: 'Bến xe Đà Lạt',
+      dropoffAddress: '01 Tô Hiến Thành, Phường 3, Đà Lạt',
+      originalPrice: 300000,
+      discountPrice: 280000,
+      availableSeats: 0,
+      totalSeats: 34,
+      seatLayoutType: 'standard',
+      rating: 4.8,
+      reviewCount: 120,
+      amenities: ['wifi'],
+      images: [],
+      pickupPoints: [],
+      dropoffPoints: [],
+    );
+
+    bool wasSelected = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TripCard(
+            trip: soldOutTrip,
+            onSelect: (_) => wasSelected = true,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chuyến xe đã hết chỗ'), findsOneWidget);
+    final buttonFinder = find.byType(DiscoveryButton);
+    expect(buttonFinder, findsOneWidget);
+    final buttonWidget = tester.widget<DiscoveryButton>(buttonFinder);
+    expect(buttonWidget.onPressed, isNull);
+
+    await tester.tap(buttonFinder, warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(wasSelected, isFalse);
+  });
+
+  testWidgets('TripDetailSheet shows error state with retry and close', (
+    tester,
+  ) async {
+    const baseTrip = TripModel(
+      id: 'trip_detail_test',
+      operatorId: 'op_1',
+      operatorName: 'Phương Trang',
+      vehicleType: 'Limousine 34 giường',
+      fromCityId: 'HCM',
+      fromCityName: 'TP. Hồ Chí Minh',
+      toCityId: 'DL',
+      toCityName: 'Đà Lạt',
+      departureTime: '08:00',
+      arrivalTime: '14:00',
+      duration: '6 giờ',
+      pickupPoint: 'Bến xe Miền Tây',
+      pickupAddress: '395 Kinh Dương Vương, An Lạc, Bình Tân',
+      dropoffPoint: 'Bến xe Đà Lạt',
+      dropoffAddress: '01 Tô Hiến Thành, Phường 3, Đà Lạt',
+      originalPrice: 300000,
+      discountPrice: 280000,
+      availableSeats: 10,
+      totalSeats: 34,
+      seatLayoutType: 'standard',
+      rating: 4.8,
+      reviewCount: 120,
+      amenities: ['wifi'],
+      images: [],
+      pickupPoints: [],
+      dropoffPoints: [],
+    );
+
+    final repo = _Trips()..fail = true;
+
+    await tester.pumpWidget(
+      RepositoryProvider<TripRepository>.value(
+        value: repo,
+        child: MaterialApp(
+          home: Scaffold(
+            body: TripDetailSheet(trip: baseTrip, onSelectTrip: (_) {}),
+          ),
+        ),
+      ),
+    );
+
+    for (int i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+      if (find.text('Không thể tải chi tiết chuyến').evaluate().isNotEmpty) {
+        break;
+      }
+    }
+    await tester.pumpAndSettle();
+
+    expect(find.text('Không thể tải chi tiết chuyến'), findsOneWidget);
+    expect(find.text('Đóng'), findsOneWidget);
+    expect(find.text('Thử lại'), findsOneWidget);
+
+    repo.fail = false;
+    repo.tripToReturn = baseTrip;
+    await tester.tap(find.text('Thử lại'));
+    for (int i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+      if (find.text('Tiện ích').evaluate().isNotEmpty) {
+        break;
+      }
+    }
+    await tester.pumpAndSettle();
+
+    expect(find.text('Không thể tải chi tiết chuyến'), findsNothing);
+    expect(find.text(baseTrip.operatorName), findsOneWidget);
+  });
+
+  testWidgets('TripDetailSheet shows empty state for amenities when empty', (
+    tester,
+  ) async {
+    const noAmenitiesTrip = TripModel(
+      id: 'trip_no_amenities',
+      operatorId: 'op_1',
+      operatorName: 'Phương Trang',
+      vehicleType: 'Limousine 34 giường',
+      fromCityId: 'HCM',
+      fromCityName: 'TP. Hồ Chí Minh',
+      toCityId: 'DL',
+      toCityName: 'Đà Lạt',
+      departureTime: '08:00',
+      arrivalTime: '14:00',
+      duration: '6 giờ',
+      pickupPoint: 'Bến xe Miền Tây',
+      pickupAddress: '395 Kinh Dương Vương, An Lạc, Bình Tân',
+      dropoffPoint: 'Bến xe Đà Lạt',
+      dropoffAddress: '01 Tô Hiến Thành, Phường 3, Đà Lạt',
+      originalPrice: 300000,
+      discountPrice: 280000,
+      availableSeats: 10,
+      totalSeats: 34,
+      seatLayoutType: 'standard',
+      rating: 4.8,
+      reviewCount: 120,
+      amenities: [],
+      images: [],
+      pickupPoints: [],
+      dropoffPoints: [],
+    );
+
+    final repo = _Trips()..tripToReturn = noAmenitiesTrip;
+
+    await tester.pumpWidget(
+      RepositoryProvider<TripRepository>.value(
+        value: repo,
+        child: MaterialApp(
+          home: Scaffold(
+            body: TripDetailSheet(trip: noAmenitiesTrip, onSelectTrip: (_) {}),
+          ),
+        ),
+      ),
+    );
+
+    for (int i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+      if (find.text('Tiện ích').evaluate().isNotEmpty) {
+        break;
+      }
+    }
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Tiện ích'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Chưa có thông tin tiện ích cho chuyến xe này'),
+      findsOneWidget,
+    );
   });
 }

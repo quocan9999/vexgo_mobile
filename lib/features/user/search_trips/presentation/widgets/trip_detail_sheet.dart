@@ -51,20 +51,86 @@ class TripDetailSheet extends StatelessWidget {
               ),
               child: Center(
                 child: state.status == TripDetailStatus.loading
-                    ? const CircularProgressIndicator()
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(state.error!),
-                          TextButton(
-                            onPressed: context.read<TripDetailCubit>().load,
-                            child: const Text('Thử lại'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Đóng'),
-                          ),
-                        ],
+                    ? const CircularProgressIndicator(
+                        color: DiscoveryColors.primary,
+                      )
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.all(AppDimensions.xl),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: const BoxDecoration(
+                                color: DiscoveryColors.errorLight,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.error_outline_rounded,
+                                color: DiscoveryColors.error,
+                                size: 32,
+                              ),
+                            ),
+                            const SizedBox(height: AppDimensions.md),
+                            Text(
+                              'Không thể tải chi tiết chuyến',
+                              style: DiscoveryTextStyles.titleMedium.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: AppDimensions.xs),
+                            Text(
+                              state.error ?? 'Đã xảy ra lỗi khi tải dữ liệu.',
+                              style: DiscoveryTextStyles.bodySmall.copyWith(
+                                color: DiscoveryColors.neutral600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: AppDimensions.lg),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Semantics(
+                                  button: true,
+                                  label: 'Đóng chi tiết chuyến',
+                                  child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      minimumSize: const Size(96, 44),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          AppDimensions.radiusMd,
+                                        ),
+                                      ),
+                                    ),
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: const Text('Đóng'),
+                                  ),
+                                ),
+                                const SizedBox(width: AppDimensions.md),
+                                Semantics(
+                                  button: true,
+                                  label: 'Thử lại tải chi tiết chuyến',
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: DiscoveryColors.primary,
+                                      foregroundColor: Colors.white,
+                                      minimumSize: const Size(108, 44),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          AppDimensions.radiusMd,
+                                        ),
+                                      ),
+                                    ),
+                                    onPressed: context.read<TripDetailCubit>().load,
+                                    child: const Text('Thử lại'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
               ),
             ),
@@ -306,10 +372,27 @@ class _TripDetailContent extends StatelessWidget {
             );
           })
         else
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.all(AppDimensions.xxl),
-              child: Text('Chưa có hình ảnh thực tế cho chuyến xe này'),
+              padding: const EdgeInsets.all(AppDimensions.xxl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.image_not_supported_outlined,
+                    size: 40,
+                    color: DiscoveryColors.neutral400,
+                  ),
+                  const SizedBox(height: AppDimensions.sm),
+                  Text(
+                    'Chưa có hình ảnh thực tế cho chuyến xe này',
+                    style: DiscoveryTextStyles.bodyMedium.copyWith(
+                      color: DiscoveryColors.neutral600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
       ],
@@ -317,6 +400,31 @@ class _TripDetailContent extends StatelessWidget {
   }
 
   Widget _buildAmenitiesTab() {
+    if (trip.amenities.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppDimensions.xxl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.info_outline_rounded,
+                size: 40,
+                color: DiscoveryColors.neutral400,
+              ),
+              const SizedBox(height: AppDimensions.sm),
+              Text(
+                'Chưa có thông tin tiện ích cho chuyến xe này',
+                style: DiscoveryTextStyles.bodyMedium.copyWith(
+                  color: DiscoveryColors.neutral600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return ListView(
       padding: const EdgeInsets.all(AppDimensions.base),
       children: trip.amenities.map((amenity) {
@@ -337,10 +445,12 @@ class _TripDetailContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppDimensions.md),
-              Text(
-                amenity,
-                style: DiscoveryTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  amenity,
+                  style: DiscoveryTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],

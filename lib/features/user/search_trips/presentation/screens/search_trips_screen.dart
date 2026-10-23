@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
-import 'package:vexgo_app/core/widgets/empty_state.dart';
 import 'package:vexgo_app/core/widgets/loading_shimmer.dart';
 import 'package:vexgo_app/data/models/city_model.dart';
 import 'package:vexgo_app/data/repositories/trip_repository.dart';
@@ -141,7 +140,7 @@ class _SearchTripsView extends StatelessWidget {
                 },
               ),
 
-              // 3. Results count summary
+              // 3. Results count summary & Clear filter button
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppDimensions.base,
@@ -149,39 +148,56 @@ class _SearchTripsView extends StatelessWidget {
                   AppDimensions.base,
                   AppDimensions.xs,
                 ),
-                child: Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  spacing: 8,
-                  runSpacing: 8,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      state.status == SearchTripsStatus.loading
-                          ? 'Đang tìm kiếm chuyến xe...'
-                          : 'Tìm thấy ${state.filteredTrips.length} chuyến xe',
-                      style: DiscoveryTextStyles.caption.copyWith(
-                        color: DiscoveryColors.neutral600,
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Text(
+                        state.status == SearchTripsStatus.loading
+                            ? 'Đang tìm kiếm chuyến xe...'
+                            : 'Tìm thấy ${state.filteredTrips.length} chuyến xe',
+                        style: DiscoveryTextStyles.caption.copyWith(
+                          color: DiscoveryColors.neutral600,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (state.currentFilter.hasActiveFilters)
-                      InkWell(
-                        onTap: () => bloc.add(const ResetFilterEvent()),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.close_rounded,
-                              size: 14,
-                              color: DiscoveryColors.secondary,
+                      Semantics(
+                        button: true,
+                        label:
+                            'Xóa bộ lọc (${state.currentFilter.activeFilterCount})',
+                        child: InkWell(
+                          onTap: () => bloc.add(const ResetFilterEvent()),
+                          borderRadius: BorderRadius.circular(
+                            AppDimensions.radiusSm,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 4,
                             ),
-                            const SizedBox(width: 2),
-                            Text(
-                              'Xóa lọc (${state.currentFilter.activeFilterCount})',
-                              style: DiscoveryTextStyles.caption.copyWith(
-                                color: DiscoveryColors.secondary,
-                                fontWeight: FontWeight.w700,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.close_rounded,
+                                  size: 14,
+                                  color: DiscoveryColors.secondary,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  'Xóa lọc (${state.currentFilter.activeFilterCount})',
+                                  style: DiscoveryTextStyles.caption.copyWith(
+                                    color: DiscoveryColors.secondary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                   ],
@@ -211,12 +227,13 @@ class _SearchTripsView extends StatelessWidget {
     }
 
     if (state.status == SearchTripsStatus.failure) {
-      return EmptyState(
+      return _buildEmptyOrErrorState(
         icon: Icons.error_outline_rounded,
         title: 'Có lỗi xảy ra',
         message:
             state.errorMessage ?? 'Không thể tải danh sách chuyến xe lúc này.',
         buttonText: 'Thử lại',
+        buttonType: ButtonType.primary,
         onButtonPressed: () {
           bloc.add(
             LoadTripsEvent(
@@ -230,12 +247,13 @@ class _SearchTripsView extends StatelessWidget {
     }
 
     if (state.filteredTrips.isEmpty) {
-      return EmptyState(
+      return _buildEmptyOrErrorState(
         icon: Icons.directions_bus_outlined,
         title: 'Không tìm thấy chuyến xe phù hợp',
         message:
             'Không có chuyến xe nào thỏa mãn các tiêu chí lọc của bạn. Hãy thử thay đổi bộ lọc.',
         buttonText: 'Thiết lập lại bộ lọc',
+        buttonType: ButtonType.secondary,
         onButtonPressed: () => bloc.add(const ResetFilterEvent()),
       );
     }
@@ -260,6 +278,80 @@ class _SearchTripsView extends StatelessWidget {
               },
             );
           },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyOrErrorState({
+    required IconData icon,
+    required String title,
+    required String message,
+    required String buttonText,
+    required VoidCallback onButtonPressed,
+    ButtonType buttonType = ButtonType.primary,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(AppDimensions.xl),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: (constraints.maxHeight - 48).clamp(
+                180.0,
+                double.infinity,
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 68,
+                    height: 68,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: DiscoveryColors.primaryLight,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 34,
+                      color: DiscoveryColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.lg),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: DiscoveryTextStyles.h3.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.sm),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 320),
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: DiscoveryTextStyles.bodyMedium.copyWith(
+                        color: DiscoveryColors.neutral500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.lg),
+                  DiscoveryButton(
+                    text: buttonText,
+                    type: buttonType,
+                    height: 44,
+                    onPressed: onButtonPressed,
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );

@@ -24,7 +24,7 @@ class QuickFilterBar extends StatelessWidget {
     final activeCount = currentFilter.activeFilterCount;
 
     return Container(
-      height: 36 + MediaQuery.textScalerOf(context).scale(20),
+      height: 42 + MediaQuery.textScalerOf(context).scale(18),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(bottom: BorderSide(color: DiscoveryColors.neutral200)),
@@ -33,66 +33,71 @@ class QuickFilterBar extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.base,
-          vertical: 6,
+          vertical: 5,
         ),
         children: [
           // Filter Button
-          InkWell(
-            onTap: onOpenFilterSheet,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: activeCount > 0
-                    ? DiscoveryColors.primaryLight
-                    : DiscoveryColors.neutral100,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(
+          Semantics(
+            button: true,
+            label: activeCount > 0 ? 'Mở bộ lọc, có $activeCount bộ lọc đang chọn' : 'Mở bộ lọc',
+            child: InkWell(
+              onTap: onOpenFilterSheet,
+              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 40),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
                   color: activeCount > 0
-                      ? DiscoveryColors.primary
-                      : DiscoveryColors.neutral300,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.tune_rounded,
-                    size: 16,
+                      ? DiscoveryColors.primaryLight
+                      : DiscoveryColors.neutral100,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                  border: Border.all(
                     color: activeCount > 0
                         ? DiscoveryColors.primary
-                        : DiscoveryColors.neutral700,
+                        : DiscoveryColors.neutral300,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Bộ lọc',
-                    style: DiscoveryTextStyles.caption.copyWith(
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      size: 16,
                       color: activeCount > 0
                           ? DiscoveryColors.primary
                           : DiscoveryColors.neutral700,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
                     ),
-                  ),
-                  if (activeCount > 0) ...[
-                    const SizedBox(width: 4),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: DiscoveryColors.primary,
-                        shape: BoxShape.circle,
+                    const SizedBox(width: 5),
+                    Text(
+                      'Bộ lọc',
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: activeCount > 0
+                            ? DiscoveryColors.primary
+                            : DiscoveryColors.neutral700,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
                       ),
-                      child: Text(
-                        '$activeCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          height: 1,
+                    ),
+                    if (activeCount > 0) ...[
+                      const SizedBox(width: 5),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: DiscoveryColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '$activeCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            height: 1,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -100,33 +105,38 @@ class QuickFilterBar extends StatelessWidget {
           const SizedBox(width: AppDimensions.sm),
 
           // Sort Button
-          InkWell(
-            onTap: onOpenSortSheet,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: DiscoveryColors.neutral100,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(color: DiscoveryColors.neutral300),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.swap_vert_rounded,
-                    size: 16,
-                    color: DiscoveryColors.neutral700,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    currentSort.label,
-                    style: DiscoveryTextStyles.caption.copyWith(
+          Semantics(
+            button: true,
+            label: 'Sắp xếp theo: ${currentSort.label}',
+            child: InkWell(
+              onTap: onOpenSortSheet,
+              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 40),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: DiscoveryColors.neutral100,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                  border: Border.all(color: DiscoveryColors.neutral300),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.swap_vert_rounded,
+                      size: 16,
                       color: DiscoveryColors.neutral700,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Text(
+                      currentSort.label,
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: DiscoveryColors.neutral700,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -209,29 +219,35 @@ class QuickFilterBar extends StatelessWidget {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? DiscoveryColors.primaryLight : Colors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-          border: Border.all(
-            color: isSelected
-                ? DiscoveryColors.primary
-                : DiscoveryColors.neutral300,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: DiscoveryTextStyles.caption.copyWith(
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? DiscoveryColors.primaryLight : Colors.white,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+            border: Border.all(
               color: isSelected
                   ? DiscoveryColors.primary
-                  : DiscoveryColors.neutral700,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              fontSize: 12,
+                  : DiscoveryColors.neutral300,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: DiscoveryTextStyles.caption.copyWith(
+                color: isSelected
+                    ? DiscoveryColors.primary
+                    : DiscoveryColors.neutral700,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 12,
+              ),
             ),
           ),
         ),

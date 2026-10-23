@@ -155,19 +155,6 @@ class _HomeScreenContent extends StatelessWidget {
                     )
                   else
                     const SearchFormCard(),
-                  const SizedBox(height: 16),
-                  OutlinedButton.icon(
-                    onPressed: () => context.go('/my-tickets'),
-                    icon: const Icon(Icons.confirmation_number_outlined),
-                    label: const Text('Tra cứu vé và xem vé của tôi'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
-                      foregroundColor: DiscoveryColors.primary,
-                      backgroundColor: Colors.white,
-                      side: const BorderSide(color: DiscoveryColors.neutral200),
-                      textStyle: DiscoveryTextStyles.titleSmall,
-                    ),
-                  ),
                 ],
               ),
             ),
