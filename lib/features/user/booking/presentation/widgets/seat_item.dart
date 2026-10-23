@@ -1,136 +1,138 @@
 import 'package:flutter/material.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
+import 'package:vexgo_app/core/design/discovery_theme.dart';
+import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
+import 'seat_vector.dart';
 
 class SeatItem extends StatelessWidget {
   final SeatModel seat;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool showPrice;
 
   const SeatItem({
     super.key,
     required this.seat,
     required this.isSelected,
     required this.onTap,
+    this.showPrice = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final unavailable = seat.status == SeatStatus.unavailable;
-    final isBooked = seat.status == SeatStatus.booked || unavailable;
-    final isHeld = seat.status == SeatStatus.held;
-    final isDisabled = isBooked || isHeld;
+    final disabled = ![
+      SeatStatus.available,
+      SeatStatus.selected,
+    ].contains(seat.status);
+    final selected =
+        !disabled && (isSelected || seat.status == SeatStatus.selected);
+    final held = seat.status == SeatStatus.held;
+    final fill = disabled
+        ? (held ? const Color(0xFFFEF3C7) : DiscoveryColors.neutral200)
+        : selected
+        ? DiscoveryColors.primary
+        : Colors.white;
+    final stroke = held
+        ? const Color(0xFFB45309)
+        : selected
+        ? DiscoveryColors.primaryDark
+        : DiscoveryColors.neutral400;
 
-    Color bgColor = Colors.white;
-    Color borderColor = AppColors.neutral300;
-    Color textColor = AppColors.neutral800;
-    Color priceColor = AppColors.neutral500;
+    final label = seat.status == SeatStatus.unavailable
+        ? 'Không khả dụng'
+        : held
+        ? 'Đang giữ'
+        : disabled
+        ? 'Đã đặt'
+        : selected
+        ? 'Đang chọn'
+        : 'Trống';
 
-    if (isBooked) {
-      bgColor = AppColors.neutral200;
-      borderColor = AppColors.neutral300;
-      textColor = AppColors.neutral400;
-      priceColor = AppColors.neutral400;
-    } else if (isHeld) {
-      bgColor = AppColors.warning.withValues(alpha: 0.12);
-      borderColor = AppColors.warning.withValues(alpha: 0.4);
-      textColor = AppColors.warning;
-      priceColor = AppColors.warning;
-    } else if (isSelected) {
-      bgColor = AppColors.primary;
-      borderColor = AppColors.primary;
-      textColor = Colors.white;
-      priceColor = Colors.white.withValues(alpha: 0.9);
-    }
+    final separateLabel =
+        MediaQuery.textScalerOf(context).scale(1) > 1.3 || seat.name.length > 4;
 
-    // Price string in short (e.g. 290k)
-    final priceShort = (seat.price != null && seat.price! > 0)
-        ? '${seat.price! ~/ 1000}k'
-        : '';
+    final name = Text(
+      seat.name,
+      textAlign: TextAlign.center,
+      style: DiscoveryTextStyles.bodySmall.copyWith(
+        fontWeight: FontWeight.w700,
+        color: separateLabel
+            ? DiscoveryColors.neutral900
+            : selected
+            ? Colors.white
+            : DiscoveryColors.neutral700,
+      ),
+    );
 
-    return GestureDetector(
-      onTap: isDisabled ? null : onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeInOut,
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: borderColor, width: isSelected ? 2 : 1.2),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.35),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Bed headboard / seat header bar
-            Container(
-              width: 24,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 4),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Colors.white.withValues(alpha: 0.6)
-                    : (isBooked
-                          ? AppColors.neutral300
-                          : AppColors.primaryLight),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            // Seat Name & Icon
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isBooked)
-                  const Icon(
-                    Icons.close_rounded,
-                    size: 13,
-                    color: AppColors.neutral400,
-                  )
-                else if (isSelected)
-                  const Icon(Icons.check_rounded, size: 14, color: Colors.white)
-                else
-                  const Icon(
-                    Icons.airline_seat_recline_extra_rounded,
-                    size: 13,
-                    color: AppColors.primary,
-                  ),
-                const SizedBox(width: 2),
-                Text(
-                  seat.name,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
-                    fontSize: 12,
-                  ),
+    return Semantics(
+      button: true,
+      onTap: disabled ? null : onTap,
+      enabled: !disabled,
+      selected: selected,
+      label:
+          'Ghế ${seat.name}, $label${seat.price == null ? '' : ', ${CurrencyFormatter.format(seat.price)}'}',
+      child: ExcludeSemantics(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: disabled ? null : onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 58),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 40,
+                      height: 48,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SeatVector(fill: fill, stroke: stroke),
+                          if (!separateLabel)
+                            Positioned(top: 10, left: 1, right: 1, child: name),
+                          if (selected || disabled)
+                            Positioned(
+                              bottom: 0,
+                              child: Icon(
+                                selected
+                                    ? Icons.check_circle
+                                    : held
+                                    ? Icons.hourglass_bottom
+                                    : Icons.close,
+                                size: 14,
+                                color: selected
+                                    ? Colors.white
+                                    : held
+                                    ? const Color(0xFFB45309)
+                                    : DiscoveryColors.neutral500,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (separateLabel) name,
+                    if (showPrice && seat.price != null && seat.price! > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          '${seat.price! ~/ 1000}k',
+                          style: DiscoveryTextStyles.caption.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: selected
+                                ? DiscoveryColors.primary
+                                : DiscoveryColors.neutral600,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 2),
-
-            // Seat Price
-            Text(
-              isBooked
-                  ? (unavailable ? 'Chưa mở bán' : 'Đã bán')
-                  : (priceShort.isNotEmpty ? priceShort : '--'),
-              style: AppTextStyles.caption.copyWith(
-                color: priceColor,
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
