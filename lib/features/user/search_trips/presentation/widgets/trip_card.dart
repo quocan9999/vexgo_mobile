@@ -104,7 +104,10 @@ class TripCard extends StatelessWidget {
               Expanded(
                 flex: 4,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -177,9 +180,7 @@ class TripCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: DiscoveryColors.neutral50,
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: DiscoveryColors.neutral200,
-                        ),
+                        border: Border.all(color: DiscoveryColors.neutral200),
                       ),
                       child: Text(
                         value,

@@ -44,7 +44,9 @@ class TripDetailSheet extends StatelessWidget {
       builder: (context, state) {
         if (state.status != TripDetailStatus.loaded) {
           return ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.95),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.95,
+            ),
             child: Material(
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(20),
@@ -106,7 +108,8 @@ class TripDetailSheet extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    onPressed: () => Navigator.of(context).pop(),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
                                     child: const Text('Đóng'),
                                   ),
                                 ),
@@ -124,7 +127,9 @@ class TripDetailSheet extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    onPressed: context.read<TripDetailCubit>().load,
+                                    onPressed: context
+                                        .read<TripDetailCubit>()
+                                        .load,
                                     child: const Text('Thử lại'),
                                   ),
                                 ),
@@ -181,7 +186,9 @@ class _TripDetailContent extends StatelessWidget {
                   height: 4,
                   decoration: BoxDecoration(
                     color: DiscoveryColors.neutral300,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.radiusFull,
+                    ),
                   ),
                 ),
               )
@@ -251,7 +258,10 @@ class _TripDetailContent extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.close_rounded),
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -261,7 +271,9 @@ class _TripDetailContent extends StatelessWidget {
             // Tab bar
             MediaQuery(
               data: MediaQuery.of(context).copyWith(
-                textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.2),
+                textScaler: MediaQuery.textScalerOf(
+                  context,
+                ).clamp(maxScaleFactor: 1.2),
               ),
               child: TabBar(
                 isScrollable: true,
@@ -321,8 +333,11 @@ class _TripDetailContent extends StatelessWidget {
                 bottom: !isCompactHeight,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
-                    final isNarrow = constraints.maxWidth < 320 && textScale > 1.2;
+                    final textScale = MediaQuery.textScalerOf(
+                      context,
+                    ).scale(1.0);
+                    final isNarrow =
+                        constraints.maxWidth < 320 && textScale > 1.2;
 
                     final priceCol = Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

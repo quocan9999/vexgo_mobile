@@ -246,7 +246,8 @@ class SearchFormCard extends StatelessWidget {
                             ),
                           );
 
-                          final retDate = state.returnDate ??
+                          final retDate =
+                              state.returnDate ??
                               state.departureDate.add(const Duration(days: 2));
                           final retField = _buildDateField(
                             context: context,
@@ -324,8 +325,8 @@ class SearchFormCard extends StatelessWidget {
 
                         final returnDateStr =
                             state.isRoundTrip && state.returnDate != null
-                                ? '${state.returnDate!.year}-${state.returnDate!.month.toString().padLeft(2, '0')}-${state.returnDate!.day.toString().padLeft(2, '0')}'
-                                : null;
+                            ? '${state.returnDate!.year}-${state.returnDate!.month.toString().padLeft(2, '0')}-${state.returnDate!.day.toString().padLeft(2, '0')}'
+                            : null;
 
                         final extraMap = <String, dynamic>{
                           'fromCity': departureCity,
@@ -369,18 +370,11 @@ class SearchFormCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
       child: Container(
         constraints: const BoxConstraints(minHeight: 54),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 10,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: DiscoveryColors.neutral50,
-          borderRadius: BorderRadius.circular(
-            AppDimensions.radiusMd,
-          ),
-          border: Border.all(
-            color: DiscoveryColors.neutral200,
-          ),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          border: Border.all(color: DiscoveryColors.neutral200),
         ),
         child: Row(
           children: [

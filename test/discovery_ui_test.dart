@@ -324,10 +324,10 @@ void main() {
   testWidgets('TripDetailSheet shows error state with retry and close', (
     tester,
   ) async {
-tester.view.physicalSize = const Size(320, 640);
-tester.view.devicePixelRatio = 1;
-addTearDown(tester.view.resetPhysicalSize);
-addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     const baseTrip = TripModel(
       id: 'trip_detail_test',
       operatorId: 'op_1',
@@ -363,7 +363,13 @@ addTearDown(tester.view.resetDevicePixelRatio);
       RepositoryProvider<TripRepository>.value(
         value: repo,
         child: MaterialApp(
-          builder: (_, child) => MediaQuery(data: const MediaQueryData(size: Size(320, 640), textScaler: TextScaler.linear(2)), child: child!),
+          builder: (_, child) => MediaQuery(
+            data: const MediaQueryData(
+              size: Size(320, 640),
+              textScaler: TextScaler.linear(2),
+            ),
+            child: child!,
+          ),
           home: Scaffold(
             body: TripDetailSheet(trip: baseTrip, onSelectTrip: (_) {}),
           ),
@@ -401,10 +407,10 @@ addTearDown(tester.view.resetDevicePixelRatio);
   testWidgets('TripDetailSheet shows empty state for amenities when empty', (
     tester,
   ) async {
-tester.view.physicalSize = const Size(320, 640);
-tester.view.devicePixelRatio = 1;
-addTearDown(tester.view.resetPhysicalSize);
-addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     const noAmenitiesTrip = TripModel(
       id: 'trip_no_amenities',
       operatorId: 'op_1',
@@ -440,7 +446,13 @@ addTearDown(tester.view.resetDevicePixelRatio);
       RepositoryProvider<TripRepository>.value(
         value: repo,
         child: MaterialApp(
-          builder: (_, child) => MediaQuery(data: const MediaQueryData(size: Size(320, 640), textScaler: TextScaler.linear(2)), child: child!),
+          builder: (_, child) => MediaQuery(
+            data: const MediaQueryData(
+              size: Size(320, 640),
+              textScaler: TextScaler.linear(2),
+            ),
+            child: child!,
+          ),
           home: Scaffold(
             body: TripDetailSheet(trip: noAmenitiesTrip, onSelectTrip: (_) {}),
           ),
@@ -497,7 +509,10 @@ addTearDown(tester.view.resetDevicePixelRatio);
         rating: 4.8,
         reviewCount: 120,
         amenities: ['WiFi tốc độ cao', 'Nước uống miễn phí', 'Cổng sạc USB'],
-        images: ['https://example.com/bus1.jpg', 'https://example.com/bus2.jpg'],
+        images: [
+          'https://example.com/bus1.jpg',
+          'https://example.com/bus2.jpg',
+        ],
         pickupPoints: [],
         dropoffPoints: [],
       );

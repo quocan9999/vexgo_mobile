@@ -39,13 +39,18 @@ class QuickFilterBar extends StatelessWidget {
           // Filter Button
           Semantics(
             button: true,
-            label: activeCount > 0 ? 'Mở bộ lọc, có $activeCount bộ lọc đang chọn' : 'Mở bộ lọc',
+            label: activeCount > 0
+                ? 'Mở bộ lọc, có $activeCount bộ lọc đang chọn'
+                : 'Mở bộ lọc',
             child: InkWell(
               onTap: onOpenFilterSheet,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
               child: Container(
                 constraints: const BoxConstraints(minHeight: 40),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: activeCount > 0
                       ? DiscoveryColors.primaryLight
@@ -113,7 +118,10 @@ class QuickFilterBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
               child: Container(
                 constraints: const BoxConstraints(minHeight: 40),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: DiscoveryColors.neutral100,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusMd),

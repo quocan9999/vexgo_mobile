@@ -316,11 +316,7 @@ class _SearchTripsView extends StatelessWidget {
                       color: DiscoveryColors.primaryLight,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      icon,
-                      size: 34,
-                      color: DiscoveryColors.primary,
-                    ),
+                    child: Icon(icon, size: 34, color: DiscoveryColors.primary),
                   ),
                   const SizedBox(height: AppDimensions.lg),
                   Text(
