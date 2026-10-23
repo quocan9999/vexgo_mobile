@@ -29,10 +29,10 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Ghế trống'), findsOneWidget);
+        expect(find.text('Trống'), findsOneWidget);
         expect(find.text('Đang chọn'), findsOneWidget);
         expect(find.text('Đang giữ'), findsOneWidget);
-        expect(find.text('Đã bán'), findsOneWidget);
+        expect(find.text('Đã đặt'), findsOneWidget);
         expect(tester.takeException(), isNull);
       },
     );
@@ -59,10 +59,10 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Ghế trống'), findsOneWidget);
+        expect(find.text('Trống'), findsOneWidget);
         expect(find.text('Đang chọn'), findsOneWidget);
         expect(find.text('Đang giữ'), findsOneWidget);
-        expect(find.text('Đã bán'), findsOneWidget);
+        expect(find.text('Đã đặt'), findsOneWidget);
         expect(tester.takeException(), isNull);
       },
     );
@@ -140,7 +140,7 @@ void main() {
         expect(find.text('A02'), findsOneWidget);
         expect(find.text('A03'), findsOneWidget);
         expect(find.text('A04'), findsOneWidget);
-        expect(find.text('Lối đi'), findsOneWidget);
+        expect(find.text('Lối đi'), findsNothing);
         expect(tester.takeException(), isNull);
       },
     );

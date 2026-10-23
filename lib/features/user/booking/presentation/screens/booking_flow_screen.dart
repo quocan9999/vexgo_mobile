@@ -10,6 +10,7 @@ import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
 import 'package:vexgo_app/features/user/profile/bloc/auth_bloc.dart';
+import 'package:vexgo_app/features/user/search_trips/presentation/widgets/trip_detail_sheet.dart';
 import '../steps/step_1_seat_selection.dart';
 import '../steps/step_2_pickup_point.dart';
 import '../steps/step_3_dropoff_point.dart';
@@ -17,6 +18,7 @@ import '../steps/step_4_passenger_info.dart';
 import '../steps/step_5_trip_summary.dart';
 import '../steps/step_6_payment.dart';
 import '../widgets/booking_bottom_bar.dart';
+import '../widgets/booking_selection_view.dart';
 import '../widgets/booking_stepper.dart';
 import '../widgets/seat_hold_countdown_bar.dart';
 
@@ -193,63 +195,100 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
               context.pop();
             }
           },
-          child: Scaffold(
-            appBar: CustomAppBar(
-              title: state.step.title,
-              subtitle: trip != null
-                  ? '${trip.operatorName} • ${trip.fromCityName} -> ${trip.toCityName}'
-                  : null,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: () async {
-                  final shouldPop = await _handlePop(context, state, bloc);
-                  if (shouldPop && context.mounted) {
-                    context.pop();
-                  }
-                },
-              ),
-            ),
-            body:
-                state.status == BookingFlowStatus.loading &&
-                    state.seatLayout == null
-                ? const Center(child: CircularProgressIndicator())
-                : Column(
-                    children: [
-                      // Top Stepper
-                      BookingStepper(
-                        currentStep: state.step,
-                        onStepTapped: (index) => bloc.add(GoToStepEvent(index)),
-                      ),
-
-                      // Sticky Countdown Bar when holding seats
-                      if (state.seatHold != null &&
-                          state.step != BookingStep.seatSelection)
-                        SeatHoldCountdownBar(
-                          remainingSeconds: state.countdownSeconds,
-                          seatCodes: state.selectedSeats
-                              .map((s) => s.name)
-                              .toList(),
+          child: state.step.index <= BookingStep.dropoffPoint.index
+              ? BookingSelectionView(
+                  state: state,
+                  child: _buildCurrentStepView(state, bloc),
+                  onBack: () async {
+                    final shouldPop = await _handlePop(context, state, bloc);
+                    if (shouldPop && context.mounted) context.pop();
+                  },
+                  onNext: () => bloc.add(const NextStepEvent()),
+                  onStep: (index) => bloc.add(GoToStepEvent(index)),
+                  onRetry: () {
+                    if (trip != null && state.date != null) {
+                      bloc.add(
+                        InitBookingFlowEvent(
+                          trip: trip,
+                          date: state.date!,
+                          ticketCount: state.targetTicketCount,
+                          passengerName: state.passengerName,
+                          passengerPhone: state.passengerPhone,
+                          passengerEmail: state.passengerEmail,
                         ),
-
-                      // Step View Container
-                      Expanded(
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 250),
-                          child: _buildCurrentStepView(state, bloc),
-                        ),
+                      );
+                    }
+                  },
+                  onDetails: () {
+                    if (trip != null) {
+                      TripDetailSheet.show(
+                        context,
+                        trip: trip,
+                        onSelectTrip: (_) {},
+                      );
+                    }
+                  },
+                )
+              : Scaffold(
+                  appBar: CustomAppBar(
+                    title: state.step.title,
+                    subtitle: trip != null
+                        ? '${trip.operatorName} • ${trip.fromCityName} -> ${trip.toCityName}'
+                        : null,
+                    leading: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 20,
                       ),
-                    ],
+                      onPressed: () async {
+                        final shouldPop = await _handlePop(
+                          context,
+                          state,
+                          bloc,
+                        );
+                        if (shouldPop && context.mounted) {
+                          context.pop();
+                        }
+                      },
+                    ),
                   ),
-            bottomNavigationBar: state.status == BookingFlowStatus.loading
-                ? null
-                : BookingBottomBar(
-                    state: state,
-                    onNext: () => bloc.add(const NextStepEvent()),
-                    onBack: () => bloc.add(const PreviousStepEvent()),
-                    onConfirmPayment: () =>
-                        bloc.add(const ConfirmPaymentEvent()),
-                  ),
-          ),
+                  body:
+                      state.status == BookingFlowStatus.loading &&
+                          state.seatLayout == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : Column(
+                          children: [
+                            BookingStepper(
+                              currentStep: state.step,
+                              onStepTapped: (index) =>
+                                  bloc.add(GoToStepEvent(index)),
+                            ),
+                            if (state.seatHold != null &&
+                                state.step != BookingStep.seatSelection)
+                              SeatHoldCountdownBar(
+                                remainingSeconds: state.countdownSeconds,
+                                seatCodes: state.selectedSeats
+                                    .map((s) => s.name)
+                                    .toList(),
+                              ),
+                            Expanded(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 250),
+                                child: _buildCurrentStepView(state, bloc),
+                              ),
+                            ),
+                          ],
+                        ),
+                  bottomNavigationBar: state.status == BookingFlowStatus.loading
+                      ? null
+                      : BookingBottomBar(
+                          state: state,
+                          onNext: () => bloc.add(const NextStepEvent()),
+                          onBack: () => bloc.add(const PreviousStepEvent()),
+                          onConfirmPayment: () =>
+                              bloc.add(const ConfirmPaymentEvent()),
+                        ),
+                ),
         );
       },
     );

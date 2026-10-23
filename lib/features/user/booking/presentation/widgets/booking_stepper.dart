@@ -2,8 +2,137 @@ import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
 
+/// Compact visual stepper with circle badges for the 3 selection steps
+class BookingStepperCompact extends StatelessWidget {
+  final int currentStepIndex;
+  final ValueChanged<int>? onStepTapped;
+
+  const BookingStepperCompact({
+    super.key,
+    required this.currentStepIndex,
+    this.onStepTapped,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const stepTitles = ['Chọn chỗ', 'Điểm đón', 'Điểm trả'];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < 3; i++) ...[
+              if (i > 0)
+                Container(
+                  width: 20,
+                  height: 1.5,
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+              _buildStepItem(
+                index: i,
+                title: stepTitles[i],
+                isActive: i == currentStepIndex,
+                isPassed: i < currentStepIndex,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepItem({
+    required int index,
+    required String title,
+    required bool isActive,
+    required bool isPassed,
+  }) {
+    final canTap = isPassed && onStepTapped != null;
+
+    final badgeChild = isPassed
+        ? const Icon(Icons.check, size: 12, color: Colors.white)
+        : Text(
+            '${index + 1}',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: isActive
+                  ? DiscoveryColors.header
+                  : Colors.white.withValues(alpha: 0.85),
+            ),
+          );
+
+    final badgeDecoration = BoxDecoration(
+      color: isActive
+          ? Colors.white
+          : isPassed
+          ? Colors.white.withValues(alpha: 0.35)
+          : Colors.transparent,
+      shape: BoxShape.circle,
+      border: isActive || isPassed
+          ? null
+          : Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.5),
+      boxShadow: isActive
+          ? [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ]
+          : null,
+    );
+
+    final labelStyle = TextStyle(
+      fontSize: 12.5,
+      fontWeight: isActive
+          ? FontWeight.w800
+          : isPassed
+          ? FontWeight.w600
+          : FontWeight.w500,
+      color: isActive
+          ? Colors.white
+          : isPassed
+          ? Colors.white.withValues(alpha: 0.95)
+          : Colors.white.withValues(alpha: 0.75),
+    );
+
+    return InkWell(
+      onTap: canTap ? () => onStepTapped!(index) : null,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              alignment: Alignment.center,
+              decoration: badgeDecoration,
+              child: badgeChild,
+            ),
+            const SizedBox(width: 6),
+            Text(title, style: labelStyle),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Legacy multi-step stepper retained for subsequent checkout steps if needed
 class BookingStepper extends StatelessWidget {
   final BookingStep currentStep;
   final Function(int) onStepTapped;
@@ -32,7 +161,6 @@ class BookingStepper extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Step Counter & Title
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -74,10 +202,7 @@ class BookingStepper extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: AppDimensions.sm),
-
-          // Progress Bar
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
@@ -89,10 +214,7 @@ class BookingStepper extends StatelessWidget {
               minHeight: 5,
             ),
           ),
-
           const SizedBox(height: AppDimensions.sm),
-
-          // Scrollable Mini Step Chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -119,7 +241,7 @@ class BookingStepper extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 6),
                   child: InkWell(
                     onTap: isPassed ? () => onStepTapped(index) : null,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -127,31 +249,18 @@ class BookingStepper extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: bgColor,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: borderColor),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (isPassed) ...[
-                            const Icon(
-                              Icons.check_circle_rounded,
-                              size: 13,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          Text(
-                            '${index + 1}. ${step.shortTitle}',
-                            style: AppTextStyles.caption.copyWith(
-                              color: textColor,
-                              fontWeight: isCurrent || isPassed
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        step.title,
+                        style: AppTextStyles.caption.copyWith(
+                          color: textColor,
+                          fontWeight: isCurrent
+                              ? FontWeight.w700
+                              : FontWeight.normal,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
                   ),
