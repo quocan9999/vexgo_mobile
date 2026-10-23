@@ -43,8 +43,8 @@ class TripDetailSheet extends StatelessWidget {
     child: BlocBuilder<TripDetailCubit, TripDetailState>(
       builder: (context, state) {
         if (state.status != TripDetailStatus.loaded) {
-          return SizedBox(
-            height: MediaQuery.sizeOf(context).height * .5,
+          return ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.95),
             child: Material(
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(20),
@@ -89,8 +89,10 @@ class TripDetailSheet extends StatelessWidget {
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: AppDimensions.lg),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              spacing: AppDimensions.md,
+                              runSpacing: AppDimensions.sm,
                               children: [
                                 Semantics(
                                   button: true,
@@ -108,7 +110,6 @@ class TripDetailSheet extends StatelessWidget {
                                     child: const Text('Đóng'),
                                   ),
                                 ),
-                                const SizedBox(width: AppDimensions.md),
                                 Semantics(
                                   button: true,
                                   label: 'Thử lại tải chi tiết chuyến',
@@ -218,24 +219,23 @@ class _TripDetailContent extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: AppDimensions.xs,
+                          runSpacing: 2,
                           children: [
-                            if (trip.rating != null) ...[
+                            if (trip.rating != null)
                               RatingBadge(
                                 rating: trip.rating!,
                                 reviewCount: trip.reviewCount,
                               ),
-                              const SizedBox(width: AppDimensions.xs),
-                            ],
-                            Flexible(
-                              child: Text(
-                                '• ${trip.vehicleType}',
-                                style: DiscoveryTextStyles.caption.copyWith(
-                                  color: DiscoveryColors.neutral600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                            Text(
+                              '• ${trip.vehicleType}',
+                              style: DiscoveryTextStyles.caption.copyWith(
+                                color: DiscoveryColors.neutral600,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
@@ -251,18 +251,26 @@ class _TripDetailContent extends StatelessWidget {
             ),
 
             // Tab bar
-            const TabBar(
-              isScrollable: true,
-              labelColor: DiscoveryColors.primary,
-              unselectedLabelColor: DiscoveryColors.neutral500,
-              indicatorColor: DiscoveryColors.primary,
-              indicatorWeight: 2.5,
-              tabs: [
-                Tab(text: 'Hình ảnh xe'),
-                Tab(text: 'Tiện ích'),
-                Tab(text: 'Đón / Trả'),
-                Tab(text: 'Chính sách hủy'),
-              ],
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.2),
+              ),
+              child: TabBar(
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                padding: EdgeInsets.zero,
+                labelPadding: const EdgeInsets.symmetric(horizontal: 10),
+                labelColor: DiscoveryColors.primary,
+                unselectedLabelColor: DiscoveryColors.neutral500,
+                indicatorColor: DiscoveryColors.primary,
+                indicatorWeight: 2.5,
+                tabs: const [
+                  Tab(text: 'Hình ảnh xe'),
+                  Tab(text: 'Tiện ích'),
+                  Tab(text: 'Đón / Trả'),
+                  Tab(text: 'Chính sách hủy'),
+                ],
+              ),
             ),
 
             // Tab view content
@@ -299,9 +307,12 @@ class _TripDetailContent extends StatelessWidget {
               ),
               child: SafeArea(
                 top: false,
-                child: Row(
-                  children: [
-                    Column(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
+                    final isNarrow = constraints.maxWidth < 300 || textScale > 1.2;
+
+                    final priceCol = Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -318,23 +329,42 @@ class _TripDetailContent extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(width: AppDimensions.base),
-                    Expanded(
-                      child: DiscoveryButton(
-                        text: trip.availableSeats > 0
-                            ? 'CHỌN CHUYẾN NÀY'
-                            : 'CHUYẾN XE ĐÃ HẾT CHỖ',
-                        type: ButtonType.secondary,
-                        onPressed: trip.availableSeats <= 0
-                            ? null
-                            : () {
-                                Navigator.of(context).pop();
-                                onSelectTrip(trip);
-                              },
-                      ),
-                    ),
-                  ],
+                    );
+
+                    final ctaBtn = DiscoveryButton(
+                      text: trip.availableSeats > 0
+                          ? 'CHỌN CHUYẾN NÀY'
+                          : 'CHUYẾN XE ĐÃ HẾT CHỖ',
+                      type: ButtonType.secondary,
+                      width: isNarrow ? double.infinity : null,
+                      onPressed: trip.availableSeats <= 0
+                          ? null
+                          : () {
+                              Navigator.of(context).pop();
+                              onSelectTrip(trip);
+                            },
+                    );
+
+                    if (isNarrow) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          priceCol,
+                          const SizedBox(height: AppDimensions.sm),
+                          ctaBtn,
+                        ],
+                      );
+                    }
+
+                    return Row(
+                      children: [
+                        priceCol,
+                        const SizedBox(width: AppDimensions.base),
+                        Expanded(child: ctaBtn),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -401,26 +431,28 @@ class _TripDetailContent extends StatelessWidget {
 
   Widget _buildAmenitiesTab() {
     if (trip.amenities.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.xxl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.info_outline_rounded,
-                size: 40,
-                color: DiscoveryColors.neutral400,
-              ),
-              const SizedBox(height: AppDimensions.sm),
-              Text(
-                'Chưa có thông tin tiện ích cho chuyến xe này',
-                style: DiscoveryTextStyles.bodyMedium.copyWith(
-                  color: DiscoveryColors.neutral600,
+      return SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppDimensions.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 40,
+                  color: DiscoveryColors.neutral400,
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+                const SizedBox(height: AppDimensions.sm),
+                Text(
+                  'Chưa có thông tin tiện ích cho chuyến xe này',
+                  style: DiscoveryTextStyles.bodyMedium.copyWith(
+                    color: DiscoveryColors.neutral600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       );

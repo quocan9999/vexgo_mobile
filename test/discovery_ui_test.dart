@@ -324,6 +324,10 @@ void main() {
   testWidgets('TripDetailSheet shows error state with retry and close', (
     tester,
   ) async {
+tester.view.physicalSize = const Size(320, 640);
+tester.view.devicePixelRatio = 1;
+addTearDown(tester.view.resetPhysicalSize);
+addTearDown(tester.view.resetDevicePixelRatio);
     const baseTrip = TripModel(
       id: 'trip_detail_test',
       operatorId: 'op_1',
@@ -359,6 +363,7 @@ void main() {
       RepositoryProvider<TripRepository>.value(
         value: repo,
         child: MaterialApp(
+          builder: (_, child) => MediaQuery(data: const MediaQueryData(size: Size(320, 640), textScaler: TextScaler.linear(2)), child: child!),
           home: Scaffold(
             body: TripDetailSheet(trip: baseTrip, onSelectTrip: (_) {}),
           ),
@@ -396,6 +401,10 @@ void main() {
   testWidgets('TripDetailSheet shows empty state for amenities when empty', (
     tester,
   ) async {
+tester.view.physicalSize = const Size(320, 640);
+tester.view.devicePixelRatio = 1;
+addTearDown(tester.view.resetPhysicalSize);
+addTearDown(tester.view.resetDevicePixelRatio);
     const noAmenitiesTrip = TripModel(
       id: 'trip_no_amenities',
       operatorId: 'op_1',
@@ -431,6 +440,7 @@ void main() {
       RepositoryProvider<TripRepository>.value(
         value: repo,
         child: MaterialApp(
+          builder: (_, child) => MediaQuery(data: const MediaQueryData(size: Size(320, 640), textScaler: TextScaler.linear(2)), child: child!),
           home: Scaffold(
             body: TripDetailSheet(trip: noAmenitiesTrip, onSelectTrip: (_) {}),
           ),
@@ -455,3 +465,5 @@ void main() {
     );
   });
 }
+
+
