@@ -246,6 +246,7 @@ class _ReceiptContent extends StatelessWidget {
           for (final ticket in receipt.tickets)
             row(
               'Ghế ${display(ticket.seat)} • ${switch (ticket.status) {
+                'DA_THANH_TOAN' => 'Đã thanh toán',
                 'DA_DAT' => 'Đã đặt',
                 'HOAN_TAT' || 'DA_SU_DUNG' => 'Đã sử dụng',
                 'HUY' || 'DA_HUY' => 'Đã hủy',

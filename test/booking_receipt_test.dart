@@ -520,6 +520,41 @@ void main() {
       await cubit.close();
     },
   );
+  for (final ticketStatus in ['DA_THANH_TOAN', 'UNKNOWN_NEW_STATUS']) {
+    testWidgets(
+      'receipt ticket status $ticketStatus keeps its verified meaning',
+      (tester) async {
+        final repo = DeferredReceiptRepository();
+        await tester.pumpWidget(
+          RepositoryProvider<BookingReceiptRepository>.value(
+            value: repo,
+            child: MaterialApp(
+              home: BookingReceiptScreen(
+                initialRequest: ReceiptLookupRequest(
+                  'QA-VE-01',
+                  '0901234567',
+                  TokenStorage.sessionVersion,
+                ),
+              ),
+            ),
+          ),
+        );
+        final payload = paidReceipt();
+        (payload['tickets'] as List).first['status'] = ticketStatus;
+        repo.calls.single.complete(BookingReceipt.fromJson(payload));
+        await tester.pumpAndSettle();
+        expect(
+          find.text(
+            ticketStatus == 'DA_THANH_TOAN'
+                ? 'Ghế A01 • Đã thanh toán'
+                : 'Ghế A01 • Chưa xác minh trạng thái vé',
+          ),
+          findsOneWidget,
+        );
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+  }
   for (final width in [320.0, 390.0]) {
     testWidgets(
       'receipt layout fits $width, shows all tickets and clears private data on logout',
