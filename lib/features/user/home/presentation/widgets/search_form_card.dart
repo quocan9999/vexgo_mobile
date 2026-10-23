@@ -1,55 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
-import 'package:vexgo_app/core/widgets/custom_button.dart';
+import 'package:vexgo_app/data/models/city_model.dart';
 import '../../bloc/home_bloc.dart';
 import '../../bloc/home_event.dart';
 import '../../bloc/home_state.dart';
 import '../screens/select_city_sheet.dart';
-import 'package:vexgo_app/data/models/city_model.dart';
 
 class SearchFormCard extends StatelessWidget {
   const SearchFormCard({super.key});
 
-  Future<void> _pickDate(
-    BuildContext context, {
-    required DateTime initialDate,
-    required DateTime firstDate,
-    required ValueChanged<DateTime> onDateSelected,
-  }) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: firstDate,
-      lastDate: DateTime.now().add(const Duration(days: 120)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: Colors.white,
-              onSurface: AppColors.neutral900,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      onDateSelected(picked);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final homeBloc = context.read<HomeBloc>();
+
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
-        final homeBloc = context.read<HomeBloc>();
-
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -61,15 +30,70 @@ class SearchFormCard extends StatelessWidget {
                 offset: Offset(0, 4),
               ),
             ],
-            border: Border.all(color: AppColors.neutral200),
+            border: Border.all(color: DiscoveryColors.neutral200),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Departure & Destination City Selectors
+              // 1. Top Bar: Toggle Switch Khứ hồi
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppDimensions.base,
+                  AppDimensions.sm,
                   AppDimensions.base,
+                  AppDimensions.xs,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.sync_alt_rounded,
+                            size: 20,
+                            color: state.isRoundTrip
+                                ? DiscoveryColors.primary
+                                : DiscoveryColors.neutral500,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'Khứ hồi',
+                              style: DiscoveryTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: state.isRoundTrip
+                                    ? DiscoveryColors.primary
+                                    : DiscoveryColors.neutral700,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Semantics(
+                      label: 'Bật tắt vé khứ hồi',
+                      toggled: state.isRoundTrip,
+                      child: Switch.adaptive(
+                        value: state.isRoundTrip,
+                        activeThumbColor: DiscoveryColors.primary,
+                        activeTrackColor: DiscoveryColors.primaryLight,
+                        onChanged: (val) =>
+                            homeBloc.add(ToggleRoundTripEvent(val)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 2. Departure & Destination City Selectors
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppDimensions.base,
+                  AppDimensions.xs,
                   AppDimensions.base,
                   AppDimensions.sm,
                 ),
@@ -82,7 +106,7 @@ class SearchFormCard extends StatelessWidget {
                         _buildCityRow(
                           context,
                           icon: Icons.trip_origin_rounded,
-                          iconColor: AppColors.primary,
+                          iconColor: DiscoveryColors.primary,
                           label: 'Điểm xuất phát',
                           cityName: state.departureCity?.name ?? 'Chọn điểm đi',
                           province: state.departureCity?.region,
@@ -103,7 +127,7 @@ class SearchFormCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 36, right: 48),
                           child: const Divider(
                             height: 1,
-                            color: AppColors.neutral200,
+                            color: DiscoveryColors.neutral200,
                           ),
                         ),
 
@@ -111,7 +135,7 @@ class SearchFormCard extends StatelessWidget {
                         _buildCityRow(
                           context,
                           icon: Icons.location_on_rounded,
-                          iconColor: AppColors.secondary,
+                          iconColor: DiscoveryColors.secondary,
                           label: 'Điểm đến',
                           cityName:
                               state.destinationCity?.name ?? 'Chọn điểm đến',
@@ -133,28 +157,38 @@ class SearchFormCard extends StatelessWidget {
                       ],
                     ),
 
-                    // Swap Cities Button
+                    // Swap Button
                     Positioned(
-                      right: 4,
-                      child: Material(
-                        color: Colors.white,
-                        shape: const CircleBorder(),
-                        elevation: 2,
-                        shadowColor: Colors.black26,
-                        child: InkWell(
-                          customBorder: const CircleBorder(),
-                          onTap: () => homeBloc.add(const SwapCitiesEvent()),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.neutral200),
-                            ),
-                            child: const Icon(
-                              Icons.swap_vert_rounded,
-                              color: AppColors.primary,
-                              size: 22,
+                      right: 0,
+                      child: Tooltip(
+                        message: 'Đổi chiều điểm đi và điểm đến',
+                        child: Semantics(
+                          button: true,
+                          label: 'Đổi chiều điểm đi và điểm đến',
+                          child: Material(
+                            color: Colors.white,
+                            shape: const CircleBorder(),
+                            elevation: 2,
+                            shadowColor: Colors.black26,
+                            child: InkWell(
+                              onTap: () =>
+                                  homeBloc.add(const SwapCitiesEvent()),
+                              customBorder: const CircleBorder(),
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: DiscoveryColors.neutral200,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.swap_vert_rounded,
+                                  color: DiscoveryColors.primary,
+                                  size: 22,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -164,271 +198,104 @@ class SearchFormCard extends StatelessWidget {
                 ),
               ),
 
-              const Divider(height: 1, color: AppColors.neutral200),
+              const Divider(height: 1, color: DiscoveryColors.neutral200),
 
-              // Date Selection Section
+              // 3. Date Selection & CTA Button Section
               Padding(
                 padding: const EdgeInsets.all(AppDimensions.base),
                 child: Column(
                   children: [
-                    // One-way / Round-trip selector
-                    Row(
-                      children: [
-                        _buildTripTypeChip(
-                          label: 'Một chiều',
-                          isSelected: !state.isRoundTrip,
-                          onTap: () =>
-                              homeBloc.add(const ToggleRoundTripEvent(false)),
+                    // Date pickers: Single or Round trip
+                    if (!state.isRoundTrip)
+                      _buildDateField(
+                        context: context,
+                        label: 'Ngày đi',
+                        date: state.departureDate,
+                        onTap: () => _pickDate(
+                          context,
+                          initialDate: state.departureDate,
+                          firstDate: DateTime.now(),
+                          onDateSelected: (date) {
+                            homeBloc.add(SelectDepartureDateEvent(date));
+                          },
                         ),
-                        const SizedBox(width: AppDimensions.sm),
-                        _buildTripTypeChip(
-                          label: 'Khứ hồi',
-                          isSelected: state.isRoundTrip,
-                          onTap: () =>
-                              homeBloc.add(const ToggleRoundTripEvent(true)),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: AppDimensions.md),
-
-                    // Departure Date Picker Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
+                      )
+                    else
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isNarrow = constraints.maxWidth < 320;
+                          final depField = _buildDateField(
+                            context: context,
+                            label: 'Ngày đi',
+                            date: state.departureDate,
                             onTap: () => _pickDate(
                               context,
                               initialDate: state.departureDate,
                               firstDate: DateTime.now(),
-                              onDateSelected: (date) =>
-                                  homeBloc.add(SelectDepartureDateEvent(date)),
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              AppDimensions.radiusMd,
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(
-                                AppDimensions.sm + 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.neutral50,
-                                borderRadius: BorderRadius.circular(
-                                  AppDimensions.radiusMd,
-                                ),
-                                border: Border.all(color: AppColors.neutral200),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.calendar_today_rounded,
-                                    size: 18,
-                                    color: AppColors.primary,
-                                  ),
-                                  const SizedBox(width: AppDimensions.sm),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Ngày đi',
-                                          style: AppTextStyles.caption.copyWith(
-                                            color: AppColors.neutral500,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          DateFormatter.formatFullDate(
-                                            state.departureDate,
-                                          ),
-                                          style: AppTextStyles.titleSmall
-                                              .copyWith(
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
+                              onDateSelected: (date) {
+                                homeBloc.add(SelectDepartureDateEvent(date));
+                                if (state.returnDate != null &&
+                                    state.returnDate!.isBefore(date)) {
+                                  homeBloc.add(
+                                    SelectReturnDateEvent(
+                                      date.add(const Duration(days: 1)),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  );
+                                }
+                              },
                             ),
-                          ),
-                        ),
+                          );
 
-                        // Return Date (if Round-trip)
-                        if (state.isRoundTrip) ...[
-                          const SizedBox(width: AppDimensions.sm),
-                          Expanded(
-                            child: InkWell(
-                              onTap: () => _pickDate(
-                                context,
-                                initialDate:
-                                    state.returnDate ??
-                                    state.departureDate.add(
-                                      const Duration(days: 1),
-                                    ),
-                                firstDate: state.departureDate,
-                                onDateSelected: (date) =>
-                                    homeBloc.add(SelectReturnDateEvent(date)),
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                AppDimensions.radiusMd,
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.all(
-                                  AppDimensions.sm + 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.neutral50,
-                                  borderRadius: BorderRadius.circular(
-                                    AppDimensions.radiusMd,
-                                  ),
-                                  border: Border.all(
-                                    color: AppColors.neutral200,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.event_repeat_rounded,
-                                      size: 18,
-                                      color: AppColors.secondary,
-                                    ),
-                                    const SizedBox(width: AppDimensions.sm),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Ngày về',
-                                            style: AppTextStyles.caption
-                                                .copyWith(
-                                                  color: AppColors.neutral500,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            state.returnDate != null
-                                                ? DateFormatter.formatFullDate(
-                                                    state.returnDate!,
-                                                  )
-                                                : 'Chọn ngày về',
-                                            style: AppTextStyles.titleSmall
-                                                .copyWith(
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                          final retDate =
+                              state.returnDate ??
+                              state.departureDate.add(const Duration(days: 2));
+                          final retField = _buildDateField(
+                            context: context,
+                            label: 'Ngày về',
+                            date: retDate,
+                            onTap: () => _pickDate(
+                              context,
+                              initialDate: retDate,
+                              firstDate: state.departureDate,
+                              onDateSelected: (date) {
+                                homeBloc.add(SelectReturnDateEvent(date));
+                              },
                             ),
-                          ),
-                        ],
-                      ],
-                    ),
+                          );
 
-                    const SizedBox(height: AppDimensions.sm),
+                          if (isNarrow) {
+                            return Column(
+                              children: [
+                                depField,
+                                const SizedBox(height: AppDimensions.sm),
+                                retField,
+                              ],
+                            );
+                          }
 
-                    // Quick date chips: Hôm nay, Ngày mai
-                    Row(
-                      children: [
-                        _buildQuickDateChip(
-                          label: 'Hôm nay',
-                          isSelected: _isSameDay(
-                            state.departureDate,
-                            DateTime.now(),
-                          ),
-                          onTap: () => homeBloc.add(
-                            SelectDepartureDateEvent(DateTime.now()),
-                          ),
-                        ),
-                        const SizedBox(width: AppDimensions.xs),
-                        _buildQuickDateChip(
-                          label: 'Ngày mai',
-                          isSelected: _isSameDay(
-                            state.departureDate,
-                            DateTime.now().add(const Duration(days: 1)),
-                          ),
-                          onTap: () => homeBloc.add(
-                            SelectDepartureDateEvent(
-                              DateTime.now().add(const Duration(days: 1)),
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        // Number of tickets
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.neutral100,
-                            borderRadius: BorderRadius.circular(
-                              AppDimensions.radiusFull,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                          return Row(
                             children: [
-                              GestureDetector(
-                                onTap: () => homeBloc.add(
-                                  UpdateTicketCountEvent(state.ticketCount - 1),
-                                ),
-                                child: const Icon(
-                                  Icons.remove_circle_outline_rounded,
-                                  size: 18,
-                                  color: AppColors.neutral700,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                child: Text(
-                                  '${state.ticketCount} vé',
-                                  style: AppTextStyles.caption.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.neutral900,
-                                  ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () => homeBloc.add(
-                                  UpdateTicketCountEvent(state.ticketCount + 1),
-                                ),
-                                child: const Icon(
-                                  Icons.add_circle_outline_rounded,
-                                  size: 18,
-                                  color: AppColors.neutral700,
-                                ),
-                              ),
+                              Expanded(child: depField),
+                              const SizedBox(width: AppDimensions.sm),
+                              Expanded(child: retField),
                             ],
-                          ),
-                        ),
-                      ],
-                    ),
+                          );
+                        },
+                      ),
 
                     const SizedBox(height: AppDimensions.base),
 
                     // Primary Search Button
-                    CustomButton(
-                      text: 'Tìm Chuyến Xe Khách',
+                    DiscoveryButton(
+                      text: 'Tìm chuyến',
+                      type: ButtonType.secondary,
                       prefixIcon: const Icon(
-                        Icons.directions_bus_rounded,
+                        Icons.search_rounded,
                         color: Colors.white,
                         size: 20,
                       ),
                       width: double.infinity,
+                      height: 50,
                       onPressed: () {
                         final fromId = state.departureCity?.id ?? 'HCM';
                         final fromName =
@@ -456,14 +323,29 @@ class SearchFormCard extends StatelessWidget {
                               isPopular: false,
                             );
 
+                        final returnDateStr =
+                            state.isRoundTrip && state.returnDate != null
+                            ? '${state.returnDate!.year}-${state.returnDate!.month.toString().padLeft(2, '0')}-${state.returnDate!.day.toString().padLeft(2, '0')}'
+                            : null;
+
+                        final extraMap = <String, dynamic>{
+                          'fromCity': departureCity,
+                          'toCity': destinationCity,
+                          'date': state.departureDate,
+                          'ticketCount': state.ticketCount,
+                          'isRoundTrip': state.isRoundTrip,
+                        };
+                        if (state.isRoundTrip && state.returnDate != null) {
+                          extraMap['returnDate'] = state.returnDate;
+                        }
+
+                        final returnQuery = returnDateStr != null
+                            ? '&returnDate=$returnDateStr&isRoundTrip=true'
+                            : '';
+
                         context.push(
-                          '/search-trips?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&ticketCount=${state.ticketCount}',
-                          extra: {
-                            'fromCity': departureCity,
-                            'toCity': destinationCity,
-                            'date': state.departureDate,
-                            'ticketCount': state.ticketCount,
-                          },
+                          '/search-trips?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&ticketCount=${state.ticketCount}$returnQuery',
+                          extra: extraMap,
                         );
                       },
                     ),
@@ -474,6 +356,60 @@ class SearchFormCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildDateField({
+    required BuildContext context,
+    required String label,
+    required DateTime date,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 54),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: DiscoveryColors.neutral50,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          border: Border.all(color: DiscoveryColors.neutral200),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.calendar_today_rounded,
+              size: 20,
+              color: DiscoveryColors.primary,
+            ),
+            const SizedBox(width: AppDimensions.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      color: DiscoveryColors.neutral500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    DateFormatter.formatFullDate(date),
+                    style: DiscoveryTextStyles.titleSmall.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -506,16 +442,16 @@ class SearchFormCard extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.neutral500,
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      color: DiscoveryColors.neutral500,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     cityName,
-                    style: AppTextStyles.titleMedium.copyWith(
+                    style: DiscoveryTextStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.neutral900,
+                      color: DiscoveryColors.neutral900,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -528,13 +464,13 @@ class SearchFormCard extends StatelessWidget {
                 margin: const EdgeInsets.only(right: 48),
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.neutral100,
+                  color: DiscoveryColors.neutral100,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   province,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neutral600,
+                  style: DiscoveryTextStyles.caption.copyWith(
+                    color: DiscoveryColors.neutral600,
                     fontSize: 10,
                   ),
                 ),
@@ -546,64 +482,32 @@ class SearchFormCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTripTypeChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.neutral300,
-            width: isSelected ? 1.5 : 1.0,
+  Future<void> _pickDate(
+    BuildContext context, {
+    required DateTime initialDate,
+    required DateTime firstDate,
+    required ValueChanged<DateTime> onDateSelected,
+  }) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate.isBefore(firstDate) ? firstDate : initialDate,
+      firstDate: firstDate,
+      lastDate: DateTime.now().add(const Duration(days: 120)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: DiscoveryColors.primary,
+              onPrimary: Colors.white,
+              onSurface: DiscoveryColors.neutral900,
+            ),
           ),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            color: isSelected ? AppColors.primary : AppColors.neutral600,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          ),
-        ),
-      ),
+          child: child!,
+        );
+      },
     );
-  }
-
-  Widget _buildQuickDateChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.neutral100,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            color: isSelected ? Colors.white : AppColors.neutral700,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            fontSize: 11,
-          ),
-        ),
-      ),
-    );
-  }
-
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
+    if (picked != null) {
+      onDateSelected(picked);
+    }
   }
 }

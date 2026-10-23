@@ -1,249 +1,171 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
-import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/data/repositories/trip_repository.dart';
 import '../../bloc/home_bloc.dart';
 import '../../bloc/home_event.dart';
 import '../../bloc/home_state.dart';
 import '../widgets/featured_operators_section.dart';
 import '../widgets/popular_routes_section.dart';
-import '../widgets/promo_banners_section.dart';
 import '../widgets/search_form_card.dart';
-import '../widgets/service_category_tabs.dart';
-import '../widgets/service_guarantee_section.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider<HomeBloc>(
+  Widget build(BuildContext context) => DiscoveryTheme(
+    child: BlocProvider<HomeBloc>(
       create: (context) =>
           HomeBloc(tripRepository: context.read<TripRepository>())
             ..add(const LoadHomeDataEvent()),
       child: const _HomeScreenContent(),
-    );
-  }
+    ),
+  );
 }
 
 class _HomeScreenContent extends StatelessWidget {
   const _HomeScreenContent();
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          if (state.status == HomeStatus.loading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
-          }
-
-          if (state.status == HomeStatus.failure) {
-            return Center(
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: DiscoveryColors.background,
+    body: BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) => CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: ColoredBox(
+              color: DiscoveryColors.header,
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.directions_bus_outlined,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Semantics(
+                          label: 'VexGo',
+                          child: ExcludeSemantics(
+                            child: Text.rich(
+                              TextSpan(
+                                children: const [
+                                  TextSpan(text: 'Vex'),
+                                  TextSpan(
+                                    text: 'Go',
+                                    style: TextStyle(
+                                      color: DiscoveryColors.logoAccent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              style: DiscoveryTextStyles.h1.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Thông báo',
+                        icon: const Icon(
+                          Icons.notifications_none_outlined,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => context.go('/notifications'),
+                      ),
+                      IconButton(
+                        tooltip: 'Tài khoản và hỗ trợ',
+                        icon: const Icon(
+                          Icons.headset_mic_outlined,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => context.go('/profile'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+            sliver: SliverToBoxAdapter(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.error_outline_rounded,
-                    color: AppColors.error,
-                    size: 48,
-                  ),
-                  const SizedBox(height: AppDimensions.md),
                   Text(
-                    state.errorMessage ?? 'Đã có lỗi xảy ra',
-                    style: AppTextStyles.bodyMedium,
+                    'Bạn muốn đi đâu?',
+                    style: DiscoveryTextStyles.h1.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                  const SizedBox(height: AppDimensions.base),
-                  ElevatedButton(
-                    onPressed: () =>
-                        context.read<HomeBloc>().add(const LoadHomeDataEvent()),
-                    child: const Text('Thử lại'),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tìm chuyến xe phù hợp cho hành trình của bạn.',
+                    style: DiscoveryTextStyles.bodyMedium,
                   ),
+                  const SizedBox(height: 20),
+                  if (state.status == HomeStatus.loading ||
+                      state.status == HomeStatus.initial)
+                    const Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (state.status == HomeStatus.failure)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.wifi_off_outlined,
+                              color: DiscoveryColors.neutral500,
+                              size: 32,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Chưa tải được dữ liệu tìm chuyến',
+                              style: DiscoveryTextStyles.titleMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Kiểm tra kết nối và thử lại nhé.',
+                              style: DiscoveryTextStyles.bodyMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            DiscoveryButton(
+                              text: 'Thử lại',
+                              onPressed: () => context.read<HomeBloc>().add(
+                                const LoadHomeDataEvent(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    const SearchFormCard(),
                 ],
               ),
-            );
-          }
-
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top Header with Blue Gradient & Service Category Tabs
-                Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.primaryGradientStart,
-                        AppColors.primaryGradientEnd,
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(AppDimensions.radiusXl),
-                      bottomRight: Radius.circular(AppDimensions.radiusXl),
-                    ),
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppDimensions.base,
-                        AppDimensions.sm,
-                        AppDimensions.base,
-                        AppDimensions.base,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Top App Bar Row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(
-                                      AppDimensions.xs + 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(
-                                        AppDimensions.radiusSm,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.directions_bus_rounded,
-                                      color: AppColors.primary,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppDimensions.sm),
-                                  Text(
-                                    'VexGo',
-                                    style: AppTextStyles.h2.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () =>
-                                        context.push('/notifications'),
-                                    icon: const Icon(
-                                      Icons.notifications_none_rounded,
-                                      color: Colors.white,
-                                    ),
-                                    tooltip: 'Thông báo',
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (ctx) => AlertDialog(
-                                          title: const Text(
-                                            'Hotline Hỗ trợ VexGo',
-                                          ),
-                                          content: const Text(
-                                            'Tổng đài hỗ trợ đặt vé: 1900 8888 (24/7)',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.of(ctx).pop(),
-                                              child: const Text('Đóng'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(
-                                      Icons.headset_mic_outlined,
-                                      color: Colors.white,
-                                    ),
-                                    tooltip: 'Hotline',
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: AppDimensions.xs),
-
-                          // Slogan & Guarantee
-                          Text(
-                            'Đặt vé xe khách trực tuyến',
-                            style: AppTextStyles.h2.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Cam kết giữ chỗ 100% • Hàng triệu hành khách tin dùng',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: Colors.white.withValues(alpha: 0.9),
-                            ),
-                          ),
-
-                          const SizedBox(height: AppDimensions.md),
-
-                          // Dịch vụ hệ sinh thái xe khách (Vé xe khách, Gửi hàng hóa, Tra cứu vé)
-                          const ServiceCategoryTabs(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Search Form Card (Positioned cleanly, 100% visible with full borders and shadow)
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    AppDimensions.base,
-                    AppDimensions.md,
-                    AppDimensions.base,
-                    0,
-                  ),
-                  child: SearchFormCard(),
-                ),
-
-                const SizedBox(height: AppDimensions.base),
-
-                // Promo Banners Section
-                const PromoBannersSection(),
-
-                const SizedBox(height: AppDimensions.xl),
-
-                // Popular Routes Section
-                const PopularRoutesSection(),
-
-                const SizedBox(height: AppDimensions.xl),
-
-                // Featured Operators Section
-                const FeaturedOperatorsSection(),
-
-                const SizedBox(height: AppDimensions.xl),
-
-                // Service Guarantee Section
-                const ServiceGuaranteeSection(),
-
-                const SizedBox(height: AppDimensions.xxxl),
-              ],
             ),
-          );
-        },
+          ),
+          if (state.popularRoutes.isNotEmpty)
+            const SliverToBoxAdapter(child: PopularRoutesSection()),
+          if (state.operators.isNotEmpty)
+            const SliverToBoxAdapter(child: FeaturedOperatorsSection()),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }

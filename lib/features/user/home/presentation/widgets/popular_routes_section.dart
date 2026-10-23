@@ -1,9 +1,8 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/data/models/popular_route_model.dart';
 import '../../bloc/home_bloc.dart';
@@ -36,23 +35,14 @@ class PopularRoutesSection extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Tuyến đường phổ biến',
-                      style: AppTextStyles.h3.copyWith(
+                      style: DiscoveryTextStyles.h3.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Tất cả',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  const SizedBox.shrink(),
                 ],
               ),
             ),
@@ -124,7 +114,7 @@ class _PopularRouteCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-          border: Border.all(color: AppColors.neutral200),
+          border: Border.all(color: DiscoveryColors.neutral200),
           boxShadow: const [
             BoxShadow(
               color: Color(0x0A000000),
@@ -148,11 +138,11 @@ class _PopularRouteCard extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       height: 110,
-                      color: AppColors.primaryLight,
+                      color: DiscoveryColors.primaryLight,
                       child: const Center(
                         child: Icon(
                           Icons.landscape_rounded,
-                          color: AppColors.primary,
+                          color: DiscoveryColors.primary,
                           size: 36,
                         ),
                       ),
@@ -184,7 +174,7 @@ class _PopularRouteCard extends StatelessWidget {
                         const SizedBox(width: 3),
                         Text(
                           route.duration,
-                          style: AppTextStyles.caption.copyWith(
+                          style: DiscoveryTextStyles.caption.copyWith(
                             color: Colors.white,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
@@ -205,7 +195,7 @@ class _PopularRouteCard extends StatelessWidget {
                 children: [
                   Text(
                     '${route.fromCityName} - ${route.toCityName}',
-                    style: AppTextStyles.titleSmall.copyWith(
+                    style: DiscoveryTextStyles.titleSmall.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
                     ),
@@ -215,8 +205,8 @@ class _PopularRouteCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     'Khoảng cách: ${route.distance}',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.neutral500,
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      color: DiscoveryColors.neutral500,
                       fontSize: 11,
                     ),
                   ),
@@ -226,14 +216,14 @@ class _PopularRouteCard extends StatelessWidget {
                       children: [
                         Text(
                           'Từ ',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.neutral500,
+                          style: DiscoveryTextStyles.caption.copyWith(
+                            color: DiscoveryColors.neutral500,
                           ),
                         ),
                         Flexible(
                           child: Text(
                             CurrencyFormatter.format(route.minPrice!),
-                            style: AppTextStyles.price.copyWith(
+                            style: DiscoveryTextStyles.price.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                             ),
@@ -246,8 +236,8 @@ class _PopularRouteCard extends StatelessWidget {
                   else
                     Text(
                       'Xem giá vé',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.primary,
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: DiscoveryColors.primary,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),

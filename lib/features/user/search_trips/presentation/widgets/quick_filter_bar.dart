@@ -1,7 +1,6 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/features/user/search_trips/data/models/trip_filter_model.dart';
 
 class QuickFilterBar extends StatelessWidget {
@@ -25,75 +24,85 @@ class QuickFilterBar extends StatelessWidget {
     final activeCount = currentFilter.activeFilterCount;
 
     return Container(
-      height: 48,
+      height: 42 + MediaQuery.textScalerOf(context).scale(18),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: AppColors.neutral200)),
+        border: Border(bottom: BorderSide(color: DiscoveryColors.neutral200)),
       ),
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.base,
-          vertical: 6,
+          vertical: 5,
         ),
         children: [
           // Filter Button
-          InkWell(
-            onTap: onOpenFilterSheet,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: activeCount > 0
-                    ? AppColors.primaryLight
-                    : AppColors.neutral100,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(
-                  color: activeCount > 0
-                      ? AppColors.primary
-                      : AppColors.neutral300,
+          Semantics(
+            button: true,
+            label: activeCount > 0
+                ? 'Mở bộ lọc, có $activeCount bộ lọc đang chọn'
+                : 'Mở bộ lọc',
+            child: InkWell(
+              onTap: onOpenFilterSheet,
+              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
                 ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.tune_rounded,
-                    size: 16,
+                decoration: BoxDecoration(
+                  color: activeCount > 0
+                      ? DiscoveryColors.primaryLight
+                      : DiscoveryColors.neutral100,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                  border: Border.all(
                     color: activeCount > 0
-                        ? AppColors.primary
-                        : AppColors.neutral700,
+                        ? DiscoveryColors.primary
+                        : DiscoveryColors.neutral300,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Bộ lọc',
-                    style: AppTextStyles.caption.copyWith(
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      size: 16,
                       color: activeCount > 0
-                          ? AppColors.primary
-                          : AppColors.neutral700,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
+                          ? DiscoveryColors.primary
+                          : DiscoveryColors.neutral700,
                     ),
-                  ),
-                  if (activeCount > 0) ...[
-                    const SizedBox(width: 4),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
+                    const SizedBox(width: 5),
+                    Text(
+                      'Bộ lọc',
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: activeCount > 0
+                            ? DiscoveryColors.primary
+                            : DiscoveryColors.neutral700,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
                       ),
-                      child: Text(
-                        '$activeCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          height: 1,
+                    ),
+                    if (activeCount > 0) ...[
+                      const SizedBox(width: 5),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: DiscoveryColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '$activeCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            height: 1,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -101,33 +110,41 @@ class QuickFilterBar extends StatelessWidget {
           const SizedBox(width: AppDimensions.sm),
 
           // Sort Button
-          InkWell(
-            onTap: onOpenSortSheet,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.neutral100,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(color: AppColors.neutral300),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.swap_vert_rounded,
-                    size: 16,
-                    color: AppColors.neutral700,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    currentSort.label,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.neutral700,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+          Semantics(
+            button: true,
+            label: 'Sắp xếp theo: ${currentSort.label}',
+            child: InkWell(
+              onTap: onOpenSortSheet,
+              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: DiscoveryColors.neutral100,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                  border: Border.all(color: DiscoveryColors.neutral300),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.swap_vert_rounded,
+                      size: 16,
+                      color: DiscoveryColors.neutral700,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Text(
+                      currentSort.label,
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: DiscoveryColors.neutral700,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -210,25 +227,35 @@ class QuickFilterBar extends StatelessWidget {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight : Colors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.neutral300,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? DiscoveryColors.primaryLight : Colors.white,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+            border: Border.all(
+              color: isSelected
+                  ? DiscoveryColors.primary
+                  : DiscoveryColors.neutral300,
+            ),
           ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: isSelected ? AppColors.primary : AppColors.neutral700,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              fontSize: 12,
+          child: Center(
+            child: Text(
+              label,
+              style: DiscoveryTextStyles.caption.copyWith(
+                color: isSelected
+                    ? DiscoveryColors.primary
+                    : DiscoveryColors.neutral700,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 12,
+              ),
             ),
           ),
         ),

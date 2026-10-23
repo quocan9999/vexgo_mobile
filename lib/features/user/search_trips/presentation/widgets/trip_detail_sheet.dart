@@ -1,12 +1,10 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/data/repositories/trip_repository.dart';
 import '../../bloc/trip_detail_cubit.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
-import 'package:vexgo_app/core/widgets/custom_button.dart';
 import 'package:vexgo_app/core/widgets/rating_badge.dart';
 import 'package:vexgo_app/data/models/trip_model.dart';
 
@@ -45,28 +43,100 @@ class TripDetailSheet extends StatelessWidget {
     child: BlocBuilder<TripDetailCubit, TripDetailState>(
       builder: (context, state) {
         if (state.status != TripDetailStatus.loaded) {
-          return SizedBox(
-            height: MediaQuery.sizeOf(context).height * .5,
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.95,
+            ),
             child: Material(
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(20),
               ),
               child: Center(
                 child: state.status == TripDetailStatus.loading
-                    ? const CircularProgressIndicator()
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(state.error!),
-                          TextButton(
-                            onPressed: context.read<TripDetailCubit>().load,
-                            child: const Text('Thử lại'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Đóng'),
-                          ),
-                        ],
+                    ? const CircularProgressIndicator(
+                        color: DiscoveryColors.primary,
+                      )
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.all(AppDimensions.xl),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: const BoxDecoration(
+                                color: DiscoveryColors.errorLight,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.error_outline_rounded,
+                                color: DiscoveryColors.error,
+                                size: 32,
+                              ),
+                            ),
+                            const SizedBox(height: AppDimensions.md),
+                            Text(
+                              'Không thể tải chi tiết chuyến',
+                              style: DiscoveryTextStyles.titleMedium.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: AppDimensions.xs),
+                            Text(
+                              state.error ?? 'Đã xảy ra lỗi khi tải dữ liệu.',
+                              style: DiscoveryTextStyles.bodySmall.copyWith(
+                                color: DiscoveryColors.neutral600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: AppDimensions.lg),
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              spacing: AppDimensions.md,
+                              runSpacing: AppDimensions.sm,
+                              children: [
+                                Semantics(
+                                  button: true,
+                                  label: 'Đóng chi tiết chuyến',
+                                  child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      minimumSize: const Size(96, 44),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          AppDimensions.radiusMd,
+                                        ),
+                                      ),
+                                    ),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: const Text('Đóng'),
+                                  ),
+                                ),
+                                Semantics(
+                                  button: true,
+                                  label: 'Thử lại tải chi tiết chuyến',
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: DiscoveryColors.primary,
+                                      foregroundColor: Colors.white,
+                                      minimumSize: const Size(108, 44),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          AppDimensions.radiusMd,
+                                        ),
+                                      ),
+                                    ),
+                                    onPressed: context
+                                        .read<TripDetailCubit>()
+                                        .load,
+                                    child: const Text('Thử lại'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
               ),
             ),
@@ -88,10 +158,13 @@ class _TripDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isCompactHeight = mediaQuery.size.height <= 450;
+
     return DefaultTabController(
       length: 4,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.88,
+        height: mediaQuery.size.height * (isCompactHeight ? 0.96 : 0.88),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -102,42 +175,47 @@ class _TripDetailContent extends StatelessWidget {
         child: Column(
           children: [
             // Drag handle
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(
-                  top: AppDimensions.md,
-                  bottom: AppDimensions.xs,
+            if (!isCompactHeight)
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(
+                    top: AppDimensions.md,
+                    bottom: AppDimensions.xs,
+                  ),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: DiscoveryColors.neutral300,
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.radiusFull,
+                    ),
+                  ),
                 ),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.neutral300,
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-                ),
-              ),
-            ),
+              )
+            else
+              const SizedBox(height: 4),
 
             // Top Header: Operator & Price
             Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: AppDimensions.base,
-                vertical: AppDimensions.sm,
+                vertical: isCompactHeight ? 4 : AppDimensions.sm,
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: isCompactHeight ? 36 : 44,
+                    height: isCompactHeight ? 36 : 44,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
+                      color: DiscoveryColors.primaryLight,
                       borderRadius: BorderRadius.circular(
                         AppDimensions.radiusSm,
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.directions_bus_rounded,
-                      color: AppColors.primary,
-                      size: 24,
+                      color: DiscoveryColors.primary,
+                      size: isCompactHeight ? 20 : 24,
                     ),
                   ),
                   const SizedBox(width: AppDimensions.md),
@@ -147,31 +225,30 @@ class _TripDetailContent extends StatelessWidget {
                       children: [
                         Text(
                           trip.operatorName,
-                          style: AppTextStyles.titleMedium.copyWith(
+                          style: DiscoveryTextStyles.titleMedium.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: AppDimensions.xs,
+                          runSpacing: 2,
                           children: [
-                            if (trip.rating != null) ...[
+                            if (trip.rating != null)
                               RatingBadge(
                                 rating: trip.rating!,
                                 reviewCount: trip.reviewCount,
                               ),
-                              const SizedBox(width: AppDimensions.xs),
-                            ],
-                            Flexible(
-                              child: Text(
-                                '• ${trip.vehicleType}',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.neutral600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                            Text(
+                              '• ${trip.vehicleType}',
+                              style: DiscoveryTextStyles.caption.copyWith(
+                                color: DiscoveryColors.neutral600,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
@@ -180,6 +257,11 @@ class _TripDetailContent extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -187,18 +269,28 @@ class _TripDetailContent extends StatelessWidget {
             ),
 
             // Tab bar
-            const TabBar(
-              isScrollable: true,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.neutral500,
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 2.5,
-              tabs: [
-                Tab(text: 'Hình ảnh xe'),
-                Tab(text: 'Tiện ích'),
-                Tab(text: 'Đón / Trả'),
-                Tab(text: 'Chính sách hủy'),
-              ],
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: MediaQuery.textScalerOf(
+                  context,
+                ).clamp(maxScaleFactor: 1.2),
+              ),
+              child: TabBar(
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                padding: EdgeInsets.zero,
+                labelPadding: const EdgeInsets.symmetric(horizontal: 10),
+                labelColor: DiscoveryColors.primary,
+                unselectedLabelColor: DiscoveryColors.neutral500,
+                indicatorColor: DiscoveryColors.primary,
+                indicatorWeight: 2.5,
+                tabs: const [
+                  Tab(text: 'Hình ảnh xe'),
+                  Tab(text: 'Tiện ích'),
+                  Tab(text: 'Đón / Trả'),
+                  Tab(text: 'Chính sách hủy'),
+                ],
+              ),
             ),
 
             // Tab view content
@@ -222,7 +314,10 @@ class _TripDetailContent extends StatelessWidget {
 
             // Bottom CTA Bar
             Container(
-              padding: const EdgeInsets.all(AppDimensions.base),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+                vertical: isCompactHeight ? 6 : AppDimensions.base,
+              ),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
@@ -235,40 +330,70 @@ class _TripDetailContent extends StatelessWidget {
               ),
               child: SafeArea(
                 top: false,
-                child: Row(
-                  children: [
-                    Column(
+                bottom: !isCompactHeight,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final textScale = MediaQuery.textScalerOf(
+                      context,
+                    ).scale(1.0);
+                    final isNarrow =
+                        constraints.maxWidth < 320 && textScale > 1.2;
+
+                    final priceCol = Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'Giá chỉ từ',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.neutral500,
+                          style: DiscoveryTextStyles.caption.copyWith(
+                            color: DiscoveryColors.neutral500,
                           ),
                         ),
                         Text(
                           CurrencyFormatter.format(trip.discountPrice),
-                          style: AppTextStyles.price.copyWith(fontSize: 18),
+                          style: DiscoveryTextStyles.price.copyWith(
+                            fontSize: isCompactHeight ? 16 : 18,
+                          ),
                         ),
                       ],
-                    ),
-                    const SizedBox(width: AppDimensions.base),
-                    Expanded(
-                      child: CustomButton(
-                        text: trip.availableSeats > 0
-                            ? 'CHỌN CHUYẾN NÀY'
-                            : 'CHUYẾN XE ĐÃ HẾT CHỖ',
-                        type: ButtonType.secondary,
-                        onPressed: trip.availableSeats <= 0
-                            ? null
-                            : () {
-                                Navigator.of(context).pop();
-                                onSelectTrip(trip);
-                              },
-                      ),
-                    ),
-                  ],
+                    );
+
+                    final ctaBtn = DiscoveryButton(
+                      text: trip.availableSeats > 0
+                          ? 'CHỌN CHUYẾN NÀY'
+                          : 'CHUYẾN XE ĐÃ HẾT CHỖ',
+                      type: ButtonType.secondary,
+                      height: isCompactHeight ? 42 : 48,
+                      width: isNarrow ? double.infinity : null,
+                      onPressed: trip.availableSeats <= 0
+                          ? null
+                          : () {
+                              Navigator.of(context).pop();
+                              onSelectTrip(trip);
+                            },
+                    );
+
+                    if (isNarrow) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          priceCol,
+                          const SizedBox(height: AppDimensions.sm),
+                          ctaBtn,
+                        ],
+                      );
+                    }
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        priceCol,
+                        const SizedBox(width: AppDimensions.base),
+                        Expanded(child: ctaBtn),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -289,7 +414,7 @@ class _TripDetailContent extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                color: AppColors.neutral100,
+                color: DiscoveryColors.neutral100,
               ),
               clipBehavior: Clip.antiAlias,
               child: Image.network(
@@ -299,17 +424,34 @@ class _TripDetailContent extends StatelessWidget {
                   child: Icon(
                     Icons.directions_bus_rounded,
                     size: 50,
-                    color: AppColors.primary,
+                    color: DiscoveryColors.primary,
                   ),
                 ),
               ),
             );
           })
         else
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.all(AppDimensions.xxl),
-              child: Text('Chưa có hình ảnh thực tế cho chuyến xe này'),
+              padding: const EdgeInsets.all(AppDimensions.xxl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.image_not_supported_outlined,
+                    size: 40,
+                    color: DiscoveryColors.neutral400,
+                  ),
+                  const SizedBox(height: AppDimensions.sm),
+                  Text(
+                    'Chưa có hình ảnh thực tế cho chuyến xe này',
+                    style: DiscoveryTextStyles.bodyMedium.copyWith(
+                      color: DiscoveryColors.neutral600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
       ],
@@ -317,6 +459,33 @@ class _TripDetailContent extends StatelessWidget {
   }
 
   Widget _buildAmenitiesTab() {
+    if (trip.amenities.isEmpty) {
+      return SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppDimensions.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 40,
+                  color: DiscoveryColors.neutral400,
+                ),
+                const SizedBox(height: AppDimensions.sm),
+                Text(
+                  'Chưa có thông tin tiện ích cho chuyến xe này',
+                  style: DiscoveryTextStyles.bodyMedium.copyWith(
+                    color: DiscoveryColors.neutral600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return ListView(
       padding: const EdgeInsets.all(AppDimensions.base),
       children: trip.amenities.map((amenity) {
@@ -327,20 +496,22 @@ class _TripDetailContent extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppDimensions.xs + 2),
                 decoration: BoxDecoration(
-                  color: AppColors.successLight,
+                  color: DiscoveryColors.successLight,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                 ),
                 child: const Icon(
                   Icons.check_rounded,
-                  color: AppColors.success,
+                  color: DiscoveryColors.success,
                   size: 16,
                 ),
               ),
               const SizedBox(width: AppDimensions.md),
-              Text(
-                amenity,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  amenity,
+                  style: DiscoveryTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -364,11 +535,15 @@ class _TripDetailContent extends StatelessWidget {
                   width: 12,
                   height: 12,
                   decoration: const BoxDecoration(
-                    color: AppColors.primary,
+                    color: DiscoveryColors.primary,
                     shape: BoxShape.circle,
                   ),
                 ),
-                Container(width: 2, height: 60, color: AppColors.primaryLight),
+                Container(
+                  width: 2,
+                  height: 60,
+                  color: DiscoveryColors.primaryLight,
+                ),
               ],
             ),
             const SizedBox(width: AppDimensions.md),
@@ -381,8 +556,8 @@ class _TripDetailContent extends StatelessWidget {
                     children: [
                       Text(
                         'Điểm đón • ${trip.departureTime}',
-                        style: AppTextStyles.titleSmall.copyWith(
-                          color: AppColors.primary,
+                        style: DiscoveryTextStyles.titleSmall.copyWith(
+                          color: DiscoveryColors.primary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -391,15 +566,15 @@ class _TripDetailContent extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     trip.pickupPoint,
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: DiscoveryTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     trip.pickupAddress,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.neutral500,
+                    style: DiscoveryTextStyles.bodySmall.copyWith(
+                      color: DiscoveryColors.neutral500,
                     ),
                   ),
                 ],
@@ -416,7 +591,7 @@ class _TripDetailContent extends StatelessWidget {
               width: 12,
               height: 12,
               decoration: const BoxDecoration(
-                color: AppColors.secondary,
+                color: DiscoveryColors.secondary,
                 shape: BoxShape.circle,
               ),
             ),
@@ -430,8 +605,8 @@ class _TripDetailContent extends StatelessWidget {
                     children: [
                       Text(
                         'Điểm trả • ${trip.arrivalTime}',
-                        style: AppTextStyles.titleSmall.copyWith(
-                          color: AppColors.secondary,
+                        style: DiscoveryTextStyles.titleSmall.copyWith(
+                          color: DiscoveryColors.secondary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -440,15 +615,15 @@ class _TripDetailContent extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     trip.dropoffPoint,
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    style: DiscoveryTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     trip.dropoffAddress,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.neutral500,
+                    style: DiscoveryTextStyles.bodySmall.copyWith(
+                      color: DiscoveryColors.neutral500,
                     ),
                   ),
                 ],
@@ -472,22 +647,22 @@ class _TripDetailContent extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppDimensions.md),
           decoration: BoxDecoration(
-            color: AppColors.warningLight,
+            color: DiscoveryColors.warningLight,
             borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           ),
           child: Row(
             children: [
               const Icon(
                 Icons.warning_amber_rounded,
-                color: AppColors.warning,
+                color: DiscoveryColors.warning,
                 size: 20,
               ),
               const SizedBox(width: AppDimensions.sm),
               Expanded(
                 child: Text(
                   'Lưu ý: Vào dịp Lễ/Tết chính sách hoàn hủy vé sẽ tuân theo quy định riêng của nhà xe.',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neutral800,
+                  style: DiscoveryTextStyles.caption.copyWith(
+                    color: DiscoveryColors.neutral800,
                   ),
                 ),
               ),
@@ -504,7 +679,7 @@ class _TripDetailContent extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.circle, size: 8, color: AppColors.primary),
+          const Icon(Icons.circle, size: 8, color: DiscoveryColors.primary),
           const SizedBox(width: AppDimensions.sm),
           Expanded(
             child: Column(
@@ -512,15 +687,15 @@ class _TripDetailContent extends StatelessWidget {
               children: [
                 Text(
                   time,
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: DiscoveryTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   rule,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.neutral600,
+                  style: DiscoveryTextStyles.bodySmall.copyWith(
+                    color: DiscoveryColors.neutral600,
                   ),
                 ),
               ],

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
@@ -34,18 +35,28 @@ class MainShellScreen extends StatelessWidget {
           currentIndex: navigationShell.currentIndex,
           onTap: _onItemTapped,
           backgroundColor: Colors.white,
-          selectedItemColor: AppColors.primary,
+          selectedItemColor: navigationShell.currentIndex == 0
+              ? DiscoveryColors.primary
+              : AppColors.primary,
           unselectedItemColor: AppColors.neutral400,
-          selectedLabelStyle: AppTextStyles.caption.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 12,
-            color: AppColors.primary,
-          ),
-          unselectedLabelStyle: AppTextStyles.caption.copyWith(
-            fontWeight: FontWeight.w500,
-            fontSize: 12,
-            color: AppColors.neutral400,
-          ),
+          selectedLabelStyle:
+              (navigationShell.currentIndex == 0
+                      ? DiscoveryTextStyles.caption
+                      : AppTextStyles.caption)
+                  .copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    color: AppColors.primary,
+                  ),
+          unselectedLabelStyle:
+              (navigationShell.currentIndex == 0
+                      ? DiscoveryTextStyles.caption
+                      : AppTextStyles.caption)
+                  .copyWith(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    color: AppColors.neutral400,
+                  ),
           type: BottomNavigationBarType.fixed,
           elevation: 0,
           items: const [
