@@ -153,10 +153,13 @@ class _TripDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isCompactHeight = mediaQuery.size.height <= 450;
+
     return DefaultTabController(
       length: 4,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.88,
+        height: mediaQuery.size.height * (isCompactHeight ? 0.96 : 0.88),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -167,42 +170,45 @@ class _TripDetailContent extends StatelessWidget {
         child: Column(
           children: [
             // Drag handle
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(
-                  top: AppDimensions.md,
-                  bottom: AppDimensions.xs,
+            if (!isCompactHeight)
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(
+                    top: AppDimensions.md,
+                    bottom: AppDimensions.xs,
+                  ),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: DiscoveryColors.neutral300,
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                  ),
                 ),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: DiscoveryColors.neutral300,
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-                ),
-              ),
-            ),
+              )
+            else
+              const SizedBox(height: 4),
 
             // Top Header: Operator & Price
             Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: AppDimensions.base,
-                vertical: AppDimensions.sm,
+                vertical: isCompactHeight ? 4 : AppDimensions.sm,
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: isCompactHeight ? 36 : 44,
+                    height: isCompactHeight ? 36 : 44,
                     decoration: BoxDecoration(
                       color: DiscoveryColors.primaryLight,
                       borderRadius: BorderRadius.circular(
                         AppDimensions.radiusSm,
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.directions_bus_rounded,
                       color: DiscoveryColors.primary,
-                      size: 24,
+                      size: isCompactHeight ? 20 : 24,
                     ),
                   ),
                   const SizedBox(width: AppDimensions.md),
@@ -244,6 +250,8 @@ class _TripDetailContent extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -294,7 +302,10 @@ class _TripDetailContent extends StatelessWidget {
 
             // Bottom CTA Bar
             Container(
-              padding: const EdgeInsets.all(AppDimensions.base),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppDimensions.base,
+                vertical: isCompactHeight ? 6 : AppDimensions.base,
+              ),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
@@ -307,10 +318,11 @@ class _TripDetailContent extends StatelessWidget {
               ),
               child: SafeArea(
                 top: false,
+                bottom: !isCompactHeight,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final textScale = MediaQuery.textScalerOf(context).scale(1.0);
-                    final isNarrow = constraints.maxWidth < 300 || textScale > 1.2;
+                    final isNarrow = constraints.maxWidth < 320 && textScale > 1.2;
 
                     final priceCol = Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,7 +337,7 @@ class _TripDetailContent extends StatelessWidget {
                         Text(
                           CurrencyFormatter.format(trip.discountPrice),
                           style: DiscoveryTextStyles.price.copyWith(
-                            fontSize: 18,
+                            fontSize: isCompactHeight ? 16 : 18,
                           ),
                         ),
                       ],
@@ -336,6 +348,7 @@ class _TripDetailContent extends StatelessWidget {
                           ? 'CHỌN CHUYẾN NÀY'
                           : 'CHUYẾN XE ĐÃ HẾT CHỖ',
                       type: ButtonType.secondary,
+                      height: isCompactHeight ? 42 : 48,
                       width: isNarrow ? double.infinity : null,
                       onPressed: trip.availableSeats <= 0
                           ? null
@@ -358,6 +371,7 @@ class _TripDetailContent extends StatelessWidget {
                     }
 
                     return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         priceCol,
                         const SizedBox(width: AppDimensions.base),

@@ -464,6 +464,98 @@ addTearDown(tester.view.resetDevicePixelRatio);
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'TripDetailSheet in landscape 640x360 with text 2.0 scrolls content and CTA remains accessible',
+    (tester) async {
+      tester.view.physicalSize = const Size(640, 360);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      const baseTrip = TripModel(
+        id: 'trip_landscape_test',
+        operatorId: 'op_1',
+        operatorName: 'Phương Trang',
+        vehicleType: 'Limousine 34 giường',
+        fromCityId: 'HCM',
+        fromCityName: 'TP. Hồ Chí Minh',
+        toCityId: 'DL',
+        toCityName: 'Đà Lạt',
+        departureTime: '08:00',
+        arrivalTime: '14:00',
+        duration: '6 giờ',
+        pickupPoint: 'Bến xe Miền Tây',
+        pickupAddress: '395 Kinh Dương Vương, An Lạc, Bình Tân',
+        dropoffPoint: 'Bến xe Đà Lạt',
+        dropoffAddress: '01 Tô Hiến Thành, Phường 3, Đà Lạt',
+        originalPrice: 300000,
+        discountPrice: 280000,
+        availableSeats: 10,
+        totalSeats: 34,
+        seatLayoutType: 'standard',
+        rating: 4.8,
+        reviewCount: 120,
+        amenities: ['WiFi tốc độ cao', 'Nước uống miễn phí', 'Cổng sạc USB'],
+        images: ['https://example.com/bus1.jpg', 'https://example.com/bus2.jpg'],
+        pickupPoints: [],
+        dropoffPoints: [],
+      );
+
+      final repo = _Trips()..tripToReturn = baseTrip;
+      TripModel? selectedTrip;
+
+      await tester.pumpWidget(
+        RepositoryProvider<TripRepository>.value(
+          value: repo,
+          child: MaterialApp(
+            home: DiscoveryTheme(
+              child: MediaQuery(
+                data: const MediaQueryData(
+                  size: Size(640, 360),
+                  textScaler: TextScaler.linear(2),
+                ),
+                child: Scaffold(
+                  body: TripDetailSheet(
+                    trip: baseTrip,
+                    onSelectTrip: (t) => selectedTrip = t,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      for (int i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+        if (find.text('Tiện ích').evaluate().isNotEmpty) break;
+      }
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+
+      final ctaFinder = find.text('CHỌN CHUYẾN NÀY');
+      expect(ctaFinder, findsOneWidget);
+
+      final scrollableFinder = find.byType(Scrollable);
+      expect(scrollableFinder, findsWidgets);
+
+      await tester.drag(find.byType(ListView).first, const Offset(0, -100));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.text('Tiện ích'));
+      await tester.pumpAndSettle();
+      expect(find.text('WiFi tốc độ cao'), findsOneWidget);
+
+      await tester.tap(find.text('Đón / Trả'));
+      await tester.pumpAndSettle();
+      expect(find.text(baseTrip.pickupPoint), findsOneWidget);
+
+      await tester.tap(ctaFinder);
+      await tester.pumpAndSettle();
+      expect(selectedTrip, equals(baseTrip));
+    },
+  );
 }
-
-
