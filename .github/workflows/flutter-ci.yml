@@ -2,7 +2,7 @@ name: Flutter CI
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [develop, feature/mobile-discovery-ui]
     types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [develop]

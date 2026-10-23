@@ -4,6 +4,7 @@ import 'package:vexgo_app/core/network/api_exceptions.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/data/models/voucher_model.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
+import 'package:vexgo_app/data/models/seat_layout_resolver.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/core/network/api_config.dart';
@@ -83,13 +84,9 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           return s.copyWith(price: authoritativePrice);
         }).toList();
 
-        final lower = realSeats.where((s) => s.floor == 1).toList();
-        final upper = realSeats.where((s) => s.floor == 2).toList();
-        seatLayout = SeatLayoutModel(
+        seatLayout = resolveSeatLayout(
           vehicleType: event.trip.vehicleType,
-          hasTwoFloors: upper.isNotEmpty,
-          lowerFloor: lower,
-          upperFloor: upper,
+          seats: realSeats,
         );
       } else {
         seatLayout = await seatRepository.getSeatLayout(

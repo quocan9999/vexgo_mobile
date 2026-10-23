@@ -59,11 +59,12 @@ class SeatHoldCountdownBar extends StatelessWidget {
           Expanded(
             child: Text.rich(
               TextSpan(
-                style: (compact ? AppTextStyles.caption : AppTextStyles.bodySmall)
-                    .copyWith(
-                  color: AppColors.neutral800,
-                  fontWeight: FontWeight.w500,
-                ),
+                style:
+                    (compact ? AppTextStyles.caption : AppTextStyles.bodySmall)
+                        .copyWith(
+                          color: AppColors.neutral800,
+                          fontWeight: FontWeight.w500,
+                        ),
                 children: [
                   TextSpan(
                     text: isUrgent

@@ -160,10 +160,15 @@ class SeatMapView extends StatelessWidget {
               else
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final maxCol = seats.map((s) => s.col).reduce(math.max);
+                    final maxCol = math.max(
+                      layout.columnCount ?? 1,
+                      seats.map((s) => s.col).reduce(math.max),
+                    );
                     final rows = seats.map((s) => s.row).toSet().toList()
                       ..sort();
-                    final aisleAfter = maxCol == 4
+                    final aisleAfter = layout.columnCount != null
+                        ? layout.aisleAfterColumn
+                        : maxCol == 4
                         ? 2
                         : maxCol == 2
                         ? 1
