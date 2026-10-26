@@ -6,42 +6,40 @@ class SeatLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: DiscoveryColors.neutral200),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _item('Trống', Colors.white, DiscoveryColors.neutral400),
-            const SizedBox(width: 14),
-            _item(
-              'Đang chọn',
-              DiscoveryColors.primary,
-              DiscoveryColors.primary,
-              Icons.check,
-            ),
-            const SizedBox(width: 14),
-            _item(
-              'Đang giữ',
-              const Color(0xFFFEF3C7),
-              const Color(0xFFB45309),
-              Icons.hourglass_bottom,
-            ),
-            const SizedBox(width: 14),
-            _item(
-              'Đã đặt',
-              DiscoveryColors.neutral200,
-              DiscoveryColors.neutral500,
-              Icons.close,
-            ),
-          ],
-        ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: DiscoveryColors.neutral200),
+      ),
+      child: Wrap(
+        alignment: WrapAlignment.spaceEvenly,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12,
+        runSpacing: 8,
+        children: [
+          _item('Trống', Colors.white, DiscoveryColors.neutral400),
+          _item(
+            'Đang chọn',
+            DiscoveryColors.primary,
+            DiscoveryColors.primary,
+            Icons.check,
+          ),
+          _item(
+            'Đang giữ',
+            const Color(0xFFFEF3C7),
+            const Color(0xFFB45309),
+            Icons.hourglass_bottom,
+          ),
+          _item(
+            'Đã đặt',
+            DiscoveryColors.neutral200,
+            DiscoveryColors.neutral500,
+            Icons.close,
+          ),
+        ],
       ),
     );
   }

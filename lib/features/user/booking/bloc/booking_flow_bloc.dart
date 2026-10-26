@@ -26,6 +26,19 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   Completer<void>? _holdFinished;
   int _quoteRevision = 0;
   String? _acceptedQuoteKey;
+  bool _sessionInvalidated = false;
+
+  bool get sessionInvalidated => _sessionInvalidated;
+
+  /// Fence synchronously: already queued events and late responses must not
+  /// continue checkout using the next account's credentials.
+  void invalidateSession() {
+    if (_sessionInvalidated || _closing || isClosed) return;
+    _sessionInvalidated = true;
+    _invalidateQuote();
+    _stopCountdown();
+    add(const InvalidateBookingSessionEvent());
+  }
 
   BookingFlowBloc({
     required this.seatRepository,
@@ -50,12 +63,43 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     on<GoToStepEvent>(_onGoToStep);
     on<ConfirmPaymentEvent>(_onConfirmPayment);
     on<ReleaseSeatHoldEvent>(_onReleaseSeatHold);
+    on<InvalidateBookingSessionEvent>(_onInvalidateSession);
+  }
+
+  Future<void> _onInvalidateSession(
+    InvalidateBookingSessionEvent event,
+    Emitter<BookingFlowState> emit,
+  ) async {
+    final releaseHold = !state.isCheckoutLocked && !_confirmBusy;
+    final hold = releaseHold ? state.seatHold : null;
+    emit(
+      state.copyWith(
+        passengerName: '',
+        passengerPhone: '',
+        passengerEmail: '',
+        passengerNote: '',
+        savePassengerInfo: false,
+        clearQuote: true,
+        clearVoucher: true,
+        requestedPromotionCode: '',
+        quoteLoading: false,
+        quoteError: null,
+        selectedSeats: releaseHold ? const [] : null,
+        step: releaseHold ? BookingStep.seatSelection : null,
+        clearSeatHold: releaseHold,
+        errorMessage: null,
+      ),
+    );
+    if (hold != null) await _releaseOnClose(hold.holdToken);
+    // A failed release remains subject to the authoritative backend deadline.
+    // This route stays fenced, so its hold can never be reused by a new actor.
   }
 
   Future<void> _onInit(
     InitBookingFlowEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
+    if (_sessionInvalidated) return;
     _invalidateQuote();
     emit(
       state.copyWith(
@@ -93,6 +137,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           event.trip.seatLayoutType,
         );
       }
+      if (_sessionInvalidated || _closing || emit.isDone) return;
       final vouchers = await bookingRepository.getVouchers();
 
       final pickups = event.trip.pickupPoints;
@@ -118,7 +163,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
       final initialPassengerPhone = event.passengerPhone?.trim() ?? '';
       final initialPassengerEmail = event.passengerEmail?.trim() ?? '';
 
-      if (_closing || emit.isDone) return;
+      if (_sessionInvalidated || _closing || emit.isDone) return;
       emit(
         state.copyWith(
           status: BookingFlowStatus.loaded,
@@ -141,7 +186,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         ),
       );
     } catch (e) {
-      if (_closing || emit.isDone) return;
+      if (_sessionInvalidated || _closing || emit.isDone) return;
       emit(
         state.copyWith(
           status: BookingFlowStatus.failure,
@@ -155,7 +200,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     ToggleSeatEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
-    if (state.isCheckoutLocked ||
+    if (_sessionInvalidated ||
+        state.isCheckoutLocked ||
         _holdBusy ||
         state.status == BookingFlowStatus.loading) {
       return;
@@ -168,10 +214,11 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     ];
     final seat = inventory.where((s) => s.id == event.seat.id).firstOrNull;
     if (!exists && (seat == null || !seat.isAvailable)) return;
-    if (!exists && current.length >= 6) {
+    if (!exists && current.length >= BookingFlowState.maxSeatsPerTrip) {
       emit(
         state.copyWith(
-          errorMessage: 'Bạn chỉ có thể chọn tối đa 6 chỗ trong một lần đặt!',
+          errorMessage:
+              'Bạn chỉ có thể chọn tối đa ${BookingFlowState.maxSeatsPerTrip} chỗ trong một lần đặt!',
         ),
       );
       return;
@@ -205,6 +252,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   }
 
   void _onChangeFloor(ChangeFloorEvent event, Emitter<BookingFlowState> emit) {
+    if (_sessionInvalidated) return;
     emit(state.copyWith(selectedFloor: event.floor));
   }
 
@@ -212,7 +260,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     SelectPickupPointEvent event,
     Emitter<BookingFlowState> emit,
   ) {
-    if (state.isCheckoutLocked) return;
+    if (_sessionInvalidated || state.isCheckoutLocked) return;
     emit(state.copyWith(selectedPickupPoint: event.point));
   }
 
@@ -220,7 +268,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     SelectDropoffPointEvent event,
     Emitter<BookingFlowState> emit,
   ) {
-    if (state.isCheckoutLocked) return;
+    if (_sessionInvalidated || state.isCheckoutLocked) return;
     emit(state.copyWith(selectedDropoffPoint: event.point));
   }
 
@@ -228,7 +276,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     UpdatePassengerInfoEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
-    if (state.isCheckoutLocked) return;
+    if (_sessionInvalidated || state.isCheckoutLocked) return;
     final changed =
         state.passengerName.trim() != event.name.trim() ||
         state.passengerPhone.trim() != event.phone.trim() ||
@@ -257,7 +305,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     ApplyVoucherEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
-    if (state.isCheckoutLocked) return;
+    if (_sessionInvalidated || state.isCheckoutLocked) return;
     if (!state.requiresAuthoritativeQuote) {
       emit(state.copyWith(appliedVoucher: event.voucher));
       return;
@@ -269,7 +317,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     ApplyPromotionCodeEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
-    if (state.isCheckoutLocked) return;
+    if (_sessionInvalidated || state.isCheckoutLocked) return;
     await _applyCode(event.code, emit);
   }
 
@@ -295,7 +343,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     RemoveVoucherEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
-    if (state.isCheckoutLocked) return;
+    if (_sessionInvalidated || state.isCheckoutLocked) return;
     _invalidateQuote();
     emit(
       state.copyWith(
@@ -325,7 +373,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           _acceptedQuoteKey == _quoteKey(state));
 
   Future<void> _loadQuote(Emitter<BookingFlowState> emit) async {
-    if (!state.requiresAuthoritativeQuote ||
+    if (_sessionInvalidated ||
+        !state.requiresAuthoritativeQuote ||
         state.quoteLoading ||
         state.isCheckoutLocked ||
         !state.isSeatsValid ||
@@ -351,7 +400,12 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
             : draft.requestedPromotionCode,
         contactPhone: draft.passengerPhone.trim(),
       );
-      if (_closing || emit.isDone || revision != _quoteRevision) return;
+      if (_sessionInvalidated ||
+          _closing ||
+          emit.isDone ||
+          revision != _quoteRevision) {
+        return;
+      }
       if (_quoteKey(state) != key) {
         emit(
           state.copyWith(
@@ -396,7 +450,12 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         ),
       );
     } catch (error) {
-      if (_closing || emit.isDone || revision != _quoteRevision) return;
+      if (_sessionInvalidated ||
+          _closing ||
+          emit.isDone ||
+          revision != _quoteRevision) {
+        return;
+      }
       emit(
         state.copyWith(
           quoteLoading: false,
@@ -413,7 +472,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     SelectPaymentMethodEvent event,
     Emitter<BookingFlowState> emit,
   ) {
-    if (state.isCheckoutLocked) return;
+    if (_sessionInvalidated || state.isCheckoutLocked) return;
     emit(state.copyWith(selectedPaymentMethod: event.method));
   }
 
@@ -427,7 +486,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     Emitter<BookingFlowState> emit,
   ) async {
     final hold = state.seatHold;
-    if (hold == null ||
+    if (_sessionInvalidated ||
+        hold == null ||
         state.pendingBookingId != null ||
         state.bookingOutcomeUnknown) {
       return;
@@ -464,7 +524,12 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     if (trip == null || tripId == null) return;
     try {
       final seats = await seatRepository.getTripSeats(tripId);
-      if (_closing || emit.isDone || state.isCheckoutLocked) return;
+      if (_sessionInvalidated ||
+          _closing ||
+          emit.isDone ||
+          state.isCheckoutLocked) {
+        return;
+      }
       final price = trip.discountPrice > 0
           ? trip.discountPrice
           : trip.originalPrice;
@@ -477,11 +542,9 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           .toList();
       emit(
         state.copyWith(
-          seatLayout: SeatLayoutModel(
+          seatLayout: resolveSeatLayout(
             vehicleType: trip.vehicleType,
-            hasTwoFloors: priced.any((s) => s.floor == 2),
-            lowerFloor: priced.where((s) => s.floor == 1).toList(),
-            upperFloor: priced.where((s) => s.floor == 2).toList(),
+            seats: priced,
           ),
         ),
       );
@@ -495,7 +558,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     NextStepEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
-    if (!state.canProceed ||
+    if (_sessionInvalidated ||
+        !state.canProceed ||
         state.isCheckoutLocked ||
         _holdBusy ||
         state.status == BookingFlowStatus.loading) {
@@ -541,7 +605,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           tripId: tripId,
           seatIds: seatIds,
         );
-        if (_closing || emit.isDone) {
+        if (_sessionInvalidated || _closing || emit.isDone) {
           await seatRepository.releaseSeatHold(hold.holdToken);
           return;
         }
@@ -567,7 +631,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         _startCountdown();
         return;
       } on ApiException catch (e) {
-        if (_closing || emit.isDone) return;
+        if (_sessionInvalidated || _closing || emit.isDone) return;
         emit(
           state.copyWith(
             status: BookingFlowStatus.failure,
@@ -578,7 +642,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         await _refreshInventory(emit);
         return;
       } catch (e) {
-        if (_closing || emit.isDone) return;
+        if (_sessionInvalidated || _closing || emit.isDone) return;
         emit(
           state.copyWith(
             status: BookingFlowStatus.failure,
@@ -590,6 +654,12 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         _holdBusy = false;
         if (!(_holdFinished?.isCompleted ?? true)) _holdFinished!.complete();
       }
+    }
+
+    if (state.seatHold == null) return;
+    if (_remainingSeconds(state.seatHold!.expiresAt) <= 0) {
+      await _onTickCountdown(const TickCountdownEvent(), emit);
+      return;
     }
 
     if (state.requiresAuthoritativeQuote &&
@@ -643,7 +713,12 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     PreviousStepEvent event,
     Emitter<BookingFlowState> emit,
   ) {
-    if (state.isCheckoutLocked || _holdBusy) return;
+    if (_sessionInvalidated ||
+        state.isCheckoutLocked ||
+        _holdBusy ||
+        state.status == BookingFlowStatus.loading) {
+      return;
+    }
     final prevIndex = state.step.index - 1;
     if (prevIndex >= 0) {
       emit(
@@ -653,10 +728,15 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   }
 
   void _onGoToStep(GoToStepEvent event, Emitter<BookingFlowState> emit) {
-    if (state.isCheckoutLocked || _holdBusy) return;
+    if (_sessionInvalidated ||
+        state.isCheckoutLocked ||
+        _holdBusy ||
+        state.status == BookingFlowStatus.loading) {
+      return;
+    }
     if (event.stepIndex >= 0 && event.stepIndex < BookingStep.values.length) {
       // Allow going back to previous steps without re-validation
-      if (event.stepIndex <= state.step.index) {
+      if (event.stepIndex < state.step.index) {
         final targetStep = BookingStep.values[event.stepIndex];
         emit(state.copyWith(step: targetStep, errorMessage: null));
       }
@@ -667,7 +747,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     ConfirmPaymentEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
-    if (_confirmBusy ||
+    if (_sessionInvalidated ||
+        _confirmBusy ||
         _holdBusy ||
         state.status == BookingFlowStatus.success ||
         state.status == BookingFlowStatus.blockedByBackend) {
@@ -715,7 +796,9 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
       } finally {
         _confirmBusy = false;
       }
-      if (_closing || emit.isDone || !_hasCurrentQuote) return;
+      if (_sessionInvalidated || _closing || emit.isDone || !_hasCurrentQuote) {
+        return;
+      }
     }
     _confirmBusy = true;
     final draft = state;
@@ -741,7 +824,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           ),
           promotionCode: draft.appliedVoucher?.code,
         );
-        if (_closing || emit.isDone) return;
+        if (_sessionInvalidated || _closing || emit.isDone) return;
         _stopCountdown();
         emit(
           state.copyWith(
@@ -804,12 +887,13 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           ),
         );
       }
+      if (_sessionInvalidated) return;
       if (bankTransfer || state.checkoutBooking?.totalAmount == 0) {
         final expected = state.checkoutBooking!;
         final verified = await bookingRepository.getBookingById(
           expected.bookingId,
         );
-        if (_closing || emit.isDone) return;
+        if (_sessionInvalidated || _closing || emit.isDone) return;
         if (verified == null ||
             verified.bookingId != expected.bookingId ||
             verified.bookingCode != expected.bookingCode ||
@@ -874,6 +958,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
               pendingDeeplink: payment.deeplink,
             ),
           );
+          if (_sessionInvalidated) return;
           if (!ApiConfig.isDemoMode && payment.isDemo) {
             emit(
               state.copyWith(
@@ -889,7 +974,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           final payment = await bookingRepository.getPaymentStatus(
             state.pendingPaymentId!,
           );
-          if (_closing || emit.isDone) return;
+          if (_sessionInvalidated || _closing || emit.isDone) return;
           if (payment.paymentId != state.pendingPaymentId ||
               payment.bookingId != state.pendingBookingId ||
               payment.amount != state.pendingPaymentAmount ||
@@ -915,8 +1000,9 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
       final tickets = await resolvePaidBookingTickets(
         bookingRepository,
         state.pendingBookingId!,
+        isCurrentSession: () => !_sessionInvalidated && !_closing,
       );
-      if (_closing || emit.isDone) return;
+      if (_sessionInvalidated || _closing || emit.isDone) return;
       emit(
         state.copyWith(
           status: BookingFlowStatus.success,
@@ -926,7 +1012,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         ),
       );
     } on ApiException catch (error) {
-      if (_closing || emit.isDone) return;
+      if (_sessionInvalidated || _closing || emit.isDone) return;
       final definiteRejection =
           state.pendingBookingId == null &&
           error.statusCode >= 400 &&
@@ -950,7 +1036,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         ),
       );
     } catch (error) {
-      if (_closing || emit.isDone) return;
+      if (_sessionInvalidated || _closing || emit.isDone) return;
       emit(
         state.copyWith(
           status: BookingFlowStatus.failure,

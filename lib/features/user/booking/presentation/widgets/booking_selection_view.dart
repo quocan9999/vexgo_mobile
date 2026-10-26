@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
-import 'package:vexgo_app/core/utils/date_formatter.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
 import 'booking_stepper.dart';
 import 'seat_hold_countdown_bar.dart';
@@ -31,7 +30,8 @@ class BookingSelectionView extends StatelessWidget {
   Widget build(BuildContext context) {
     final busy =
         state.status == BookingFlowStatus.loading ||
-        state.status == BookingFlowStatus.submitting;
+        state.status == BookingFlowStatus.submitting ||
+        state.isCheckoutLocked;
     final failed =
         state.status == BookingFlowStatus.failure && state.seatLayout == null;
 
@@ -40,7 +40,15 @@ class BookingSelectionView extends StatelessWidget {
         backgroundColor: Colors.white,
         body: NestedScrollView(
           headerSliverBuilder: (context, _) => [
-            SliverToBoxAdapter(child: _header(context, busy)),
+            SliverToBoxAdapter(
+              child: BookingCompactHeader(
+                state: state,
+                onBack: onBack,
+                onStep: onStep,
+                onDetails: onDetails,
+                busy: busy,
+              ),
+            ),
           ],
           body: Column(
             children: [
@@ -83,105 +91,6 @@ class BookingSelectionView extends StatelessWidget {
                 onNext: onNext,
                 onBack: onBack,
               ),
-      ),
-    );
-  }
-
-  Widget _header(BuildContext context, bool busy) {
-    final trip = state.trip;
-
-    return ColoredBox(
-      color: DiscoveryColors.header,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(6, 4, 14, 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Row 1: Back | Operator & Route/Time | Inline "Chi tiết xe"
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    tooltip: 'Quay lại',
-                    onPressed: busy ? null : onBack,
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  ),
-                  const SizedBox(width: 2),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          trip?.operatorName ?? 'Đặt vé',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: DiscoveryTextStyles.titleMedium.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                        if (trip != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            '${trip.departureTime}${state.date == null ? '' : ' • ${DateFormatter.formatShortDate(state.date!)}'} • ${trip.fromCityName} → ${trip.toCityName}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: DiscoveryTextStyles.bodySmall.copyWith(
-                              color: Colors.white.withValues(alpha: 0.92),
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 100),
-                    child: TextButton(
-                      onPressed: busy ? null : onDetails,
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 6,
-                        ),
-                        minimumSize: const Size(48, 44),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          'Chi tiết xe',
-                          style: DiscoveryTextStyles.bodySmall.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12.5,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 4),
-
-              // Row 2: Compact Stepper with badges & connectors
-              BookingStepperCompact(
-                currentStepIndex: state.step.index,
-                onStepTapped: busy ? null : onStep,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -11,6 +11,11 @@ abstract class BookingFlowEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Internal cleanup after the route's account identity has changed.
+class InvalidateBookingSessionEvent extends BookingFlowEvent {
+  const InvalidateBookingSessionEvent();
+}
+
 class InitBookingFlowEvent extends BookingFlowEvent {
   final TripModel trip;
   final DateTime date;

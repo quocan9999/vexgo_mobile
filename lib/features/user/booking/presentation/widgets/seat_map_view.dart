@@ -4,6 +4,7 @@ import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
 import 'seat_item.dart';
 import 'seat_vector.dart';
+import 'spatial_seat_map.dart';
 
 class SeatMapView extends StatelessWidget {
   final SeatLayoutModel layout;
@@ -132,30 +133,53 @@ class SeatMapView extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Đầu xe',
-                    style: DiscoveryTextStyles.caption.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: DiscoveryColors.neutral400,
-                      letterSpacing: 0.5,
+              SizedBox(
+                height: 24,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Tooltip(
+                        message: 'Vô lăng tài xế',
+                        child: SteeringWheelVector(),
+                      ),
                     ),
-                  ),
-                  const Tooltip(
-                    message: 'Vô lăng tài xế',
-                    child: SteeringWheelVector(),
-                  ),
-                ],
+                    Center(
+                      child: Text(
+                        'Đầu xe',
+                        style: DiscoveryTextStyles.caption.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: DiscoveryColors.neutral400,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: Tooltip(
+                        message: 'Cửa lên xuống',
+                        child: BusDoorVector(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               const Divider(height: 1, color: DiscoveryColors.neutral200),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
               if (seats.isEmpty)
                 const Padding(
                   padding: EdgeInsets.all(16),
                   child: Text('Chưa có sơ đồ ghế.'),
+                )
+              else if (seats.every((seat) => seat.hasSpatialCoordinates))
+                SpatialSeatMap(
+                  seats: seats,
+                  allSeats: [...layout.lowerFloor, ...layout.upperFloor],
+                  selectedSeats: selectedSeats,
+                  showPrice: prices.length > 1,
+                  onSeatToggled: onSeatToggled,
                 )
               else
                 LayoutBuilder(

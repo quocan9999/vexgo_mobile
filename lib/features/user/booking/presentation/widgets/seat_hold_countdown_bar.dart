@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_dimensions.dart';
 import '../../../../../core/constants/app_text_styles.dart';
+import '../../../../../core/design/discovery_theme.dart';
 
 /// Sticky banner displaying seat hold status and countdown timer per rule-ui-ux.md
 class SeatHoldCountdownBar extends StatelessWidget {
@@ -60,7 +61,9 @@ class SeatHoldCountdownBar extends StatelessWidget {
             child: Text.rich(
               TextSpan(
                 style:
-                    (compact ? AppTextStyles.caption : AppTextStyles.bodySmall)
+                    (compact
+                            ? DiscoveryTextStyles.caption
+                            : AppTextStyles.bodySmall)
                         .copyWith(
                           color: AppColors.neutral800,
                           fontWeight: FontWeight.w500,
@@ -77,7 +80,8 @@ class SeatHoldCountdownBar extends StatelessWidget {
                     style: TextStyle(
                       color: primaryColor,
                       fontWeight: FontWeight.w700,
-                      fontFamily: 'monospace',
+                      fontFamily: compact ? 'VexGoJakarta' : 'monospace',
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ],

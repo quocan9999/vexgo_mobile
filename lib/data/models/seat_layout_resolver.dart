@@ -1,12 +1,15 @@
 import 'dart:math' as math;
 import 'seat_model.dart';
 
-/// Matches the Web booking conventions when the API supplies position labels
-/// rather than coordinates. These conventions are not a physical vehicle plan.
+/// Prefer the per-vehicle Customer API layout. The legacy row/column path is
+/// retained only for payloads and offline fixtures without the new contract.
 SeatLayoutModel resolveSeatLayout({
   required String vehicleType,
   required List<SeatModel> seats,
 }) {
+  if (seats.any((seat) => seat.usesApiLayout)) {
+    return _resolveApiLayout(vehicleType, seats);
+  }
   if (seats.isNotEmpty && seats.every((s) => s.hasExplicitCoordinates)) {
     return _layout(vehicleType, seats);
   }
@@ -91,6 +94,44 @@ SeatLayoutModel resolveSeatLayout({
     columnCount: width,
     aisleAfterColumn: sleeper ? null : 2,
   );
+}
+
+SeatLayoutModel _resolveApiLayout(String vehicleType, List<SeatModel> seats) {
+  final result = <SeatModel>[];
+  for (final floor
+      in seats.map((seat) => seat.floor).toSet().toList()..sort()) {
+    final floorSeats = seats.where((seat) => seat.floor == floor).toList()
+      ..sort(_compareSeats);
+    final occupied = <(double, double)>[
+      for (final seat in floorSeats)
+        if (seat.hasSpatialCoordinates) (seat.x!, seat.y!),
+    ];
+    for (final seat in floorSeats) {
+      if (seat.hasSpatialCoordinates) {
+        result.add(seat);
+        continue;
+      }
+      // Same null-coordinate policy as Customer Web. Never change the API's
+      // seat ID, floor, status or real coordinates, and never persist fallback.
+      var row = 1;
+      (double, double)? available;
+      while (available == null) {
+        final y = row * 1000.0;
+        for (final x in [160.0, 360.0, 640.0, 840.0]) {
+          if (!occupied.any(
+            (point) => (point.$1 - x).abs() < 180 && (point.$2 - y).abs() < 875,
+          )) {
+            available = (x, y);
+            break;
+          }
+        }
+        row++;
+      }
+      occupied.add(available);
+      result.add(seat.copyWith(x: available.$1, y: available.$2));
+    }
+  }
+  return _layout(vehicleType, result);
 }
 
 int _compareSeats(SeatModel a, SeatModel b) {

@@ -201,6 +201,65 @@ void main() {
     ApiConfig.isDemoMode = false;
   });
 
+  test(
+    'hold expiry refresh retains new API coordinates and authoritative floor',
+    () async {
+      final repo = _TestSeatRepo();
+      repo.items
+        ..clear()
+        ..add(
+          SeatModel.fromJson({
+            'tripSeatId': 90,
+            'seatNumber': 'B01',
+            'floor': 1,
+            'x': 180,
+            'y': 1000,
+            'status': 'TRONG',
+          }),
+        );
+      var now = DateTime.now();
+      final bloc = BookingFlowBloc(
+        seatRepository: repo,
+        bookingRepository: _TestBookingRepo(),
+        now: () => now,
+      );
+      addTearDown(bloc.close);
+      final loaded = bloc.stream.firstWhere(
+        (s) => s.status == BookingFlowStatus.loaded,
+      );
+      bloc.add(InitBookingFlowEvent(trip: trip, date: DateTime(2026, 10, 24)));
+      await loaded;
+      expect(bloc.state.seatLayout!.lowerFloor.single.x, 180);
+      final selected = bloc.stream.firstWhere(
+        (s) => s.selectedSeats.isNotEmpty,
+      );
+      bloc.add(ToggleSeatEvent(bloc.state.seatLayout!.lowerFloor.single));
+      await selected;
+      final held = bloc.stream.firstWhere((s) => s.seatHold != null);
+      bloc.add(const NextStepEvent());
+      await held;
+      repo.items[0] = repo.items[0].copyWith(
+        x: 820,
+        y: 3000,
+        status: SeatStatus.booked,
+      );
+      now = bloc.state.seatHold!.expiresAt.add(const Duration(seconds: 1));
+      final refreshed = bloc.stream.firstWhere(
+        (s) => s.seatLayout!.lowerFloor.single.x == 820,
+      );
+      bloc.add(const TickCountdownEvent());
+      await refreshed;
+      final actual = bloc.state.seatLayout!.lowerFloor.single;
+      expect(
+        (actual.id, actual.floor, actual.x, actual.y),
+        ('90', 1, 820, 3000),
+      );
+      expect(actual.status, SeatStatus.booked);
+      expect(bloc.state.selectedSeats, isEmpty);
+      expect(bloc.state.seatHold, isNull);
+    },
+  );
+
   group('Redesigned Header & Stepper Tests', () {
     testWidgets(
       'Compact header renders operator, route/time and inline Chi tiết xe',
@@ -241,6 +300,11 @@ void main() {
         expect(find.text('Đang giữ'), findsOneWidget);
         expect(find.text('Đã đặt'), findsOneWidget);
         expect(find.text('Chưa mở bán'), findsNothing);
+        expect(
+          find.text('Chọn tối đa 5 chỗ cho mỗi lượt đặt.'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('tối đa 6 chỗ'), findsNothing);
       },
     );
 

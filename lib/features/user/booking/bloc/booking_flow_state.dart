@@ -70,6 +70,9 @@ extension BookingStepExtension on BookingStep {
 const _unchangedError = Object();
 
 class BookingFlowState extends Equatable {
+  /// Matches the shared API/Web limit for holds, quotes and bookings.
+  static const maxSeatsPerTrip = 5;
+
   final BookingFlowStatus status;
   final BookingStep step;
   final TripModel? trip;
@@ -203,7 +206,10 @@ class BookingFlowState extends Equatable {
     return max(0, seatsTotal - discountAmount);
   }
 
-  bool get isSeatsValid => selectedSeats.isNotEmpty && hasValidSeatPricing;
+  bool get isSeatsValid =>
+      selectedSeats.isNotEmpty &&
+      selectedSeats.length <= maxSeatsPerTrip &&
+      hasValidSeatPricing;
   String? get holdToken => seatHold?.holdToken;
   bool get isPickupValid => selectedPickupPoint != null;
   bool get isDropoffValid => selectedDropoffPoint != null;

@@ -43,7 +43,7 @@ class Step1SeatSelection extends StatelessWidget {
           const SizedBox(height: 16),
           Center(
             child: Text(
-              'Chọn tối đa 6 chỗ cho mỗi lượt đặt.',
+              'Chọn tối đa ${BookingFlowState.maxSeatsPerTrip} chỗ cho mỗi lượt đặt.',
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.neutral500,
                 fontWeight: FontWeight.w500,
