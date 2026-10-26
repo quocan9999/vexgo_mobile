@@ -88,3 +88,9 @@ APK được build ở chế độ Debug Real Mode với các tham số sandbox 
   - `http://127.0.0.1:4000/api/v1`: **True**
   - `BusDoorVector`: **True**
   - `maxSeatsPerTrip`: **True**
+
+## Follow-up alignment and large-text fixes (2026-10-26)
+
+Seat cell width now uses the densest row across the vehicle's floors, so switching floors preserves the centre of seats with the same x coordinate. The front row uses intrinsic text height and equal-width side icon regions instead of a fixed 24dp height; the front label remains centred and fits at 2x text scale.
+
+Two regressions in test/seat_alignment_regression_test.dart verify cross-floor alignment and intrinsic label height with the production font. Full suite: 401/401 passed; analyzer clean; format: 169 files, 0 changes. No new APK/device validation was performed for this follow-up; the APK manifest above belongs to the earlier build.
