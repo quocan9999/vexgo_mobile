@@ -3,6 +3,7 @@ import '../widgets/guest_ticket_lookup_panel.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/widgets/custom_app_bar.dart';
@@ -71,11 +72,12 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
             title: 'Vé của tôi',
             automaticallyImplyLeading: false,
             actions: [
-              IconButton(
-                tooltip: 'Tra cứu chứng từ thanh toán',
-                icon: const Icon(Icons.receipt_long_outlined),
-                onPressed: () => context.push('/booking-receipt'),
-              ),
+              if (!ApiConfig.isDemoMode)
+                IconButton(
+                  tooltip: 'Tra cứu chứng từ thanh toán',
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  onPressed: () => context.push('/booking-receipt'),
+                ),
             ],
           ),
           body: state.requiresLogin

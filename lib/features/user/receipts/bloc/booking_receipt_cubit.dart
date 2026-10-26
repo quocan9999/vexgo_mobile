@@ -23,9 +23,7 @@ class BookingReceiptCubit extends Cubit<BookingReceiptState> {
   String? _phone;
   BookingReceiptCubit(this.repository)
     : super(const BookingReceiptState(ReceiptStatus.initial)) {
-    _invalidations = TokenStorage.sessionInvalidations.listen(
-      (_) => invalidate(),
-    );
+    _invalidations = TokenStorage.sessionChanges.listen((_) => invalidate());
   }
   bool get isCurrent => _session == TokenStorage.sessionVersion;
   void clear() {

@@ -11,9 +11,11 @@ import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/data/datasources/remote/booking_receipt_remote_data_source.dart';
 import 'package:vexgo_app/data/models/booking_receipt_model.dart';
+import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/data/repositories/booking_receipt_repository.dart';
 import 'package:vexgo_app/features/user/receipts/bloc/booking_receipt_cubit.dart';
 import 'package:vexgo_app/features/user/receipts/presentation/booking_receipt_screen.dart';
+import 'package:vexgo_app/features/user/receipts/presentation/receipt_entry_button.dart';
 
 Map<String, dynamic> paidReceipt([int id = 12]) => {
   'bookingId': id,
@@ -94,8 +96,210 @@ void main() {
     ApiConfig.setCustomBaseUrl('http://localhost:4012/api/v1');
   });
   tearDown(() {
+    ApiConfig.isDemoMode = false;
     TokenStorage.resetStorageAdapter();
     ApiConfig.resetBaseUrl();
+  });
+
+  test('receipt provider is offline in demo and real in Real Mode', () async {
+    ApiConfig.isDemoMode = true;
+    final offline = BookingReceiptRepository.forCurrentMode();
+    expect(offline, isA<UnavailableBookingReceiptRepository>());
+    await expectLater(
+      offline.lookup(code: 'MOCK', phone: '0901234567'),
+      throwsA(isA<ReceiptUnavailable>()),
+    );
+    ApiConfig.isDemoMode = false;
+    expect(
+      BookingReceiptRepository.forCurrentMode(),
+      isA<RealBookingReceiptRepository>(),
+    );
+  });
+
+  test(
+    'login session changes are synchronous and rotation does not invalidate receipt',
+    () async {
+      var changes = 0;
+      var logouts = 0;
+      final changed = TokenStorage.sessionChanges.listen((_) => changes++);
+      final invalidated = TokenStorage.sessionInvalidations.listen(
+        (_) => logouts++,
+      );
+      addTearDown(changed.cancel);
+      addTearDown(invalidated.cancel);
+      final saving = TokenStorage.saveTokens(
+        accessToken: 'account-a',
+        refreshToken: 'refresh-a',
+      );
+      expect(changes, 1);
+      expect(logouts, 0);
+      await saving;
+      final repo = DeferredReceiptRepository();
+      final cubit = BookingReceiptCubit(repo);
+      addTearDown(cubit.close);
+      final lookup = cubit.lookup('QA-VE-01', '0901234567');
+      repo.calls.single.complete(BookingReceipt.fromJson(paidReceipt()));
+      await lookup;
+      expect(
+        await TokenStorage.rotateTokensIfCurrent(
+          expectedVersion: TokenStorage.sessionVersion,
+          accessToken: 'rotated-a',
+          refreshToken: 'rotated-refresh-a',
+        ),
+        isTrue,
+      );
+      expect(changes, 1);
+      expect(cubit.state.status, ReceiptStatus.loaded);
+      await TokenStorage.clearTokens();
+      expect(changes, 2);
+      expect(logouts, 1);
+      expect(cubit.state.status, ReceiptStatus.invalidated);
+    },
+  );
+
+  test('account switch discards an in-flight receipt refresh', () async {
+    final repo = DeferredReceiptRepository();
+    final cubit = BookingReceiptCubit(repo);
+    addTearDown(cubit.close);
+    final lookup = cubit.lookup('QA-VE-01', '0901234567');
+    repo.calls.single.complete(BookingReceipt.fromJson(paidReceipt()));
+    await lookup;
+    final refreshing = cubit.refresh();
+    await TokenStorage.saveTokens(accessToken: 'account-b');
+    expect(cubit.state.status, ReceiptStatus.invalidated);
+    repo.calls.last.complete(BookingReceipt.fromJson(paidReceipt()));
+    await refreshing;
+    expect(cubit.state.receipt, isNull);
+    expect(cubit.state.status, ReceiptStatus.invalidated);
+  });
+
+  testWidgets('mounted receipt entry disables immediately on account switch', (
+    tester,
+  ) async {
+    final ticket = TicketModel.fromJson({
+      'id': '1',
+      'ticketCode': 'QA-VE-01',
+      'status': 'DA_DAT',
+      'passenger': {'fullName': 'QA', 'phone': '0901234567', 'email': ''},
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: ReceiptEntryButton(ticket: ticket)),
+      ),
+    );
+    expect(
+      tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+      isNotNull,
+    );
+    await tester.runAsync(
+      () => TokenStorage.saveTokens(accessToken: 'account-b'),
+    );
+    await tester.pump();
+    expect(
+      tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+      isNull,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  test(
+    'account switch immediately clears loaded receipt and ignores late refresh',
+    () async {
+      await TokenStorage.saveTokens(accessToken: 'account-a');
+      final repo = DeferredReceiptRepository();
+      final cubit = BookingReceiptCubit(repo);
+      addTearDown(cubit.close);
+      final lookup = cubit.lookup('QA-VE-01', '0901234567');
+      repo.calls.single.complete(BookingReceipt.fromJson(paidReceipt()));
+      await lookup;
+      expect(cubit.state.status, ReceiptStatus.loaded);
+      await TokenStorage.saveTokens(accessToken: 'account-b');
+      expect(cubit.state.status, ReceiptStatus.invalidated);
+      expect(cubit.state.receipt, isNull);
+      await cubit.refresh();
+      expect(repo.calls, hasLength(1));
+    },
+  );
+
+  testWidgets(
+    'mounted receipt and both inputs clear after saveTokens without user action',
+    (tester) async {
+      final repo = DeferredReceiptRepository();
+      await tester.pumpWidget(
+        RepositoryProvider<BookingReceiptRepository>.value(
+          value: repo,
+          child: MaterialApp(
+            home: BookingReceiptScreen(
+              initialRequest: ReceiptLookupRequest(
+                'QA-VE-01',
+                '0901234567',
+                TokenStorage.sessionVersion,
+              ),
+            ),
+          ),
+        ),
+      );
+      repo.calls.single.complete(BookingReceipt.fromJson(paidReceipt()));
+      await tester.pumpAndSettle();
+      expect(find.text('Đã thanh toán'), findsOneWidget);
+      await tester.runAsync(
+        () => TokenStorage.saveTokens(accessToken: 'account-b'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Đã thanh toán'), findsNothing);
+      for (final key in ['receipt-code', 'receipt-phone']) {
+        expect(
+          tester.widget<TextFormField>(find.byKey(Key(key))).controller!.text,
+          isEmpty,
+        );
+      }
+      expect(repo.calls, hasLength(1));
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'demo deep link does not request a real receipt or expose lookup form',
+    (tester) async {
+      ApiConfig.isDemoMode = true;
+      final repo = DeferredReceiptRepository();
+      await tester.pumpWidget(
+        RepositoryProvider<BookingReceiptRepository>.value(
+          value: repo,
+          child: MaterialApp(
+            home: BookingReceiptScreen(
+              initialRequest: ReceiptLookupRequest(
+                'MOCK-TICKET',
+                '0901234567',
+                TokenStorage.sessionVersion,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(repo.calls, isEmpty);
+      expect(find.byKey(const Key('receipt-code')), findsNothing);
+      expect(find.byKey(const Key('receipt-phone')), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets('demo ticket hides its receipt action', (tester) async {
+    ApiConfig.isDemoMode = true;
+    final ticket = TicketModel.fromJson({
+      'id': '1',
+      'ticketCode': 'DEMO',
+      'status': 'DA_DAT',
+      'passenger': {'fullName': 'Demo', 'phone': '0901234567', 'email': ''},
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: ReceiptEntryButton(ticket: ticket)),
+      ),
+    );
+    expect(find.text('Xem chứng từ thanh toán'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
   });
 
   test(

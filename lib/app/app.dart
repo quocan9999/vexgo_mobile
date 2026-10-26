@@ -26,7 +26,7 @@ class VexGoApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<BookingReceiptRepository>(
-          create: (_) => RealBookingReceiptRepository(),
+          create: (_) => BookingReceiptRepository.forCurrentMode(),
         ),
         RepositoryProvider<TripRepository>(
           create: (context) =>

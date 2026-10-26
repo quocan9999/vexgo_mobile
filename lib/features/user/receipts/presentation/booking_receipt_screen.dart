@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/token_storage.dart';
+import '../../../../core/network/api_config.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/widgets/custom_button.dart';
@@ -29,8 +30,9 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
     WidgetsBinding.instance.addObserver(this);
     final request = widget.initialRequest;
     final validRequest =
-        request == null ||
-        request.sessionVersion == TokenStorage.sessionVersion;
+        !ApiConfig.isDemoMode &&
+        (request == null ||
+            request.sessionVersion == TokenStorage.sessionVersion);
     _code = TextEditingController(text: validRequest ? request?.code : null);
     _phone = TextEditingController(text: validRequest ? request?.phone : null);
     _reader = BookingReceiptCubit(context.read<BookingReceiptRepository>());
@@ -65,107 +67,124 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.background,
-    appBar: const CustomAppBar(title: 'Chứng từ thanh toán'),
-    body: BlocConsumer<BookingReceiptCubit, BookingReceiptState>(
-      bloc: _reader,
-      listener: (_, state) {
-        if (state.status == ReceiptStatus.invalidated) {
-          _code.clear();
-          _phone.clear();
-        }
-      },
-      builder: (context, state) {
-        final invalid =
-            !_reader.isCurrent || state.status == ReceiptStatus.invalidated;
-        final busy = state.status == ReceiptStatus.loading;
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Text(
-              'Tra cứu chứng từ đặt vé',
-              style: Theme.of(context).textTheme.titleLarge,
+  Widget build(BuildContext context) => ApiConfig.isDemoMode
+      ? const Scaffold(
+          appBar: CustomAppBar(title: 'Chứng từ thanh toán'),
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Tra cứu chứng từ chỉ khả dụng khi kết nối hệ thống thật.',
+              ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Nhập mã vé hoặc mã đặt vé và số điện thoại đặt vé. Đơn gắn tài khoản cần đăng nhập đúng tài khoản đã đặt.',
-            ),
-            const SizedBox(height: 16),
-            Form(
-              key: _form,
-              child: Column(
+          ),
+        )
+      : Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: const CustomAppBar(title: 'Chứng từ thanh toán'),
+          body: BlocConsumer<BookingReceiptCubit, BookingReceiptState>(
+            bloc: _reader,
+            listener: (_, state) {
+              if (state.status == ReceiptStatus.invalidated) {
+                _code.clear();
+                _phone.clear();
+              }
+            },
+            builder: (context, state) {
+              final invalid =
+                  !_reader.isCurrent ||
+                  state.status == ReceiptStatus.invalidated;
+              final busy = state.status == ReceiptStatus.loading;
+              return ListView(
+                padding: const EdgeInsets.all(16),
                 children: [
-                  TextFormField(
-                    key: const Key('receipt-code'),
-                    controller: _code,
-                    enabled: !busy && !invalid,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    decoration: const InputDecoration(
-                      labelText: 'Mã vé hoặc mã đặt vé',
-                    ),
-                    onChanged: (_) => _reader.clear(),
-                    validator: (value) => value == null || value.trim().isEmpty
-                        ? 'Vui lòng nhập mã vé hoặc mã đặt vé.'
-                        : null,
+                  Text(
+                    'Tra cứu chứng từ đặt vé',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    key: const Key('receipt-phone'),
-                    controller: _phone,
-                    enabled: !busy && !invalid,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Số điện thoại đặt vé',
-                    ),
-                    onChanged: (_) => _reader.clear(),
-                    validator: (value) =>
-                        RegExp(
-                          r'^(?:\+84|0)(?:3[2-9]|5[689]|7[06-9]|8[1-9]|9\d)\d{7}$',
-                        ).hasMatch(value?.trim() ?? '')
-                        ? null
-                        : 'Số điện thoại không hợp lệ.',
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Nhập mã vé hoặc mã đặt vé và số điện thoại đặt vé. Đơn gắn tài khoản cần đăng nhập đúng tài khoản đã đặt.',
                   ),
                   const SizedBox(height: 16),
-                  CustomButton(
-                    text: 'Tra cứu chứng từ',
-                    isLoading: busy,
-                    onPressed: invalid || busy ? null : _lookup,
-                    width: double.infinity,
+                  Form(
+                    key: _form,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          key: const Key('receipt-code'),
+                          controller: _code,
+                          enabled: !busy && !invalid,
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          decoration: const InputDecoration(
+                            labelText: 'Mã vé hoặc mã đặt vé',
+                          ),
+                          onChanged: (_) => _reader.clear(),
+                          validator: (value) =>
+                              value == null || value.trim().isEmpty
+                              ? 'Vui lòng nhập mã vé hoặc mã đặt vé.'
+                              : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          key: const Key('receipt-phone'),
+                          controller: _phone,
+                          enabled: !busy && !invalid,
+                          keyboardType: TextInputType.phone,
+                          decoration: const InputDecoration(
+                            labelText: 'Số điện thoại đặt vé',
+                          ),
+                          onChanged: (_) => _reader.clear(),
+                          validator: (value) =>
+                              RegExp(
+                                r'^(?:\+84|0)(?:3[2-9]|5[689]|7[06-9]|8[1-9]|9\d)\d{7}$',
+                              ).hasMatch(value?.trim() ?? '')
+                              ? null
+                              : 'Số điện thoại không hợp lệ.',
+                        ),
+                        const SizedBox(height: 16),
+                        CustomButton(
+                          text: 'Tra cứu chứng từ',
+                          isLoading: busy,
+                          onPressed: invalid || busy ? null : _lookup,
+                          width: double.infinity,
+                        ),
+                      ],
+                    ),
                   ),
+                  if (state.error != null || invalid)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          invalid
+                              ? 'Phiên đã thay đổi. Vui lòng đóng và mở lại tra cứu chứng từ.'
+                              : state.error!,
+                          style: const TextStyle(color: AppColors.error),
+                        ),
+                      ),
+                    ),
+                  if (state.status == ReceiptStatus.failure && !invalid)
+                    TextButton(
+                      onPressed: _lookup,
+                      child: const Text('Thử lại'),
+                    ),
+                  if (state.receipt != null && !invalid) ...[
+                    const SizedBox(height: 20),
+                    _ReceiptContent(state.receipt!),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: _reader.refresh,
+                      child: const Text('Cập nhật chứng từ'),
+                    ),
+                  ],
                 ],
-              ),
-            ),
-            if (state.error != null || invalid)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    invalid
-                        ? 'Phiên đã thay đổi. Vui lòng đóng và mở lại tra cứu chứng từ.'
-                        : state.error!,
-                    style: const TextStyle(color: AppColors.error),
-                  ),
-                ),
-              ),
-            if (state.status == ReceiptStatus.failure && !invalid)
-              TextButton(onPressed: _lookup, child: const Text('Thử lại')),
-            if (state.receipt != null && !invalid) ...[
-              const SizedBox(height: 20),
-              _ReceiptContent(state.receipt!),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: _reader.refresh,
-                child: const Text('Cập nhật chứng từ'),
-              ),
-            ],
-          ],
+              );
+            },
+          ),
         );
-      },
-    ),
-  );
 }
 
 class _ReceiptContent extends StatelessWidget {

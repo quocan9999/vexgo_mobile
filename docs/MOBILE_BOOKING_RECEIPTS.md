@@ -92,3 +92,16 @@ The feature branch starts from Mobile `develop` at
 `7981d22aa932794cd8d4e63f2f1ba37fbc590864`; it does not include the separate,
 unmerged support-chat feature branch. CI results should be checked against the
 receipt PR's current head before merge.
+
+## Lead review follow-up (2026-10-26)
+
+This follow-up addresses the two P2 issues adopted by Lead in the 2026-10-22 review:
+
+- Demo Mode hides receipt entry points (including My Tickets and ticket actions). A directly opened receipt route displays an unavailable message and performs no lookup; its repository provider is offline/unavailable instead of the real HTTP repository. No synthetic paid receipt is added.
+- TokenStorage.sessionChanges synchronously notifies login/account replacement and logout. Receipt readers and ticket receipt entry buttons subscribe to it, clearing loaded receipts/form fields and fencing late responses. Token rotation does not emit a session change. The existing logout-only sessionInvalidations stream is preserved so saveTokens cannot invalidate AuthBloc's own in-flight login generation.
+
+Eight new automated tests cover loaded receipt account replacement, mounted form clearing, in-flight refresh discard, entry-button invalidation, demo entry/deep-link guards, repository selection and session-change versus token-rotation behavior. The first four regression probes failed on the original implementation and passed after the fix.
+
+Validation: full suite 364/364 passed; analyzer No issues found (14.4s); format lib/test 161 files, 0 changes; git diff check passed. These are unit/widget tests with in-memory credentials and fake/mocked transports. No new APK, physical-device, live API, DB or payment validation was performed for this follow-up. Earlier device/APK evidence above applies only to its original source snapshot.
+
+Raw execution logs remain outside Git at workspace/mobile-qa-evidence/ci-followup/pr8-fix-{red,focused,full,analyze}.log. Review conversations remain for Lead verification; no self-resolution or merge.

@@ -1,10 +1,29 @@
 import '../../core/network/api_client.dart';
+import '../../core/network/api_config.dart';
 import '../../core/network/token_storage.dart';
 import '../datasources/remote/booking_receipt_remote_data_source.dart';
 import '../models/booking_receipt_model.dart';
 
 abstract class BookingReceiptRepository {
+  factory BookingReceiptRepository.forCurrentMode() => ApiConfig.isDemoMode
+      ? const UnavailableBookingReceiptRepository()
+      : RealBookingReceiptRepository();
   Future<BookingReceipt> lookup({required String code, required String phone});
+}
+
+/// Offline tickets are not evidence of a paid order in the live system.
+class UnavailableBookingReceiptRepository implements BookingReceiptRepository {
+  const UnavailableBookingReceiptRepository();
+
+  @override
+  Future<BookingReceipt> lookup({
+    required String code,
+    required String phone,
+  }) async {
+    throw const ReceiptUnavailable(
+      'Tra cứu chứng từ chỉ khả dụng khi kết nối hệ thống thật.',
+    );
+  }
 }
 
 class RealBookingReceiptRepository implements BookingReceiptRepository {
