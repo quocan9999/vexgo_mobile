@@ -71,7 +71,7 @@ class SpatialSeatMap extends StatelessWidget {
 
         // Compute maximum seat height based on actual text wrapping within cellWidth.
         var maxSeatHeight = 58.0;
-        for (final seat in seats) {
+        for (final seat in refSeats) {
           var height = 60.0;
           final separateLabel = scaler.scale(1) > 1.3 || seat.name.length > 4;
           if (separateLabel) {
@@ -110,21 +110,24 @@ class SpatialSeatMap extends StatelessWidget {
           maxSeatHeight = math.max(maxSeatHeight, height);
         }
 
-        // Calculate vertical scale without excessive blank space.
-        var minRowDy = 1000.0;
-        for (var i = 0; i < seats.length; i++) {
-          for (var j = i + 1; j < seats.length; j++) {
-            final dy = (seats[i].y! - seats[j].y!).abs().toDouble();
-            if (dy > 0 && dy < minRowDy) {
-              minRowDy = dy;
+        // Keep the API's vertical scale unless seat targets overlap sideways.
+        // A tiny y offset in another column must not stretch the whole cabin.
+        // Use one scale across floors to preserve the vehicle's alignment.
+        const minGapY = 12.0;
+        var yScale = 64.0 / 1000.0;
+        for (var i = 0; i < refSeats.length; i++) {
+          for (var j = i + 1; j < refSeats.length; j++) {
+            if (refSeats[i].floor != refSeats[j].floor) continue;
+            final dy = (refSeats[i].y! - refSeats[j].y!).abs();
+            final dx = (refSeats[i].x! - refSeats[j].x!).abs();
+            final horizontalDistance = dxRange == 0
+                ? 0.0
+                : dx / dxRange * availableSpan;
+            if (dy > 0 && horizontalDistance < cellWidth) {
+              yScale = math.max(yScale, (maxSeatHeight + minGapY) / dy);
             }
           }
         }
-        const minGapY = 12.0;
-        final yScale = math.max(
-          64.0 / 1000.0,
-          (maxSeatHeight + minGapY) / minRowDy,
-        );
         final totalHeight = (maxY - minY) * yScale + maxSeatHeight + 16.0;
 
         return Align(

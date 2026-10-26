@@ -94,3 +94,11 @@ APK được build ở chế độ Debug Real Mode với các tham số sandbox 
 Seat cell width now uses the densest row across the vehicle's floors, so switching floors preserves the centre of seats with the same x coordinate. The front row uses intrinsic text height and equal-width side icon regions instead of a fixed 24dp height; the front label remains centred and fits at 2x text scale.
 
 Two regressions in test/seat_alignment_regression_test.dart verify cross-floor alignment and intrinsic label height with the production font. Full suite: 401/401 passed; analyzer clean; format: 169 files, 0 changes. No new APK/device validation was performed for this follow-up; the APK manifest above belongs to the earlier build.
+
+## Review F02 follow-up - 2026-10-27
+
+Vertical scale starts at the Customer API reference of 64dp per 1000 units and expands only for seats on the same floor whose rendered horizontal targets overlap. A tiny y offset in separate columns no longer determines the scale of the whole cabin. Text/price heights and scale use the same vehicle reference across floors; API coordinates, IDs, statuses and selection callbacks are preserved.
+
+The independent valid fixture at (110,1000), (310,1001), (110,2000), (310,2001) failed before the fix with a 72148dp canvas. The same fixture is now 148.072dp at text 1x and 216.106dp at 2x. Four committed cases at widths 264/380dp and text 1x/2x verify the bounds/collision contract, compact height, aligned near-row positions, non-overlapping same-column targets and successful selection of the second row. These are production-font widget tests, not a claim about live inventory or Android E2E.
+
+PR #10 F01 is merged into this feature branch, including its regression test. Final full suite: 406/406 passed; analyzer clean (8.8s); format 171 files, 0 changes; staged diff check required before commit. No new APK/device/live API/DB testing in this follow-up.
