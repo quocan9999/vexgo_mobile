@@ -22,6 +22,7 @@ import '../widgets/booking_bottom_bar.dart';
 import '../widgets/booking_passenger_info_view.dart';
 import '../widgets/booking_selection_view.dart';
 import '../widgets/booking_stepper.dart';
+import '../widgets/booking_trip_summary_view.dart';
 import '../widgets/seat_hold_countdown_bar.dart';
 
 class BookingFlowScreen extends StatelessWidget {
@@ -300,6 +301,21 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
 
     if (state.step == BookingStep.passengerInfo) {
       return BookingPassengerInfoView(
+        state: state,
+        bloc: bloc,
+        onBack: () => bloc.add(const PreviousStepEvent()),
+        onNext: () => bloc.add(const NextStepEvent()),
+        onStep: (index) => bloc.add(GoToStepEvent(index)),
+        onDetails: () {
+          if (trip != null) {
+            TripDetailSheet.show(context, trip: trip, onSelectTrip: (_) {});
+          }
+        },
+      );
+    }
+
+    if (state.step == BookingStep.tripSummary) {
+      return BookingTripSummaryView(
         state: state,
         bloc: bloc,
         onBack: () => bloc.add(const PreviousStepEvent()),

@@ -157,7 +157,7 @@ class BookingStepperCompact extends StatefulWidget {
     'Điểm trả',
     'Thông tin',
     'Xác nhận',
-    'Thanh toán',
+    'Thanh toán vé',
   ];
 
   const BookingStepperCompact({
