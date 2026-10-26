@@ -133,21 +133,22 @@ class SeatMapView extends StatelessWidget {
           ),
           child: Column(
             children: [
-              SizedBox(
-                height: 24,
-                child: Stack(
-                  alignment: Alignment.center,
+              ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 24),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Align(
-                      alignment: Alignment.centerLeft,
+                    const SizedBox(
+                      width: 32,
                       child: Tooltip(
                         message: 'Vô lăng tài xế',
                         child: SteeringWheelVector(),
                       ),
                     ),
-                    Center(
+                    Expanded(
                       child: Text(
                         'Đầu xe',
+                        textAlign: TextAlign.center,
                         style: DiscoveryTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
                           color: DiscoveryColors.neutral400,
@@ -155,8 +156,8 @@ class SeatMapView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Align(
-                      alignment: Alignment.centerRight,
+                    const SizedBox(
+                      width: 32,
                       child: Tooltip(
                         message: 'Cửa lên xuống',
                         child: BusDoorVector(),

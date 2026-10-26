@@ -49,10 +49,11 @@ class SpatialSeatMap extends StatelessWidget {
 
         // Find minimum distance between distinct columns on the same row.
         var minRowDx = dxRange > 0 ? dxRange : 1.0;
-        for (var i = 0; i < seats.length; i++) {
-          for (var j = i + 1; j < seats.length; j++) {
-            if (seats[i].y == seats[j].y) {
-              final dx = (seats[i].x! - seats[j].x!).abs().toDouble();
+        for (var i = 0; i < refSeats.length; i++) {
+          for (var j = i + 1; j < refSeats.length; j++) {
+            if (refSeats[i].floor == refSeats[j].floor &&
+                refSeats[i].y == refSeats[j].y) {
+              final dx = (refSeats[i].x! - refSeats[j].x!).abs().toDouble();
               if (dx > 0 && dx < minRowDx) {
                 minRowDx = dx;
               }
