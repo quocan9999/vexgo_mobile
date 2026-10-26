@@ -477,11 +477,9 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           .toList();
       emit(
         state.copyWith(
-          seatLayout: SeatLayoutModel(
+          seatLayout: resolveSeatLayout(
             vehicleType: trip.vehicleType,
-            hasTwoFloors: priced.any((s) => s.floor == 2),
-            lowerFloor: priced.where((s) => s.floor == 1).toList(),
-            upperFloor: priced.where((s) => s.floor == 2).toList(),
+            seats: priced,
           ),
         ),
       );

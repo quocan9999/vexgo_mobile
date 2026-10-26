@@ -51,3 +51,9 @@ Local logs, screenshots, private configuration and SQL backups stay outside Git.
 The installed APK was built from the working source before the commit; a later
 countdown whitespace change and diagnostic-only lint fix do not alter app logic.
 CI artifacts have separate provenance and are not device-E2E evidence.
+
+## Review F01 follow-up - 2026-10-27
+
+Inventory refresh after hold expiry or a failed hold now uses resolveSeatLayout on the priced server seats, matching initialization. This brings the existing PR #11 behavior into this parent PR so PR #10 can be reviewed/merged independently. IDs, prices and status remain sourced from the same inventory response.
+
+Added test/inventory_refresh_regression_test.dart from the independent review probe. It failed on the old HEAD and passes after this fix: unchanged API inventory keeps identical normalized positions after the simulated hold deadline. Full suite 358/358 passed. The test uses production BLoC/parser/repositories with MockClient, not a live backend/device check. No Backend/DB changes, review resolution or merge.
