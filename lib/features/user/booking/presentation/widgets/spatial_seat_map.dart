@@ -47,12 +47,18 @@ class SpatialSeatMap extends StatelessWidget {
         // Keep a reasonable maximum cabin width on very wide/landscape screens.
         final contentWidth = math.min(containerWidth, 380.0);
 
-        // Find minimum distance between distinct columns on the same row.
+        // The API rejects same-floor seats with both dx < 180 and dy < 875.
+        // Seats less than 875 apart vertically therefore occupy adjacent
+        // columns, even when their row coordinates are slightly staggered.
+        // Size these columns before checking vertical overlap: comparing only
+        // equal y values can leave 64dp cells overlapping on a narrow cabin
+        // and amplify a 1-unit y offset into a many-thousand-dp canvas.
+        const minSeparateRowDy = 875.0;
         var minRowDx = dxRange > 0 ? dxRange : 1.0;
         for (var i = 0; i < refSeats.length; i++) {
           for (var j = i + 1; j < refSeats.length; j++) {
             if (refSeats[i].floor == refSeats[j].floor &&
-                refSeats[i].y == refSeats[j].y) {
+                (refSeats[i].y! - refSeats[j].y!).abs() < minSeparateRowDy) {
               final dx = (refSeats[i].x! - refSeats[j].x!).abs().toDouble();
               if (dx > 0 && dx < minRowDx) {
                 minRowDx = dx;
