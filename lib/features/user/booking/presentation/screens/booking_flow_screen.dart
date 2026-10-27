@@ -20,6 +20,7 @@ import '../steps/step_5_trip_summary.dart';
 import '../steps/step_6_payment.dart';
 import '../widgets/booking_bottom_bar.dart';
 import '../widgets/booking_passenger_info_view.dart';
+import '../widgets/booking_payment_view.dart';
 import '../widgets/booking_selection_view.dart';
 import '../widgets/booking_stepper.dart';
 import '../widgets/booking_trip_summary_view.dart';
@@ -320,6 +321,23 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
         bloc: bloc,
         onBack: () => bloc.add(const PreviousStepEvent()),
         onNext: () => bloc.add(const NextStepEvent()),
+        onStep: (index) => bloc.add(GoToStepEvent(index)),
+        onDetails: () {
+          if (trip != null) {
+            TripDetailSheet.show(context, trip: trip, onSelectTrip: (_) {});
+          }
+        },
+      );
+    }
+
+    if (state.step == BookingStep.payment) {
+      return BookingPaymentView(
+        state: state,
+        bloc: bloc,
+        onBack: () async {
+          final shouldPop = await _handlePop(context, state, bloc);
+          if (shouldPop && context.mounted) context.pop();
+        },
         onStep: (index) => bloc.add(GoToStepEvent(index)),
         onDetails: () {
           if (trip != null) {
