@@ -2,7 +2,7 @@ name: Flutter CI
 
 on:
   pull_request:
-    branches: [develop, feature/mobile-discovery-ui, feature/mobile-seat-pickup-ui-redesign, feature/mobile-passenger-info-ui, feature/mobile-trip-summary-ui]
+    branches: [develop, feature/mobile-discovery-ui, feature/mobile-seat-pickup-ui-redesign, feature/mobile-passenger-info-ui, feature/mobile-trip-summary-ui, feature/mobile-my-tickets-ui]
     types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [develop]

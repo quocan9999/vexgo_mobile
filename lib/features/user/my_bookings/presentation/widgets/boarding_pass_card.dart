@@ -1,15 +1,14 @@
 import 'dart:async';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vexgo_app/core/network/token_storage.dart';
-import '../../bloc/my_tickets_bloc.dart';
 import 'package:flutter/material.dart';
-import '../../bloc/ticket_read_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
+import 'package:vexgo_app/core/design/discovery_theme.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
+import '../../bloc/my_tickets_bloc.dart';
+import '../../bloc/ticket_read_cubit.dart';
 import 'ticket_qr_modal.dart';
 
 class BoardingPassCard extends StatefulWidget {
@@ -31,7 +30,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
   TicketModel get ticket => widget.ticket;
   TicketReadCubit? get ticketReader => widget.ticketReader;
 
-  bool get _authorized {
+  bool get _sessionAuthorized {
     final owner = _owner;
     final reader = ticketReader;
     return !_invalidated &&
@@ -41,9 +40,14 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                 owner.sessionGeneration == _sessionGeneration)) &&
         (reader == null ||
             (!reader.isClosed &&
-                reader.state.status == TicketReadStatus.loaded &&
-                identical(reader.state.ticket, ticket)));
+                reader.state.status != TicketReadStatus.invalidated));
   }
+
+  bool get _authorized =>
+      _sessionAuthorized &&
+      (ticketReader == null ||
+          (ticketReader!.state.status == TicketReadStatus.loaded &&
+              identical(ticketReader!.state.ticket, ticket)));
 
   @override
   void initState() {
@@ -75,8 +79,12 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
   }
 
   void _checkAuthorization() {
-    if (!mounted || _authorized || _invalidated) return;
-    setState(() => _invalidated = true);
+    if (!mounted || _invalidated) return;
+    setState(() {
+      // Loading and a fresh ticket object are temporary read states. Only
+      // actual session loss/reader invalidation permanently revokes this card.
+      if (!_sessionAuthorized) _invalidated = true;
+    });
   }
 
   @override
@@ -89,17 +97,50 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_authorized) {
-      return const Text('Phiên đã thay đổi. Vui lòng mở lại thông tin vé.');
+    if (!_sessionAuthorized) {
+      return Container(
+        padding: const EdgeInsets.all(AppDimensions.base),
+        decoration: BoxDecoration(
+          color: DiscoveryColors.errorLight,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          border: Border.all(
+            color: DiscoveryColors.error.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: DiscoveryColors.error,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Phiên đã thay đổi. Vui lòng mở lại thông tin vé.',
+                style: DiscoveryTextStyles.bodySmall.copyWith(
+                  color: DiscoveryColors.errorDark,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
     }
+
+    // Do not expose the old payload while a fresh read is pending or has failed.
+    if (!_authorized) return const SizedBox.shrink();
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        color: DiscoveryColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: DiscoveryColors.divider, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 15,
+            color: DiscoveryColors.neutral900.withValues(alpha: 0.05),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -112,37 +153,47 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
             padding: const EdgeInsets.all(AppDimensions.base),
             child: Column(
               children: [
-                // Operator Name & Status
+                // Operator Name & Status Badges
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(8),
+                        color: DiscoveryColors.primaryLight,
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
                         Icons.directions_bus_rounded,
-                        color: AppColors.primary,
+                        color: DiscoveryColors.primary,
                         size: 22,
                       ),
                     ),
-                    const SizedBox(width: AppDimensions.sm),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            ticket.trip.operatorName,
-                            style: AppTextStyles.h4.copyWith(fontSize: 16),
+                            ticket.trip.operatorName.isNotEmpty
+                                ? ticket.trip.operatorName
+                                : 'Nhà xe VexGo',
+                            style: DiscoveryTextStyles.titleSmall.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: DiscoveryColors.neutral900,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            ticket.trip.vehicleType,
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.neutral500,
+                            ticket.trip.vehicleType.isNotEmpty
+                                ? ticket.trip.vehicleType
+                                : 'Xe khách chất lượng cao',
+                            style: DiscoveryTextStyles.bodySmall.copyWith(
+                              color: DiscoveryColors.neutral500,
+                              fontSize: 12,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -150,12 +201,12 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: AppDimensions.xs),
-                    _buildStatusBadge(),
+                    const SizedBox(width: 8),
+                    _buildStatusBadges(),
                   ],
                 ),
 
-                const SizedBox(height: AppDimensions.base),
+                const SizedBox(height: 16),
 
                 // Cities Flow
                 Row(
@@ -167,24 +218,26 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                         children: [
                           Text(
                             'Điểm đi',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.neutral500,
+                            style: DiscoveryTextStyles.caption.copyWith(
+                              color: DiscoveryColors.neutral500,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             ticket.trip.fromCity,
-                            style: AppTextStyles.h3.copyWith(
+                            style: DiscoveryTextStyles.h3.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
+                              color: DiscoveryColors.neutral900,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          const SizedBox(height: 2),
                           Text(
                             ticket.trip.departureTime,
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.primary,
+                            style: DiscoveryTextStyles.bodyMedium.copyWith(
+                              color: DiscoveryColors.primary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -194,12 +247,12 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.neutral100,
+                        color: DiscoveryColors.neutral100,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.arrow_forward_rounded,
-                        color: AppColors.primary,
+                        color: DiscoveryColors.primary,
                         size: 18,
                       ),
                     ),
@@ -209,24 +262,26 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                         children: [
                           Text(
                             'Điểm đến',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.neutral500,
+                            style: DiscoveryTextStyles.caption.copyWith(
+                              color: DiscoveryColors.neutral500,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             ticket.trip.toCity,
-                            style: AppTextStyles.h3.copyWith(
+                            style: DiscoveryTextStyles.h3.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
+                              color: DiscoveryColors.neutral900,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          const SizedBox(height: 2),
                           Text(
                             ticket.trip.arrivalTime,
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.secondary,
+                            style: DiscoveryTextStyles.bodyMedium.copyWith(
+                              color: DiscoveryColors.secondary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -236,71 +291,152 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                   ],
                 ),
 
-                const SizedBox(height: AppDimensions.base),
+                const SizedBox(height: 16),
 
-                // QR Code Tap Box
-                GestureDetector(
-                  onTap: ticket.canShowQr
-                      ? () => TicketQrModal.show(
+                // QR Code / Gate Box
+                if (ticket.canShowQr)
+                  Semantics(
+                    button: true,
+                    label: 'Mã QR lên xe, chạm để phóng to',
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => TicketQrModal.show(
                           context,
                           ticket,
                           ticketReader: ticketReader,
-                        )
-                      : null,
-                  child: Container(
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: DiscoveryColors.neutral50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: DiscoveryColors.neutral200,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: DiscoveryColors.divider,
+                                  ),
+                                ),
+                                child: QrImageView(
+                                  data:
+                                      'VEXGO:${ticket.ticketCode}:${ticket.id}',
+                                  version: QrVersions.auto,
+                                  size: 72.0,
+                                  backgroundColor: Colors.white,
+                                  padding: EdgeInsets.zero,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Mã vé: ${ticket.ticketCode}',
+                                      style: DiscoveryTextStyles.titleSmall
+                                          .copyWith(
+                                            color: DiscoveryColors.primary,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.fullscreen_rounded,
+                                          size: 16,
+                                          color: DiscoveryColors.primary,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            'Chạm để phóng to mã QR',
+                                            style: DiscoveryTextStyles.caption
+                                                .copyWith(
+                                                  color:
+                                                      DiscoveryColors.primary,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Dùng mã này khi lên xe tại điểm đón',
+                                      style: DiscoveryTextStyles.bodySmall
+                                          .copyWith(
+                                            color: DiscoveryColors.neutral500,
+                                            fontSize: 11,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: 14,
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.neutral100.withValues(alpha: 0.5),
+                      color: DiscoveryColors.neutral100.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.neutral200),
+                      border: Border.all(color: DiscoveryColors.neutral200),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (ticket.canShowQr)
-                          QrImageView(
-                            data: 'VEXGO:${ticket.ticketCode}:${ticket.id}',
-                            version: QrVersions.auto,
-                            size: 72.0,
-                            backgroundColor: Colors.transparent,
-                          )
-                        else
-                          const Icon(Icons.lock_clock, size: 54),
-                        const SizedBox(width: AppDimensions.base),
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: DiscoveryColors.neutral200.withValues(
+                              alpha: 0.5,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.lock_clock,
+                            size: 22,
+                            color: DiscoveryColors.neutral500,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Mã vé: ${ticket.ticketCode}',
-                                style: AppTextStyles.h4.copyWith(
-                                  color: AppColors.primary,
-                                  fontSize: 15,
-                                  letterSpacing: 1.1,
+                                style: DiscoveryTextStyles.titleSmall.copyWith(
+                                  color: DiscoveryColors.neutral800,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.fullscreen_rounded,
-                                    size: 16,
-                                    color: AppColors.primary,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    ticket.canShowQr
-                                        ? 'Chạm để phóng to mã QR'
-                                        : 'Chưa có xác nhận thanh toán',
-                                    style: AppTextStyles.caption.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                              const SizedBox(height: 2),
+                              Text(
+                                _getQrUnavailableReason(),
+                                style: DiscoveryTextStyles.caption.copyWith(
+                                  color: DiscoveryColors.neutral600,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -308,7 +444,6 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                       ],
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -329,7 +464,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                       child: _buildPassDetailBlock(
                         title: 'Chỗ ngồi',
                         value: ticket.seats.join(', '),
-                        valueColor: AppColors.primary,
+                        valueColor: DiscoveryColors.primary,
                         isHighlight: true,
                       ),
                     ),
@@ -350,7 +485,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                 ),
 
                 const SizedBox(height: AppDimensions.base),
-                const Divider(height: 1),
+                const Divider(height: 1, color: DiscoveryColors.divider),
                 const SizedBox(height: AppDimensions.base),
 
                 // Pickup Point
@@ -372,7 +507,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                 ),
 
                 const SizedBox(height: AppDimensions.base),
-                const Divider(height: 1),
+                const Divider(height: 1, color: DiscoveryColors.divider),
                 const SizedBox(height: AppDimensions.base),
 
                 // Passenger and Contact
@@ -381,41 +516,36 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                   value:
                       '${ticket.passenger.fullName} · ${ticket.passenger.phone}',
                 ),
-                const SizedBox(height: 8),
                 _buildInfoLine(
                   label: 'Email nhận vé:',
                   value: ticket.passenger.email,
                 ),
-                const SizedBox(height: 8),
                 _buildInfoLine(
                   label: 'Thanh toán qua:',
                   value: ticket.paymentMethod,
                 ),
-                const SizedBox(height: 8),
                 _buildInfoLine(
                   label: 'Tổng tiền vé:',
                   value: CurrencyFormatter.format(ticket.finalAmount),
                   valueColor: ticket.status == TicketStatus.cancelled
-                      ? AppColors.neutral500
-                      : AppColors.secondary,
+                      ? DiscoveryColors.neutral500
+                      : DiscoveryColors.secondary,
                   isBold: true,
                 ),
 
                 if (ticket.status == TicketStatus.cancelled) ...[
-                  const SizedBox(height: 8),
                   _buildInfoLine(
                     label: 'Số tiền hoàn (chưa xác nhận):',
                     value: ticket.refundAmount != null
                         ? CurrencyFormatter.format(ticket.refundAmount!)
                         : 'Chưa có dữ liệu',
-                    valueColor: AppColors.success,
+                    valueColor: DiscoveryColors.successDark,
                     isBold: true,
                   ),
-                  const SizedBox(height: 8),
                   _buildInfoLine(
                     label: 'Lý do hủy:',
                     value: ticket.cancelReason ?? 'Hủy theo yêu cầu',
-                    valueColor: AppColors.error,
+                    valueColor: DiscoveryColors.error,
                   ),
                 ],
               ],
@@ -424,6 +554,19 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
         ],
       ),
     );
+  }
+
+  String _getQrUnavailableReason() {
+    if (ticket.status == TicketStatus.cancelled) {
+      return 'Vé đã bị hủy. Mã QR không khả dụng.';
+    }
+    if (ticket.status == TicketStatus.completed) {
+      return 'Chuyến đi đã hoàn thành.';
+    }
+    if (!ticket.isPaid) {
+      return 'Chưa có xác nhận thanh toán';
+    }
+    return 'Mã QR chưa khả dụng cho vé này.';
   }
 
   Widget _buildTearLine() {
@@ -445,7 +588,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                   return Container(
                     width: dashWidth,
                     height: 1.5,
-                    color: AppColors.neutral300,
+                    color: DiscoveryColors.neutral300,
                     margin: const EdgeInsets.symmetric(
                       horizontal: dashSpace / 2,
                     ),
@@ -461,7 +604,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
               width: 24,
               height: 24,
               decoration: const BoxDecoration(
-                color: Color(0xFFF4F6F8), // Match background page
+                color: DiscoveryColors.background,
                 shape: BoxShape.circle,
               ),
             ),
@@ -473,7 +616,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
               width: 24,
               height: 24,
               decoration: const BoxDecoration(
-                color: Color(0xFFF4F6F8),
+                color: DiscoveryColors.background,
                 shape: BoxShape.circle,
               ),
             ),
@@ -495,15 +638,16 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
         Icon(
           isStart ? Icons.radio_button_checked : Icons.location_on,
           size: 16,
-          color: isStart ? AppColors.primary : AppColors.secondary,
+          color: isStart ? DiscoveryColors.primary : DiscoveryColors.secondary,
         ),
         const SizedBox(width: 8),
         SizedBox(
           width: 50,
           child: Text(
             time,
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: DiscoveryTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w700,
+              color: DiscoveryColors.neutral900,
             ),
           ),
         ),
@@ -514,8 +658,9 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
             children: [
               Text(
                 title,
-                style: AppTextStyles.bodyMedium.copyWith(
+                style: DiscoveryTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: DiscoveryColors.neutral900,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -523,8 +668,8 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
               const SizedBox(height: 2),
               Text(
                 address,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.neutral500,
+                style: DiscoveryTextStyles.caption.copyWith(
+                  color: DiscoveryColors.neutral500,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -547,17 +692,17 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
       children: [
         Text(
           title,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.neutral500,
+          style: DiscoveryTextStyles.caption.copyWith(
+            color: DiscoveryColors.neutral500,
             fontSize: 11,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: DiscoveryTextStyles.bodyMedium.copyWith(
             fontWeight: isHighlight ? FontWeight.w800 : FontWeight.w600,
-            color: valueColor ?? AppColors.neutral900,
+            color: valueColor ?? DiscoveryColors.neutral900,
             fontSize: isHighlight ? 15 : 13,
           ),
           maxLines: 1,
@@ -573,66 +718,101 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
     Color? valueColor,
     bool isBold = false,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 110,
-          child: Text(
-            label,
-            style: AppTextStyles.caption.copyWith(color: AppColors.neutral600),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: valueColor ?? AppColors.neutral900,
-              fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: DiscoveryTextStyles.caption.copyWith(
+                color: DiscoveryColors.neutral600,
+              ),
             ),
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: DiscoveryTextStyles.bodySmall.copyWith(
+                color: valueColor ?? DiscoveryColors.neutral900,
+                fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+              ),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildStatusBadge() {
+  Widget _buildStatusBadges() {
     Color bg;
     Color text;
     String label;
 
     switch (ticket.status) {
       case TicketStatus.upcoming:
-        bg = AppColors.primaryLight;
-        text = AppColors.primary;
+        bg = DiscoveryColors.primaryLight;
+        text = DiscoveryColors.primary;
         label = 'Sắp đi';
         break;
       case TicketStatus.completed:
-        bg = AppColors.successLight;
-        text = AppColors.success;
+        bg = DiscoveryColors.successLight;
+        text = DiscoveryColors.successDark;
         label = 'Đã đi';
         break;
       case TicketStatus.cancelled:
-        bg = AppColors.errorLight;
-        text = AppColors.error;
+        bg = DiscoveryColors.errorLight;
+        text = DiscoveryColors.errorDark;
         label = 'Đã hủy';
         break;
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.caption.copyWith(
-          color: text,
-          fontWeight: FontWeight.w700,
-          fontSize: 11,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            label,
+            style: DiscoveryTextStyles.caption.copyWith(
+              color: text,
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
+          ),
         ),
-      ),
+        if (ticket.status == TicketStatus.upcoming) ...[
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: ticket.isPaid
+                  ? DiscoveryColors.successLight
+                  : DiscoveryColors.warningLight,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              ticket.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán',
+              style: DiscoveryTextStyles.caption.copyWith(
+                color: ticket.isPaid
+                    ? DiscoveryColors.successDark
+                    : DiscoveryColors.warningDark,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
