@@ -372,12 +372,12 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                     const SizedBox(height: 8),
                     _buildInfoRow(
                       'Điểm đón:',
-                      '${trip.pickupPoint} (${trip.pickupAddress})',
+                      _locationText(trip.pickupPoint, trip.pickupAddress),
                     ),
                     const SizedBox(height: 8),
                     _buildInfoRow(
                       'Điểm trả:',
-                      '${trip.dropoffPoint} (${trip.dropoffAddress})',
+                      _locationText(trip.dropoffPoint, trip.dropoffAddress),
                     ),
                     const SizedBox(height: 8),
                     _buildInfoRow(
@@ -673,6 +673,13 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
         ),
       ),
     );
+  }
+
+  String _locationText(String point, String address) {
+    final name = point.trim();
+    final detail = address.trim();
+    if (detail.isEmpty) return name.isEmpty ? 'Chưa cập nhật' : name;
+    return name.isEmpty ? detail : '$name ($detail)';
   }
 
   Widget _buildInfoRow(

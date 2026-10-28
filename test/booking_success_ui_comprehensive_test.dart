@@ -30,6 +30,7 @@ TicketModel createTicket({
   bool isPaid = true,
   TicketStatus status = TicketStatus.upcoming,
   int price = 250000,
+  TicketTripSummary? trip,
 }) {
   return TicketModel(
     id: id,
@@ -41,7 +42,7 @@ TicketModel createTicket({
     paymentStatus: isPaid ? 'DA_THANH_TOAN' : 'CHO_THANH_TOAN',
     rawStatus: isPaid ? 'DA_THANH_TOAN' : 'CHO_THANH_TOAN',
     bookingDate: '27/10/2026 14:00',
-    trip: qaSummary,
+    trip: trip ?? qaSummary,
     seats: [seat],
     totalAmount: price,
     discountAmount: 0,
@@ -68,6 +69,43 @@ void main() {
   });
 
   group('BookingSuccessScreen Comprehensive Regression Tests', () {
+    testWidgets('missing stop addresses do not render empty parentheses', (
+      tester,
+    ) async {
+      final owner = MyTicketsBloc(
+        authenticated: false,
+        bookingRepository: MockBookingRepository(),
+      )..setSession(null);
+      addTearDown(owner.close);
+      final trip = TicketTripSummary.fromJson({
+        ...qaSummary.toJson(),
+        'pickupPoint': 'Bến đón kiểm thử',
+        'pickupAddress': '',
+        'dropoffPoint': 'Đà Lạt',
+        'dropoffAddress': '  ',
+      });
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: owner,
+          child: MaterialApp(
+            home: BookingSuccessScreen(
+              ticket: createTicket(
+                id: '101',
+                code: 'QA-MISSING-ADDRESSES',
+                seat: 'A01',
+                trip: trip,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Bến đón kiểm thử'), findsOneWidget);
+      expect(find.text('Đà Lạt'), findsOneWidget);
+      expect(find.textContaining('()'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets(
       'Multi-ticket (5 tickets) shows all seats, unique QRs, and no duplicate codes',
       (tester) async {
