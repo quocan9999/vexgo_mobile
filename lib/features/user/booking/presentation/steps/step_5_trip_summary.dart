@@ -569,7 +569,7 @@ class Step5TripSummary extends StatelessWidget {
 
                 _buildRowInfo(
                   icon: Icons.person_rounded,
-                  label: 'Họ tên hành khách:',
+                  label: 'Họ tên',
                   value: state.passengerName.isNotEmpty
                       ? state.passengerName
                       : 'Chưa nhập',
@@ -578,7 +578,7 @@ class Step5TripSummary extends StatelessWidget {
                 const SizedBox(height: 8),
                 _buildRowInfo(
                   icon: Icons.phone_iphone_rounded,
-                  label: 'Số điện thoại:',
+                  label: 'Số điện thoại',
                   value: state.passengerPhone.isNotEmpty
                       ? state.passengerPhone
                       : 'Chưa nhập',
@@ -586,7 +586,7 @@ class Step5TripSummary extends StatelessWidget {
                 const SizedBox(height: 8),
                 _buildRowInfo(
                   icon: Icons.email_outlined,
-                  label: 'Email nhận vé:',
+                  label: 'Email',
                   value: state.passengerEmail.isNotEmpty
                       ? state.passengerEmail
                       : 'Chưa cung cấp (tùy chọn)',
@@ -973,13 +973,18 @@ class Step5TripSummary extends StatelessWidget {
     required String value,
     Color? valueColor,
     bool isBold = false,
+    double labelWidth = 90,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: DiscoveryColors.neutral500),
+        Padding(
+          padding: const EdgeInsets.only(top: 1.5),
+          child: Icon(icon, size: 16, color: DiscoveryColors.neutral500),
+        ),
         const SizedBox(width: 8),
-        Flexible(
+        SizedBox(
+          width: labelWidth,
           child: Text(
             label,
             style: DiscoveryTextStyles.bodySmall.copyWith(

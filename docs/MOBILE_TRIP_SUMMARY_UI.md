@@ -130,3 +130,16 @@ Implemented after independent review (not committed/pushed):
 - Final execution: 413/413 tests passed; analyzer No issues found (15.9s); format 171 files, 0 changes; tracked diff check passed.
 - No new APK/device/live-payment validation in this follow-up. Prior APK manifest above describes the Agent build before these fixes.
 - Evidence: workspace/mobile-qa-evidence/trip-summary-independent-review/fix-all-tests.log and fix-analyze.log.
+
+## Follow-up fixes - 2026-10-27 (Passenger Card Alignment)
+
+Implemented approved Đề xuất 3 for Step 5 Passenger Info Card:
+- Shortened labels to exact strings: `Họ tên`, `Số điện thoại`, `Email` (removed colon `:` and redundant phrases).
+- In `_buildRowInfo`: aligned icons to first line (`top: 1.5`), fixed label column to consistent width (`labelWidth = 90`), and expanded value column with right alignment (`TextAlign.end`).
+- Geometry verified: all 3 labels share the same left axis, all 3 values share the same right axis, and typical email addresses (`nguyen221205@gmail.com`) fit cleanly on a single line on 390dp without dropping `.com`.
+- Responsive verified: wraps cleanly on 320dp 2.0x and 640x360 landscape without overflow.
+- Test suite: 420/420 tests passed; `dart format` (172 files, 0 changes) and `flutter analyze` clean.
+- Debug APK: `mobile-qa-evidence/ci-followup/app-debug-trip-summary-aligned.apk`
+  - File Size: `185,644,233` bytes (~177.04 MB)
+  - SHA-256: `26B26E5D1CA2CD3C01A22E2AA2FC95A4967969A4EDFCD0C2EB1004376711836C`
+  - Kernel verified: `HasApiBase`, `HasTripSummaryView`, `HasStep5`, `HasSepayAccount`, `HasSepayBank` all `True`.

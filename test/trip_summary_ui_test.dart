@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vexgo_app/data/models/booking_quote_model.dart';
@@ -318,6 +319,12 @@ Future<void> _pumpWithViewport(
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    final loader = FontLoader('VexGoJakarta')
+      ..addFont(rootBundle.load('assets/fonts/PlusJakartaSans.ttf'));
+    await loader.load();
+  });
   testWidgets('Rejected promotion is not shown as accepted and can be edited', (
     tester,
   ) async {
@@ -833,6 +840,132 @@ void main() {
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump(const Duration(milliseconds: 50));
         unawaited(authBloc.close());
+      },
+    );
+
+    testWidgets(
+      '10. Passenger card alignment: short labels (Họ tên, Số điện thoại, Email) align columns and format email without orphan .com wrap',
+      (tester) async {
+        final seatRepo = _FakeSeatRepo();
+        final bookingRepo = _FakeBookingRepo();
+        final bloc = await _createStep5Bloc(
+          tester,
+          seatRepo: seatRepo,
+          bookingRepo: bookingRepo,
+        );
+
+        // Emit state with customer details from user screenshot
+        bloc.emit(
+          bloc.state.copyWith(
+            passengerName: 'Pham Minh Tai',
+            passengerPhone: '+84582061913',
+            passengerEmail: 'nguyen221205@gmail.com',
+          ),
+        );
+
+        await _pumpWithViewport(
+          tester,
+          _buildStep5Harness(bloc),
+          size: const Size(390, 844),
+          textScale: 1.0,
+        );
+
+        // Verify shortened labels exist and old labels do not exist
+        expect(find.text('Họ tên'), findsOneWidget);
+        expect(find.text('Số điện thoại'), findsOneWidget);
+        expect(find.text('Email'), findsOneWidget);
+        expect(find.text('Họ tên hành khách:'), findsNothing);
+        expect(find.text('Email nhận vé:'), findsNothing);
+
+        // Verify values are present
+        expect(find.text('Pham Minh Tai'), findsOneWidget);
+        expect(find.text('+84582061913'), findsOneWidget);
+        expect(find.text('nguyen221205@gmail.com'), findsOneWidget);
+
+        // Check geometry: left coordinates of labels are equal (aligned)
+        final nameLabelPos = tester.getTopLeft(find.text('Họ tên'));
+        final phoneLabelPos = tester.getTopLeft(find.text('Số điện thoại'));
+        final emailLabelPos = tester.getTopLeft(find.text('Email'));
+        expect(nameLabelPos.dx, equals(phoneLabelPos.dx));
+        expect(nameLabelPos.dx, equals(emailLabelPos.dx));
+
+        // Check geometry: right coordinates of values are equal (aligned)
+        final nameValPos = tester.getTopRight(find.text('Pham Minh Tai'));
+        final phoneValPos = tester.getTopRight(find.text('+84582061913'));
+        final emailValPos = tester.getTopRight(
+          find.text('nguyen221205@gmail.com'),
+        );
+        expect(nameValPos.dx, equals(phoneValPos.dx));
+        expect(nameValPos.dx, equals(emailValPos.dx));
+
+        // Ensure email text renders on single line (height equal to 1-line text height)
+        final emailSize = tester.getSize(find.text('nguyen221205@gmail.com'));
+        final phoneSize = tester.getSize(find.text('+84582061913'));
+        expect(emailSize.height, equals(phoneSize.height));
+
+        await tester.runAsync(bloc.close);
+      },
+    );
+
+    testWidgets(
+      '11. Passenger card: long names, long emails, and empty fallbacks render without overflow on 320dp 2.0x and 640x360 landscape',
+      (tester) async {
+        final seatRepo = _FakeSeatRepo();
+        final bookingRepo = _FakeBookingRepo();
+        final bloc = await _createStep5Bloc(
+          tester,
+          seatRepo: seatRepo,
+          bookingRepo: bookingRepo,
+        );
+
+        // Case A: Long customer info on 320dp with 2.0x text scale
+        bloc.emit(
+          bloc.state.copyWith(
+            passengerName: 'Nguyễn Hoàng Anh Thư',
+            passengerPhone: '+84901234567',
+            passengerEmail: 'nguyen.hoang.anh.thu.1998@congtycophan.vn',
+          ),
+        );
+
+        await _pumpWithViewport(
+          tester,
+          _buildStep5Harness(bloc),
+          size: const Size(320, 740),
+          textScale: 2.0,
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(find.text('Họ tên'), findsOneWidget);
+        expect(find.text('Số điện thoại'), findsOneWidget);
+        expect(find.text('Email'), findsOneWidget);
+        expect(find.text('Nguyễn Hoàng Anh Thư'), findsOneWidget);
+        expect(find.text('+84901234567'), findsOneWidget);
+        expect(
+          find.text('nguyen.hoang.anh.thu.1998@congtycophan.vn'),
+          findsOneWidget,
+        );
+
+        // Case B: Fallback when email is empty on Landscape 640x360 at 2.0x
+        bloc.emit(
+          bloc.state.copyWith(
+            passengerName: 'Trần Văn Nam',
+            passengerPhone: '0988776655',
+            passengerEmail: '',
+          ),
+        );
+
+        await _pumpWithViewport(
+          tester,
+          _buildStep5Harness(bloc),
+          size: const Size(640, 360),
+          textScale: 2.0,
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(find.text('Chưa cung cấp (tùy chọn)'), findsOneWidget);
+        expect(find.text('Sửa'), findsWidgets);
+
+        await tester.runAsync(bloc.close);
       },
     );
   });
