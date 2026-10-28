@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/network/api_client.dart';
 import 'package:vexgo_app/core/network/api_config.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/data/datasources/remote/review_remote_data_source.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/data/repositories/booking_repository.dart';
@@ -99,6 +100,14 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
 
   void _onAddNewTicket(AddNewTicketEvent event, Emitter<MyTicketsState> emit) {
     if (!_authenticated) return;
+    if (event.sessionGeneration != null &&
+        event.sessionGeneration != _generation) {
+      return;
+    }
+    if (event.tokenSessionVersion != null &&
+        event.tokenSessionVersion != TokenStorage.sessionVersion) {
+      return;
+    }
     // Avoid duplicate
     final existingIndex = state.tickets.indexWhere(
       (t) => t.id == event.ticket.id,

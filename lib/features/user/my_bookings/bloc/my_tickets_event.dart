@@ -15,11 +15,17 @@ class LoadMyTicketsEvent extends MyTicketsEvent {
 
 class AddNewTicketEvent extends MyTicketsEvent {
   final TicketModel ticket;
+  final int? sessionGeneration;
+  final int? tokenSessionVersion;
 
-  const AddNewTicketEvent(this.ticket);
+  const AddNewTicketEvent(
+    this.ticket, {
+    this.sessionGeneration,
+    this.tokenSessionVersion,
+  });
 
   @override
-  List<Object?> get props => [ticket];
+  List<Object?> get props => [ticket, sessionGeneration, tokenSessionVersion];
 }
 
 class ChangeTabEvent extends MyTicketsEvent {
