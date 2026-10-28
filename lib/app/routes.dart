@@ -11,6 +11,7 @@ import '../features/user/my_bookings/presentation/screens/my_tickets_screen.dart
 import '../features/user/my_bookings/presentation/screens/ticket_detail_screen.dart';
 import '../features/user/notification/presentation/screens/notifications_screen.dart';
 import '../features/user/profile/presentation/screens/profile_screen.dart';
+import '../features/user/support_chat/presentation/screens/support_chat_screen.dart';
 import '../features/user/search_trips/presentation/screens/search_trips_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -38,12 +39,18 @@ class AppRoutes {
   static const String checkout = '/checkout';
   static const String bookingSuccess = '/booking-success';
   static const String ticketDetail = '/ticket-detail';
+  static const String supportChat = '/support-chat';
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: home,
     routes: [
       // Top-level pushed routes (without BottomNavBar)
+      GoRoute(
+        path: supportChat,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SupportChatScreen(),
+      ),
       GoRoute(
         path: searchTrips,
         parentNavigatorKey: _rootNavigatorKey,
