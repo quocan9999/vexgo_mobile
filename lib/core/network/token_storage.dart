@@ -60,10 +60,16 @@ class TokenStorage {
   static bool _cleared = false;
   static Future<void> _writes = Future<void>.value();
   static final _invalidations = StreamController<void>.broadcast(sync: true);
+  static final _sessionChanges = StreamController<void>.broadcast(sync: true);
 
   /// Changes on login/logout, but stays stable during refresh token rotation.
   static int get sessionVersion => _sessionVersion;
   static Stream<void> get sessionInvalidations => _invalidations.stream;
+
+  /// Login/account replacement and logout, but not access-token rotation.
+  /// Separate from logout invalidations so login cannot cancel AuthBloc's
+  /// own in-flight authentication operation.
+  static Stream<void> get sessionChanges => _sessionChanges.stream;
 
   static Future<void> _serialize(Future<void> Function() action) {
     final operation = _writes.then((_) => action());
@@ -141,6 +147,7 @@ class TokenStorage {
     _cachedAccessToken = accessToken;
     _cachedRefreshToken = refreshToken;
     _refreshLoaded = true;
+    _sessionChanges.add(null);
     final storage = _secureStorage;
     try {
       await _serialize(() async {
@@ -203,6 +210,7 @@ class TokenStorage {
     _cachedRefreshToken = null;
     _refreshLoaded = true;
     _invalidations.add(null);
+    _sessionChanges.add(null);
     final storage = _secureStorage;
     await _serialize(() async {
       // Independent deletions ensure failure of one does not skip the other.

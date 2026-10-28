@@ -5,6 +5,7 @@ import '../core/network/api_config.dart';
 import '../core/theme/app_theme.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/booking_repository.dart';
+import '../data/repositories/booking_receipt_repository.dart';
 import '../data/repositories/notification_repository.dart';
 import '../data/repositories/seat_repository.dart';
 import '../data/repositories/trip_repository.dart';
@@ -27,6 +28,9 @@ class VexGoApp extends StatelessWidget {
 
     return MultiRepositoryProvider(
       providers: [
+        RepositoryProvider<BookingReceiptRepository>(
+          create: (_) => BookingReceiptRepository.forCurrentMode(),
+        ),
         RepositoryProvider<TripRepository>(
           create: (context) =>
               isDemo ? MockTripRepository() : RealTripRepository(),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -78,9 +79,17 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
         final bloc = context.read<MyTicketsBloc>();
         return Scaffold(
           backgroundColor: DiscoveryColors.background,
-          appBar: const CustomAppBar(
+          appBar: CustomAppBar(
             title: 'Vé của tôi',
             automaticallyImplyLeading: false,
+            actions: [
+              if (!ApiConfig.isDemoMode)
+                IconButton(
+                  tooltip: 'Tra cứu chứng từ thanh toán',
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  onPressed: () => context.push('/booking-receipt'),
+                ),
+            ],
           ),
           body: state.requiresLogin
               ? _buildGuestView(context, state, bloc)

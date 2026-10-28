@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../data/models/booking_receipt_model.dart';
+import '../features/user/receipts/presentation/booking_receipt_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/data/models/city_model.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
@@ -40,12 +42,22 @@ class AppRoutes {
   static const String bookingSuccess = '/booking-success';
   static const String ticketDetail = '/ticket-detail';
   static const String supportChat = '/support-chat';
+  static const String bookingReceipt = '/booking-receipt';
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: home,
     routes: [
       // Top-level pushed routes (without BottomNavBar)
+        GoRoute(
+          path: bookingReceipt,
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (_, state) => BookingReceiptScreen(
+            initialRequest: state.extra is ReceiptLookupRequest
+                ? state.extra as ReceiptLookupRequest
+                : null,
+          ),
+        ),
       GoRoute(
         path: supportChat,
         parentNavigatorKey: _rootNavigatorKey,
