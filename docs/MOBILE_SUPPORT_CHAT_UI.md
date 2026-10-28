@@ -1,9 +1,9 @@
 # Tài liệu Bàn giao — UI Chat Realtime Hỗ trợ Khách hàng (`SupportChatScreen`)
 
-**Ngày cập nhật**: 28/10/2026  
-**Worktree**: `vexgo_support_chat_ui_worktree`  
-**Branch**: `feature/mobile-support-chat-ui`  
-**Base commit (HEAD)**: `7a726fa8451778f42d352c3d054b1b26ec61e572`  
+**Ngày cập nhật**: 28/10/2026
+**Worktree**: `vexgo_support_chat_ui_worktree`
+**Branch**: `feature/mobile-support-chat-ui`
+**Base commit (HEAD)**: `7a726fa8451778f42d352c3d054b1b26ec61e572`
 **Baseline tests**: 365/365 → UI đợt 1: 382/382 → sửa F01/F02: 384/384 → **sửa R01/R02 từ re-review: 387/387 tests qua**. Mục 8 là implementation và kết quả mới nhất; các mục trước lưu snapshot của Agent.
 
 ---
@@ -220,4 +220,3 @@ Logs ở workspace cha: mobile-qa-evidence/chat-ui-final-full.log, chat-ui-final
 Lúc hoàn thiện test có ca khôi phục focus chưa qua do requestFocus trước khi Visibility cho editor nhận focus trở lại; đã sửa bằng callback sau frame có guard session/conversation, test giữ draft/focus và full suite hiện qua. Không nới assertion để làm xanh.
 
 Giới hạn: widget/AuthBloc/Cubit thật với FakeRepository/FakeSocket, chưa build/cài APK, chưa kiểm thử Android hoặc Mobile↔Admin/API/DB thật trong lượt sửa. Các khẳng định contrast/WCAG của snapshot Agent chưa được xác nhận bằng audit riêng. Chưa commit/push/tạo PR; giữ nhánh chat UI riêng để điều phối viên tích hợp sau.
-

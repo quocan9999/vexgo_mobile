@@ -1,10 +1,10 @@
 # Tài liệu Bàn giao — UI Bottom Sheet Hủy vé & Thông tin hoàn tiền (`CancelTicketSheet` & `GuestCancelTicketSheet`)
 
-**Ngày cập nhật**: 28/10/2026  
-**Worktree**: `vexgo_cancellation_ui_worktree`  
-**Branch**: `feature/mobile-cancellation-ui`  
-**Base branch**: `feature/mobile-ticket-detail-ui`  
-**Base commit (HEAD)**: `774450aac36e105d5b0463a0a9a87d57788bf73a`  
+**Ngày cập nhật**: 28/10/2026
+**Worktree**: `vexgo_cancellation_ui_worktree`
+**Branch**: `feature/mobile-cancellation-ui`
+**Base branch**: `feature/mobile-ticket-detail-ui`
+**Base commit (HEAD)**: `774450aac36e105d5b0463a0a9a87d57788bf73a`
 **Baseline tests**: 472/472 -> Agent 485/485 -> **Sau review/sửa: 498/498 tests PASS**. Kết quả mới nhất và phạm vi sửa logic Mobile tại mục 5.
 
 ---

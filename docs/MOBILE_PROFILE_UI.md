@@ -1,9 +1,9 @@
 # Tài liệu Bàn giao — UI Hồ sơ & Quản lý Tài khoản (`ProfileScreen`, `EditProfileDialog`, `ChangePasswordDialog`)
 
-**Ngày cập nhật**: 28/10/2026  
-**Worktree**: `vexgo_profile_ui_worktree`  
-**Branch**: `feature/mobile-profile-ui`  
-**Base commit (HEAD)**: `774450aac36e105d5b0463a0a9a87d57788bf73a`  
+**Ngày cập nhật**: 28/10/2026
+**Worktree**: `vexgo_profile_ui_worktree`
+**Branch**: `feature/mobile-profile-ui`
+**Base commit (HEAD)**: `774450aac36e105d5b0463a0a9a87d57788bf73a`
 **Baseline tests**: 472/472. Sau Agent sửa F01–F04: 489/489. Sau sửa route từ re-review: **492/492 tests qua**; xem mục 8 cho kết quả mới nhất.
 
 ---

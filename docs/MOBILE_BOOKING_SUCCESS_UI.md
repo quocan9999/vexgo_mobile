@@ -1,10 +1,10 @@
 # Tài liệu Bàn giao — UI Màn hình Đặt vé thành công (`BookingSuccessScreen`)
 
-**Ngày cập nhật**: 27/10/2026  
-**Worktree**: `vexgo_booking_success_ui_worktree`  
-**Branch**: `feature/mobile-booking-success-ui`  
-**Base HEAD**: `410ba93890766c600fd65e2823037b16f914c14a` (Nền PR #12)  
-**Baseline tests**: 418 tests passing -> **Hiện tại: 425 tests passing (+7 new comprehensive regression tests)**  
+**Ngày cập nhật**: 27/10/2026
+**Worktree**: `vexgo_booking_success_ui_worktree`
+**Branch**: `feature/mobile-booking-success-ui`
+**Base HEAD**: `410ba93890766c600fd65e2823037b16f914c14a` (Nền PR #12)
+**Baseline tests**: 418 tests passing -> **Hiện tại: 425 tests passing (+7 new comprehensive regression tests)**
 
 ---
 
