@@ -49,15 +49,15 @@ class AppRoutes {
     initialLocation: home,
     routes: [
       // Top-level pushed routes (without BottomNavBar)
-        GoRoute(
-          path: bookingReceipt,
-          parentNavigatorKey: _rootNavigatorKey,
-          builder: (_, state) => BookingReceiptScreen(
-            initialRequest: state.extra is ReceiptLookupRequest
-                ? state.extra as ReceiptLookupRequest
-                : null,
-          ),
+      GoRoute(
+        path: bookingReceipt,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) => BookingReceiptScreen(
+          initialRequest: state.extra is ReceiptLookupRequest
+              ? state.extra as ReceiptLookupRequest
+              : null,
         ),
+      ),
       GoRoute(
         path: supportChat,
         parentNavigatorKey: _rootNavigatorKey,
