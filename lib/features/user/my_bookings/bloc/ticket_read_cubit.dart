@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
+import 'package:vexgo_app/core/network/api_exceptions.dart';
+import 'cancellation_policy.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'my_tickets_bloc.dart';
 import 'my_tickets_event.dart';
@@ -20,7 +22,14 @@ class TicketReadState {
   final TicketModel? ticket;
   final String? error;
   final String? message;
-  const TicketReadState(this.status, {this.ticket, this.error, this.message});
+  final bool cancellationUncertain;
+  const TicketReadState(
+    this.status, {
+    this.ticket,
+    this.error,
+    this.message,
+    this.cancellationUncertain = false,
+  });
 }
 
 /// A fresh read has its own lifecycle; navigation/list snapshots never authorize QR.
@@ -38,16 +47,39 @@ class TicketReadCubit extends Cubit<TicketReadState> {
   String? _lookupPhone;
   String? _cancelledTicketId;
   bool _mutationInFlight = false;
+  final _uncertainCancellationCodes = <String>{};
+  bool get _uncertainCancellation =>
+      _uncertainCancellationCodes.contains(_expectedCode);
   TicketReadCubit({required this.owner})
     : super(const TicketReadState(TicketReadStatus.initial)) {
     _session = owner.sessionGeneration;
     _tokenVersion = TokenStorage.sessionVersion;
     _ownerChanges = owner.stream.listen((_) {
       if (!_isCurrent) invalidate();
+      if (_expectedId != null &&
+          owner.state.tickets.any(
+            (t) =>
+                t.id == _expectedId &&
+                t.status == TicketStatus.cancelled &&
+                TicketModel.parseSupportedStatus(t.rawStatus) ==
+                    TicketStatus.cancelled,
+          )) {
+        _cancelledTicketId = _expectedId;
+        if (_isCurrent &&
+            state.status == TicketReadStatus.loaded &&
+            state.ticket?.status != TicketStatus.cancelled) {
+          _request++;
+          emit(
+            const TicketReadState(
+              TicketReadStatus.failure,
+              error:
+                  'Trạng thái vé đã thay đổi. Vui lòng cập nhật thông tin vé.',
+            ),
+          );
+        }
+      }
     });
-    _invalidations = TokenStorage.sessionInvalidations.listen(
-      (_) => invalidate(),
-    );
+    _invalidations = TokenStorage.sessionChanges.listen((_) => invalidate());
   }
 
   bool get _isCurrent =>
@@ -134,7 +166,16 @@ class TicketReadCubit extends Cubit<TicketReadState> {
           ticket.status != TicketStatus.cancelled) {
         throw StateError('Trạng thái hủy vé chưa được đồng bộ.');
       }
-      emit(TicketReadState(TicketReadStatus.loaded, ticket: ticket));
+      if (ticket.status == TicketStatus.cancelled) {
+        _uncertainCancellationCodes.remove(ticket.ticketCode);
+      }
+      emit(
+        TicketReadState(
+          TicketReadStatus.loaded,
+          ticket: ticket,
+          cancellationUncertain: _uncertainCancellation,
+        ),
+      );
       if (!_isPublic) owner.add(SyncTicketDetailsEvent(ticket, _session));
     } catch (error) {
       if (isClosed || request != _request) return;
@@ -147,6 +188,7 @@ class TicketReadCubit extends Cubit<TicketReadState> {
           TicketReadStatus.failure,
           error:
               'Không thể tải thông tin vé. Vui lòng kiểm tra mã vé, số điện thoại và thử lại. ($error)',
+          cancellationUncertain: _uncertainCancellation,
         ),
       );
     }
@@ -158,7 +200,7 @@ class TicketReadCubit extends Cubit<TicketReadState> {
     required TicketModel quotedTicket,
     required String reason,
   }) async {
-    if (_mutationInFlight || isClosed) return;
+    if (_mutationInFlight || isClosed || _uncertainCancellation) return;
     if (!_isCurrent) {
       invalidate();
       return;
@@ -168,6 +210,9 @@ class TicketReadCubit extends Cubit<TicketReadState> {
     if (!_isPublic ||
         state.status != TicketReadStatus.loaded ||
         !identical(state.ticket, quotedTicket) ||
+        !hasUsableCancellationQuote(quotedTicket) ||
+        reason.trim().isEmpty ||
+        reason.trim().length > 500 ||
         phone == null ||
         quote == null ||
         !quotedTicket.canCancel ||
@@ -179,6 +224,7 @@ class TicketReadCubit extends Cubit<TicketReadState> {
       return;
     }
     _mutationInFlight = true;
+    _uncertainCancellationCodes.add(quotedTicket.ticketCode);
     final request = ++_request;
     emit(const TicketReadState(TicketReadStatus.cancelling));
     String? errorMessage;
@@ -193,13 +239,17 @@ class TicketReadCubit extends Cubit<TicketReadState> {
       final payload = response['data'] is Map<String, dynamic>
           ? response['data'] as Map<String, dynamic>
           : response;
-      if (payload['ticketId']?.toString() != quotedTicket.id ||
-          payload['ticketCode'] != quotedTicket.ticketCode ||
-          payload['status'] != 'HUY') {
+      if (!confirmsCancellation(payload, quotedTicket)) {
         throw const FormatException('Phản hồi hủy vé không khớp.');
       }
       accepted = true;
-    } catch (_) {
+    } catch (error) {
+      if (error is ApiException &&
+          error.statusCode >= 400 &&
+          error.statusCode < 500 &&
+          error.statusCode != 408) {
+        _uncertainCancellationCodes.remove(quotedTicket.ticketCode);
+      }
       // Includes an expired quote or unknown POST result. Never retry POST
       // automatically: reconcile by a public lookup and ask for confirmation.
       errorMessage =
@@ -224,6 +274,7 @@ class TicketReadCubit extends Cubit<TicketReadState> {
           state.status,
           ticket: state.ticket,
           error: cancelled ? null : errorMessage ?? state.error,
+          cancellationUncertain: _uncertainCancellation,
           message: accepted || cancelled
               ? 'Yêu cầu hủy vé đã được xác nhận. Việc hoàn tiền cần được kiểm tra riêng.'
               : null,

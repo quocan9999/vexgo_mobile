@@ -50,15 +50,35 @@ class CancelTicketEvent extends MyTicketsEvent {
   final String ticketId;
   final String reason;
   final int refundAmount;
+  final TicketModel? quotedTicket;
+  final int? sessionGeneration;
+  final int? tokenSessionVersion;
 
   const CancelTicketEvent({
     required this.ticketId,
     required this.reason,
     required this.refundAmount,
+    this.quotedTicket,
+    this.sessionGeneration,
+    this.tokenSessionVersion,
   });
 
   @override
-  List<Object?> get props => [ticketId, reason, refundAmount];
+  List<Object?> get props => [
+    ticketId,
+    reason,
+    refundAmount,
+    quotedTicket,
+    sessionGeneration,
+    tokenSessionVersion,
+  ];
+}
+
+class CheckCancellationEvent extends MyTicketsEvent {
+  final String ticketId;
+  const CheckCancellationEvent(this.ticketId);
+  @override
+  List<Object?> get props => [ticketId];
 }
 
 class SubmitTicketReviewEvent extends MyTicketsEvent {

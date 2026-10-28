@@ -3,6 +3,8 @@ import 'package:vexgo_app/data/models/ticket_model.dart';
 
 enum MyTicketsStatus { initial, loading, loaded, error }
 
+enum TicketCancellationStatus { idle, submitting, succeeded, failed, uncertain }
+
 class MyTicketsState extends Equatable {
   final MyTicketsStatus status;
   final int detailsRevision;
@@ -12,6 +14,9 @@ class MyTicketsState extends Equatable {
   final String searchQuery;
   final String? errorMessage;
   final String? successMessage;
+  final TicketCancellationStatus cancellationStatus;
+  final String? cancellationTicketId;
+  final String cancellationMessage;
 
   const MyTicketsState({
     this.status = MyTicketsStatus.initial,
@@ -22,6 +27,9 @@ class MyTicketsState extends Equatable {
     this.searchQuery = '',
     this.errorMessage,
     this.successMessage,
+    this.cancellationStatus = TicketCancellationStatus.idle,
+    this.cancellationTicketId,
+    this.cancellationMessage = '',
   });
 
   List<TicketModel> get upcomingTickets =>
@@ -60,6 +68,9 @@ class MyTicketsState extends Equatable {
     String? errorMessage,
     String? successMessage,
     bool clearMessages = false,
+    TicketCancellationStatus? cancellationStatus,
+    String? cancellationTicketId,
+    String? cancellationMessage,
   }) {
     return MyTicketsState(
       status: status ?? this.status,
@@ -68,6 +79,9 @@ class MyTicketsState extends Equatable {
       tickets: tickets ?? this.tickets,
       selectedTab: selectedTab ?? this.selectedTab,
       searchQuery: searchQuery ?? this.searchQuery,
+      cancellationStatus: cancellationStatus ?? this.cancellationStatus,
+      cancellationTicketId: cancellationTicketId ?? this.cancellationTicketId,
+      cancellationMessage: cancellationMessage ?? this.cancellationMessage,
       errorMessage: clearMessages ? null : (errorMessage ?? this.errorMessage),
       successMessage: clearMessages
           ? null
@@ -85,5 +99,8 @@ class MyTicketsState extends Equatable {
     searchQuery,
     errorMessage,
     successMessage,
+    cancellationStatus,
+    cancellationTicketId,
+    cancellationMessage,
   ];
 }
