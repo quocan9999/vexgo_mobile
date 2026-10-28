@@ -482,6 +482,7 @@ class _MockCountingBookingRepository extends HybridBookingRepository {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
   }) async {
     createBookingCallCount++;
     return BookingModel(

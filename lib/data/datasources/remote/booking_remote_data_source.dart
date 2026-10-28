@@ -29,6 +29,7 @@ abstract class BookingRemoteDataSource {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
   });
 
   Future<BookingModel> getBookingById(dynamic bookingId);
@@ -104,6 +105,7 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
   }) async {
     if (holdToken == null || holdToken.isEmpty) {
       throw ArgumentError('Cần mã giữ ghế còn hiệu lực để tạo đơn.');
@@ -119,6 +121,14 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
       if (promotionCode != null && promotionCode.isNotEmpty)
         'promotionCode': promotionCode,
       'holdToken': holdToken,
+      if (promotionCode != null &&
+          promotionCode.isNotEmpty &&
+          expectedPromotionQuote != null)
+        'expectedPromotionQuote': {
+          'originalTotal': expectedPromotionQuote.originalTotal.toString(),
+          'discountAmount': expectedPromotionQuote.discountAmount.toString(),
+          'finalTotal': expectedPromotionQuote.finalTotal.toString(),
+        },
     };
 
     final res = await client.post(

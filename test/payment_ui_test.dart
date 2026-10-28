@@ -219,6 +219,7 @@ class _FakeBookingRepo implements BookingRepository {
     required PassengerInfo contact,
     String? holdToken,
     String? promotionCode,
+    BookingQuoteModel? expectedPromotionQuote,
   }) async {
     createApiBookingCalls++;
     return bookingToReturn ??

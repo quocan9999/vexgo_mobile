@@ -255,6 +255,7 @@ abstract class BookingRepository {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
   });
 
   Future<PaymentTransactionModel> createPayment({
@@ -441,6 +442,7 @@ class MockBookingRepository implements BookingRepository {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
   }) async {
     final quote = await getBookingQuote(
       tripId: tripId,
@@ -710,6 +712,7 @@ class HybridBookingRepository implements BookingRepository {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
   }) async {
     if (tripId <= 0) {
       throw ArgumentError('Mã chuyến đi không hợp lệ ($tripId)');
@@ -719,6 +722,7 @@ class HybridBookingRepository implements BookingRepository {
     }
     try {
       return await remoteBookingDataSource.createBooking(
+        expectedPromotionQuote: expectedPromotionQuote,
         tripId: tripId,
         seatIds: seatIds,
         pickupPoint: pickupPoint,
@@ -952,6 +956,7 @@ class RealBookingRepository implements BookingRepository {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
   }) {
     if (tripId <= 0) {
       throw ArgumentError('Mã chuyến đi không hợp lệ ($tripId)');
@@ -960,6 +965,7 @@ class RealBookingRepository implements BookingRepository {
       throw ArgumentError('Danh sách ghế không hợp lệ ($seatIds)');
     }
     return remoteBookingDataSource.createBooking(
+      expectedPromotionQuote: expectedPromotionQuote,
       tripId: tripId,
       seatIds: seatIds,
       pickupPoint: pickupPoint,

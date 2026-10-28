@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/booking_quote_model.dart';
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vexgo_app/core/network/api_exceptions.dart';
@@ -47,6 +48,7 @@ class RiskBookingRepository implements BookingRepository {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
   }) async {
     bookings++;
     if (!bookingStarted.isCompleted) bookingStarted.complete();

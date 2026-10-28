@@ -20,6 +20,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   final BookingRepository bookingRepository;
   Timer? _countdownTimer;
   final DateTime Function() _now;
+  final VietQrReceivingAccount _receivingAccount;
   bool _holdBusy = false;
   bool _confirmBusy = false;
   bool _closing = false;
@@ -44,7 +45,9 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     required this.seatRepository,
     required this.bookingRepository,
     DateTime Function()? now,
+    VietQrReceivingAccount receivingAccount = VietQrConfig.account,
   }) : _now = now ?? DateTime.now,
+       _receivingAccount = receivingAccount,
        super(const BookingFlowState()) {
     on<InitBookingFlowEvent>(_onInit);
     on<ToggleSeatEvent>(_onToggleSeat);
@@ -62,8 +65,64 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     on<PreviousStepEvent>(_onPreviousStep);
     on<GoToStepEvent>(_onGoToStep);
     on<ConfirmPaymentEvent>(_onConfirmPayment);
+    on<_AwaitCheckoutEvent>((event, emit) async {
+      try {
+        await _onConfirmPayment(const ConfirmPaymentEvent(), emit);
+      } finally {
+        event.finished.complete();
+      }
+    });
+    on<_AwaitDraftEvent>((event, emit) async {
+      try {
+        final action = event.action;
+        if (action is ToggleSeatEvent) {
+          await _onToggleSeat(action, emit);
+        } else if (action is ChangeFloorEvent) {
+          _onChangeFloor(action, emit);
+        } else if (action is SelectPickupPointEvent) {
+          _onSelectPickupPoint(action, emit);
+        } else if (action is SelectDropoffPointEvent) {
+          _onSelectDropoffPoint(action, emit);
+        } else if (action is NextStepEvent) {
+          await _onNextStep(action, emit);
+        } else if (action is PreviousStepEvent) {
+          _onPreviousStep(action, emit);
+        } else if (action is GoToStepEvent) {
+          _onGoToStep(action, emit);
+        } else if (action is ApplyPromotionCodeEvent) {
+          await _onApplyPromotionCode(action, emit);
+        } else if (action is RemoveVoucherEvent) {
+          await _onRemoveVoucher(action, emit);
+        } else if (action is RefreshBookingQuoteEvent) {
+          await _loadQuote(emit);
+        } else if (action is ReleaseSeatHoldEvent) {
+          await _onReleaseSeatHold(action, emit);
+        } else if (action is UpdatePassengerInfoEvent) {
+          await _onUpdatePassengerInfo(action, emit);
+        }
+      } finally {
+        event.finished.complete();
+      }
+    });
     on<ReleaseSeatHoldEvent>(_onReleaseSeatHold);
     on<InvalidateBookingSessionEvent>(_onInvalidateSession);
+  }
+
+  /// Await one explicit create/recheck action, including ticket hydration.
+  /// Used by the two-leg coordinator; it does not bypass existing guards.
+  Future<void> confirmPayment() {
+    if (_closing || isClosed || _sessionInvalidated) return Future.value();
+    final finished = Completer<void>();
+    add(_AwaitCheckoutEvent(finished));
+    return finished.future;
+  }
+
+  /// Coordinator barrier: a queued edit/quote must finish before checkout.
+  Future<void> applyDraftAction(BookingFlowEvent action) {
+    if (_closing || isClosed || _sessionInvalidated) return Future.value();
+    final finished = Completer<void>();
+    add(_AwaitDraftEvent(action, finished));
+    return finished.future;
   }
 
   Future<void> _onInvalidateSession(
@@ -840,7 +899,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           draft.selectedPaymentMethod == 'vietqr' && !ApiConfig.isDemoMode;
       if (bankTransfer &&
           state.pendingBookingId == null &&
-          !VietQrConfig.isConfigured &&
+          !_receivingAccount.isConfigured &&
           draft.finalAmount != 0) {
         emit(
           state.copyWith(
@@ -861,6 +920,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         // has no idempotency key contract, so never automatically replay it.
         emit(state.copyWith(bookingOutcomeUnknown: true));
         final booking = await bookingRepository.createApiBooking(
+          expectedPromotionQuote: draft.quote,
           tripId: trip.numericTripId ?? int.parse(trip.id),
           seatIds: draft.selectedSeats.map((s) => s.numericSeatId!).toList(),
           pickupPoint: draft.selectedPickupPoint!.name,
@@ -923,7 +983,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
                   ? BookingFlowStatus.paymentPending
                   : BookingFlowStatus.failure,
               pendingQrCodeUrl: pending
-                  ? VietQrConfig.imageUrl(
+                  ? _receivingAccount.imageUrl(
                       verified.totalAmount,
                       verified.orderCode!,
                     )
@@ -1104,4 +1164,15 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     await super.close();
     await _holdFinished?.future;
   }
+}
+
+class _AwaitCheckoutEvent extends BookingFlowEvent {
+  final Completer<void> finished;
+  const _AwaitCheckoutEvent(this.finished);
+}
+
+class _AwaitDraftEvent extends BookingFlowEvent {
+  final BookingFlowEvent action;
+  final Completer<void> finished;
+  const _AwaitDraftEvent(this.action, this.finished);
 }

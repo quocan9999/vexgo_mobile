@@ -159,6 +159,7 @@ class FakeBookingRemoteDataSource implements BookingRemoteDataSource {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
   }) async {
     throw UnimplementedError();
   }
