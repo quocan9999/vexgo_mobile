@@ -237,6 +237,102 @@ void main() {
     },
   );
 
+  for (final outcome in ['account switch', 'logout', 'success']) {
+    testWidgets('covered password dialog removes its own route on $outcome', (
+      tester,
+    ) async {
+      final repository = PasswordRepository();
+      final bloc = await authenticated(repository);
+      addTearDown(bloc.close);
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: bloc,
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => ChangePasswordDialog.show(context),
+                  child: const Text('Open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('Mật khẩu hiện tại')),
+        'old-pass',
+      );
+      if (outcome == 'success') {
+        await tester.enterText(
+          find.byKey(const ValueKey('Mật khẩu mới')),
+          'new-pass',
+        );
+        await tester.enterText(
+          find.byKey(const ValueKey('Xác nhận mật khẩu mới')),
+          'new-pass',
+        );
+        await tester.tap(find.text('Lưu mật khẩu'));
+        await tester.pump();
+        expect(repository.calls, 1);
+      }
+
+      final dialogContext = tester.element(find.byType(ChangePasswordDialog));
+      showDialog<void>(
+        context: dialogContext,
+        builder: (context) => AlertDialog(
+          content: const Text('Independent modal'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close independent modal'),
+            ),
+          ],
+        ),
+      );
+      // Bounded pumps: the submitting form contains an indeterminate spinner.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      if (outcome == 'account switch') {
+        // Fixture session transition without changing a real account.
+        // ignore: invalid_use_of_visible_for_testing_member
+        bloc.emit(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            user: UserModel(
+              taiKhoanId: 43,
+              maKhachHang: 'KH43',
+              hoTen: 'Second account',
+              soDienThoai: '0901234568',
+            ),
+          ),
+        );
+      } else if (outcome == 'logout') {
+        bloc.add(const LogoutEvent());
+      } else {
+        repository.result.complete('Đổi mật khẩu thành công.');
+      }
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ChangePasswordDialog), findsNothing);
+      expect(find.text('Independent modal'), findsOneWidget);
+      expect(repository.calls, outcome == 'success' ? 1 : 0);
+      expect(
+        find.text('Đổi mật khẩu thành công.'),
+        outcome == 'success' ? findsOneWidget : findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.text('Close independent modal'));
+      await tester.pumpAndSettle();
+      expect(find.text('Open'), findsOneWidget);
+      expect(find.byType(ChangePasswordDialog), findsNothing);
+    });
+  }
+
   testWidgets('dialog closes only after confirmed server success', (
     tester,
   ) async {

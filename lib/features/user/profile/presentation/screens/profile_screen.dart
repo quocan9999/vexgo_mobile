@@ -2,20 +2,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../../app/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vexgo_app/core/network/api_config.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
-import 'package:vexgo_app/core/widgets/custom_button.dart';
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/data/models/user_model.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
 import '../widgets/auth_modal_sheet.dart';
-import '../widgets/edit_profile_dialog.dart';
 import '../widgets/change_password_dialog.dart';
-import '../widgets/loyalty_card_widget.dart';
-import '../widgets/loyalty_history_sheet.dart';
+import '../widgets/edit_profile_dialog.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -23,14 +18,14 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: DiscoveryColors.background,
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state.successMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.successMessage!),
-                backgroundColor: AppColors.success,
+                backgroundColor: DiscoveryColors.successDark,
                 duration: const Duration(seconds: 2),
               ),
             );
@@ -39,7 +34,7 @@ class ProfileScreen extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage!),
-                backgroundColor: AppColors.error,
+                backgroundColor: DiscoveryColors.error,
               ),
             );
           }
@@ -57,202 +52,158 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (state.status == AuthStatus.loading)
-                    const LinearProgressIndicator(),
-                  if (state.status == AuthStatus.failure && state.user == null)
-                    TextButton(
-                      onPressed: () => context.read<AuthBloc>().add(
-                        const CheckAuthStatusEvent(),
-                      ),
-                      child: const Text('Thử tải lại phiên đăng nhập'),
+                  // App Page Header
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 2,
+                      bottom: AppDimensions.md,
                     ),
-                  // 1. Profile Header
+                    child: Text(
+                      'Tài khoản',
+                      style: DiscoveryTextStyles.h2.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: DiscoveryColors.neutral900,
+                      ),
+                    ),
+                  ),
+
+                  if (state.status == AuthStatus.loading) ...[
+                    const LinearProgressIndicator(
+                      color: DiscoveryColors.primary,
+                      backgroundColor: DiscoveryColors.primaryLight,
+                    ),
+                    const SizedBox(height: AppDimensions.sm),
+                  ],
+
+                  if (state.status == AuthStatus.failure && state.user == null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: AppDimensions.md),
+                      padding: const EdgeInsets.all(AppDimensions.sm),
+                      decoration: BoxDecoration(
+                        color: DiscoveryColors.errorLight,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: DiscoveryColors.error.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: DiscoveryColors.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: AppDimensions.sm),
+                          Expanded(
+                            child: Text(
+                              'Không thể tải phiên đăng nhập.',
+                              style: DiscoveryTextStyles.bodySmall.copyWith(
+                                color: DiscoveryColors.errorDark,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => context.read<AuthBloc>().add(
+                              const CheckAuthStatusEvent(),
+                            ),
+                            child: const Text('Thử lại'),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // 1. Identity Card (User vs Guest)
                   if (isAuthenticated && user != null)
-                    _buildUserHeader(context, user)
+                    _buildUserCard(context, user)
                   else
-                    _buildGuestHeader(context),
+                    _buildGuestCard(context),
 
                   const SizedBox(height: AppDimensions.base),
 
-                  // 2. Loyalty VIP Card (If authenticated)
+                  // 2. Loyalty Points Card (Only for authenticated)
                   if (isAuthenticated && user != null) ...[
-                    if (ApiConfig.isDemoMode) ...[
-                      LoyaltyCardWidget(user: user),
-                      const SizedBox(height: AppDimensions.base),
-                    ],
-                    _buildQuickStats(context, user),
+                    _buildPointsCard(context, user),
                     const SizedBox(height: AppDimensions.base),
                   ],
 
-                  // 3. Menu Sections
+                  // 3. Account Management Group (Only for authenticated)
                   if (isAuthenticated && user != null) ...[
-                    _buildSectionTitle('QUẢN LÝ TÀI KHOẢN'),
-                    _buildMenuCard([
-                      _MenuItem(
+                    _buildSectionHeader('QUẢN LÝ TÀI KHOẢN'),
+                    _buildMenuContainer([
+                      _MenuRow(
                         icon: Icons.person_outline_rounded,
                         title: 'Thông tin cá nhân',
                         subtitle: 'Họ tên, email, CCCD, ngày sinh',
                         onTap: () =>
                             EditProfileDialog.show(context, user: user),
                       ),
-                      _MenuItem(
+                      _MenuRow(
                         icon: Icons.lock_outline_rounded,
                         title: 'Đổi mật khẩu',
                         subtitle: 'Cập nhật mật khẩu định kỳ để an toàn',
                         onTap: () => ChangePasswordDialog.show(context),
                       ),
-                      _MenuItem(
-                        icon: Icons.people_outline_rounded,
-                        title: 'Danh sách hành khách thường xuyên',
-                        subtitle: 'Chưa hỗ trợ lưu hành khách trên máy chủ',
-                      ),
-                    ]),
-                    const SizedBox(height: AppDimensions.base),
-
-                    _buildSectionTitle('ĐIỂM THƯỞNG & ƯU ĐÃI'),
-                    _buildMenuCard([
-                      _MenuItem(
-                        icon: Icons.stars_rounded,
-                        iconColor: AppColors.secondary,
-                        title: 'Lịch sử điểm VexGo Points',
-                        subtitle: ApiConfig.isDemoMode
-                            ? 'Tích điểm mỗi chuyến đi, đổi voucher giảm giá'
-                            : 'Máy chủ chưa cung cấp lịch sử và đổi điểm',
-                        onTap: !ApiConfig.isDemoMode
-                            ? null
-                            : () =>
-                                  LoyaltyHistorySheet.show(context, user: user),
-                      ),
-                      _MenuItem(
-                        icon: Icons.confirmation_number_outlined,
-                        iconColor: AppColors.primary,
-                        title: 'Ví Voucher & Khuyến mãi',
-                        subtitle: 'Nhập mã khuyến mãi tại bước xác nhận đặt vé',
-                      ),
                     ]),
                     const SizedBox(height: AppDimensions.base),
                   ],
 
-                  _buildSectionTitle('CÀI ĐẶT ỨNG DỤNG'),
-                  _buildMenuCard([
-                    _MenuItem(
-                      icon: Icons.language_rounded,
-                      title: 'Ngôn ngữ (Language)',
-                      subtitle: ApiConfig.isDemoMode
-                          ? null
-                          : 'Hiện hỗ trợ Tiếng Việt',
-                      trailing: Text(
-                        state.language == 'en' ? 'English' : 'Tiếng Việt',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      onTap: !ApiConfig.isDemoMode
-                          ? null
-                          : () {
-                              final next = state.language == 'vi' ? 'en' : 'vi';
-                              context.read<AuthBloc>().add(
-                                ToggleLanguageEvent(next),
-                              );
-                            },
-                    ),
-                    _MenuItem(
-                      icon: Icons.notifications_none_rounded,
-                      title: 'Thông báo đẩy',
-                      subtitle: ApiConfig.isDemoMode
-                          ? null
-                          : 'Chưa tích hợp thông báo đẩy; xem thông báo trong ứng dụng',
-                      trailing: Switch(
-                        value: ApiConfig.isDemoMode && state.pushEnabled,
-                        activeThumbColor: AppColors.primary,
-                        onChanged: !ApiConfig.isDemoMode
-                            ? null
-                            : (val) {
-                                context.read<AuthBloc>().add(
-                                  TogglePushNotificationEvent(val),
-                                );
-                              },
-                      ),
-                    ),
-                    _MenuItem(
-                      icon: Icons.fingerprint_rounded,
-                      title: 'Đăng nhập sinh trắc học',
-                      subtitle: 'Chưa hỗ trợ',
-                      trailing: Switch(
-                        value: false,
-                        activeThumbColor: AppColors.primary,
-                        onChanged: null,
-                      ),
+                  _buildSectionHeader('HỖ TRỢ'),
+                  _buildMenuContainer([
+                    _MenuRow(
+                      icon: Icons.forum_outlined,
+                      title: 'Chat với nhà xe',
+                      subtitle: 'Trao đổi trực tiếp về chuyến đi của bạn',
+                      onTap: () => context.push(AppRoutes.supportChat),
                     ),
                   ]),
                   const SizedBox(height: AppDimensions.base),
 
-                  _buildSectionTitle('HỖ TRỢ & THÔNG TIN'),
-                  _buildMenuCard([
-                    _MenuItem(
-                      icon: Icons.chat_bubble_outline_rounded,
-                      title: 'Chat với nhà xe',
-                      subtitle: 'Nhắn tin và theo dõi hỗ trợ',
-                      onTap: () => context.push(AppRoutes.supportChat),
+                  // 4. App Info Group
+                  _buildSectionHeader('THÔNG TIN ỨNG DỤNG'),
+                  _buildMenuContainer([
+                    const _MenuRow(
+                      icon: Icons.language_rounded,
+                      title: 'Ngôn ngữ',
+                      subtitle: 'Giao diện ứng dụng',
+                      trailingText: 'Tiếng Việt',
                     ),
-                    _MenuItem(
-                      icon: Icons.headset_mic_outlined,
-                      title: 'Tổng đài chăm sóc khách hàng',
-                      subtitle: 'Chưa cấu hình tổng đài chính thức',
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Tổng đài hỗ trợ VexGo'),
-                            content: const Text(
-                              'Liên hệ nhà xe theo thông tin được cung cấp trên vé của bạn.',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(ctx).pop(),
-                                child: const Text('Đóng'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.policy_outlined,
-                      title: 'Quy chế hoạt động & Chính sách',
-                      subtitle:
-                          'Chưa có nội dung công bố; xem chính sách vé trước khi hủy',
-                    ),
-                    _MenuItem(
+                    const _MenuRow(
                       icon: Icons.info_outline_rounded,
-                      title: 'Về ứng dụng VexGo',
-                      subtitle: 'Phiên bản 1.0.0 (Đồ án Khóa luận Tốt nghiệp)',
-                      onTap: () {},
+                      title: 'Phiên bản ứng dụng',
+                      subtitle: 'Hệ thống Đặt vé xe khách VexGo',
+                      trailingText: '1.0.0',
                     ),
                   ]),
                   const SizedBox(height: AppDimensions.lg),
 
-                  // 4. Logout / Login CTA
-                  if (isAuthenticated)
+                  // 5. Logout Action (Only for authenticated)
+                  if (isAuthenticated) ...[
                     Center(
                       child: TextButton.icon(
                         onPressed: () => _confirmLogout(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          minimumSize: const Size(48, 48),
+                        ),
                         icon: const Icon(
                           Icons.logout_rounded,
-                          color: AppColors.error,
+                          color: DiscoveryColors.error,
+                          size: 20,
                         ),
                         label: Text(
                           'Đăng xuất tài khoản',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.error,
+                          style: DiscoveryTextStyles.bodyMedium.copyWith(
+                            color: DiscoveryColors.error,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                     ),
-
-                  const SizedBox(height: AppDimensions.xl),
+                    const SizedBox(height: AppDimensions.base),
+                  ],
                 ],
               ),
             ),
@@ -262,54 +213,34 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUserHeader(BuildContext context, UserModel user) {
+  Widget _buildUserCard(BuildContext context, UserModel user) {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.md),
+      padding: const EdgeInsets.all(AppDimensions.base),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.neutral200),
+        color: DiscoveryColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: DiscoveryColors.neutral200),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Avatar with badge
-          Stack(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryLight,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    user.hoTen.isNotEmpty ? user.hoTen[0].toUpperCase() : 'U',
-                    style: AppTextStyles.h1.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+          // Letter Avatar
+          Container(
+            width: 56,
+            height: 56,
+            decoration: const BoxDecoration(
+              color: DiscoveryColors.primaryLight,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                user.hoTen.isNotEmpty ? user.hoTen[0].toUpperCase() : 'U',
+                style: DiscoveryTextStyles.h1.copyWith(
+                  color: DiscoveryColors.primary,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              if (user.daXacThucSoDienThoai)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: const BoxDecoration(
-                      color: AppColors.success,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.check,
-                      size: 12,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-            ],
+            ),
           ),
           const SizedBox(width: AppDimensions.md),
 
@@ -323,67 +254,73 @@ class ProfileScreen extends StatelessWidget {
                     Flexible(
                       child: Text(
                         user.hoTen,
-                        style: AppTextStyles.titleMedium.copyWith(
+                        style: DiscoveryTextStyles.h4.copyWith(
                           fontWeight: FontWeight.w700,
+                          color: DiscoveryColors.neutral900,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    if (user.daXacThucSoDienThoai)
+                    if (user.daXacThucSoDienThoai) ...[
+                      const SizedBox(width: 4),
                       const Icon(
                         Icons.verified_rounded,
-                        color: AppColors.primary,
+                        color: DiscoveryColors.primary,
                         size: 16,
                       ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 2),
                 Text(
                   user.soDienThoai,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.neutral600,
+                  style: DiscoveryTextStyles.bodySmall.copyWith(
+                    color: DiscoveryColors.neutral700,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                if (user.email != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    user.email!,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.neutral500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 2),
+                Text(
+                  user.email != null && user.email!.trim().isNotEmpty
+                      ? user.email!
+                      : 'Chưa cập nhật email',
+                  style: DiscoveryTextStyles.caption.copyWith(
+                    color: DiscoveryColors.neutral500,
                   ),
-                ],
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),
 
+          // Edit Profile Action
           IconButton(
             onPressed: () => EditProfileDialog.show(context, user: user),
             icon: const Icon(
               Icons.edit_note_rounded,
-              color: AppColors.primary,
+              color: DiscoveryColors.primary,
               size: 26,
             ),
             tooltip: 'Chỉnh sửa hồ sơ',
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGuestHeader(BuildContext context) {
+  Widget _buildGuestCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.base),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.neutral200),
+        color: DiscoveryColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: DiscoveryColors.neutral200),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
@@ -391,12 +328,12 @@ class ProfileScreen extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: const BoxDecoration(
-                  color: AppColors.neutral100,
+                  color: DiscoveryColors.neutral100,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.person_outline_rounded,
-                  color: AppColors.neutral500,
+                  color: DiscoveryColors.neutral500,
                   size: 28,
                 ),
               ),
@@ -407,15 +344,16 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Chào mừng bạn đến với VexGo',
-                      style: AppTextStyles.titleMedium.copyWith(
+                      style: DiscoveryTextStyles.titleMedium.copyWith(
                         fontWeight: FontWeight.w700,
+                        color: DiscoveryColors.neutral900,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Đăng nhập để tích điểm và nhận ưu đãi độc quyền',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.neutral500,
+                      'Đăng nhập để đặt vé thuận tiện và quản lý thông tin chuyến đi',
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: DiscoveryColors.neutral500,
                       ),
                     ),
                   ],
@@ -423,55 +361,74 @@ class ProfileScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppDimensions.md),
-          CustomButton(
-            text: 'ĐĂNG NHẬP / ĐĂNG KÝ',
-            width: double.infinity,
-            type: ButtonType.primary,
+          const SizedBox(height: AppDimensions.base),
+          FilledButton(
             onPressed: () => AuthModalSheet.show(context),
+            style: FilledButton.styleFrom(
+              backgroundColor: DiscoveryColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              minimumSize: const Size(double.infinity, 48),
+            ),
+            child: const Text(
+              'ĐĂNG NHẬP / ĐĂNG KÝ',
+              style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.5),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickStats(BuildContext context, UserModel user) {
+  Widget _buildPointsCard(BuildContext context, UserModel user) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        vertical: AppDimensions.md,
-        horizontal: AppDimensions.sm,
+        horizontal: AppDimensions.base,
+        vertical: 14,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.neutral200),
+        color: DiscoveryColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: DiscoveryColors.neutral200),
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _buildStatItem(
-              ApiConfig.isDemoMode ? '12' : '—',
-              'Chuyến đã đi',
-              Icons.directions_bus_rounded,
-              AppColors.primary,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: DiscoveryColors.secondaryLight,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ),
-          Container(width: 1, height: 32, color: AppColors.neutral200),
-          Expanded(
-            child: _buildStatItem(
-              '${user.diemTichLuy}',
-              'Điểm VexGo',
+            child: const Icon(
               Icons.stars_rounded,
-              AppColors.secondary,
+              color: DiscoveryColors.secondary,
+              size: 26,
             ),
           ),
-          Container(width: 1, height: 32, color: AppColors.neutral200),
+          const SizedBox(width: AppDimensions.md),
           Expanded(
-            child: _buildStatItem(
-              ApiConfig.isDemoMode ? '3' : '—',
-              'Voucher',
-              Icons.card_giftcard_rounded,
-              const Color(0xFF0F9D58),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Điểm tích lũy VexGo',
+                  style: DiscoveryTextStyles.caption.copyWith(
+                    color: DiscoveryColors.neutral600,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${user.diemTichLuy} điểm',
+                  style: DiscoveryTextStyles.h3.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: DiscoveryColors.secondaryDark,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -479,56 +436,26 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(
-    String value,
-    String label,
-    IconData icon,
-    Color color,
-  ) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color, size: 20),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: AppTextStyles.titleMedium.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.neutral500,
-            fontSize: 11,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: AppDimensions.xs),
       child: Text(
         title,
-        style: AppTextStyles.caption.copyWith(
+        style: DiscoveryTextStyles.caption.copyWith(
           fontWeight: FontWeight.w800,
-          color: AppColors.neutral500,
+          color: DiscoveryColors.neutral500,
           letterSpacing: 0.8,
         ),
       ),
     );
   }
 
-  Widget _buildMenuCard(List<_MenuItem> items) {
+  Widget _buildMenuContainer(List<_MenuRow> items) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.neutral200),
+        color: DiscoveryColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: DiscoveryColors.neutral200),
       ),
       child: Column(
         children: items.asMap().entries.map((entry) {
@@ -541,72 +468,103 @@ class ProfileScreen extends StatelessWidget {
               InkWell(
                 onTap: item.onTap,
                 borderRadius: BorderRadius.vertical(
-                  top: idx == 0
-                      ? const Radius.circular(AppDimensions.radiusLg)
-                      : Radius.zero,
-                  bottom: isLast
-                      ? const Radius.circular(AppDimensions.radiusLg)
-                      : Radius.zero,
+                  top: idx == 0 ? const Radius.circular(16) : Radius.zero,
+                  bottom: isLast ? const Radius.circular(16) : Radius.zero,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppDimensions.base,
-                    vertical: AppDimensions.md - 2,
+                    vertical: 12,
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: (item.iconColor ?? AppColors.primary)
-                              .withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          item.icon,
-                          color: item.iconColor ?? AppColors.primary,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: AppDimensions.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.title,
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isTight =
+                          constraints.maxWidth < 280 ||
+                          MediaQuery.textScalerOf(context).scale(12) > 15;
+                      return Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: DiscoveryColors.primaryLight,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            if (item.subtitle != null) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                item.subtitle!,
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.neutral500,
-                                  fontSize: 11,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      item.trailing ??
-                          const Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 14,
-                            color: AppColors.neutral400,
+                            child: Icon(
+                              item.icon,
+                              color: DiscoveryColors.primary,
+                              size: 20,
+                            ),
                           ),
-                    ],
+                          const SizedBox(width: AppDimensions.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.title,
+                                  style: DiscoveryTextStyles.bodyMedium
+                                      .copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: DiscoveryColors.neutral900,
+                                      ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (item.subtitle != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    item.subtitle!,
+                                    style: DiscoveryTextStyles.caption.copyWith(
+                                      color: DiscoveryColors.neutral500,
+                                      fontSize: 11,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                                if (isTight && item.trailingText != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    item.trailingText!,
+                                    style: DiscoveryTextStyles.bodySmall
+                                        .copyWith(
+                                          color: DiscoveryColors.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          if (!isTight && item.trailingText != null) ...[
+                            const SizedBox(width: AppDimensions.sm),
+                            Flexible(
+                              child: Text(
+                                item.trailingText!,
+                                style: DiscoveryTextStyles.bodySmall.copyWith(
+                                  color: DiscoveryColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ] else if (item.onTap != null)
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              size: 20,
+                              color: DiscoveryColors.neutral400,
+                            ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
-              if (!isLast) const Divider(height: 1, indent: 56),
+              if (!isLast)
+                const Divider(
+                  height: 1,
+                  indent: 56,
+                  color: DiscoveryColors.divider,
+                ),
             ],
           );
         }).toList(),
@@ -618,26 +576,63 @@ class ProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Đăng xuất'),
-        content: const Text(
-          'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản VexGo không?',
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: DiscoveryColors.errorLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: DiscoveryColors.error,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Đăng xuất',
+                style: DiscoveryTextStyles.titleMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: DiscoveryColors.neutral900,
+                ),
+              ),
+            ),
+          ],
         ),
+        content: Text(
+          'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản VexGo không?',
+          style: DiscoveryTextStyles.bodyMedium.copyWith(
+            color: DiscoveryColors.neutral700,
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.end,
+        actionsOverflowButtonSpacing: 8,
+        actionsOverflowDirection: VerticalDirection.down,
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy'),
+            child: const Text('Ở lại'),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () {
+              final authBloc = context.read<AuthBloc>();
               Navigator.of(ctx).pop();
-              context.read<AuthBloc>().add(const LogoutEvent());
+              authBloc.add(const LogoutEvent());
             },
+            style: FilledButton.styleFrom(
+              backgroundColor: DiscoveryColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: const Text(
               'Đăng xuất',
-              style: TextStyle(
-                color: AppColors.error,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -646,20 +641,18 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-class _MenuItem {
+class _MenuRow {
   final IconData icon;
-  final Color? iconColor;
   final String title;
   final String? subtitle;
-  final Widget? trailing;
+  final String? trailingText;
   final VoidCallback? onTap;
 
-  const _MenuItem({
+  const _MenuRow({
     required this.icon,
-    this.iconColor,
     required this.title,
     this.subtitle,
-    this.trailing,
+    this.trailingText,
     this.onTap,
   });
 }
