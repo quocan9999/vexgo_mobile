@@ -1,6 +1,8 @@
 # Chuẩn bị gửi hàng kèm vé Mobile
 
-Chốt phạm vi ngày29/10/2026 theo yêu cầu người dùng. Đây là kế hoạch/contract chuẩn bị, chưa phải code cargo đã hoàn thành.
+Chốt phạm vi ngày29/10/2026 theo yêu cầu người dùng. Core API/state đã triển khai;
+tài liệu kết quả và contract callback hiện tại: [MOBILE_BOOKING_CARGO_CORE.md](MOBILE_BOOKING_CARGO_CORE.md).
+Các mục dưới đây lưu nền và phạm vi đã thống nhất; phần UI vẫn là công việc tiếp theo.
 
 ## Nền đã chốt và đồng bộ
 
@@ -27,8 +29,8 @@ tách từ a3cf0ba. Bản khứ hồi nguồn được giữ nguyên; scope gử
 
 Codex phụ trách models, datasource/repository, state/BLoC, validation/giá, auth/race/recovery và kiểm thử API/device.
 Agent UI phụ trách presentation: form kiện hàng, điểm gửi/nhận, tóm tắt, trạng thái lỗi/loading, responsive/widget tests.
-Chưa giao Agent sửa UI ngay vì contract callback/state cargo chưa được implement/freeze.
-Sau khi core qua test sẽ tạo worktree UI từ đúng commit core và handoff riêng, không bắt Agent tự gọi API.
+Core callback/state cargo đã có; worktree UI được tách từ commit core đã kiểm thử,
+kèm MOBILE_BOOKING_CARGO_UI_AGENT_HANDOFF.md ở workspace. Agent UI không tự gọi API.
 
 ## Phạm vi sản phẩm
 

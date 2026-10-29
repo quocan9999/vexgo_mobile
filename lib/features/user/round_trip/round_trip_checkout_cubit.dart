@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/repositories/cargo_repository.dart';
 import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -122,6 +123,7 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
     required TripModel inbound,
     required SeatRepository seatRepository,
     required BookingRepository bookingRepository,
+    CargoRepository? cargoRepository,
     DateTime Function()? now,
     VietQrReceivingAccount receivingAccount = VietQrConfig.account,
   }) : _now = now ?? DateTime.now,
@@ -139,6 +141,7 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
         leg: BookingFlowBloc(
           seatRepository: seatRepository,
           bookingRepository: bookingRepository,
+          cargoRepository: cargoRepository,
           now: _now,
           receivingAccount: receivingAccount,
         ),
@@ -196,6 +199,9 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
   bool dispatch(TripLeg leg, BookingFlowEvent event) {
     if (!_active || _busy || state.hasUnknownOutcome) return false;
     final allowed =
+        event is SetBookingCargoEnabledEvent ||
+        event is RefreshBookingCargoEvent ||
+        event is UpdateBookingCargoEvent ||
         event is ToggleSeatEvent ||
         event is ChangeFloorEvent ||
         event is SelectPickupPointEvent ||
@@ -252,6 +258,7 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
       s.isPickupValid &&
       s.isDropoffValid &&
       s.isPassengerValid &&
+      s.cargo.isValid &&
       s.hasUsableQuote &&
       !s.quoteLoading &&
       s.quoteError == null &&

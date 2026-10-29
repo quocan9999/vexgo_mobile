@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'dart:math';
 import 'package:vexgo_app/data/models/booking_quote_model.dart';
 import 'package:equatable/equatable.dart';
@@ -73,6 +74,7 @@ class BookingFlowState extends Equatable {
   /// Matches the shared API/Web limit for holds, quotes and bookings.
   static const maxSeatsPerTrip = 5;
 
+  final BookingCargoState cargo;
   final BookingFlowStatus status;
   final BookingStep step;
   final TripModel? trip;
@@ -114,6 +116,7 @@ class BookingFlowState extends Equatable {
   final String? pendingDeeplink;
 
   const BookingFlowState({
+    this.cargo = const BookingCargoState(),
     this.status = BookingFlowStatus.initial,
     this.step = BookingStep.seatSelection,
     this.trip,
@@ -198,8 +201,22 @@ class BookingFlowState extends Equatable {
     return appliedVoucher!.discountAmount;
   }
 
+  int? get ticketFinalAmount => requiresAuthoritativeQuote
+      ? quote?.finalTotal
+      : seatsTotalAmount == null
+      ? null
+      : max(0, seatsTotalAmount! - discountAmount);
+  bool get canSubmitDraft =>
+      isSeatsValid &&
+      isPickupValid &&
+      isDropoffValid &&
+      isPassengerValid &&
+      hasUsableQuote &&
+      cargo.isValid;
+
   int? get finalAmount {
     if (checkoutBooking != null) return checkoutBooking!.totalAmount;
+    if (cargo.enabled) return null;
     if (requiresAuthoritativeQuote) return quote?.finalTotal;
     final seatsTotal = seatsTotalAmount;
     if (seatsTotal == null) return null;
@@ -232,9 +249,11 @@ class BookingFlowState extends Equatable {
       case BookingStep.passengerInfo:
         return isPassengerValid;
       case BookingStep.tripSummary:
-        return hasUsableQuote;
+        return hasUsableQuote && cargo.isValid;
       case BookingStep.payment:
-        return selectedPaymentMethod.isNotEmpty && hasUsableQuote;
+        return selectedPaymentMethod.isNotEmpty &&
+            hasUsableQuote &&
+            cargo.isValid;
     }
   }
 
@@ -245,6 +264,7 @@ class BookingFlowState extends Equatable {
   }
 
   BookingFlowState copyWith({
+    BookingCargoState? cargo,
     BookingFlowStatus? status,
     BookingStep? step,
     TripModel? trip,
@@ -290,6 +310,7 @@ class BookingFlowState extends Equatable {
     bool clearPendingPayment = false,
   }) {
     return BookingFlowState(
+      cargo: cargo ?? this.cargo,
       status: status ?? this.status,
       step: step ?? this.step,
       trip: trip ?? this.trip,
@@ -356,6 +377,7 @@ class BookingFlowState extends Equatable {
 
   @override
   List<Object?> get props => [
+    cargo,
     status,
     step,
     trip,

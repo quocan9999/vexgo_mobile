@@ -1,3 +1,4 @@
+import 'booking_cargo_model.dart';
 import 'package:equatable/equatable.dart';
 import 'ticket_model.dart';
 
@@ -20,6 +21,11 @@ class BookingModel extends Equatable {
   final List<int> seatIds;
   final int totalAmount;
   final int originalAmount;
+  final int? originalTicketSubtotal;
+  final int? ticketSubtotal;
+  final int? shippingFee;
+  final BookingShipmentSummary? shipment;
+  final List<BookingCargoLine> cargoItems;
   final int discountAmount;
   final String? promotionCode;
   final String? holdToken;
@@ -50,6 +56,11 @@ class BookingModel extends Equatable {
     required this.seatIds,
     required this.totalAmount,
     this.originalAmount = 0,
+    this.originalTicketSubtotal,
+    this.ticketSubtotal,
+    this.shippingFee,
+    this.shipment,
+    this.cargoItems = const [],
     this.discountAmount = 0,
     this.promotionCode,
     this.holdToken,
@@ -81,6 +92,11 @@ class BookingModel extends Equatable {
     List<int>? seatIds,
     int? totalAmount,
     int? originalAmount,
+    int? originalTicketSubtotal,
+    int? ticketSubtotal,
+    int? shippingFee,
+    BookingShipmentSummary? shipment,
+    List<BookingCargoLine>? cargoItems,
     int? discountAmount,
     String? promotionCode,
     String? holdToken,
@@ -111,6 +127,12 @@ class BookingModel extends Equatable {
       seatIds: seatIds ?? this.seatIds,
       totalAmount: totalAmount ?? this.totalAmount,
       originalAmount: originalAmount ?? this.originalAmount,
+      originalTicketSubtotal:
+          originalTicketSubtotal ?? this.originalTicketSubtotal,
+      ticketSubtotal: ticketSubtotal ?? this.ticketSubtotal,
+      shippingFee: shippingFee ?? this.shippingFee,
+      shipment: shipment ?? this.shipment,
+      cargoItems: cargoItems ?? this.cargoItems,
       discountAmount: discountAmount ?? this.discountAmount,
       promotionCode: promotionCode ?? this.promotionCode,
       holdToken: holdToken ?? this.holdToken,
@@ -217,10 +239,58 @@ class BookingModel extends Equatable {
       );
     }
 
-    final totalAmount = (json['totalAmount'] as num?)?.toInt() ?? 0;
+    int? optionalMoney(String key) =>
+        json[key] == null ? null : cargoInteger(json[key]);
+    final shippingFee =
+        optionalMoney('shippingFee') ?? optionalMoney('cargoFee');
+    if (json['shippingFee'] != null &&
+        json['cargoFee'] != null &&
+        json['shippingFee'] != json['cargoFee']) {
+      throw const FormatException('Conflicting cargo fees');
+    }
+    final originalTickets = optionalMoney('originalTicketSubtotal');
+    final finalTickets = optionalMoney('ticketSubtotal');
+    final shipment = json['shipment'] == null
+        ? null
+        : BookingShipmentSummary.fromJson(
+            Map<String, dynamic>.from(json['shipment'] as Map),
+          );
+    final cargoItems = json['cargoItems'] == null
+        ? const <BookingCargoLine>[]
+        : List<BookingCargoLine>.unmodifiable(
+            (json['cargoItems'] as List).map(
+              (v) => BookingCargoLine.fromJson(
+                Map<String, dynamic>.from(v as Map),
+              ),
+            ),
+          );
+    final hasCargoMoney =
+        shippingFee != null || finalTickets != null || shipment != null;
+    final totalAmount = hasCargoMoney
+        ? cargoInteger(json['totalAmount'])
+        : (json['totalAmount'] as num?)?.toInt() ?? 0;
     final originalAmount =
-        (json['originalAmount'] as num?)?.toInt() ?? totalAmount;
-    final discountAmount = (json['discountAmount'] as num?)?.toInt() ?? 0;
+        (json['originalAmount'] as num?)?.toInt() ??
+        originalTickets ??
+        totalAmount;
+    final discountAmount = hasCargoMoney
+        ? optionalMoney('discountAmount') ?? 0
+        : (json['discountAmount'] as num?)?.toInt() ?? 0;
+    if (finalTickets != null &&
+        shippingFee != null &&
+        finalTickets + shippingFee != totalAmount) {
+      throw const FormatException('Inconsistent booking cargo total');
+    }
+    if (originalTickets != null &&
+        finalTickets != null &&
+        originalTickets - discountAmount != finalTickets) {
+      throw const FormatException('Inconsistent ticket discount');
+    }
+    if (shipment != null &&
+        shippingFee != null &&
+        shipment.shippingFee != shippingFee) {
+      throw const FormatException('Inconsistent shipment fee');
+    }
     final ticketCount =
         (json['ticketCount'] as num?)?.toInt() ?? parsedTickets.length;
 
@@ -240,6 +310,11 @@ class BookingModel extends Equatable {
       seatIds: parsedSeatIds,
       totalAmount: totalAmount,
       originalAmount: originalAmount,
+      originalTicketSubtotal: originalTickets,
+      ticketSubtotal: finalTickets,
+      shippingFee: shippingFee,
+      shipment: shipment,
+      cargoItems: cargoItems,
       discountAmount: discountAmount,
       promotionCode: json['promotionCode'] as String?,
       holdToken: json['holdToken'] as String?,
@@ -281,6 +356,13 @@ class BookingModel extends Equatable {
     'seatIds': seatIds,
     'totalAmount': totalAmount,
     'originalAmount': originalAmount,
+    if (originalTicketSubtotal != null)
+      'originalTicketSubtotal': originalTicketSubtotal,
+    if (ticketSubtotal != null) 'ticketSubtotal': ticketSubtotal,
+    if (shippingFee != null) 'shippingFee': shippingFee,
+    if (shipment != null) 'shipment': shipment!.toJson(),
+    if (cargoItems.isNotEmpty)
+      'cargoItems': cargoItems.map((v) => v.toJson()).toList(),
     'discountAmount': discountAmount,
     if (promotionCode != null) 'promotionCode': promotionCode,
     if (holdToken != null) 'holdToken': holdToken,
@@ -301,6 +383,11 @@ class BookingModel extends Equatable {
     tripId,
     status,
     totalAmount,
+    originalTicketSubtotal,
+    ticketSubtotal,
+    shippingFee,
+    shipment,
+    cargoItems,
     seatIds,
   ];
 }

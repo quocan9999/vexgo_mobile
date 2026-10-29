@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vexgo_app/core/network/api_exceptions.dart';
 import 'package:vexgo_app/core/network/api_response.dart';
@@ -28,6 +29,7 @@ class FakeBookingRemoteDataSource implements BookingRemoteDataSource {
     String? promotionCode,
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
+    BookingCargoDraft? cargo,
   }) async {
     if (errorToThrow != null) throw errorToThrow!;
     return createdBooking =

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:flutter/foundation.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_config.dart';
@@ -256,6 +257,7 @@ abstract class BookingRepository {
     String? promotionCode,
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
+    BookingCargoDraft? cargo,
   });
 
   Future<PaymentTransactionModel> createPayment({
@@ -443,7 +445,11 @@ class MockBookingRepository implements BookingRepository {
     String? promotionCode,
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
+    BookingCargoDraft? cargo,
   }) async {
+    if (cargo != null) {
+      throw UnsupportedError('Mock cargo checkout is not supported.');
+    }
     final quote = await getBookingQuote(
       tripId: tripId,
       seatIds: seatIds,
@@ -713,6 +719,7 @@ class HybridBookingRepository implements BookingRepository {
     String? promotionCode,
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
+    BookingCargoDraft? cargo,
   }) async {
     if (tripId <= 0) {
       throw ArgumentError('Mã chuyến đi không hợp lệ ($tripId)');
@@ -723,6 +730,7 @@ class HybridBookingRepository implements BookingRepository {
     try {
       return await remoteBookingDataSource.createBooking(
         expectedPromotionQuote: expectedPromotionQuote,
+        cargo: cargo,
         tripId: tripId,
         seatIds: seatIds,
         pickupPoint: pickupPoint,
@@ -957,6 +965,7 @@ class RealBookingRepository implements BookingRepository {
     String? promotionCode,
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
+    BookingCargoDraft? cargo,
   }) {
     if (tripId <= 0) {
       throw ArgumentError('Mã chuyến đi không hợp lệ ($tripId)');
@@ -966,6 +975,7 @@ class RealBookingRepository implements BookingRepository {
     }
     return remoteBookingDataSource.createBooking(
       expectedPromotionQuote: expectedPromotionQuote,
+      cargo: cargo,
       tripId: tripId,
       seatIds: seatIds,
       pickupPoint: pickupPoint,
