@@ -5,6 +5,7 @@ import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/network/vietqr_config.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/presentation/widgets/booking_cargo_section_card.dart';
 import 'package:vexgo_app/features/user/booking/presentation/widgets/payment_display_state.dart';
 import 'package:vexgo_app/features/user/round_trip/round_trip_checkout_cubit.dart';
 import 'package:vexgo_app/features/user/round_trip/round_trip_request.dart';
@@ -406,24 +407,100 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               highlight: true,
             ),
             const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Số tiền cần chuyển',
-                  style: DiscoveryTextStyles.bodySmall.copyWith(
-                    color: DiscoveryColors.neutral600,
+            if (BookingCargoSummaryBox.hasCargo(
+              state: state,
+              booking: booking,
+            )) ...[
+              if (booking.ticketSubtotal != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 2,
+                      children: [
+                        Text(
+                          'Tiền vé sau ưu đãi',
+                          style: DiscoveryTextStyles.bodySmall.copyWith(
+                            color: DiscoveryColors.neutral600,
+                          ),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(booking.ticketSubtotal!),
+                          style: DiscoveryTextStyles.bodySmall.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                Text(
-                  CurrencyFormatter.format(booking.totalAmount),
-                  style: DiscoveryTextStyles.titleMedium.copyWith(
-                    color: DiscoveryColors.secondary,
-                    fontWeight: FontWeight.w800,
+              if (booking.shippingFee != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 2,
+                      children: [
+                        Text(
+                          'Phí gửi hàng',
+                          style: DiscoveryTextStyles.bodySmall.copyWith(
+                            color: DiscoveryColors.neutral600,
+                          ),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(booking.shippingFee!),
+                          style: DiscoveryTextStyles.bodySmall.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ],
+            ],
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 2,
+                children: [
+                  Text(
+                    'Số tiền cần chuyển',
+                    style: DiscoveryTextStyles.bodySmall.copyWith(
+                      color: DiscoveryColors.neutral600,
+                    ),
+                  ),
+                  Text(
+                    CurrencyFormatter.format(booking.totalAmount),
+                    style: DiscoveryTextStyles.titleMedium.copyWith(
+                      color: DiscoveryColors.secondary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            if (BookingCargoSummaryBox.hasCargo(
+              state: state,
+              booking: booking,
+            )) ...[
+              const SizedBox(height: 10),
+              BookingCargoSummaryBox(
+                state: state,
+                booking: booking,
+                scopeKey: 'payment-${leg.name}',
+              ),
+            ],
           ] else ...[
             if (state.selectedSeats.isNotEmpty)
               Text(
@@ -435,23 +512,35 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               ),
             if (state.finalAmount != null) ...[
               const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Số tiền dự kiến',
-                    style: DiscoveryTextStyles.bodySmall.copyWith(
-                      color: DiscoveryColors.neutral600,
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 2,
+                  children: [
+                    Text(
+                      'Số tiền dự kiến',
+                      style: DiscoveryTextStyles.bodySmall.copyWith(
+                        color: DiscoveryColors.neutral600,
+                      ),
                     ),
-                  ),
-                  Text(
-                    CurrencyFormatter.format(state.finalAmount!),
-                    style: DiscoveryTextStyles.titleSmall.copyWith(
-                      color: DiscoveryColors.secondary,
-                      fontWeight: FontWeight.w700,
+                    Text(
+                      CurrencyFormatter.format(state.finalAmount!),
+                      style: DiscoveryTextStyles.titleSmall.copyWith(
+                        color: DiscoveryColors.secondary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+            ] else if (state.cargo.enabled) ...[
+              const SizedBox(height: 6),
+              BookingCargoSummaryBox(
+                state: state,
+                scopeKey: 'payment-${leg.name}',
               ),
             ],
           ],

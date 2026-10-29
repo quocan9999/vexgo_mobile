@@ -5,6 +5,7 @@ import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import '../widgets/booking_cargo_section_card.dart';
 import '../widgets/seat_hold_countdown_bar.dart';
 
 class Step4PassengerInfo extends StatefulWidget {
@@ -424,6 +425,18 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 16),
+            BookingCargoSectionCard(
+              cargo: widget.state.cargo,
+              locked: _isLocked,
+              scopeKey: 'oneway',
+              onToggleEnabled: (enabled) =>
+                  widget.bloc.add(SetBookingCargoEnabledEvent(enabled)),
+              onRefresh: () =>
+                  widget.bloc.add(const RefreshBookingCargoEvent()),
+              onUpdateDraft: (draft) =>
+                  widget.bloc.add(UpdateBookingCargoEvent(draft)),
             ),
           ],
         ),

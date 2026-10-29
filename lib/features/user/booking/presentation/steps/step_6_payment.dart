@@ -10,6 +10,7 @@ import 'package:vexgo_app/core/utils/date_formatter.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import '../widgets/booking_cargo_section_card.dart';
 import '../widgets/payment_display_state.dart';
 
 class Step6Payment extends StatefulWidget {
@@ -326,15 +327,37 @@ class _Step6PaymentState extends State<Step6Payment>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      CurrencyFormatter.format(
-                        state.pendingPaymentAmount ?? state.finalAmount,
-                      ),
+                      (state.pendingPaymentAmount ?? state.finalAmount) != null
+                          ? CurrencyFormatter.format(
+                              state.pendingPaymentAmount ?? state.finalAmount,
+                            )
+                          : state.cargo.enabled
+                          ? 'Xác định khi tạo đơn'
+                          : 'Chưa có giá vé',
                       style: DiscoveryTextStyles.price.copyWith(
                         color: DiscoveryColors.secondary,
-                        fontSize: 22,
+                        fontSize:
+                            (state.pendingPaymentAmount ?? state.finalAmount) !=
+                                null
+                            ? 22
+                            : 17,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
+                    if (state.cargo.enabled &&
+                        (state.pendingPaymentAmount ?? state.finalAmount) ==
+                            null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        state.ticketFinalAmount != null
+                            ? 'Tiền vé sau ưu đãi: ${CurrencyFormatter.format(state.ticketFinalAmount!)} • Phí gửi hàng được xác định khi tạo đơn'
+                            : 'Phí gửi hàng được xác định khi tạo đơn',
+                        style: DiscoveryTextStyles.caption.copyWith(
+                          color: DiscoveryColors.neutral600,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -360,6 +383,11 @@ class _Step6PaymentState extends State<Step6Payment>
         ),
 
         const SizedBox(height: AppDimensions.base),
+
+        if (state.cargo.enabled) ...[
+          BookingCargoSummaryBox(state: state, scopeKey: 'oneway-preorder'),
+          const SizedBox(height: AppDimensions.base),
+        ],
 
         // Trip & Seats Recap Card
         if (trip != null)
@@ -782,6 +810,102 @@ class _Step6PaymentState extends State<Step6Payment>
                       ),
                     ),
                 const SizedBox(height: 8),
+                if (BookingCargoSummaryBox.hasCargo(
+                  state: state,
+                  booking: booking,
+                )) ...[
+                  const Divider(height: 16),
+                  if (booking.ticketSubtotal != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 2,
+                          children: [
+                            Text(
+                              'Tiền vé sau ưu đãi:',
+                              style: DiscoveryTextStyles.bodySmall.copyWith(
+                                color: DiscoveryColors.neutral600,
+                              ),
+                            ),
+                            Text(
+                              CurrencyFormatter.format(booking.ticketSubtotal!),
+                              style: DiscoveryTextStyles.bodySmall.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: DiscoveryColors.neutral900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (booking.shippingFee != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 2,
+                          children: [
+                            Text(
+                              'Phí gửi hàng:',
+                              style: DiscoveryTextStyles.bodySmall.copyWith(
+                                color: DiscoveryColors.neutral600,
+                              ),
+                            ),
+                            Text(
+                              CurrencyFormatter.format(booking.shippingFee!),
+                              style: DiscoveryTextStyles.bodySmall.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: DiscoveryColors.neutral900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 2,
+                        children: [
+                          Text(
+                            'Tổng đơn thanh toán:',
+                            style: DiscoveryTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: DiscoveryColors.neutral900,
+                            ),
+                          ),
+                          Text(
+                            CurrencyFormatter.format(booking.totalAmount),
+                            style: DiscoveryTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: DiscoveryColors.secondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  BookingCargoSummaryBox(
+                    state: state,
+                    booking: booking,
+                    scopeKey: 'oneway-postorder',
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 Text(
                   'Lưu mã vé và tra cứu bằng số điện thoại liên hệ để kiểm tra đơn sau khi rời màn hình.',
                   style: DiscoveryTextStyles.caption.copyWith(

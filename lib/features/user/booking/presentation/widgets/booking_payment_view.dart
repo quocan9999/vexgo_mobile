@@ -134,6 +134,8 @@ class BookingPaymentDock extends StatelessWidget {
     if (!hasPendingOrder) {
       ctaText = state.finalAmount != null
           ? 'Thanh toán ${CurrencyFormatter.format(state.finalAmount!)}'
+          : state.cargo.enabled
+          ? 'Tạo đơn & Thanh toán'
           : 'Thanh toán';
       ctaIcon = Icons.shield_rounded;
       canPress =
@@ -142,6 +144,7 @@ class BookingPaymentDock extends StatelessWidget {
           !isBlocked &&
           !isHoldExpired &&
           state.canProceed &&
+          state.canSubmitDraft &&
           state.hasUsableQuote;
     } else {
       ctaText = 'Kiểm tra kết quả thanh toán';
@@ -199,6 +202,11 @@ class BookingPaymentDock extends StatelessWidget {
                           ? CurrencyFormatter.format(displayAmount)
                           : (state.quoteLoading
                                 ? 'Đang xác minh giá'
+                                : state.cargo.enabled &&
+                                      state.ticketFinalAmount != null
+                                ? 'Vé ${CurrencyFormatter.format(state.ticketFinalAmount!)}'
+                                : state.cargo.enabled
+                                ? 'Xác định khi tạo đơn'
                                 : 'Chưa có giá vé'),
                       style: DiscoveryTextStyles.titleMedium.copyWith(
                         color: DiscoveryColors.secondary,
@@ -206,6 +214,17 @@ class BookingPaymentDock extends StatelessWidget {
                         fontSize: compactDock ? 16 : 18,
                       ),
                     ),
+                    if (!hasPendingOrder &&
+                        state.cargo.enabled &&
+                        displayAmount == null)
+                      Text(
+                        'Phí gửi hàng được xác định khi tạo đơn',
+                        style: DiscoveryTextStyles.caption.copyWith(
+                          color: DiscoveryColors.neutral600,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     if (hasPendingOrder)
                       Text(
                         'Đơn #${state.pendingBookingId}',

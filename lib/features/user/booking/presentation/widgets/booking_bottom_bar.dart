@@ -183,7 +183,11 @@ class BookingBottomBar extends StatelessWidget {
           flex: 2,
           child: CustomButton(
             text: 'Tiếp tục',
-            onPressed: (!isBusy && hasActiveHold && state.isPassengerValid)
+            onPressed:
+                (!isBusy &&
+                    hasActiveHold &&
+                    state.isPassengerValid &&
+                    state.cargo.isValid)
                 ? onNext
                 : null,
           ),
@@ -208,11 +212,15 @@ class BookingBottomBar extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                state.finalAmount == null
-                    ? 'Đang xác minh giá'
-                    : CurrencyFormatter.format(state.finalAmount),
+                state.finalAmount != null
+                    ? CurrencyFormatter.format(state.finalAmount)
+                    : state.cargo.enabled
+                    ? 'Phí gửi hàng được xác định khi tạo đơn'
+                    : 'Đang xác minh giá',
                 style: AppTextStyles.price.copyWith(
-                  fontSize: 19,
+                  fontSize: state.finalAmount == null && state.cargo.enabled
+                      ? 14
+                      : 19,
                   color: AppColors.secondary,
                 ),
               ),
@@ -249,9 +257,11 @@ class BookingBottomBar extends StatelessWidget {
           child: CustomButton(
             text: state.pendingBookingId != null
                 ? 'Kiểm tra đơn hiện tại'
-                : state.finalAmount == null
-                ? 'Đang xác minh giá'
-                : 'Thanh toán ${CurrencyFormatter.format(state.finalAmount)}',
+                : state.finalAmount != null
+                ? 'Thanh toán ${CurrencyFormatter.format(state.finalAmount)}'
+                : state.cargo.enabled
+                ? 'Tạo đơn & Thanh toán'
+                : 'Đang xác minh giá',
             isLoading: isSubmitting,
             prefixIcon: const Icon(
               Icons.shield_rounded,
@@ -262,7 +272,8 @@ class BookingBottomBar extends StatelessWidget {
                 isSubmitting ||
                     state.bookingOutcomeUnknown ||
                     state.quoteLoading ||
-                    (state.pendingBookingId == null && !state.hasUsableQuote) ||
+                    (state.pendingBookingId == null &&
+                        (!state.hasUsableQuote || !state.canSubmitDraft)) ||
                     state.status == BookingFlowStatus.blockedByBackend
                 ? null
                 : onConfirmPayment,

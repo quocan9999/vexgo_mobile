@@ -5,6 +5,7 @@ import 'package:vexgo_app/core/utils/date_formatter.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import '../widgets/booking_cargo_section_card.dart';
 import '../widgets/seat_hold_countdown_bar.dart';
 import '../widgets/voucher_selection_sheet.dart';
 
@@ -599,6 +600,18 @@ class Step5TripSummary extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
+          // 3b. Cargo Card
+          BookingCargoSectionCard(
+            cargo: state.cargo,
+            locked: state.isCheckoutLocked,
+            scopeKey: 'oneway',
+            onToggleEnabled: (enabled) =>
+                bloc.add(SetBookingCargoEnabledEvent(enabled)),
+            onRefresh: () => bloc.add(const RefreshBookingCargoEvent()),
+            onUpdateDraft: (draft) => bloc.add(UpdateBookingCargoEvent(draft)),
+          ),
+          const SizedBox(height: 12),
+
           // 4. Voucher / Promotion Card
           _buildCard(
             child: Column(
@@ -837,6 +850,27 @@ class Step5TripSummary extends StatelessWidget {
                     valueColor: DiscoveryColors.secondary,
                   ),
                 ],
+                if (BookingCargoSummaryBox.hasCargo(state: state)) ...[
+                  const SizedBox(height: 8),
+                  _buildPriceRow(
+                    label: 'Tiền vé sau ưu đãi',
+                    value: state.ticketFinalAmount != null
+                        ? CurrencyFormatter.format(state.ticketFinalAmount!)
+                        : 'Chưa có giá vé',
+                  ),
+                  const SizedBox(height: 8),
+                  _buildPriceRow(
+                    label: 'Phí gửi hàng',
+                    value: state.checkoutBooking?.shippingFee != null
+                        ? CurrencyFormatter.format(
+                            state.checkoutBooking!.shippingFee!,
+                          )
+                        : 'Phí gửi hàng được xác định khi tạo đơn',
+                    valueColor: state.checkoutBooking?.shippingFee != null
+                        ? DiscoveryColors.neutral900
+                        : DiscoveryColors.secondary,
+                  ),
+                ],
                 const SizedBox(height: 10),
                 const Divider(height: 1, color: DiscoveryColors.divider),
                 const SizedBox(height: 10),
@@ -844,7 +878,9 @@ class Step5TripSummary extends StatelessWidget {
                   label: 'Tổng tiền cần thanh toán',
                   value: state.finalAmount != null
                       ? CurrencyFormatter.format(state.finalAmount!)
-                      : 'Chưa có giá vé',
+                      : (state.cargo.enabled
+                            ? 'Xác định khi tạo đơn'
+                            : 'Chưa có giá vé'),
                   valueColor: DiscoveryColors.secondary,
                   isTotal: true,
                 ),
@@ -1059,7 +1095,7 @@ class Step5TripSummary extends StatelessWidget {
           children: [
             Expanded(child: labelWidget),
             const SizedBox(width: 8),
-            valueWidget,
+            Flexible(child: valueWidget),
           ],
         );
       },

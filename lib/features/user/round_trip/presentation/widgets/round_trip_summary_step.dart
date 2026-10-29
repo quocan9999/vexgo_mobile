@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
+import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/presentation/widgets/booking_cargo_section_card.dart';
 import 'package:vexgo_app/features/user/round_trip/round_trip_request.dart';
 
 /// Unified review & summary step for both round-trip legs.
@@ -20,6 +22,7 @@ class RoundTripSummaryStep extends StatefulWidget {
   final ValueChanged<String> onApplyInboundVoucher;
   final VoidCallback onRemoveInboundVoucher;
   final ValueChanged<TripLeg>? onEditLeg;
+  final void Function(TripLeg leg, BookingFlowEvent event)? onDispatchCargo;
   final VoidCallback onSubmit;
   final VoidCallback onBack;
 
@@ -36,6 +39,7 @@ class RoundTripSummaryStep extends StatefulWidget {
     required this.onApplyInboundVoucher,
     required this.onRemoveInboundVoucher,
     this.onEditLeg,
+    this.onDispatchCargo,
     required this.onSubmit,
     required this.onBack,
   });
@@ -57,21 +61,39 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
     super.dispose();
   }
 
+  String _formatLegTotalSummary(BookingFlowState s) {
+    final confirmedTotal = s.checkoutBooking?.totalAmount ?? s.finalAmount;
+    if (confirmedTotal != null) {
+      return CurrencyFormatter.format(confirmedTotal);
+    }
+    if (s.cargo.enabled) {
+      final ticketAmt = s.ticketFinalAmount;
+      if (ticketAmt != null) {
+        return '${CurrencyFormatter.format(ticketAmt)} + phí gửi hàng';
+      }
+      return 'Phí gửi hàng được xác định khi tạo đơn';
+    }
+    return s.quoteLoading ? 'Đang xác minh giá...' : 'Chưa có giá vé';
+  }
+
   @override
   Widget build(BuildContext context) {
     final out = widget.outbound;
     final back = widget.inbound;
     final outReady =
         out.pendingBookingId != null ||
-        (out.hasUsableQuote && !out.quoteLoading);
+        (out.hasUsableQuote && !out.quoteLoading && out.cargo.isValid);
     final backReady =
         back.pendingBookingId != null ||
-        (back.hasUsableQuote && !back.quoteLoading);
+        (back.hasUsableQuote && !back.quoteLoading && back.cargo.isValid);
+    final hasCargoPendingPrice =
+        (out.pendingBookingId == null && out.cargo.enabled) ||
+        (back.pendingBookingId == null && back.cargo.enabled);
     final canSubmit =
         !widget.busy &&
         !out.bookingOutcomeUnknown &&
         !back.bookingOutcomeUnknown &&
-        widget.totalAmount != null &&
+        (widget.totalAmount != null || hasCargoPendingPrice) &&
         outReady &&
         backReady;
     final effectiveError =
@@ -231,12 +253,12 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                 const SizedBox(height: 12),
                 _buildPriceRow(
                   'Lượt đi (${out.selectedSeats.length} vé)',
-                  CurrencyFormatter.format(out.finalAmount ?? 0),
+                  _formatLegTotalSummary(out),
                 ),
                 const SizedBox(height: 6),
                 _buildPriceRow(
                   'Lượt về (${back.selectedSeats.length} vé)',
-                  CurrencyFormatter.format(back.finalAmount ?? 0),
+                  _formatLegTotalSummary(back),
                 ),
                 const Divider(height: 20, color: DiscoveryColors.neutral200),
                 Wrap(
@@ -254,6 +276,8 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                     Text(
                       widget.totalAmount != null
                           ? CurrencyFormatter.format(widget.totalAmount!)
+                          : hasCargoPendingPrice
+                          ? 'Xác định khi tạo đơn'
                           : 'Đang xác minh giá...',
                       style: DiscoveryTextStyles.titleMedium.copyWith(
                         fontWeight: FontWeight.w800,
@@ -262,6 +286,16 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                     ),
                   ],
                 ),
+                if (hasCargoPendingPrice) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Phí gửi hàng được xác định khi tạo đơn. Tổng thanh toán mỗi chiều sẽ được máy chủ trả về khi tạo đơn.',
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      color: DiscoveryColors.secondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 4),
                 Text(
                   'Lưu ý: Hai đơn hàng sẽ được tạo tuần tự và thanh toán riêng từng chiều.',
@@ -537,25 +571,88 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
           ],
 
           const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  'Giá vé chặng',
-                  style: DiscoveryTextStyles.bodySmall,
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 2,
+              children: [
+                Text('Giá vé chặng', style: DiscoveryTextStyles.bodySmall),
+                Text(
+                  (state.checkoutBooking?.ticketSubtotal ??
+                              state.ticketFinalAmount ??
+                              state.finalAmount) !=
+                          null
+                      ? CurrencyFormatter.format(
+                          state.checkoutBooking?.ticketSubtotal ??
+                              state.ticketFinalAmount ??
+                              state.finalAmount,
+                        )
+                      : 'Đang xác minh giá',
+                  style: DiscoveryTextStyles.titleSmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: DiscoveryColors.secondary,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                CurrencyFormatter.format(state.finalAmount ?? 0),
-                style: DiscoveryTextStyles.titleSmall.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: DiscoveryColors.secondary,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
+          if (BookingCargoSummaryBox.hasCargo(state: state)) ...[
+            const SizedBox(height: 6),
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 2,
+                children: [
+                  Text('Phí gửi hàng', style: DiscoveryTextStyles.bodySmall),
+                  Text(
+                    state.checkoutBooking?.shippingFee != null
+                        ? CurrencyFormatter.format(
+                            state.checkoutBooking!.shippingFee!,
+                          )
+                        : 'Phí gửi hàng được xác định khi tạo đơn',
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: state.checkoutBooking?.shippingFee != null
+                          ? DiscoveryColors.neutral900
+                          : DiscoveryColors.secondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (widget.onDispatchCargo != null) ...[
+            const SizedBox(height: 12),
+            BookingCargoSectionCard(
+              cargo: state.cargo,
+              locked: state.isCheckoutLocked || widget.busy,
+              scopeKey: leg.name,
+              title: 'Gửi hàng kèm vé',
+              legBadge: leg == TripLeg.outbound ? 'Lượt đi' : 'Lượt về',
+              onToggleEnabled: (enabled) => widget.onDispatchCargo!(
+                leg,
+                SetBookingCargoEnabledEvent(enabled),
+              ),
+              onRefresh: () => widget.onDispatchCargo!(
+                leg,
+                const RefreshBookingCargoEvent(),
+              ),
+              onUpdateDraft: (draft) =>
+                  widget.onDispatchCargo!(leg, UpdateBookingCargoEvent(draft)),
+            ),
+          ] else if (BookingCargoSummaryBox.hasCargo(state: state)) ...[
+            const SizedBox(height: 10),
+            BookingCargoSummaryBox(
+              state: state,
+              scopeKey: 'summary-${leg.name}',
+            ),
+          ],
         ],
       ),
     );

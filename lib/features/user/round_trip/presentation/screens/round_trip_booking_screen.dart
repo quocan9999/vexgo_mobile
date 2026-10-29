@@ -5,6 +5,7 @@ import 'package:vexgo_app/app/routes.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/data/repositories/booking_repository.dart';
+import 'package:vexgo_app/data/repositories/cargo_repository.dart';
 import 'package:vexgo_app/data/repositories/seat_repository.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
@@ -113,6 +114,7 @@ class RoundTripBookingScreen extends StatelessWidget {
                   inbound: selection!.inbound,
                   seatRepository: context.read<SeatRepository>(),
                   bookingRepository: context.read<BookingRepository>(),
+                  cargoRepository: context.read<CargoRepository?>(),
                 );
                 // Hydrate user info from AuthBloc if logged in
                 final auth = context.read<AuthBloc?>()?.state;
@@ -433,6 +435,7 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
           cubit.dispatch(leg, GoToStepEvent(BookingStep.seatSelection.index));
           setState(() => _activeLeg = leg);
         },
+        onDispatchCargo: (leg, event) => cubit.dispatch(leg, event),
         onSubmit: () => _handleProceedToPayment(cubit),
         onBack: () {
           if (state.outbound.pendingBookingId == null) {
@@ -461,8 +464,14 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
         initialPhone: state.outbound.passengerPhone,
         initialEmail: state.outbound.passengerEmail,
         initialNote: state.outbound.passengerNote,
+        outboundState: state.outbound,
+        inboundState: state.inbound,
+        onDispatchCargo: (leg, event) => cubit.dispatch(leg, event),
         isValid:
-            state.outbound.isPassengerValid && state.inbound.isPassengerValid,
+            state.outbound.isPassengerValid &&
+            state.inbound.isPassengerValid &&
+            state.outbound.cargo.isValid &&
+            state.inbound.cargo.isValid,
         busy: state.busy,
         onUpdate: (event) => cubit.updatePassenger(event),
         onNext: () {

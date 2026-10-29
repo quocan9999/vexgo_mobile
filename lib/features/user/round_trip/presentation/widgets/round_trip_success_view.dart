@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/presentation/widgets/booking_cargo_section_card.dart';
 import 'package:vexgo_app/features/user/round_trip/round_trip_request.dart';
 
 /// Success screen displayed only when both legs are completely confirmed and tickets hydrated.
@@ -81,6 +82,8 @@ class RoundTripSuccessView extends StatelessWidget {
                     'Lượt đi: ${request.origin.name} → ${request.destination.name}',
                 tickets: outTickets,
                 operatorName: outbound.trip?.operatorName ?? 'Nhà xe',
+                state: outbound,
+                scopeKey: 'outbound-success',
               ),
 
               const SizedBox(height: 16),
@@ -91,6 +94,8 @@ class RoundTripSuccessView extends StatelessWidget {
                     'Lượt về: ${request.destination.name} → ${request.origin.name}',
                 tickets: inTickets,
                 operatorName: inbound.trip?.operatorName ?? 'Nhà xe',
+                state: inbound,
+                scopeKey: 'inbound-success',
               ),
 
               const SizedBox(height: 28),
@@ -148,6 +153,8 @@ class RoundTripSuccessView extends StatelessWidget {
     required String title,
     required List<TicketModel> tickets,
     required String operatorName,
+    required BookingFlowState state,
+    required String scopeKey,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -220,6 +227,17 @@ class RoundTripSuccessView extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ],
+          if (BookingCargoSummaryBox.hasCargo(
+            state: state,
+            booking: state.checkoutBooking,
+          )) ...[
+            const SizedBox(height: 10),
+            BookingCargoSummaryBox(
+              state: state,
+              booking: state.checkoutBooking,
+              scopeKey: scopeKey,
             ),
           ],
         ],

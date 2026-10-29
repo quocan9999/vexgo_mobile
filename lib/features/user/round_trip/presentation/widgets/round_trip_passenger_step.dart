@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
+import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/presentation/widgets/booking_cargo_section_card.dart';
+import 'package:vexgo_app/features/user/round_trip/round_trip_request.dart';
 
 /// Unified passenger info input form for round-trip booking.
 /// Dispatches updates to both outbound and inbound flows via coordinator.
@@ -9,6 +12,9 @@ class RoundTripPassengerStep extends StatefulWidget {
   final String initialPhone;
   final String initialEmail;
   final String initialNote;
+  final BookingFlowState? outboundState;
+  final BookingFlowState? inboundState;
+  final void Function(TripLeg leg, BookingFlowEvent event)? onDispatchCargo;
   final bool isValid;
   final bool busy;
   final bool readOnly;
@@ -23,6 +29,9 @@ class RoundTripPassengerStep extends StatefulWidget {
     required this.initialPhone,
     required this.initialEmail,
     required this.initialNote,
+    this.outboundState,
+    this.inboundState,
+    this.onDispatchCargo,
     required this.isValid,
     required this.busy,
     this.readOnly = false,
@@ -213,6 +222,51 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
               ],
             ),
           ),
+
+          if (widget.outboundState != null &&
+              widget.inboundState != null &&
+              widget.onDispatchCargo != null) ...[
+            const SizedBox(height: 16),
+            BookingCargoSectionCard(
+              cargo: widget.outboundState!.cargo,
+              locked: widget.outboundState!.isCheckoutLocked,
+              scopeKey: 'outbound',
+              title: 'Gửi hàng kèm vé',
+              legBadge: 'Lượt đi',
+              onToggleEnabled: (enabled) => widget.onDispatchCargo!(
+                TripLeg.outbound,
+                SetBookingCargoEnabledEvent(enabled),
+              ),
+              onRefresh: () => widget.onDispatchCargo!(
+                TripLeg.outbound,
+                const RefreshBookingCargoEvent(),
+              ),
+              onUpdateDraft: (draft) => widget.onDispatchCargo!(
+                TripLeg.outbound,
+                UpdateBookingCargoEvent(draft),
+              ),
+            ),
+            const SizedBox(height: 14),
+            BookingCargoSectionCard(
+              cargo: widget.inboundState!.cargo,
+              locked: widget.inboundState!.isCheckoutLocked,
+              scopeKey: 'inbound',
+              title: 'Gửi hàng kèm vé',
+              legBadge: 'Lượt về',
+              onToggleEnabled: (enabled) => widget.onDispatchCargo!(
+                TripLeg.inbound,
+                SetBookingCargoEnabledEvent(enabled),
+              ),
+              onRefresh: () => widget.onDispatchCargo!(
+                TripLeg.inbound,
+                const RefreshBookingCargoEvent(),
+              ),
+              onUpdateDraft: (draft) => widget.onDispatchCargo!(
+                TripLeg.inbound,
+                UpdateBookingCargoEvent(draft),
+              ),
+            ),
+          ],
 
           const SizedBox(height: 24),
 
