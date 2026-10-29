@@ -5,6 +5,7 @@ import '../core/network/api_config.dart';
 import '../core/theme/app_theme.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/booking_repository.dart';
+import '../data/repositories/booking_receipt_repository.dart';
 import '../data/repositories/notification_repository.dart';
 import '../data/repositories/seat_repository.dart';
 import '../data/repositories/trip_repository.dart';
@@ -13,6 +14,9 @@ import '../features/user/notification/bloc/notification_bloc.dart';
 import '../features/user/profile/bloc/auth_bloc.dart';
 import '../features/user/profile/bloc/auth_event.dart';
 import '../features/user/profile/bloc/auth_state.dart';
+import '../core/network/support_chat_socket.dart';
+import '../data/repositories/support_chat_repository.dart';
+import '../features/user/support_chat/bloc/support_chat_cubit.dart';
 import 'routes.dart';
 
 class VexGoApp extends StatelessWidget {
@@ -24,6 +28,9 @@ class VexGoApp extends StatelessWidget {
 
     return MultiRepositoryProvider(
       providers: [
+        RepositoryProvider<BookingReceiptRepository>(
+          create: (_) => BookingReceiptRepository.forCurrentMode(),
+        ),
         RepositoryProvider<TripRepository>(
           create: (context) =>
               isDemo ? MockTripRepository() : RealTripRepository(),
@@ -48,6 +55,12 @@ class VexGoApp extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider<SupportChatCubit>(
+            create: (_) => SupportChatCubit(
+              repository: RealSupportChatRepository(),
+              socket: SupportChatSocket(),
+            ),
+          ),
           BlocProvider<MyTicketsBloc>(
             create: (context) => MyTicketsBloc(
               bookingRepository: context.read<BookingRepository>(),
@@ -103,6 +116,7 @@ class _SessionSynchronizationState extends State<_SessionSynchronization> {
         ? state.user!.taiKhoanId.toString()
         : null;
     context.read<MyTicketsBloc>().setSession(key);
+    context.read<SupportChatCubit>().setSession(key);
     context.read<NotificationBloc>().setSession(key);
     if (_previousSession != null && key != _previousSession) {
       AppRoutes.router.go(AppRoutes.home);

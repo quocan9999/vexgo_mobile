@@ -43,6 +43,10 @@ class CheckoutServer {
   bool wrongTicketBooking = false;
   bool unpaidTicket = false;
   Completer<void>? holdGate;
+  Completer<void>? bookingGate;
+  Completer<void>? paymentGate;
+  Completer<void>? bookingReadGate;
+  Completer<void>? ticketReadGate;
   int bookingPosts = 0;
   int paymentPosts = 0;
   int statusGets = 0;
@@ -141,6 +145,7 @@ class CheckoutServer {
       data = {'released': true};
     } else if (path == '/bookings' && request.method == 'POST') {
       bookingPosts++;
+      await bookingGate?.future;
       selected = (body['seatIds'] as List).cast<int>();
       if (bookingResponseLost) {
         throw const SocketException('Response lost after commit');
@@ -159,6 +164,7 @@ class CheckoutServer {
       };
     } else if (path == '/payments' && request.method == 'POST') {
       paymentPosts++;
+      await paymentGate?.future;
       if (paymentResponseLost) {
         throw const SocketException('Payment response lost');
       }
@@ -185,6 +191,7 @@ class CheckoutServer {
         'status': paymentState,
       };
     } else if (path == '/bookings/42') {
+      await bookingReadGate?.future;
       data = {
         'bookingId': 42,
         'bookingCode': 'VXG-PDV-42',
@@ -207,6 +214,7 @@ class CheckoutServer {
       };
     } else if (path.startsWith('/tickets/')) {
       ticketGets++;
+      await ticketReadGate?.future;
       if (ticketResponseLost) {
         throw const SocketException('Ticket response lost');
       }
@@ -331,6 +339,146 @@ void main() {
     TokenStorage.resetStorageAdapter();
     ApiConfig.isDemoMode = false;
   });
+
+  for (final duringTicket in [false, true]) {
+    test(
+      'session change during ${duringTicket ? 'ticket' : 'booking'} hydration stops subsequent ticket reads',
+      () async {
+        final server = CheckoutServer()..selected = [1, 2];
+        final gate = Completer<void>();
+        if (duringTicket) {
+          server.ticketReadGate = gate;
+        } else {
+          server.bookingReadGate = gate;
+        }
+        var currentSession = true;
+        final operation = resolvePaidBookingTickets(
+          server.real,
+          42,
+          isCurrentSession: () => currentSession,
+        );
+        final stopped = expectLater(operation, throwsStateError);
+        await Future<void>.delayed(Duration.zero);
+        expect(server.ticketGets, duringTicket ? 1 : 0);
+        currentSession = false;
+        gate.complete();
+        await stopped;
+        expect(server.ticketGets, duringTicket ? 1 : 0);
+      },
+    );
+  }
+
+  test(
+    'session change releases a late hold and blocks queued checkout',
+    () async {
+      final server = CheckoutServer()..holdGate = Completer<void>();
+      final bloc = BookingFlowBloc(
+        seatRepository: server.seats,
+        bookingRepository: server.real,
+        now: () => server.now,
+      );
+      await dispatch(
+        bloc,
+        InitBookingFlowEvent(trip: trip, date: server.now),
+        (s) => s.status == BookingFlowStatus.loaded,
+      );
+      await dispatch(
+        bloc,
+        ToggleSeatEvent(bloc.state.seatLayout!.lowerFloor.first),
+        (s) => s.selectedSeats.isNotEmpty,
+      );
+      bloc.add(const NextStepEvent());
+      await Future<void>.delayed(Duration.zero);
+      expect(server.holdPosts, 1);
+      bloc.invalidateSession();
+      server.holdGate!.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      bloc.add(const NextStepEvent());
+      bloc.add(const ConfirmPaymentEvent());
+      await Future<void>.delayed(Duration.zero);
+      expect(server.releases, 1);
+      expect(bloc.state.seatHold, isNull);
+      expect(bloc.state.selectedSeats, isEmpty);
+      expect(bloc.state.step, BookingStep.seatSelection);
+      expect(server.bookingPosts, 0);
+      await bloc.close();
+    },
+  );
+
+  test(
+    'session change preserves late booking ID without starting payment',
+    () async {
+      final server = CheckoutServer()..bookingGate = Completer<void>();
+      final bloc = await ready(server);
+      addTearDown(bloc.close);
+      await dispatch(
+        bloc,
+        const ConfirmPaymentEvent(),
+        (s) => s.bookingOutcomeUnknown,
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(server.bookingPosts, 1);
+      bloc.invalidateSession();
+      final recovered = bloc.stream.firstWhere((s) => s.pendingBookingId == 42);
+      server.bookingGate!.complete();
+      await recovered.timeout(const Duration(seconds: 3));
+      bloc.add(const ConfirmPaymentEvent());
+      await Future<void>.delayed(Duration.zero);
+      expect(bloc.state.bookingOutcomeUnknown, isFalse);
+      expect(bloc.state.passengerPhone, isEmpty);
+      expect(server.bookingPosts, 1);
+      expect(server.paymentPosts, 0);
+      expect(server.releases, 0);
+    },
+  );
+
+  test(
+    'session change preserves late payment ID without polling or replay',
+    () async {
+      final server = CheckoutServer()..paymentGate = Completer<void>();
+      final bloc = await ready(server);
+      addTearDown(bloc.close);
+      await dispatch(
+        bloc,
+        const ConfirmPaymentEvent(),
+        (s) => s.pendingBookingId == 42,
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(server.paymentPosts, 1);
+      bloc.invalidateSession();
+      final recovered = bloc.stream.firstWhere((s) => s.pendingPaymentId == 9);
+      server.paymentGate!.complete();
+      await recovered.timeout(const Duration(seconds: 3));
+      bloc.add(const ConfirmPaymentEvent());
+      await Future<void>.delayed(Duration.zero);
+      expect(bloc.state.pendingBookingId, 42);
+      expect(server.paymentPosts, 1);
+      expect(server.statusGets, 0);
+      expect(server.ticketGets, 0);
+    },
+  );
+
+  test(
+    'session change retains unknown booking outcome and never replays POST',
+    () async {
+      final server = CheckoutServer()..bookingResponseLost = true;
+      final bloc = await ready(server);
+      addTearDown(bloc.close);
+      await dispatch(
+        bloc,
+        const ConfirmPaymentEvent(),
+        (s) => s.status == BookingFlowStatus.failure,
+      );
+      expect(bloc.state.bookingOutcomeUnknown, isTrue);
+      bloc.invalidateSession();
+      bloc.add(const ConfirmPaymentEvent());
+      await Future<void>.delayed(Duration.zero);
+      expect(bloc.state.bookingOutcomeUnknown, isTrue);
+      expect(bloc.state.pendingBookingId, isNull);
+      expect(server.bookingPosts, 1);
+      expect(server.releases, 0);
+    },
+  );
 
   test(
     'real checkout PENDING retains create URLs, polls without duplicate POST, hydrates every full ticket',
@@ -579,28 +727,96 @@ void main() {
     },
   );
 
-  test('rejected seventh seat keeps valid hold and deadline', () async {
-    final server = CheckoutServer();
-    final bloc = await ready(server, seatCount: 6);
-    addTearDown(bloc.close);
-    await dispatch(
-      bloc,
-      const PreviousStepEvent(),
-      (s) => s.step == BookingStep.seatSelection,
+  test(
+    'rejected sixth seat keeps five selections, valid hold and deadline',
+    () async {
+      final server = CheckoutServer();
+      final bloc = await ready(server, seatCount: 5);
+      addTearDown(bloc.close);
+      final originalHold = bloc.state.seatHold;
+      final originalIds = bloc.state.selectedSeats.map((s) => s.id).toList();
+      await dispatch(
+        bloc,
+        const PreviousStepEvent(),
+        (s) => s.step == BookingStep.seatSelection,
+      );
+      await dispatch(
+        bloc,
+        ToggleSeatEvent(bloc.state.seatLayout!.lowerFloor[5]),
+        (s) => s.errorMessage != null,
+      );
+      expect(server.releases, 0);
+      expect(server.holdPosts, 1);
+      expect(bloc.state.seatHold, originalHold);
+      expect(bloc.state.selectedSeats.map((s) => s.id), originalIds);
+      expect(bloc.state.errorMessage, contains('5 chỗ'));
+      server.now = server.now.add(const Duration(minutes: 2));
+      await dispatch(
+        bloc,
+        const TickCountdownEvent(),
+        (s) => s.countdownSeconds == 480,
+      );
+    },
+  );
+
+  test(
+    'sixth seat is rejected locally before any hold POST; five can proceed',
+    () async {
+      final server = CheckoutServer();
+      final bloc = BookingFlowBloc(
+        seatRepository: server.seats,
+        bookingRepository: server.real,
+        now: () => server.now,
+      );
+      addTearDown(bloc.close);
+      await dispatch(
+        bloc,
+        InitBookingFlowEvent(trip: trip, date: DateTime(2026, 11, 1)),
+        (s) => s.status == BookingFlowStatus.loaded,
+      );
+      for (var i = 0; i < 5; i++) {
+        await dispatch(
+          bloc,
+          ToggleSeatEvent(bloc.state.seatLayout!.lowerFloor[i]),
+          (s) => s.selectedSeats.length == i + 1,
+        );
+      }
+      final originalIds = bloc.state.selectedSeats.map((s) => s.id).toList();
+      final originalTotal = bloc.state.seatsTotalAmount;
+      await dispatch(
+        bloc,
+        ToggleSeatEvent(bloc.state.seatLayout!.lowerFloor[5]),
+        (s) => s.errorMessage != null,
+      );
+      expect(bloc.state.selectedSeats.map((s) => s.id), originalIds);
+      expect(bloc.state.seatsTotalAmount, originalTotal);
+      expect(server.holdPosts, 0);
+      expect(server.releases, 0);
+      expect(bloc.state.canProceed, isTrue);
+      await dispatch(bloc, const NextStepEvent(), (s) => s.seatHold != null);
+      expect(server.holdPosts, 1);
+      expect(server.selected, originalIds.map(int.parse));
+    },
+  );
+
+  test('over-limit seat state cannot enable checkout', () {
+    final seats = List.generate(
+      6,
+      (i) => SeatModel(
+        id: '${i + 1}',
+        name: 'A${i + 1}',
+        floor: 1,
+        status: SeatStatus.available,
+        price: 200000,
+        row: i ~/ 3 + 1,
+        col: i % 3 + 1,
+      ),
     );
-    await dispatch(
-      bloc,
-      ToggleSeatEvent(bloc.state.seatLayout!.lowerFloor[6]),
-      (s) => s.errorMessage != null,
+    expect(
+      BookingFlowState(selectedSeats: seats.take(5).toList()).canProceed,
+      isTrue,
     );
-    expect(server.releases, 0);
-    expect(bloc.state.seatHold, isNotNull);
-    server.now = server.now.add(const Duration(minutes: 2));
-    await dispatch(
-      bloc,
-      const TickCountdownEvent(),
-      (s) => s.countdownSeconds == 480,
-    );
+    expect(BookingFlowState(selectedSeats: seats).canProceed, isFalse);
   });
 
   test(

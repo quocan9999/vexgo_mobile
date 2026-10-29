@@ -1,8 +1,7 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 
 class DateSelectorStrip extends StatelessWidget {
   final DateTime selectedDate;
@@ -23,10 +22,10 @@ class DateSelectorStrip extends StatelessWidget {
     final days = List.generate(14, (i) => today.add(Duration(days: i)));
 
     return Container(
-      height: 76,
+      height: 48 + MediaQuery.textScalerOf(context).scale(30),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: AppColors.neutral200)),
+        border: Border(bottom: BorderSide(color: DiscoveryColors.neutral200)),
       ),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
@@ -72,59 +71,74 @@ class DateSelectorStrip extends StatelessWidget {
             dateTitle = '$weekdayName, $dayMonth';
           }
 
-          return InkWell(
-            onTap: () => onDateSelected(date),
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 82,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.neutral50,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.neutral200,
-                  width: isSelected ? 1.5 : 1,
+          return Semantics(
+            button: true,
+            selected: isSelected,
+            label: '$dateTitle, giá $priceK',
+            child: InkWell(
+              onTap: () => onDateSelected(date),
+              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 64 + MediaQuery.textScalerOf(context).scale(22),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? DiscoveryColors.primary
+                      : DiscoveryColors.neutral50,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                  border: Border.all(
+                    color: isSelected
+                        ? DiscoveryColors.primary
+                        : DiscoveryColors.neutral200,
+                    width: isSelected ? 1.5 : 1,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: DiscoveryColors.primary.withValues(
+                              alpha: 0.25,
+                            ),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.25),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    dateTitle,
-                    style: AppTextStyles.caption.copyWith(
-                      color: isSelected ? Colors.white : AppColors.neutral700,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      fontSize: 11,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      dateTitle,
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: isSelected
+                            ? Colors.white
+                            : DiscoveryColors.neutral700,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    priceK,
-                    style: AppTextStyles.caption.copyWith(
-                      color: isSelected ? Colors.white : AppColors.secondary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
+                    const SizedBox(height: 3),
+                    Text(
+                      priceK,
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: isSelected
+                            ? Colors.white
+                            : DiscoveryColors.secondary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
                     ),
-                    maxLines: 1,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

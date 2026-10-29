@@ -35,7 +35,11 @@ class SeatRemoteDataSourceImpl implements SeatRemoteDataSource {
     required List<int> seatIds,
   }) async {
     final body = {'tripId': tripId, 'seatIds': seatIds};
-    final res = await client.post(ApiConfig.seatHolds, body: body);
+    final res = await client.post(
+      ApiConfig.seatHolds,
+      body: body,
+      optionalAuth: true,
+    );
     if (res is Map<String, dynamic>) {
       final data = res['data'] ?? res;
       return SeatHoldModel.fromJson(data as Map<String, dynamic>);

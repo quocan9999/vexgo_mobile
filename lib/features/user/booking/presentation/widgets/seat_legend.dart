@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
-import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 
 class SeatLegend extends StatelessWidget {
   const SeatLegend({super.key});
@@ -9,83 +7,70 @@ class SeatLegend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.base,
-        vertical: AppDimensions.sm,
-      ),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.neutral50,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        border: Border.all(color: AppColors.neutral200),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: DiscoveryColors.neutral200),
       ),
-      child: Center(
-        child: Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: AppDimensions.md,
-          runSpacing: AppDimensions.xs,
-          children: [
-            _buildItem(
-              color: Colors.white,
-              borderColor: AppColors.neutral400,
-              label: 'Ghế trống',
-            ),
-            _buildItem(
-              color: AppColors.primary,
-              borderColor: AppColors.primary,
-              label: 'Đang chọn',
-            ),
-            _buildItem(
-              color: AppColors.warning.withValues(alpha: 0.2),
-              borderColor: AppColors.warning,
-              label: 'Đang giữ',
-            ),
-            _buildItem(
-              color: AppColors.neutral200,
-              borderColor: AppColors.neutral300,
-              label: 'Đã bán',
-              hasLock: true,
-            ),
-          ],
-        ),
+      child: Wrap(
+        alignment: WrapAlignment.spaceEvenly,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12,
+        runSpacing: 8,
+        children: [
+          _item('Trống', Colors.white, DiscoveryColors.neutral400),
+          _item(
+            'Đang chọn',
+            DiscoveryColors.primary,
+            DiscoveryColors.primary,
+            Icons.check,
+          ),
+          _item(
+            'Đang giữ',
+            const Color(0xFFFEF3C7),
+            const Color(0xFFB45309),
+            Icons.hourglass_bottom,
+          ),
+          _item(
+            'Đã đặt',
+            DiscoveryColors.neutral200,
+            DiscoveryColors.neutral500,
+            Icons.close,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildItem({
-    required Color color,
-    required Color borderColor,
-    required String label,
-    bool hasLock = false,
-  }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 22,
-          height: 22,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: borderColor, width: 1.5),
-          ),
-          child: hasLock
-              ? const Icon(
-                  Icons.close_rounded,
-                  size: 14,
-                  color: AppColors.neutral500,
-                )
-              : null,
+  Widget _item(String text, Color fill, Color stroke, [IconData? icon]) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 18,
+        height: 18,
+        decoration: BoxDecoration(
+          color: fill,
+          border: Border.all(color: stroke, width: 1.2),
+          borderRadius: BorderRadius.circular(4),
         ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.neutral700,
-          ),
+        child: icon == null
+            ? null
+            : Icon(
+                icon,
+                size: 12,
+                color: fill == DiscoveryColors.primary ? Colors.white : stroke,
+              ),
+      ),
+      const SizedBox(width: 6),
+      Text(
+        text,
+        style: DiscoveryTextStyles.caption.copyWith(
+          color: DiscoveryColors.neutral700,
+          fontWeight: FontWeight.w600,
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }

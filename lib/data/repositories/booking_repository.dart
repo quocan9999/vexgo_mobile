@@ -41,9 +41,18 @@ class CheckoutProgressException implements Exception {
 /// the full ticket endpoint, including settlement and cancellation information.
 Future<List<TicketModel>> resolvePaidBookingTickets(
   BookingRepository repository,
-  int bookingId,
-) async {
+  int bookingId, {
+  bool Function()? isCurrentSession,
+}) async {
+  void checkSession() {
+    if (isCurrentSession != null && !isCurrentSession()) {
+      throw StateError('Phiên đặt vé đã thay đổi.');
+    }
+  }
+
+  checkSession();
   final booking = await repository.getBookingById(bookingId);
+  checkSession();
   if (booking == null ||
       booking.bookingId != bookingId ||
       !booking.isPaid ||
@@ -67,6 +76,7 @@ Future<List<TicketModel>> resolvePaidBookingTickets(
       (source is BookingRemoteDataSourceImpl &&
           source.isGuestCheckout(bookingId)) ||
       !await TokenStorage.hasAccessToken();
+  checkSession();
   for (final summary in booking.tickets) {
     if ((int.tryParse(summary.id) ?? 0) <= 0 || !ids.add(summary.id)) {
       throw StateError('Thông tin mã vé từ máy chủ không hợp lệ.');
@@ -77,6 +87,7 @@ Future<List<TicketModel>> resolvePaidBookingTickets(
             phoneNumber: booking.contact.phone,
           )
         : await repository.getTicketById(summary.id);
+    checkSession();
     if (ticket == null ||
         ticket.id != summary.id ||
         ticket.ticketCode != summary.ticketCode ||

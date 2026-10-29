@@ -47,6 +47,11 @@ class FailingReviewRemoteDataSource implements ReviewRemoteDataSource {
 }
 
 class QueuedRefundBookingRepository extends MockBookingRepository {
+  final TicketModel ticket;
+  QueuedRefundBookingRepository(this.ticket);
+  @override
+  Future<TicketModel?> getTicketById(String id) async =>
+      id == ticket.id ? ticket : null;
   @override
   Future<Map<String, dynamic>> cancelTicket({
     required String ticketCode,
@@ -54,7 +59,12 @@ class QueuedRefundBookingRepository extends MockBookingRepository {
     String? reason,
     required double expectedCancelFeeRate,
   }) async {
-    return {'success': true, 'message': 'Tiếp nhận yêu cầu hủy vé'};
+    return {
+      'ticketId': ticket.id,
+      'ticketCode': ticketCode,
+      'status': 'HUY',
+      'message': 'Yêu cầu hoàn tiền đang xử lý',
+    };
   }
 }
 
@@ -945,7 +955,7 @@ void main() {
       'Finding R: MyTicketsBloc cancelTicket with absent refundAmount reports queued processing message',
       () async {
         final sampleTicket = TicketModel(
-          id: 'TKT_CANCEL_TEST',
+          id: '901',
           ticketCode: 'VXG-CAN-01',
           status: TicketStatus.upcoming,
           bookingDate: '10/10/2026 10:00',
@@ -976,14 +986,25 @@ void main() {
           ),
         );
 
-        final queuedRepo = QueuedRefundBookingRepository();
+        final quotedTicket = sampleTicket.copyWith(
+          rawStatus: 'DA_THANH_TOAN',
+          bookingStatus: 'DA_THANH_TOAN',
+          paymentStatus: 'DA_THANH_TOAN',
+          cancellation: const CancellationQuote(
+            eligible: true,
+            cancelFeeRate: 0.1,
+            cancelFee: 25000,
+            refundAmount: 225000,
+          ),
+        );
+        final queuedRepo = QueuedRefundBookingRepository(quotedTicket);
         final bloc = MyTicketsBloc(bookingRepository: queuedRepo);
 
-        bloc.add(AddNewTicketEvent(sampleTicket));
+        bloc.add(AddNewTicketEvent(quotedTicket));
 
         bloc.add(
           const CancelTicketEvent(
-            ticketId: 'TKT_CANCEL_TEST',
+            ticketId: '901',
             reason: 'Bận việc',
             refundAmount: 200000,
           ),

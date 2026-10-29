@@ -10,6 +10,25 @@ class SeatModel extends Equatable {
   final int? price;
   final int row;
   final int col;
+  final String position;
+  final bool hasExplicitCoordinates;
+
+  /// Coordinates of the seat centre from the Customer API (x: 0..1000).
+  final double? x;
+  final double? y;
+
+  /// True even when a legacy seat in the new API has null coordinates.
+  final bool hasApiLayout;
+
+  bool get usesApiLayout => hasApiLayout || (x != null && y != null);
+  bool get hasSpatialCoordinates =>
+      x != null &&
+      y != null &&
+      x!.isFinite &&
+      y!.isFinite &&
+      x! >= 0 &&
+      x! <= 1000 &&
+      y! >= 0;
 
   const SeatModel({
     required this.id,
@@ -19,6 +38,11 @@ class SeatModel extends Equatable {
     this.price,
     required this.row,
     required this.col,
+    this.position = '',
+    this.hasExplicitCoordinates = true,
+    this.x,
+    this.y,
+    this.hasApiLayout = false,
   });
 
   SeatModel copyWith({
@@ -29,6 +53,11 @@ class SeatModel extends Equatable {
     int? price,
     int? row,
     int? col,
+    String? position,
+    bool? hasExplicitCoordinates,
+    double? x,
+    double? y,
+    bool? hasApiLayout,
   }) {
     return SeatModel(
       id: id ?? this.id,
@@ -38,6 +67,12 @@ class SeatModel extends Equatable {
       price: price ?? this.price,
       row: row ?? this.row,
       col: col ?? this.col,
+      position: position ?? this.position,
+      hasExplicitCoordinates:
+          hasExplicitCoordinates ?? this.hasExplicitCoordinates,
+      x: x ?? this.x,
+      y: y ?? this.y,
+      hasApiLayout: hasApiLayout ?? this.hasApiLayout,
     );
   }
 
@@ -112,6 +147,8 @@ class SeatModel extends Equatable {
         (json['row'] as num?)?.toInt() ?? (json['hang'] as num?)?.toInt() ?? 0;
     int col =
         (json['col'] as num?)?.toInt() ?? (json['cot'] as num?)?.toInt() ?? 0;
+    final explicitCoordinates =
+        json['hasExplicitCoordinates'] as bool? ?? (row > 0 && col > 0);
 
     if (row == 0 || col == 0) {
       final seatNum = int.tryParse(name.replaceAll(RegExp(r'[^0-9]'), ''));
@@ -132,6 +169,13 @@ class SeatModel extends Equatable {
       price: effectivePrice,
       row: row,
       col: col,
+      position: positionStr,
+      hasExplicitCoordinates: explicitCoordinates,
+      x: (json['x'] as num?)?.toDouble(),
+      y: (json['y'] as num?)?.toDouble(),
+      hasApiLayout:
+          json['hasApiLayout'] as bool? ??
+          (json.containsKey('x') || json.containsKey('y')),
     );
   }
 
@@ -147,6 +191,9 @@ class SeatModel extends Equatable {
     if (price != null) 'price': price,
     'row': row,
     'col': col,
+    'position': position,
+    'hasExplicitCoordinates': hasExplicitCoordinates,
+    if (usesApiLayout) ...{'x': x, 'y': y, 'hasApiLayout': true},
   };
 
   /// Helper getters
@@ -157,7 +204,20 @@ class SeatModel extends Equatable {
   bool get isSelected => status == SeatStatus.selected;
 
   @override
-  List<Object?> get props => [id, name, floor, status, price, row, col];
+  List<Object?> get props => [
+    id,
+    name,
+    floor,
+    status,
+    price,
+    row,
+    col,
+    position,
+    hasExplicitCoordinates,
+    x,
+    y,
+    hasApiLayout,
+  ];
 }
 
 class SeatLayoutModel extends Equatable {
@@ -165,18 +225,24 @@ class SeatLayoutModel extends Equatable {
   final bool hasTwoFloors;
   final List<SeatModel> lowerFloor;
   final List<SeatModel> upperFloor;
+  final int? columnCount;
+  final int? aisleAfterColumn;
 
   const SeatLayoutModel({
     required this.vehicleType,
     required this.hasTwoFloors,
     required this.lowerFloor,
     required this.upperFloor,
+    this.columnCount,
+    this.aisleAfterColumn,
   });
 
   factory SeatLayoutModel.fromJson(Map<String, dynamic> json) {
     return SeatLayoutModel(
       vehicleType: json['vehicleType'] as String? ?? '',
       hasTwoFloors: json['hasTwoFloors'] as bool? ?? false,
+      columnCount: (json['columnCount'] as num?)?.toInt(),
+      aisleAfterColumn: (json['aisleAfterColumn'] as num?)?.toInt(),
       lowerFloor:
           (json['lowerFloor'] as List<dynamic>?)
               ?.map((item) => SeatModel.fromJson(item as Map<String, dynamic>))
@@ -196,5 +262,7 @@ class SeatLayoutModel extends Equatable {
     hasTwoFloors,
     lowerFloor,
     upperFloor,
+    columnCount,
+    aisleAfterColumn,
   ];
 }

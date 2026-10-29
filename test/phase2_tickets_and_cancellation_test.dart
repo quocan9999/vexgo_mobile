@@ -51,7 +51,14 @@ class FakeTicketRemoteDataSource implements TicketRemoteDataSource {
       'expectedCancelFeeRate': expectedCancelFeeRate,
     };
     if (shouldThrow) throw Exception('Backend reject');
-    return {'success': true, 'refundAmount': 270000, 'cancelFee': 30000};
+    final ticket = mockTickets.firstWhere((t) => t.ticketCode == ticketCode);
+    return {
+      'ticketId': ticket.id,
+      'ticketCode': ticket.ticketCode,
+      'status': 'HUY',
+      'refundAmount': 270000,
+      'cancelFee': 30000,
+    };
   }
 }
 
@@ -64,7 +71,7 @@ void main() {
     late HybridBookingRepository hybridRepo;
 
     final sampleTicket = TicketModel(
-      id: 'TKT_100',
+      id: '100',
       ticketCode: 'VXG-100001',
       status: TicketStatus.upcoming,
       bookingDate: '09/10/2026 10:00',
@@ -148,7 +155,8 @@ void main() {
           expectedCancelFeeRate: 0.1,
         );
 
-        expect(res['success'], isTrue);
+        expect(res['status'], 'HUY');
+        expect(res['ticketCode'], sampleTicket.ticketCode);
         expect(
           fakeRemoteDataSource.lastCancelPayload?['expectedCancelFeeRate'],
           equals(0.1),
@@ -191,7 +199,7 @@ void main() {
         bloc.add(AddNewTicketEvent(sampleTicket));
         bloc.add(
           const CancelTicketEvent(
-            ticketId: 'TKT_100',
+            ticketId: '100',
             reason: 'Bận việc',
             refundAmount: 270000,
           ),

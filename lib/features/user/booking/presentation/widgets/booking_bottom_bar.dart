@@ -163,6 +163,11 @@ class BookingBottomBar extends StatelessWidget {
   }
 
   Widget _buildPassengerBottom() {
+    final isBusy =
+        state.isCheckoutLocked ||
+        state.status == BookingFlowStatus.loading ||
+        state.status == BookingFlowStatus.submitting;
+    final hasActiveHold = state.seatHold != null && state.countdownSeconds > 0;
     return Row(
       children: [
         Expanded(
@@ -170,15 +175,17 @@ class BookingBottomBar extends StatelessWidget {
           child: CustomButton(
             text: 'Quay lại',
             type: ButtonType.outline,
-            onPressed: onBack,
+            onPressed: isBusy ? null : onBack,
           ),
         ),
         const SizedBox(width: AppDimensions.base),
         Expanded(
           flex: 2,
           child: CustomButton(
-            text: 'Xem chuyến đi',
-            onPressed: state.isPassengerValid ? onNext : null,
+            text: 'Tiếp tục',
+            onPressed: (!isBusy && hasActiveHold && state.isPassengerValid)
+                ? onNext
+                : null,
           ),
         ),
       ],

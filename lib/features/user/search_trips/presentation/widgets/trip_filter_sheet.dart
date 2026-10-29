@@ -1,9 +1,7 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
-import 'package:vexgo_app/core/widgets/custom_button.dart';
 import 'package:vexgo_app/features/user/search_trips/data/models/trip_filter_model.dart';
 
 class TripFilterSheet extends StatefulWidget {
@@ -99,7 +97,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.neutral300,
+                color: DiscoveryColors.neutral300,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
               ),
             ),
@@ -117,7 +115,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 Expanded(
                   child: Text(
                     'Bộ lọc tìm kiếm',
-                    style: AppTextStyles.h3.copyWith(
+                    style: DiscoveryTextStyles.h3.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                     maxLines: 1,
@@ -128,8 +126,8 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                   onPressed: _reset,
                   child: Text(
                     'Thiết lập lại',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.secondary,
+                    style: DiscoveryTextStyles.bodyMedium.copyWith(
+                      color: DiscoveryColors.secondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -147,9 +145,9 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 // 1. Giờ xuất bến
                 Text(
                   'GIỜ XUẤT BẾN',
-                  style: AppTextStyles.caption.copyWith(
+                  style: DiscoveryTextStyles.caption.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.neutral500,
+                    color: DiscoveryColors.neutral500,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -162,20 +160,20 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                     return FilterChip(
                       label: Text(slot.label),
                       selected: isSelected,
-                      selectedColor: AppColors.primaryLight,
-                      backgroundColor: AppColors.neutral50,
-                      labelStyle: AppTextStyles.bodySmall.copyWith(
+                      selectedColor: DiscoveryColors.primaryLight,
+                      backgroundColor: DiscoveryColors.neutral50,
+                      labelStyle: DiscoveryTextStyles.bodySmall.copyWith(
                         color: isSelected
-                            ? AppColors.primary
-                            : AppColors.neutral700,
+                            ? DiscoveryColors.primary
+                            : DiscoveryColors.neutral700,
                         fontWeight: isSelected
                             ? FontWeight.w700
                             : FontWeight.w500,
                       ),
                       side: BorderSide(
                         color: isSelected
-                            ? AppColors.primary
-                            : AppColors.neutral200,
+                            ? DiscoveryColors.primary
+                            : DiscoveryColors.neutral200,
                       ),
                       onSelected: (selected) {
                         setState(() {
@@ -201,9 +199,9 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                     Flexible(
                       child: Text(
                         'KHOẢNG GIÁ',
-                        style: AppTextStyles.caption.copyWith(
+                        style: DiscoveryTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.neutral500,
+                          color: DiscoveryColors.neutral500,
                           letterSpacing: 0.5,
                         ),
                         maxLines: 1,
@@ -214,8 +212,8 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                     Flexible(
                       child: Text(
                         '${CurrencyFormatter.format(_priceRange.start.round())} - ${CurrencyFormatter.format(_priceRange.end.round())}',
-                        style: AppTextStyles.titleSmall.copyWith(
-                          color: AppColors.primary,
+                        style: DiscoveryTextStyles.titleSmall.copyWith(
+                          color: DiscoveryColors.primary,
                           fontWeight: FontWeight.w700,
                         ),
                         maxLines: 1,
@@ -230,8 +228,8 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                   min: 100000,
                   max: 500000,
                   divisions: 8,
-                  activeColor: AppColors.primary,
-                  inactiveColor: AppColors.neutral200,
+                  activeColor: DiscoveryColors.primary,
+                  inactiveColor: DiscoveryColors.neutral200,
                   labels: RangeLabels(
                     CurrencyFormatter.formatSimple(_priceRange.start.round()),
                     CurrencyFormatter.formatSimple(_priceRange.end.round()),
@@ -249,9 +247,9 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 if (widget.availableOperators.isNotEmpty) ...[
                   Text(
                     'NHÀ XE',
-                    style: AppTextStyles.caption.copyWith(
+                    style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.neutral500,
+                      color: DiscoveryColors.neutral500,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -261,10 +259,10 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                     return CheckboxListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      activeColor: AppColors.primary,
+                      activeColor: DiscoveryColors.primary,
                       title: Text(
                         operatorName,
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        style: DiscoveryTextStyles.bodyMedium.copyWith(
                           fontWeight: isChecked
                               ? FontWeight.w600
                               : FontWeight.w400,
@@ -291,9 +289,9 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 if (widget.availableVehicleTypes.isNotEmpty) ...[
                   Text(
                     'LOẠI XE',
-                    style: AppTextStyles.caption.copyWith(
+                    style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.neutral500,
+                      color: DiscoveryColors.neutral500,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -303,10 +301,10 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                     return CheckboxListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      activeColor: AppColors.primary,
+                      activeColor: DiscoveryColors.primary,
                       title: Text(
                         vType,
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        style: DiscoveryTextStyles.bodyMedium.copyWith(
                           fontWeight: isChecked
                               ? FontWeight.w600
                               : FontWeight.w400,
@@ -333,9 +331,9 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 if (widget.availableAmenities.isNotEmpty) ...[
                   Text(
                     'TIỆN ÍCH TRÊN XE',
-                    style: AppTextStyles.caption.copyWith(
+                    style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.neutral500,
+                      color: DiscoveryColors.neutral500,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -348,20 +346,20 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                       return FilterChip(
                         label: Text(amenity),
                         selected: isSelected,
-                        selectedColor: AppColors.primaryLight,
-                        backgroundColor: AppColors.neutral50,
-                        labelStyle: AppTextStyles.bodySmall.copyWith(
+                        selectedColor: DiscoveryColors.primaryLight,
+                        backgroundColor: DiscoveryColors.neutral50,
+                        labelStyle: DiscoveryTextStyles.bodySmall.copyWith(
                           color: isSelected
-                              ? AppColors.primary
-                              : AppColors.neutral700,
+                              ? DiscoveryColors.primary
+                              : DiscoveryColors.neutral700,
                           fontWeight: isSelected
                               ? FontWeight.w700
                               : FontWeight.w500,
                         ),
                         side: BorderSide(
                           color: isSelected
-                              ? AppColors.primary
-                              : AppColors.neutral200,
+                              ? DiscoveryColors.primary
+                              : DiscoveryColors.neutral200,
                         ),
                         onSelected: (selected) {
                           setState(() {
@@ -395,7 +393,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
             ),
             child: SafeArea(
               top: false,
-              child: CustomButton(
+              child: DiscoveryButton(
                 text: 'ÁP DỤNG BỘ LỌC',
                 width: double.infinity,
                 type: ButtonType.primary,

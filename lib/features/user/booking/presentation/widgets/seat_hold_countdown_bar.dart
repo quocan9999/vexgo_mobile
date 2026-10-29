@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_dimensions.dart';
 import '../../../../../core/constants/app_text_styles.dart';
+import '../../../../../core/design/discovery_theme.dart';
 
 /// Sticky banner displaying seat hold status and countdown timer per rule-ui-ux.md
 class SeatHoldCountdownBar extends StatelessWidget {
   final int remainingSeconds;
+  final bool compact;
   final List<String> seatCodes;
   final VoidCallback? onTimeout;
 
   const SeatHoldCountdownBar({
     super.key,
     required this.remainingSeconds,
+    this.compact = false,
     this.seatCodes = const [],
     this.onTimeout,
   });
@@ -38,9 +41,9 @@ class SeatHoldCountdownBar extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppDimensions.base,
-        vertical: AppDimensions.sm + 2,
+        vertical: compact ? 6 : AppDimensions.sm + 2,
       ),
       decoration: BoxDecoration(
         color: bgColor,
@@ -57,9 +60,14 @@ class SeatHoldCountdownBar extends StatelessWidget {
           Expanded(
             child: Text.rich(
               TextSpan(
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.neutral800,
-                ),
+                style:
+                    (compact
+                            ? DiscoveryTextStyles.caption
+                            : AppTextStyles.bodySmall)
+                        .copyWith(
+                          color: AppColors.neutral800,
+                          fontWeight: FontWeight.w500,
+                        ),
                 children: [
                   TextSpan(
                     text: isUrgent
@@ -70,9 +78,10 @@ class SeatHoldCountdownBar extends StatelessWidget {
                   TextSpan(
                     text: formattedTime,
                     style: TextStyle(
-                      fontWeight: FontWeight.w700,
                       color: primaryColor,
-                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w700,
+                      fontFamily: compact ? 'VexGoJakarta' : 'monospace',
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ],

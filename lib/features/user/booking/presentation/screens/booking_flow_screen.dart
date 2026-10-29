@@ -10,6 +10,8 @@ import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
 import 'package:vexgo_app/features/user/profile/bloc/auth_bloc.dart';
+import 'package:vexgo_app/features/user/profile/bloc/auth_state.dart';
+import 'package:vexgo_app/features/user/search_trips/presentation/widgets/trip_detail_sheet.dart';
 import '../steps/step_1_seat_selection.dart';
 import '../steps/step_2_pickup_point.dart';
 import '../steps/step_3_dropoff_point.dart';
@@ -17,7 +19,11 @@ import '../steps/step_4_passenger_info.dart';
 import '../steps/step_5_trip_summary.dart';
 import '../steps/step_6_payment.dart';
 import '../widgets/booking_bottom_bar.dart';
+import '../widgets/booking_passenger_info_view.dart';
+import '../widgets/booking_payment_view.dart';
+import '../widgets/booking_selection_view.dart';
 import '../widgets/booking_stepper.dart';
+import '../widgets/booking_trip_summary_view.dart';
 import '../widgets/seat_hold_countdown_bar.dart';
 
 class BookingFlowScreen extends StatelessWidget {
@@ -34,7 +40,8 @@ class BookingFlowScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authUser = context.read<AuthBloc>().state.user;
+    final auth = context.read<AuthBloc>().state;
+    final authUser = auth.isAuthenticated ? auth.user : null;
     return BlocProvider(
       create: (context) =>
           BookingFlowBloc(
@@ -63,9 +70,15 @@ class _BookingFlowContent extends StatefulWidget {
 
 class _BookingFlowContentState extends State<_BookingFlowContent>
     with WidgetsBindingObserver {
+  int? _initialAccountId;
+  bool _initialAuthenticated = false;
+
   @override
   void initState() {
     super.initState();
+    final auth = context.read<AuthBloc?>()?.state;
+    _initialAccountId = auth?.user?.taiKhoanId;
+    _initialAuthenticated = auth?.isAuthenticated ?? false;
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -131,12 +144,14 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<BookingFlowBloc>();
+    final authBloc = context.read<AuthBloc?>();
 
-    return BlocConsumer<BookingFlowBloc, BookingFlowState>(
+    final content = BlocConsumer<BookingFlowBloc, BookingFlowState>(
       listenWhen: (previous, current) =>
           previous.status != current.status ||
           previous.errorMessage != current.errorMessage,
       listener: (context, state) {
+        if (bloc.sessionInvalidated) return;
         if (state.status == BookingFlowStatus.success &&
             state.createdTicket != null) {
           context.pushReplacement(
@@ -182,8 +197,7 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
         }
       },
       builder: (context, state) {
-        final trip = state.trip;
-
+        if (bloc.sessionInvalidated) return _sessionChangedView(context);
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, result) async {
@@ -193,65 +207,193 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
               context.pop();
             }
           },
-          child: Scaffold(
-            appBar: CustomAppBar(
-              title: state.step.title,
-              subtitle: trip != null
-                  ? '${trip.operatorName} • ${trip.fromCityName} -> ${trip.toCityName}'
-                  : null,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: () async {
-                  final shouldPop = await _handlePop(context, state, bloc);
-                  if (shouldPop && context.mounted) {
-                    context.pop();
-                  }
-                },
-              ),
-            ),
-            body:
-                state.status == BookingFlowStatus.loading &&
-                    state.seatLayout == null
-                ? const Center(child: CircularProgressIndicator())
-                : Column(
-                    children: [
-                      // Top Stepper
-                      BookingStepper(
-                        currentStep: state.step,
-                        onStepTapped: (index) => bloc.add(GoToStepEvent(index)),
-                      ),
-
-                      // Sticky Countdown Bar when holding seats
-                      if (state.seatHold != null &&
-                          state.step != BookingStep.seatSelection)
-                        SeatHoldCountdownBar(
-                          remainingSeconds: state.countdownSeconds,
-                          seatCodes: state.selectedSeats
-                              .map((s) => s.name)
-                              .toList(),
-                        ),
-
-                      // Step View Container
-                      Expanded(
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 250),
-                          child: _buildCurrentStepView(state, bloc),
-                        ),
-                      ),
-                    ],
-                  ),
-            bottomNavigationBar: state.status == BookingFlowStatus.loading
-                ? null
-                : BookingBottomBar(
-                    state: state,
-                    onNext: () => bloc.add(const NextStepEvent()),
-                    onBack: () => bloc.add(const PreviousStepEvent()),
-                    onConfirmPayment: () =>
-                        bloc.add(const ConfirmPaymentEvent()),
-                  ),
-          ),
+          child: _buildStepShell(context, state, bloc),
         );
       },
+    );
+
+    if (authBloc == null) {
+      return content;
+    }
+
+    return BlocConsumer<AuthBloc, AuthState>(
+      listenWhen: (previous, current) =>
+          previous.user?.taiKhoanId != current.user?.taiKhoanId ||
+          previous.isAuthenticated != current.isAuthenticated,
+      listener: (context, authState) {
+        bloc.invalidateSession();
+      },
+      builder: (context, authState) {
+        if (bloc.sessionInvalidated ||
+            authState.user?.taiKhoanId != _initialAccountId ||
+            authState.isAuthenticated != _initialAuthenticated) {
+          return _sessionChangedView(context);
+        }
+        return content;
+      },
+    );
+  }
+
+  Widget _sessionChangedView(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Đặt vé')),
+    body: SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Phiên tài khoản đã thay đổi.',
+              key: ValueKey('booking-session-changed'),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Vui lòng mở lại đặt vé. Nếu đã gửi tạo đơn, hãy đăng nhập đúng tài khoản và kiểm tra Vé của tôi trước khi tạo đơn khác. Ghế chưa tạo đơn sẽ được yêu cầu giải phóng hoặc tự hết hạn theo máy chủ.',
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () => context.pop(),
+              child: const Text('Rời khỏi đặt vé'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget _buildStepShell(
+    BuildContext context,
+    BookingFlowState state,
+    BookingFlowBloc bloc,
+  ) {
+    final trip = state.trip;
+
+    if (state.step.index <= BookingStep.dropoffPoint.index) {
+      return BookingSelectionView(
+        state: state,
+        child: _buildCurrentStepView(state, bloc),
+        onBack: () async {
+          final shouldPop = await _handlePop(context, state, bloc);
+          if (shouldPop && context.mounted) context.pop();
+        },
+        onNext: () => bloc.add(const NextStepEvent()),
+        onStep: (index) => bloc.add(GoToStepEvent(index)),
+        onRetry: () {
+          if (trip != null && state.date != null) {
+            bloc.add(
+              InitBookingFlowEvent(
+                trip: trip,
+                date: state.date!,
+                ticketCount: state.targetTicketCount,
+                passengerName: state.passengerName,
+                passengerPhone: state.passengerPhone,
+                passengerEmail: state.passengerEmail,
+              ),
+            );
+          }
+        },
+        onDetails: () {
+          if (trip != null) {
+            TripDetailSheet.show(context, trip: trip, onSelectTrip: (_) {});
+          }
+        },
+      );
+    }
+
+    if (state.step == BookingStep.passengerInfo) {
+      return BookingPassengerInfoView(
+        state: state,
+        bloc: bloc,
+        onBack: () => bloc.add(const PreviousStepEvent()),
+        onNext: () => bloc.add(const NextStepEvent()),
+        onStep: (index) => bloc.add(GoToStepEvent(index)),
+        onDetails: () {
+          if (trip != null) {
+            TripDetailSheet.show(context, trip: trip, onSelectTrip: (_) {});
+          }
+        },
+      );
+    }
+
+    if (state.step == BookingStep.tripSummary) {
+      return BookingTripSummaryView(
+        state: state,
+        bloc: bloc,
+        onBack: () => bloc.add(const PreviousStepEvent()),
+        onNext: () => bloc.add(const NextStepEvent()),
+        onStep: (index) => bloc.add(GoToStepEvent(index)),
+        onDetails: () {
+          if (trip != null) {
+            TripDetailSheet.show(context, trip: trip, onSelectTrip: (_) {});
+          }
+        },
+      );
+    }
+
+    if (state.step == BookingStep.payment) {
+      return BookingPaymentView(
+        state: state,
+        bloc: bloc,
+        onBack: () async {
+          final shouldPop = await _handlePop(context, state, bloc);
+          if (shouldPop && context.mounted) context.pop();
+        },
+        onStep: (index) => bloc.add(GoToStepEvent(index)),
+        onDetails: () {
+          if (trip != null) {
+            TripDetailSheet.show(context, trip: trip, onSelectTrip: (_) {});
+          }
+        },
+      );
+    }
+
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: state.step.title,
+        subtitle: trip != null
+            ? '${trip.operatorName} • ${trip.fromCityName} -> ${trip.toCityName}'
+            : null,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () async {
+            final shouldPop = await _handlePop(context, state, bloc);
+            if (shouldPop && context.mounted) {
+              context.pop();
+            }
+          },
+        ),
+      ),
+      body:
+          state.status == BookingFlowStatus.loading && state.seatLayout == null
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                BookingStepper(
+                  currentStep: state.step,
+                  onStepTapped: (index) => bloc.add(GoToStepEvent(index)),
+                ),
+                if (state.seatHold != null &&
+                    state.step != BookingStep.seatSelection)
+                  SeatHoldCountdownBar(
+                    remainingSeconds: state.countdownSeconds,
+                    seatCodes: state.selectedSeats.map((s) => s.name).toList(),
+                  ),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: _buildCurrentStepView(state, bloc),
+                  ),
+                ),
+              ],
+            ),
+      bottomNavigationBar: state.status == BookingFlowStatus.loading
+          ? null
+          : BookingBottomBar(
+              state: state,
+              onNext: () => bloc.add(const NextStepEvent()),
+              onBack: () => bloc.add(const PreviousStepEvent()),
+              onConfirmPayment: () => bloc.add(const ConfirmPaymentEvent()),
+            ),
     );
   }
 

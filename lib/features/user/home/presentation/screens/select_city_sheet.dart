@@ -1,7 +1,6 @@
+import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/widgets/custom_text_field.dart';
 import 'package:vexgo_app/data/models/city_model.dart';
 
@@ -100,7 +99,7 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.neutral300,
+                color: DiscoveryColors.neutral300,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
               ),
             ),
@@ -118,7 +117,7 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                 Expanded(
                   child: Text(
                     widget.title,
-                    style: AppTextStyles.titleMedium.copyWith(
+                    style: DiscoveryTextStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
                     ),
@@ -130,7 +129,7 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(
                     Icons.close_rounded,
-                    color: AppColors.neutral600,
+                    color: DiscoveryColors.neutral600,
                   ),
                 ),
               ],
@@ -145,14 +144,14 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
               hintText: 'Tìm tỉnh thành, bến xe, văn phòng...',
               prefixIcon: const Icon(
                 Icons.search_rounded,
-                color: AppColors.neutral400,
+                color: DiscoveryColors.neutral400,
               ),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
                       icon: const Icon(
                         Icons.clear_rounded,
                         size: 18,
-                        color: AppColors.neutral500,
+                        color: DiscoveryColors.neutral500,
                       ),
                       onPressed: () => _searchController.clear(),
                     )
@@ -176,14 +175,14 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                     children: [
                       const Icon(
                         Icons.local_fire_department_rounded,
-                        color: AppColors.secondary,
+                        color: DiscoveryColors.secondary,
                         size: 18,
                       ),
                       const SizedBox(width: AppDimensions.xs),
                       Text(
                         'Địa điểm phổ biến',
-                        style: AppTextStyles.titleSmall.copyWith(
-                          color: AppColors.neutral700,
+                        style: DiscoveryTextStyles.titleSmall.copyWith(
+                          color: DiscoveryColors.neutral700,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -198,20 +197,20 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                       return ChoiceChip(
                         label: Text(city.name),
                         selected: isSelected,
-                        selectedColor: AppColors.primaryLight,
-                        backgroundColor: AppColors.neutral50,
-                        labelStyle: AppTextStyles.bodyMedium.copyWith(
+                        selectedColor: DiscoveryColors.primaryLight,
+                        backgroundColor: DiscoveryColors.neutral50,
+                        labelStyle: DiscoveryTextStyles.bodyMedium.copyWith(
                           color: isSelected
-                              ? AppColors.primary
-                              : AppColors.neutral700,
+                              ? DiscoveryColors.primary
+                              : DiscoveryColors.neutral700,
                           fontWeight: isSelected
                               ? FontWeight.w700
                               : FontWeight.w500,
                         ),
                         side: BorderSide(
                           color: isSelected
-                              ? AppColors.primary
-                              : AppColors.neutral200,
+                              ? DiscoveryColors.primary
+                              : DiscoveryColors.neutral200,
                         ),
                         onSelected: (_) => Navigator.of(context).pop(city),
                       );
@@ -225,8 +224,8 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                 // All Filtered Cities
                 Text(
                   'Tất cả địa điểm',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neutral500,
+                  style: DiscoveryTextStyles.caption.copyWith(
+                    color: DiscoveryColors.neutral500,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -240,8 +239,8 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                     child: Center(
                       child: Text(
                         'Không tìm thấy địa điểm phù hợp',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.neutral500,
+                        style: DiscoveryTextStyles.bodyMedium.copyWith(
+                          color: DiscoveryColors.neutral500,
                         ),
                       ),
                     ),
@@ -253,7 +252,9 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                       margin: const EdgeInsets.only(bottom: AppDimensions.xs),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primaryLight.withValues(alpha: 0.5)
+                            ? DiscoveryColors.primaryLight.withValues(
+                                alpha: 0.5,
+                              )
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(
                           AppDimensions.radiusMd,
@@ -266,8 +267,8 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                           padding: const EdgeInsets.all(AppDimensions.xs + 2),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.primary
-                                : AppColors.neutral100,
+                                ? DiscoveryColors.primary
+                                : DiscoveryColors.neutral100,
                             borderRadius: BorderRadius.circular(
                               AppDimensions.radiusSm,
                             ),
@@ -276,25 +277,25 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                             Icons.location_on_rounded,
                             color: isSelected
                                 ? Colors.white
-                                : AppColors.neutral600,
+                                : DiscoveryColors.neutral600,
                             size: 18,
                           ),
                         ),
                         title: Text(
                           city.name,
-                          style: AppTextStyles.titleSmall.copyWith(
+                          style: DiscoveryTextStyles.titleSmall.copyWith(
                             fontWeight: isSelected
                                 ? FontWeight.w700
                                 : FontWeight.w600,
                             color: isSelected
-                                ? AppColors.primary
-                                : AppColors.neutral900,
+                                ? DiscoveryColors.primary
+                                : DiscoveryColors.neutral900,
                           ),
                         ),
                         subtitle: Text(
                           '${city.region} • ${city.stations.length} bến xe/điểm đón',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.neutral500,
+                          style: DiscoveryTextStyles.caption.copyWith(
+                            color: DiscoveryColors.neutral500,
                           ),
                         ),
                         trailing: Row(
@@ -304,8 +305,8 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                               onPressed: () => Navigator.of(context).pop(city),
                               child: Text(
                                 'Chọn',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.primary,
+                                style: DiscoveryTextStyles.bodySmall.copyWith(
+                                  color: DiscoveryColors.primary,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -325,14 +326,14 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                             ),
                             title: Text(
                               station.name,
-                              style: AppTextStyles.bodyMedium.copyWith(
+                              style: DiscoveryTextStyles.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             subtitle: Text(
                               station.address,
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.neutral400,
+                              style: DiscoveryTextStyles.caption.copyWith(
+                                color: DiscoveryColors.neutral400,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
