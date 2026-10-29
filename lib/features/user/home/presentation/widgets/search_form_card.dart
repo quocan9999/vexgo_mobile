@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vexgo_app/app/routes.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
@@ -335,16 +336,18 @@ class SearchFormCard extends StatelessWidget {
                           'ticketCount': state.ticketCount,
                           'isRoundTrip': state.isRoundTrip,
                         };
-                        if (state.isRoundTrip && state.returnDate != null) {
-                          extraMap['returnDate'] = state.returnDate;
+                        if (state.isRoundTrip) {
+                          extraMap['returnDate'] =
+                              state.returnDate ??
+                              state.departureDate.add(const Duration(days: 2));
                         }
 
-                        final returnQuery = returnDateStr != null
-                            ? '&returnDate=$returnDateStr&isRoundTrip=true'
-                            : '';
+                        // unused returnQuery
 
                         context.push(
-                          '/search-trips?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&ticketCount=${state.ticketCount}$returnQuery',
+                          state.isRoundTrip
+                              ? '${AppRoutes.roundTripSearch}?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&returnDate=$returnDateStr&ticketCount=${state.ticketCount}'
+                              : '/search-trips?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&ticketCount=${state.ticketCount}',
                           extra: extraMap,
                         );
                       },

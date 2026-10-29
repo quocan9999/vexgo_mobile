@@ -10,18 +10,22 @@ import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
+import 'package:vexgo_app/data/models/booking_model.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
+import 'package:vexgo_app/features/user/booking/presentation/widgets/booking_cargo_section_card.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_bloc.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_event.dart';
 
 class BookingSuccessScreen extends StatefulWidget {
   final TicketModel ticket;
   final List<TicketModel> tickets;
+  final BookingModel? booking;
 
   const BookingSuccessScreen({
     super.key,
     required this.ticket,
     this.tickets = const [],
+    this.booking,
   });
 
   @override
@@ -105,6 +109,17 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
     );
   }
 
+  BookingModel? _resolvedBooking(BuildContext context) {
+    if (widget.booking != null) return widget.booking;
+    try {
+      final extra = GoRouterState.of(context).extra;
+      if (extra is Map<String, dynamic> && extra['booking'] is BookingModel) {
+        return extra['booking'] as BookingModel;
+      }
+    } catch (_) {}
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_sessionCurrent) {
@@ -133,6 +148,16 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
     final ticket = widget.ticket;
     final trip = ticket.trip;
     final ticketList = widget.tickets.isEmpty ? [ticket] : widget.tickets;
+    final booking = _resolvedBooking(context);
+    final confirmedOrderTotal =
+        booking != null &&
+            booking.isPaid &&
+            ticketList.every(
+              (issued) =>
+                  issued.bookingId?.toString() == booking.bookingId.toString(),
+            )
+        ? booking.totalAmount
+        : null;
 
     // Collect all seats across tickets for group summary
     final allSeatsList = <String>[];
@@ -390,7 +415,9 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                       const SizedBox(height: 8),
                       _buildInfoRow(
                         'Tổng thanh toán:',
-                        CurrencyFormatter.format(ticket.finalAmount),
+                        CurrencyFormatter.format(
+                          confirmedOrderTotal ?? ticket.finalAmount,
+                        ),
                         valueColor: DiscoveryColors.secondary,
                         isBold: true,
                       ),
@@ -604,6 +631,16 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
                   ],
                 ),
               ),
+
+              if (BookingCargoSummaryBox.hasCargo(
+                booking: _resolvedBooking(context),
+              )) ...[
+                const SizedBox(height: AppDimensions.base),
+                BookingCargoSummaryBox(
+                  booking: _resolvedBooking(context),
+                  scopeKey: 'oneway-success',
+                ),
+              ],
 
               const SizedBox(height: AppDimensions.base),
 

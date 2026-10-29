@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:vexgo_app/data/models/seat_model.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
@@ -160,4 +161,23 @@ class ApplyPromotionCodeEvent extends BookingFlowEvent {
 
 class RefreshBookingQuoteEvent extends BookingFlowEvent {
   const RefreshBookingQuoteEvent();
+}
+
+/// Enabling loads authoritative categories/capacity/route points for this trip.
+class SetBookingCargoEnabledEvent extends BookingFlowEvent {
+  final bool enabled;
+  const SetBookingCargoEnabledEvent(this.enabled);
+  @override
+  List<Object?> get props => [enabled];
+}
+
+class RefreshBookingCargoEvent extends BookingFlowEvent {
+  const RefreshBookingCargoEvent();
+}
+
+class UpdateBookingCargoEvent extends BookingFlowEvent {
+  final BookingCargoDraft draft;
+  const UpdateBookingCargoEvent(this.draft);
+  @override
+  List<Object?> get props => [draft];
 }

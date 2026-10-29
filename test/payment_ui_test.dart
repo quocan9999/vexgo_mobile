@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -219,6 +220,8 @@ class _FakeBookingRepo implements BookingRepository {
     required PassengerInfo contact,
     String? holdToken,
     String? promotionCode,
+    BookingQuoteModel? expectedPromotionQuote,
+    BookingCargoDraft? cargo,
   }) async {
     createApiBookingCalls++;
     return bookingToReturn ??

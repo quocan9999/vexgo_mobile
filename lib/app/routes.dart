@@ -15,6 +15,9 @@ import '../features/user/notification/presentation/screens/notifications_screen.
 import '../features/user/profile/presentation/screens/profile_screen.dart';
 import '../features/user/support_chat/presentation/screens/support_chat_screen.dart';
 import '../features/user/search_trips/presentation/screens/search_trips_screen.dart';
+import '../features/user/round_trip/round_trip_request.dart';
+import '../features/user/round_trip/presentation/screens/round_trip_search_screen.dart';
+import '../features/user/round_trip/presentation/screens/round_trip_booking_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -43,6 +46,8 @@ class AppRoutes {
   static const String ticketDetail = '/ticket-detail';
   static const String supportChat = '/support-chat';
   static const String bookingReceipt = '/booking-receipt';
+  static const String roundTripSearch = '/round-trip/search';
+  static const String roundTripBooking = '/round-trip/booking';
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -106,6 +111,29 @@ class AppRoutes {
             date: date,
             ticketCount: ticketCount,
           );
+        },
+      ),
+      GoRoute(
+        path: roundTripSearch,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra is Map<String, dynamic>
+              ? state.extra as Map<String, dynamic>
+              : const <String, dynamic>{};
+          return RoundTripSearchScreen(
+            query: state.uri.queryParameters,
+            extra: extra,
+          );
+        },
+      ),
+      GoRoute(
+        path: roundTripBooking,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final selection = state.extra is RoundTripSelection
+              ? state.extra as RoundTripSelection
+              : null;
+          return RoundTripBookingScreen(selection: selection);
         },
       ),
       GoRoute(

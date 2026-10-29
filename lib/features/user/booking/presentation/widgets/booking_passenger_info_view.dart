@@ -136,7 +136,8 @@ class BookingPassengerDock extends StatelessWidget {
         state.status == BookingFlowStatus.submitting ||
         state.isCheckoutLocked;
     final expired = state.seatHold == null || state.countdownSeconds <= 0;
-    final enabled = state.canProceed && !busy && !expired;
+    final enabled =
+        state.canProceed && state.cargo.isValid && !busy && !expired;
 
     final mediaQuery = MediaQuery.of(context);
     final keyboardOpen = mediaQuery.viewInsets.bottom > 0;
@@ -193,9 +194,12 @@ class BookingPassengerDock extends StatelessWidget {
 
                 final helperText = expired
                     ? 'Thời gian giữ ghế đã hết. Vui lòng chọn lại ghế.'
-                    : state.isPassengerValid
-                    ? 'Tiếp theo: xem lại đặt vé & mã ưu đãi'
-                    : 'Nhập họ tên và số điện thoại hợp lệ để tiếp tục';
+                    : !state.isPassengerValid
+                    ? 'Nhập họ tên và số điện thoại hợp lệ để tiếp tục'
+                    : !state.cargo.isValid
+                    ? (state.cargo.validationError ??
+                          'Hoàn tất thông tin gửi hàng hoặc tắt gửi hàng để tiếp tục')
+                    : 'Tiếp theo: xem lại đặt vé & mã ưu đãi';
 
                 return Column(
                   mainAxisSize: MainAxisSize.min,

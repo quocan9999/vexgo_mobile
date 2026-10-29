@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -482,6 +483,8 @@ class _MockCountingBookingRepository extends HybridBookingRepository {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
+    BookingCargoDraft? cargo,
   }) async {
     createBookingCallCount++;
     return BookingModel(

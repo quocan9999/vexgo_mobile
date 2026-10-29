@@ -159,6 +159,11 @@ class BookingTripSummaryDock extends StatelessWidget {
                           ? CurrencyFormatter.format(state.finalAmount!)
                           : (state.quoteLoading
                                 ? 'Đang xác minh giá'
+                                : state.cargo.enabled &&
+                                      state.ticketFinalAmount != null
+                                ? 'Vé ${CurrencyFormatter.format(state.ticketFinalAmount!)}'
+                                : state.cargo.enabled
+                                ? 'Xác định khi tạo đơn'
                                 : 'Chưa có giá vé'),
                       style: DiscoveryTextStyles.titleMedium.copyWith(
                         color: DiscoveryColors.secondary,
@@ -166,6 +171,15 @@ class BookingTripSummaryDock extends StatelessWidget {
                         fontSize: compactDock ? 16 : 18,
                       ),
                     ),
+                    if (state.cargo.enabled && state.finalAmount == null)
+                      Text(
+                        'Phí gửi hàng được xác định khi tạo đơn',
+                        style: DiscoveryTextStyles.caption.copyWith(
+                          color: DiscoveryColors.neutral600,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     if (state.discountAmount > 0)
                       Text(
                         'Đã giảm ${CurrencyFormatter.format(state.discountAmount)}',

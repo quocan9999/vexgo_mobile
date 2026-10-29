@@ -1,3 +1,6 @@
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
+import 'package:vexgo_app/data/models/booking_model.dart';
+import 'package:vexgo_app/data/repositories/cargo_repository.dart';
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/network/api_exceptions.dart';
@@ -18,8 +21,11 @@ import 'booking_flow_state.dart';
 class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   final SeatRepository seatRepository;
   final BookingRepository bookingRepository;
+  final CargoRepository cargoRepository;
+  int _cargoRevision = 0;
   Timer? _countdownTimer;
   final DateTime Function() _now;
+  final VietQrReceivingAccount _receivingAccount;
   bool _holdBusy = false;
   bool _confirmBusy = false;
   bool _closing = false;
@@ -36,6 +42,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     if (_sessionInvalidated || _closing || isClosed) return;
     _sessionInvalidated = true;
     _invalidateQuote();
+    _cargoRevision++;
     _stopCountdown();
     add(const InvalidateBookingSessionEvent());
   }
@@ -43,10 +50,17 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   BookingFlowBloc({
     required this.seatRepository,
     required this.bookingRepository,
+    CargoRepository? cargoRepository,
     DateTime Function()? now,
-  }) : _now = now ?? DateTime.now,
+    VietQrReceivingAccount receivingAccount = VietQrConfig.account,
+  }) : cargoRepository = cargoRepository ?? RealCargoRepository(),
+       _now = now ?? DateTime.now,
+       _receivingAccount = receivingAccount,
        super(const BookingFlowState()) {
     on<InitBookingFlowEvent>(_onInit);
+    on<SetBookingCargoEnabledEvent>(_onSetCargoEnabled);
+    on<RefreshBookingCargoEvent>((event, emit) => _loadCargo(emit));
+    on<UpdateBookingCargoEvent>(_onUpdateCargo);
     on<ToggleSeatEvent>(_onToggleSeat);
     on<ChangeFloorEvent>(_onChangeFloor);
     on<SelectPickupPointEvent>(_onSelectPickupPoint);
@@ -62,8 +76,70 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     on<PreviousStepEvent>(_onPreviousStep);
     on<GoToStepEvent>(_onGoToStep);
     on<ConfirmPaymentEvent>(_onConfirmPayment);
+    on<_AwaitCheckoutEvent>((event, emit) async {
+      try {
+        await _onConfirmPayment(const ConfirmPaymentEvent(), emit);
+      } finally {
+        event.finished.complete();
+      }
+    });
+    on<_AwaitDraftEvent>((event, emit) async {
+      try {
+        final action = event.action;
+        if (action is SetBookingCargoEnabledEvent) {
+          await _onSetCargoEnabled(action, emit);
+        } else if (action is RefreshBookingCargoEvent) {
+          await _loadCargo(emit);
+        } else if (action is UpdateBookingCargoEvent) {
+          _onUpdateCargo(action, emit);
+        } else if (action is ToggleSeatEvent) {
+          await _onToggleSeat(action, emit);
+        } else if (action is ChangeFloorEvent) {
+          _onChangeFloor(action, emit);
+        } else if (action is SelectPickupPointEvent) {
+          _onSelectPickupPoint(action, emit);
+        } else if (action is SelectDropoffPointEvent) {
+          _onSelectDropoffPoint(action, emit);
+        } else if (action is NextStepEvent) {
+          await _onNextStep(action, emit);
+        } else if (action is PreviousStepEvent) {
+          _onPreviousStep(action, emit);
+        } else if (action is GoToStepEvent) {
+          _onGoToStep(action, emit);
+        } else if (action is ApplyPromotionCodeEvent) {
+          await _onApplyPromotionCode(action, emit);
+        } else if (action is RemoveVoucherEvent) {
+          await _onRemoveVoucher(action, emit);
+        } else if (action is RefreshBookingQuoteEvent) {
+          await _loadQuote(emit);
+        } else if (action is ReleaseSeatHoldEvent) {
+          await _onReleaseSeatHold(action, emit);
+        } else if (action is UpdatePassengerInfoEvent) {
+          await _onUpdatePassengerInfo(action, emit);
+        }
+      } finally {
+        event.finished.complete();
+      }
+    });
     on<ReleaseSeatHoldEvent>(_onReleaseSeatHold);
     on<InvalidateBookingSessionEvent>(_onInvalidateSession);
+  }
+
+  /// Await one explicit create/recheck action, including ticket hydration.
+  /// Used by the two-leg coordinator; it does not bypass existing guards.
+  Future<void> confirmPayment() {
+    if (_closing || isClosed || _sessionInvalidated) return Future.value();
+    final finished = Completer<void>();
+    add(_AwaitCheckoutEvent(finished));
+    return finished.future;
+  }
+
+  /// Coordinator barrier: a queued edit/quote must finish before checkout.
+  Future<void> applyDraftAction(BookingFlowEvent action) {
+    if (_closing || isClosed || _sessionInvalidated) return Future.value();
+    final finished = Completer<void>();
+    add(_AwaitDraftEvent(action, finished));
+    return finished.future;
   }
 
   Future<void> _onInvalidateSession(
@@ -74,6 +150,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     final hold = releaseHold ? state.seatHold : null;
     emit(
       state.copyWith(
+        cargo: const BookingCargoState(),
         passengerName: '',
         passengerPhone: '',
         passengerEmail: '',
@@ -95,14 +172,149 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     // This route stays fenced, so its hold can never be reused by a new actor.
   }
 
+  bool get _cargoEditable =>
+      !_sessionInvalidated &&
+      !_closing &&
+      !_confirmBusy &&
+      !state.isCheckoutLocked;
+
+  Future<void> _onSetCargoEnabled(
+    SetBookingCargoEnabledEvent event,
+    Emitter<BookingFlowState> emit,
+  ) async {
+    if (!_cargoEditable) return;
+    _cargoRevision++;
+    if (!event.enabled) {
+      emit(state.copyWith(cargo: const BookingCargoState()));
+      return;
+    }
+    emit(
+      state.copyWith(
+        cargo: BookingCargoState(enabled: true, draft: state.cargo.draft),
+      ),
+    );
+    await _loadCargo(emit);
+  }
+
+  Future<void> _loadCargo(Emitter<BookingFlowState> emit) async {
+    if (!_cargoEditable || !state.cargo.enabled) return;
+    final revision = ++_cargoRevision;
+    final version = TokenStorage.sessionVersion;
+    final tripId = state.trip?.numericTripId;
+    emit(
+      state.copyWith(
+        cargo: BookingCargoState(
+          enabled: true,
+          loading: true,
+          draft: state.cargo.draft,
+        ),
+      ),
+    );
+    try {
+      if (tripId == null ||
+          tripId <= 0 ||
+          bookingRepository is MockBookingRepository ||
+          ApiConfig.isDemoMode) {
+        throw StateError(
+          'Gửi hàng kèm vé yêu cầu API thật và mã chuyến hợp lệ.',
+        );
+      }
+      final options = await cargoRepository.loadOptions(tripId);
+      if (!_cargoEditable ||
+          emit.isDone ||
+          revision != _cargoRevision ||
+          version != TokenStorage.sessionVersion) {
+        return;
+      }
+      if (options.tripId != tripId ||
+          (options.points != null && options.points!.tripId != tripId)) {
+        throw StateError('Điểm gửi/nhận không thuộc chuyến hiện tại.');
+      }
+      emit(
+        state.copyWith(
+          cargo: BookingCargoState(
+            enabled: true,
+            options: options,
+            draft: state.cargo.draft,
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!_cargoEditable ||
+          emit.isDone ||
+          revision != _cargoRevision ||
+          version != TokenStorage.sessionVersion) {
+        return;
+      }
+      emit(
+        state.copyWith(
+          cargo: BookingCargoState(
+            enabled: true,
+            draft: state.cargo.draft,
+            error:
+                'Không xác minh được dịch vụ gửi hàng. Thử tải lại hoặc tắt gửi hàng để chỉ đặt vé.',
+          ),
+        ),
+      );
+    }
+  }
+
+  void _onUpdateCargo(
+    UpdateBookingCargoEvent event,
+    Emitter<BookingFlowState> emit,
+  ) {
+    if (!_cargoEditable || !state.cargo.enabled) return;
+    emit(
+      state.copyWith(
+        cargo: BookingCargoState(
+          enabled: true,
+          loading: state.cargo.loading,
+          options: state.cargo.options,
+          error: state.cargo.error,
+          draft: event.draft,
+        ),
+      ),
+    );
+  }
+
+  bool _verifiedCargo(
+    BookingModel booking,
+    BookingFlowState draft, {
+    required bool creation,
+  }) {
+    if (!draft.cargo.enabled) return true;
+    final items = draft.cargo.draft!.items;
+    if (booking.tripId != draft.trip!.numericTripId ||
+        booking.ticketSubtotal != draft.ticketFinalAmount ||
+        booking.shippingFee == null ||
+        booking.ticketSubtotal! + booking.shippingFee! != booking.totalAmount) {
+      return false;
+    }
+    if (creation) {
+      return booking.shipment != null &&
+          booking.shipment!.shippingFee == booking.shippingFee &&
+          booking.shipment!.itemCount == items.length;
+    }
+    if (booking.cargoItems.length != items.length) return false;
+    final expected =
+        items.map((v) => '${v.name.trim()}\u0000${v.quantity}').toList()
+          ..sort();
+    final actual =
+        booking.cargoItems.map((v) => '${v.name}\u0000${v.quantity}').toList()
+          ..sort();
+    return expected.toString() == actual.toString();
+  }
+
   Future<void> _onInit(
     InitBookingFlowEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
     if (_sessionInvalidated) return;
+    _cargoRevision++;
     _invalidateQuote();
     emit(
       state.copyWith(
+        cargo: const BookingCargoState(),
         requiresAuthoritativeQuote: bookingRepository is! MockBookingRepository,
         clearQuote: true,
         quoteLoading: false,
@@ -781,6 +993,26 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
       );
       return;
     }
+    if (state.pendingBookingId == null && !state.cargo.isValid) {
+      emit(
+        state.copyWith(
+          status: BookingFlowStatus.failure,
+          errorMessage: state.cargo.validationError,
+        ),
+      );
+      return;
+    }
+    if (state.pendingBookingId == null &&
+        state.cargo.enabled &&
+        (bookingRepository is MockBookingRepository || ApiConfig.isDemoMode)) {
+      emit(
+        state.copyWith(
+          status: BookingFlowStatus.failure,
+          errorMessage: 'Gửi hàng chưa hỗ trợ Demo Mode.',
+        ),
+      );
+      return;
+    }
     if (state.pendingBookingId == null &&
         _remainingSeconds(state.seatHold!.expiresAt) <= 0) {
       await _onTickCountdown(const TickCountdownEvent(), emit);
@@ -840,7 +1072,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           draft.selectedPaymentMethod == 'vietqr' && !ApiConfig.isDemoMode;
       if (bankTransfer &&
           state.pendingBookingId == null &&
-          !VietQrConfig.isConfigured &&
+          !_receivingAccount.isConfigured &&
           draft.finalAmount != 0) {
         emit(
           state.copyWith(
@@ -861,6 +1093,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         // has no idempotency key contract, so never automatically replay it.
         emit(state.copyWith(bookingOutcomeUnknown: true));
         final booking = await bookingRepository.createApiBooking(
+          expectedPromotionQuote: draft.quote,
+          cargo: draft.cargo.enabled ? draft.cargo.draft : null,
           tripId: trip.numericTripId ?? int.parse(trip.id),
           seatIds: draft.selectedSeats.map((s) => s.numericSeatId!).toList(),
           pickupPoint: draft.selectedPickupPoint!.name,
@@ -888,6 +1122,11 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         );
       }
       if (_sessionInvalidated) return;
+      if (!_verifiedCargo(state.checkoutBooking!, draft, creation: true)) {
+        throw StateError(
+          'Máy chủ chưa xác nhận đủ tiền hàng và mã vận đơn. Giữ đơn hiện tại để kiểm tra.',
+        );
+      }
       if (bankTransfer || state.checkoutBooking?.totalAmount == 0) {
         final expected = state.checkoutBooking!;
         final verified = await bookingRepository.getBookingById(
@@ -900,13 +1139,16 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
             verified.orderCode != expected.orderCode ||
             verified.totalAmount != expected.totalAmount ||
             verified.totalAmount < 0 ||
+            !_verifiedCargo(verified, draft, creation: false) ||
             verified.orderCode == null ||
             verified.orderCode!.isEmpty) {
           throw StateError('Thông tin đơn thanh toán không khớp.');
         }
         emit(
           state.copyWith(
-            checkoutBooking: verified,
+            checkoutBooking: verified.copyWith(
+              shipment: verified.shipment ?? expected.shipment,
+            ),
             pendingPaymentAmount: verified.totalAmount,
           ),
         );
@@ -923,7 +1165,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
                   ? BookingFlowStatus.paymentPending
                   : BookingFlowStatus.failure,
               pendingQrCodeUrl: pending
-                  ? VietQrConfig.imageUrl(
+                  ? _receivingAccount.imageUrl(
                       verified.totalAmount,
                       verified.orderCode!,
                     )
@@ -1094,6 +1336,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   @override
   Future<void> close() async {
     _closing = true;
+    _cargoRevision++;
     _stopCountdown();
     if (state.seatHold != null &&
         state.createdTicket == null &&
@@ -1104,4 +1347,15 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     await super.close();
     await _holdFinished?.future;
   }
+}
+
+class _AwaitCheckoutEvent extends BookingFlowEvent {
+  final Completer<void> finished;
+  const _AwaitCheckoutEvent(this.finished);
+}
+
+class _AwaitDraftEvent extends BookingFlowEvent {
+  final BookingFlowEvent action;
+  final Completer<void> finished;
+  const _AwaitDraftEvent(this.action, this.finished);
 }

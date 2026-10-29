@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import '../../models/booking_model.dart';
 import '../../models/booking_quote_model.dart';
 import '../../models/promotion_validation_model.dart';
@@ -29,6 +30,8 @@ abstract class BookingRemoteDataSource {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
+    BookingCargoDraft? cargo,
   });
 
   Future<BookingModel> getBookingById(dynamic bookingId);
@@ -104,6 +107,8 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
+    BookingQuoteModel? expectedPromotionQuote,
+    BookingCargoDraft? cargo,
   }) async {
     if (holdToken == null || holdToken.isEmpty) {
       throw ArgumentError('Cần mã giữ ghế còn hiệu lực để tạo đơn.');
@@ -119,6 +124,15 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
       if (promotionCode != null && promotionCode.isNotEmpty)
         'promotionCode': promotionCode,
       'holdToken': holdToken,
+      if (cargo != null) ...cargo.toJson(),
+      if (promotionCode != null &&
+          promotionCode.isNotEmpty &&
+          expectedPromotionQuote != null)
+        'expectedPromotionQuote': {
+          'originalTotal': expectedPromotionQuote.originalTotal.toString(),
+          'discountAmount': expectedPromotionQuote.discountAmount.toString(),
+          'finalTotal': expectedPromotionQuote.finalTotal.toString(),
+        },
     };
 
     final res = await client.post(

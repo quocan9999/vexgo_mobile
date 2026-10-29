@@ -5,6 +5,7 @@ import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/widgets/custom_app_bar.dart';
 import 'package:vexgo_app/data/models/trip_model.dart';
 import 'package:vexgo_app/data/repositories/booking_repository.dart';
+import 'package:vexgo_app/data/repositories/cargo_repository.dart';
 import 'package:vexgo_app/data/repositories/seat_repository.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
@@ -47,6 +48,7 @@ class BookingFlowScreen extends StatelessWidget {
           BookingFlowBloc(
             seatRepository: context.read<SeatRepository>(),
             bookingRepository: context.read<BookingRepository>(),
+            cargoRepository: context.read<CargoRepository?>(),
           )..add(
             InitBookingFlowEvent(
               trip: trip,
@@ -159,6 +161,7 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
             extra: {
               'ticket': state.createdTicket,
               'tickets': state.createdTickets,
+              'booking': state.checkoutBooking,
             },
           );
         } else if (state.errorMessage != null) {
