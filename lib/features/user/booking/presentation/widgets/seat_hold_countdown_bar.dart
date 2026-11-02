@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_dimensions.dart';
@@ -80,7 +81,7 @@ class SeatHoldCountdownBar extends StatelessWidget {
                     style: TextStyle(
                       color: primaryColor,
                       fontWeight: FontWeight.w700,
-                      fontFamily: compact ? 'VexGoJakarta' : 'monospace',
+                      fontFamily: AppTypography.fontFamily,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),

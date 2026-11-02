@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 import '../constants/app_dimensions.dart';
 
@@ -68,7 +69,7 @@ class DiscoveryTextStyles {
 
   // Headings
   static TextStyle h1 = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 24,
     fontWeight: FontWeight.w700,
     color: DiscoveryColors.neutral900,
@@ -76,7 +77,7 @@ class DiscoveryTextStyles {
   );
 
   static TextStyle h2 = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 20,
     fontWeight: FontWeight.w700,
     color: DiscoveryColors.neutral900,
@@ -84,7 +85,7 @@ class DiscoveryTextStyles {
   );
 
   static TextStyle h3 = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 18,
     fontWeight: FontWeight.w600,
     color: DiscoveryColors.neutral900,
@@ -92,7 +93,7 @@ class DiscoveryTextStyles {
   );
 
   static TextStyle h4 = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: DiscoveryColors.neutral900,
@@ -101,7 +102,7 @@ class DiscoveryTextStyles {
 
   // Subtitles / Titles
   static TextStyle titleMedium = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: DiscoveryColors.neutral900,
@@ -109,7 +110,7 @@ class DiscoveryTextStyles {
   );
 
   static TextStyle titleSmall = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w600,
     color: DiscoveryColors.neutral900,
@@ -118,7 +119,7 @@ class DiscoveryTextStyles {
 
   // Body text
   static TextStyle bodyLarge = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: DiscoveryColors.neutral800,
@@ -126,7 +127,7 @@ class DiscoveryTextStyles {
   );
 
   static TextStyle bodyMedium = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w400,
     color: DiscoveryColors.neutral700,
@@ -134,7 +135,7 @@ class DiscoveryTextStyles {
   );
 
   static TextStyle bodySmall = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: DiscoveryColors.neutral500,
@@ -143,7 +144,7 @@ class DiscoveryTextStyles {
 
   // Caption & Overline
   static TextStyle caption = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 12,
     fontWeight: FontWeight.w500,
     color: DiscoveryColors.neutral500,
@@ -151,7 +152,7 @@ class DiscoveryTextStyles {
 
   // Button text
   static TextStyle button = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 15,
     fontWeight: FontWeight.w600,
     color: Colors.white,
@@ -160,14 +161,14 @@ class DiscoveryTextStyles {
 
   // Price text
   static TextStyle price = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 17,
     fontWeight: FontWeight.w700,
     color: DiscoveryColors.secondary,
   );
 
   static TextStyle priceOriginal = TextStyle(
-    fontFamily: 'VexGoJakarta',
+    fontFamily: AppTypography.fontFamily,
     fontSize: 13,
     fontWeight: FontWeight.w400,
     color: DiscoveryColors.neutral400,
@@ -383,7 +384,7 @@ class DiscoveryTheme extends StatelessWidget {
     final base = Theme.of(context);
     return Theme(
       data: base.copyWith(
-        textTheme: base.textTheme.apply(fontFamily: 'VexGoJakarta'),
+        textTheme: base.textTheme.apply(fontFamily: AppTypography.fontFamily),
         colorScheme: base.colorScheme.copyWith(
           primary: DiscoveryColors.primary,
           secondary: DiscoveryColors.secondary,

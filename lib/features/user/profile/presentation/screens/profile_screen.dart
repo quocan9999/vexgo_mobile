@@ -1,3 +1,5 @@
+import 'package:vexgo_app/features/user/app_info/presentation/screens/app_information_screen.dart';
+import 'package:vexgo_app/core/widgets/tab_page_header.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../app/routes.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +11,7 @@ import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
 import '../widgets/auth_modal_sheet.dart';
-import '../widgets/change_password_dialog.dart';
+import 'change_password_screen.dart';
 import '../widgets/edit_profile_dialog.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -18,7 +20,8 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DiscoveryColors.background,
+      backgroundColor: Colors.white,
+      appBar: const TabPageHeader(title: 'Tài khoản'),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state.successMessage != null) {
@@ -44,168 +47,85 @@ class ProfileScreen extends StatelessWidget {
           final isAuthenticated = state.isAuthenticated;
 
           return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.base,
-                vertical: AppDimensions.md,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // App Page Header
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 2,
-                      bottom: AppDimensions.md,
-                    ),
-                    child: Text(
-                      'Tài khoản',
-                      style: DiscoveryTextStyles.h2.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: DiscoveryColors.neutral900,
+            top: false,
+            child: ListView(
+              children: [
+                if (state.status == AuthStatus.loading)
+                  const LinearProgressIndicator(),
+                if (state.status == AuthStatus.failure && user == null)
+                  ListTile(
+                    title: const Text('Không thể tải phiên đăng nhập.'),
+                    trailing: TextButton(
+                      onPressed: () => context.read<AuthBloc>().add(
+                        const CheckAuthStatusEvent(),
                       ),
+                      child: const Text('Thử lại'),
                     ),
                   ),
-
-                  if (state.status == AuthStatus.loading) ...[
-                    const LinearProgressIndicator(
-                      color: DiscoveryColors.primary,
-                      backgroundColor: DiscoveryColors.primaryLight,
-                    ),
-                    const SizedBox(height: AppDimensions.sm),
-                  ],
-
-                  if (state.status == AuthStatus.failure && state.user == null)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: AppDimensions.md),
-                      padding: const EdgeInsets.all(AppDimensions.sm),
-                      decoration: BoxDecoration(
-                        color: DiscoveryColors.errorLight,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: DiscoveryColors.error.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.error_outline_rounded,
-                            color: DiscoveryColors.error,
-                            size: 20,
-                          ),
-                          const SizedBox(width: AppDimensions.sm),
-                          Expanded(
-                            child: Text(
-                              'Không thể tải phiên đăng nhập.',
-                              style: DiscoveryTextStyles.bodySmall.copyWith(
-                                color: DiscoveryColors.errorDark,
-                              ),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () => context.read<AuthBloc>().add(
-                              const CheckAuthStatusEvent(),
-                            ),
-                            child: const Text('Thử lại'),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  // 1. Identity Card (User vs Guest)
-                  if (isAuthenticated && user != null)
-                    _buildUserCard(context, user)
-                  else
-                    _buildGuestCard(context),
-
-                  const SizedBox(height: AppDimensions.base),
-
-                  // 2. Loyalty Points Card (Only for authenticated)
+                if (isAuthenticated && user != null)
+                  _buildUserCard(context, user)
+                else
+                  _buildGuestCard(context),
+                const Divider(height: 1, color: DiscoveryColors.neutral200),
+                _buildMenuList([
                   if (isAuthenticated && user != null) ...[
-                    _buildPointsCard(context, user),
-                    const SizedBox(height: AppDimensions.base),
-                  ],
-
-                  // 3. Account Management Group (Only for authenticated)
-                  if (isAuthenticated && user != null) ...[
-                    _buildSectionHeader('QUẢN LÝ TÀI KHOẢN'),
-                    _buildMenuContainer([
-                      _MenuRow(
-                        icon: Icons.person_outline_rounded,
-                        title: 'Thông tin cá nhân',
-                        subtitle: 'Họ tên, email, CCCD, ngày sinh',
-                        onTap: () =>
-                            EditProfileDialog.show(context, user: user),
-                      ),
-                      _MenuRow(
-                        icon: Icons.lock_outline_rounded,
-                        title: 'Đổi mật khẩu',
-                        subtitle: 'Cập nhật mật khẩu định kỳ để an toàn',
-                        onTap: () => ChangePasswordDialog.show(context),
-                      ),
-                    ]),
-                    const SizedBox(height: AppDimensions.base),
-                  ],
-
-                  _buildSectionHeader('HỖ TRỢ'),
-                  _buildMenuContainer([
                     _MenuRow(
-                      icon: Icons.forum_outlined,
-                      title: 'Chat với nhà xe',
-                      subtitle: 'Trao đổi trực tiếp về chuyến đi của bạn',
-                      onTap: () => context.push(AppRoutes.supportChat),
+                      icon: Icons.stars_outlined,
+                      title: 'Điểm tích lũy VexGo',
+                      trailingText: '${user.diemTichLuy} điểm',
                     ),
-                  ]),
-                  const SizedBox(height: AppDimensions.base),
-
-                  // 4. App Info Group
-                  _buildSectionHeader('THÔNG TIN ỨNG DỤNG'),
-                  _buildMenuContainer([
-                    const _MenuRow(
-                      icon: Icons.language_rounded,
-                      title: 'Ngôn ngữ',
-                      subtitle: 'Giao diện ứng dụng',
-                      trailingText: 'Tiếng Việt',
+                    _MenuRow(
+                      icon: Icons.person_outline_rounded,
+                      title: 'Thông tin cá nhân',
+                      onTap: () => EditProfileDialog.show(context, user: user),
                     ),
-                    const _MenuRow(
-                      icon: Icons.info_outline_rounded,
-                      title: 'Phiên bản ứng dụng',
-                      subtitle: 'Hệ thống Đặt vé xe khách VexGo',
-                      trailingText: '1.0.0',
+                    _MenuRow(
+                      icon: Icons.lock_outline_rounded,
+                      title: 'Đổi mật khẩu',
+                      onTap: () => ChangePasswordScreen.show(context),
                     ),
-                  ]),
-                  const SizedBox(height: AppDimensions.lg),
-
-                  // 5. Logout Action (Only for authenticated)
-                  if (isAuthenticated) ...[
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: () => _confirmLogout(context),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          minimumSize: const Size(48, 48),
-                        ),
-                        icon: const Icon(
-                          Icons.logout_rounded,
-                          color: DiscoveryColors.error,
-                          size: 20,
-                        ),
-                        label: Text(
-                          'Đăng xuất tài khoản',
-                          style: DiscoveryTextStyles.bodyMedium.copyWith(
-                            color: DiscoveryColors.error,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.base),
                   ],
+                  _MenuRow(
+                    icon: Icons.forum_outlined,
+                    title: 'Chat với nhà xe',
+                    onTap: () => context.push(AppRoutes.supportChat),
+                  ),
+                  _MenuRow(
+                    icon: Icons.info_outline_rounded,
+                    title: 'Thông tin VexGo',
+                    onTap: () => openAppInformation(
+                      context,
+                      const AppInformationScreen(),
+                    ),
+                  ),
+                  const _MenuRow(
+                    icon: Icons.language_rounded,
+                    title: 'Ngôn ngữ',
+                    trailingText: 'Tiếng Việt',
+                  ),
+                ]),
+                if (isAuthenticated) ...[
+                  const Divider(height: 1, color: DiscoveryColors.neutral200),
+                  _buildMenuList([
+                    _MenuRow(
+                      icon: Icons.logout_rounded,
+                      title: 'Đăng xuất tài khoản',
+                      color: DiscoveryColors.error,
+                      onTap: () => _confirmLogout(context),
+                    ),
+                  ]),
                 ],
-              ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                  child: Text(
+                    'Phiên bản 1.0.0',
+                    textAlign: TextAlign.center,
+                    style: DiscoveryTextStyles.caption.copyWith(
+                      color: DiscoveryColors.neutral600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -214,13 +134,8 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildUserCard(BuildContext context, UserModel user) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.base),
-      decoration: BoxDecoration(
-        color: DiscoveryColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: DiscoveryColors.neutral200),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -312,13 +227,8 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildGuestCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.base),
-      decoration: BoxDecoration(
-        color: DiscoveryColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: DiscoveryColors.neutral200),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -383,191 +293,92 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPointsCard(BuildContext context, UserModel user) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.base,
-        vertical: 14,
-      ),
-      decoration: BoxDecoration(
-        color: DiscoveryColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: DiscoveryColors.neutral200),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: DiscoveryColors.secondaryLight,
-              borderRadius: BorderRadius.circular(12),
+  Widget _buildMenuList(List<_MenuRow> items) {
+    return Column(
+      children: [
+        for (var index = 0; index < items.length; index++) ...[
+          if (index > 0)
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 20,
+              color: DiscoveryColors.neutral200,
             ),
-            child: const Icon(
-              Icons.stars_rounded,
-              color: DiscoveryColors.secondary,
-              size: 26,
-            ),
-          ),
-          const SizedBox(width: AppDimensions.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Điểm tích lũy VexGo',
-                  style: DiscoveryTextStyles.caption.copyWith(
-                    color: DiscoveryColors.neutral600,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${user.diemTichLuy} điểm',
-                  style: DiscoveryTextStyles.h3.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: DiscoveryColors.secondaryDark,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildMenuRow(items[index]),
         ],
-      ),
+      ],
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: AppDimensions.xs),
-      child: Text(
-        title,
-        style: DiscoveryTextStyles.caption.copyWith(
-          fontWeight: FontWeight.w800,
-          color: DiscoveryColors.neutral500,
-          letterSpacing: 0.8,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuContainer(List<_MenuRow> items) {
-    return Container(
-      decoration: BoxDecoration(
-        color: DiscoveryColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: DiscoveryColors.neutral200),
-      ),
-      child: Column(
-        children: items.asMap().entries.map((entry) {
-          final idx = entry.key;
-          final item = entry.value;
-          final isLast = idx == items.length - 1;
-
-          return Column(
-            children: [
-              InkWell(
-                onTap: item.onTap,
-                borderRadius: BorderRadius.vertical(
-                  top: idx == 0 ? const Radius.circular(16) : Radius.zero,
-                  bottom: isLast ? const Radius.circular(16) : Radius.zero,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.base,
-                    vertical: 12,
+  Widget _buildMenuRow(_MenuRow item) {
+    return Material(
+      color: Colors.white,
+      child: InkWell(
+        onTap: item.onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final stackValue =
+                    constraints.maxWidth < 320 ||
+                    MediaQuery.textScalerOf(context).scale(1) > 1.3;
+                final value = Text(
+                  item.trailingText ?? '',
+                  style: DiscoveryTextStyles.bodyMedium.copyWith(
+                    color: DiscoveryColors.neutral600,
                   ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isTight =
-                          constraints.maxWidth < 280 ||
-                          MediaQuery.textScalerOf(context).scale(12) > 15;
-                      return Row(
+                );
+                return Row(
+                  children: [
+                    ExcludeSemantics(
+                      child: Icon(
+                        item.icon,
+                        size: 24,
+                        color: item.color ?? DiscoveryColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: DiscoveryColors.primaryLight,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              item.icon,
-                              color: DiscoveryColors.primary,
-                              size: 20,
+                          Text(
+                            item.title,
+                            style: DiscoveryTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: item.color ?? DiscoveryColors.neutral900,
                             ),
                           ),
-                          const SizedBox(width: AppDimensions.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.title,
-                                  style: DiscoveryTextStyles.bodyMedium
-                                      .copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: DiscoveryColors.neutral900,
-                                      ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (item.subtitle != null) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    item.subtitle!,
-                                    style: DiscoveryTextStyles.caption.copyWith(
-                                      color: DiscoveryColors.neutral500,
-                                      fontSize: 11,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                                if (isTight && item.trailingText != null) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    item.trailingText!,
-                                    style: DiscoveryTextStyles.bodySmall
-                                        .copyWith(
-                                          color: DiscoveryColors.primary,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          if (!isTight && item.trailingText != null) ...[
-                            const SizedBox(width: AppDimensions.sm),
-                            Flexible(
-                              child: Text(
-                                item.trailingText!,
-                                style: DiscoveryTextStyles.bodySmall.copyWith(
-                                  color: DiscoveryColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ] else if (item.onTap != null)
-                            const Icon(
-                              Icons.chevron_right_rounded,
-                              size: 20,
-                              color: DiscoveryColors.neutral400,
-                            ),
+                          if (stackValue && item.trailingText != null) ...[
+                            const SizedBox(height: 4),
+                            value,
+                          ],
                         ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-              if (!isLast)
-                const Divider(
-                  height: 1,
-                  indent: 56,
-                  color: DiscoveryColors.divider,
-                ),
-            ],
-          );
-        }).toList(),
+                      ),
+                    ),
+                    if (!stackValue && item.trailingText != null) ...[
+                      const SizedBox(width: 12),
+                      Flexible(child: value),
+                    ],
+                    if (item.onTap != null) ...[
+                      const SizedBox(width: 8),
+                      const ExcludeSemantics(
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 20,
+                          color: DiscoveryColors.neutral500,
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -644,14 +455,14 @@ class ProfileScreen extends StatelessWidget {
 class _MenuRow {
   final IconData icon;
   final String title;
-  final String? subtitle;
+  final Color? color;
   final String? trailingText;
   final VoidCallback? onTap;
 
   const _MenuRow({
     required this.icon,
     required this.title,
-    this.subtitle,
+    this.color,
     this.trailingText,
     this.onTap,
   });

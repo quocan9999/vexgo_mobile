@@ -1,10 +1,11 @@
+import 'package:vexgo_app/core/widgets/flat_filter_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
-import 'package:vexgo_app/core/widgets/custom_app_bar.dart';
+import 'package:vexgo_app/core/widgets/tab_page_header.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_bloc.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_event.dart';
@@ -79,9 +80,8 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
         final bloc = context.read<MyTicketsBloc>();
         return Scaffold(
           backgroundColor: DiscoveryColors.background,
-          appBar: CustomAppBar(
+          appBar: TabPageHeader(
             title: 'Vé của tôi',
-            automaticallyImplyLeading: false,
             actions: [
               if (!ApiConfig.isDemoMode)
                 IconButton(
@@ -96,7 +96,6 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
               : Column(
                   children: [
                     _buildTabsBar(context, state, bloc),
-                    const Divider(height: 1, color: DiscoveryColors.divider),
                     Expanded(
                       child: NestedScrollView(
                         headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -214,120 +213,31 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
     MyTicketsState state,
     MyTicketsBloc bloc,
   ) {
-    return Container(
-      color: DiscoveryColors.surface,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.base,
-        vertical: 8,
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            _buildTabItem(
-              key: const Key('tab-upcoming'),
-              title: 'Sắp đi',
-              count: state.upcomingTickets.length,
-              isSelected: state.selectedTab == TicketStatus.upcoming,
-              onTap: () =>
-                  bloc.add(const ChangeTabEvent(TicketStatus.upcoming)),
-            ),
-            const SizedBox(width: AppDimensions.sm),
-            _buildTabItem(
-              key: const Key('tab-completed'),
-              title: 'Đã đi',
-              count: state.completedTickets.length,
-              isSelected: state.selectedTab == TicketStatus.completed,
-              onTap: () =>
-                  bloc.add(const ChangeTabEvent(TicketStatus.completed)),
-            ),
-            const SizedBox(width: AppDimensions.sm),
-            _buildTabItem(
-              key: const Key('tab-cancelled'),
-              title: 'Đã hủy',
-              count: state.cancelledTickets.length,
-              isSelected: state.selectedTab == TicketStatus.cancelled,
-              onTap: () =>
-                  bloc.add(const ChangeTabEvent(TicketStatus.cancelled)),
-            ),
-          ],
+    const statuses = [
+      TicketStatus.upcoming,
+      TicketStatus.completed,
+      TicketStatus.cancelled,
+    ];
+    return FlatFilterBar(
+      selectedIndex: statuses.indexOf(state.selectedTab),
+      onChanged: (index) => bloc.add(ChangeTabEvent(statuses[index])),
+      options: [
+        FlatFilterOption(
+          'Sắp đi',
+          count: state.upcomingTickets.length,
+          key: const Key('tab-upcoming'),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTabItem({
-    Key? key,
-    required String title,
-    required int count,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return Semantics(
-      selected: isSelected,
-      button: true,
-      child: ConstrainedBox(
-        key: key,
-        constraints: const BoxConstraints(minHeight: 48, minWidth: 90),
-        child: Material(
-          color: isSelected
-              ? DiscoveryColors.primary
-              : DiscoveryColors.neutral100,
-          borderRadius: BorderRadius.circular(10),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: DiscoveryTextStyles.caption.copyWith(
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      color: isSelected
-                          ? Colors.white
-                          : DiscoveryColors.neutral700,
-                      fontSize: 13,
-                    ),
-                  ),
-                  if (count > 0) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.white.withValues(alpha: 0.25)
-                            : DiscoveryColors.neutral300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '$count',
-                        style: DiscoveryTextStyles.caption.copyWith(
-                          color: isSelected
-                              ? Colors.white
-                              : DiscoveryColors.neutral800,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
+        FlatFilterOption(
+          'Đã đi',
+          count: state.completedTickets.length,
+          key: const Key('tab-completed'),
         ),
-      ),
+        FlatFilterOption(
+          'Đã hủy',
+          count: state.cancelledTickets.length,
+          key: const Key('tab-cancelled'),
+        ),
+      ],
     );
   }
 

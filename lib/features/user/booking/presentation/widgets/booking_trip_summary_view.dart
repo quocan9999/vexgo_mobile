@@ -35,12 +35,10 @@ class BookingTripSummaryView extends StatelessWidget {
         state.isCheckoutLocked;
     final mediaQuery = MediaQuery.of(context);
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final availableHeight =
-        mediaQuery.size.height - mediaQuery.viewInsets.bottom;
+    final availableHeight = mediaQuery.size.height;
     final isShortViewport =
         mediaQuery.size.height < 420 || availableHeight < 380;
-    final inlineCountdown =
-        isShortViewport || textScale > 1.35 || mediaQuery.viewInsets.bottom > 0;
+    final inlineCountdown = isShortViewport || textScale > 1.35;
 
     final header = BookingCompactHeader(
       state: state,
@@ -60,6 +58,7 @@ class BookingTripSummaryView extends StatelessWidget {
 
     return DiscoveryTheme(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: DiscoveryColors.background,
         body: NestedScrollView(
           headerSliverBuilder: (context, _) => [
@@ -115,9 +114,8 @@ class BookingTripSummaryDock extends StatelessWidget {
     final enabled = state.canProceed && !busy && !expired;
 
     final mediaQuery = MediaQuery.of(context);
-    final keyboardOpen = mediaQuery.viewInsets.bottom > 0;
     final isShortViewport = mediaQuery.size.height < 420;
-    final compactDock = keyboardOpen || isShortViewport;
+    final compactDock = isShortViewport;
 
     return Material(
       color: Colors.white,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../constants/app_typography.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_dimensions.dart';
 import '../constants/app_text_styles.dart';
@@ -10,6 +10,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: AppTypography.fontFamily,
       brightness: Brightness.light,
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
@@ -23,16 +24,17 @@ class AppTheme {
         onSurface: AppColors.neutral900,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.beVietnamProTextTheme().copyWith(
-        displayLarge: AppTextStyles.h1,
-        displayMedium: AppTextStyles.h2,
-        titleLarge: AppTextStyles.h3,
-        titleMedium: AppTextStyles.titleMedium,
-        titleSmall: AppTextStyles.titleSmall,
-        bodyLarge: AppTextStyles.bodyLarge,
-        bodyMedium: AppTextStyles.bodyMedium,
-        bodySmall: AppTextStyles.bodySmall,
-      ),
+      textTheme: ThemeData(fontFamily: AppTypography.fontFamily).textTheme
+          .copyWith(
+            displayLarge: AppTextStyles.h1,
+            displayMedium: AppTextStyles.h2,
+            titleLarge: AppTextStyles.h3,
+            titleMedium: AppTextStyles.titleMedium,
+            titleSmall: AppTextStyles.titleSmall,
+            bodyLarge: AppTextStyles.bodyLarge,
+            bodyMedium: AppTextStyles.bodyMedium,
+            bodySmall: AppTextStyles.bodySmall,
+          ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
         elevation: 0,

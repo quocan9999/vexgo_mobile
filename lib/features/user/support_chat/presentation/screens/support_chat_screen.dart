@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -180,7 +181,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                       child: const Text(
                         'Đăng nhập',
                         style: TextStyle(
-                          fontFamily: 'VexGoJakarta',
+                          fontFamily: AppTypography.fontFamily,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -278,7 +279,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                       Text(
                         selected.statusLabel,
                         style: TextStyle(
-                          fontFamily: 'VexGoJakarta',
+                          fontFamily: AppTypography.fontFamily,
                           fontSize: isShort ? 10 : 12,
                           color: DiscoveryColors.neutral600,
                         ),
@@ -323,7 +324,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                       label: const Text(
                         'Hội thoại mới',
                         style: TextStyle(
-                          fontFamily: 'VexGoJakarta',
+                          fontFamily: AppTypography.fontFamily,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -353,7 +354,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                               child: Text(
                                 'Realtime đang kết nối lại. Bạn vẫn có thể gửi và tải lại tin nhắn.',
                                 style: TextStyle(
-                                  fontFamily: 'VexGoJakarta',
+                                  fontFamily: AppTypography.fontFamily,
                                   fontSize: 11,
                                   color: DiscoveryColors.warningDark,
                                   fontWeight: FontWeight.w500,
@@ -385,7 +386,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                               child: Text(
                                 state.error!,
                                 style: const TextStyle(
-                                  fontFamily: 'VexGoJakarta',
+                                  fontFamily: AppTypography.fontFamily,
                                   fontSize: 11,
                                   color: DiscoveryColors.error,
                                 ),
@@ -458,7 +459,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                               const Text(
                                 'Nhân viên đang nhập…',
                                 style: TextStyle(
-                                  fontFamily: 'VexGoJakarta',
+                                  fontFamily: AppTypography.fontFamily,
                                   fontSize: 12,
                                   color: DiscoveryColors.neutral600,
                                   fontStyle: FontStyle.italic,
@@ -487,7 +488,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                             'Hội thoại đã kết thúc hoặc chưa thể gửi tin. Mở hội thoại mới để được hỗ trợ.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontFamily: 'VexGoJakarta',
+                              fontFamily: AppTypography.fontFamily,
                               fontSize: 12,
                               color: DiscoveryColors.neutral600,
                             ),
@@ -589,7 +590,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
               child: Text(
                 'Chưa có nhà xe để liên hệ.',
                 style: TextStyle(
-                  fontFamily: 'VexGoJakarta',
+                  fontFamily: AppTypography.fontFamily,
                   color: DiscoveryColors.neutral600,
                 ),
               ),
@@ -758,7 +759,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                       : 'Bắt đầu hội thoại',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontFamily: 'VexGoJakarta',
+                    fontFamily: AppTypography.fontFamily,
                     fontSize: 13,
                     color: DiscoveryColors.neutral500,
                   ),

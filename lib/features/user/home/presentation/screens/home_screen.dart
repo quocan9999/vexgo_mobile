@@ -1,3 +1,5 @@
+import 'package:vexgo_app/features/user/app_info/presentation/screens/app_information_screen.dart';
+import '../widgets/available_offers_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -159,10 +161,15 @@ class _HomeScreenContent extends StatelessWidget {
               ),
             ),
           ),
+          if (state.operators.isNotEmpty)
+            SliverToBoxAdapter(
+              child: AvailableOffersSection(operators: state.operators),
+            ),
           if (state.popularRoutes.isNotEmpty)
             const SliverToBoxAdapter(child: PopularRoutesSection()),
           if (state.operators.isNotEmpty)
             const SliverToBoxAdapter(child: FeaturedOperatorsSection()),
+          const SliverToBoxAdapter(child: BookingGuideSection()),
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
       ),

@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/network/token_storage.dart';
+import 'package:vexgo_app/features/user/booking/presentation/widgets/promotion_code_sheet.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -404,6 +406,90 @@ void main() {
     expect(find.text('Chọn hoặc nhập mã khuyến mãi'), findsOneWidget);
     expect(bloc.state.canProceed, isFalse);
   });
+  testWidgets(
+    'Promotion sheet keeps rejected code for correction and closes only after acceptance',
+    (tester) async {
+      final repo = _FakeBookingRepo()..shouldFailQuote = true;
+      final bloc = await _createStep5Bloc(
+        tester,
+        seatRepo: _FakeSeatRepo(),
+        bookingRepo: repo,
+        prefillQuote: false,
+      );
+      addTearDown(bloc.close);
+      await _pumpWithViewport(tester, _buildStep5Harness(bloc));
+      final entry = find.text('Chọn hoặc nhập mã khuyến mãi');
+      await tester.ensureVisible(entry);
+      await tester.tap(entry);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText)).autofocus,
+        isFalse,
+      );
+      await tester.enterText(find.byType(TextFormField), 'INVALID');
+      await tester.tap(find.text('Áp dụng'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextFormField), findsOneWidget);
+      expect(
+        tester
+            .widget<TextFormField>(find.byType(TextFormField))
+            .controller!
+            .text,
+        'INVALID',
+      );
+      expect(bloc.state.quoteError, isNotNull);
+      expect(find.text(bloc.state.quoteError!), findsWidgets);
+      repo.shouldFailQuote = false;
+      await tester.enterText(find.byType(TextFormField), 'VEXGO30');
+      await tester.tap(find.text('Áp dụng'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextFormField), findsNothing);
+      expect(bloc.state.quote!.appliedPromotionCode, 'VEXGO30');
+      expect(repo.quoteCalls, 2);
+    },
+  );
+
+  testWidgets(
+    'Promotion sheet scrolls with large text and keyboard, and closes on session change',
+    (tester) async {
+      TokenStorage.setStorageAdapterForTesting(InMemorySecureStorageAdapter());
+      addTearDown(TokenStorage.resetStorageAdapter);
+      final repo = _FakeBookingRepo();
+      final bloc = await _createStep5Bloc(
+        tester,
+        seatRepo: _FakeSeatRepo(),
+        bookingRepo: repo,
+        prefillQuote: false,
+      );
+      addTearDown(bloc.close);
+      await _pumpWithViewport(
+        tester,
+        Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => PromotionCodeSheet.show(context, bloc),
+              child: const Text('Open code'),
+            ),
+          ),
+        ),
+        size: const Size(320, 740),
+        textScale: 2,
+        viewInsets: const EdgeInsets.only(bottom: 280),
+      );
+      await tester.tap(find.text('Open code'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Áp dụng'));
+      await tester.tap(find.text('Áp dụng'));
+      await tester.pumpAndSettle();
+      expect(find.text('Nhập mã khuyến mãi để tiếp tục.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await TokenStorage.clearTokens();
+      await tester.pumpAndSettle();
+      expect(find.byType(PromotionCodeSheet), findsNothing);
+      expect(repo.quoteCalls, 0);
+    },
+  );
+
   testWidgets('Pending or invalidated quote hides prior promotion success', (
     tester,
   ) async {
@@ -611,7 +697,7 @@ void main() {
     );
 
     testWidgets(
-      '4. Promotion dialog workflow: enter valid code, apply, show discount, and remove code cleanly',
+      '4. Promotion sheet workflow: enter valid code, apply, show discount, and remove code cleanly',
       (tester) async {
         final seatRepo = _FakeSeatRepo();
         final bookingRepo = _FakeBookingRepo();
@@ -637,10 +723,10 @@ void main() {
 
         expect(find.text('Mã khuyến mãi'), findsOneWidget);
         expect(find.byType(TextFormField), findsOneWidget);
-        expect(find.text('Kiểm tra mã'), findsOneWidget);
+        expect(find.text('Áp dụng'), findsOneWidget);
 
         await tester.enterText(find.byType(TextFormField), 'VEXGO30');
-        await tester.tap(find.text('Kiểm tra mã'));
+        await tester.tap(find.text('Áp dụng'));
         await tester.pumpAndSettle();
 
         // Verify ApplyPromotionCodeEvent was handled
