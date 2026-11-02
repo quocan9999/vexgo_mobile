@@ -290,7 +290,7 @@ void main() {
           expect(h.posts.length, 1);
           expect(h.reader.state.status, TicketReadStatus.failure);
           expect(h.reader.state.ticket, isNull);
-          expect(h.reader.state.message, contains('kiểm tra riêng'));
+          expect(h.reader.state.message, contains('liên hệ hỗ trợ'));
           h.staleReadAfterCancel = false;
           h.failedReadAfterCancel = false;
           await h.reader.refresh();
@@ -323,10 +323,7 @@ void main() {
         expect(h.lookups, 3);
         expect(h.reader.state.ticket!.status, TicketStatus.cancelled);
         expect(h.reader.state.ticket!.canShowQr, false);
-        expect(
-          h.reader.state.message,
-          contains('hoàn tiền cần được kiểm tra riêng'),
-        );
+        expect(h.reader.state.message, contains('liên hệ hỗ trợ'));
         expect(h.owner.state.tickets, isEmpty);
       },
     );
@@ -436,7 +433,7 @@ void main() {
         );
         expect(h.posts.length, 1);
         expect(h.reader.state.ticket!.status, TicketStatus.cancelled);
-        expect(h.reader.state.message, contains('kiểm tra riêng'));
+        expect(h.reader.state.message, contains('liên hệ hỗ trợ'));
       },
     );
     test(

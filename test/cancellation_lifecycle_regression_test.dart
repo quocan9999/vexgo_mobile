@@ -218,7 +218,7 @@ void main() {
       });
       await flush();
       expect(bloc.state.cancellationStatus, TicketCancellationStatus.succeeded);
-      expect(bloc.state.successMessage, contains('xác nhận riêng'));
+      expect(bloc.state.successMessage, contains('liên hệ hỗ trợ'));
       expect(bloc.state.tickets.single.rawStatus, 'HUY');
       await bloc.close();
     },

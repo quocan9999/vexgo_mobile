@@ -1015,7 +1015,7 @@ void main() {
           emitsThrough(
             predicate<MyTicketsState>((state) {
               return state.successMessage != null &&
-                  state.successMessage!.contains('đang chờ xử lý hoàn tiền');
+                  state.successMessage!.contains('liên hệ hỗ trợ');
             }),
           ),
         );

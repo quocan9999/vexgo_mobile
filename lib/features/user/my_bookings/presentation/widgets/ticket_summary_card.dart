@@ -372,29 +372,34 @@ class TicketSummaryCard extends StatelessWidget {
         color: DiscoveryColors.errorLight,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            size: 14,
-            color: DiscoveryColors.error,
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              'Lý do: ${ticket.cancelReason ?? "Đã hủy theo yêu cầu"}',
-              style: DiscoveryTextStyles.caption.copyWith(
-                color: DiscoveryColors.errorDark,
-                fontSize: 11,
+          Row(
+            children: [
+              const Icon(
+                Icons.info_outline_rounded,
+                size: 14,
+                color: DiscoveryColors.error,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Lý do: ${ticket.cancelReason ?? "Đã hủy theo yêu cầu"}',
+                  style: DiscoveryTextStyles.caption.copyWith(
+                    color: DiscoveryColors.errorDark,
+                    fontSize: 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
           if (ticket.refundAmount != null) ...[
-            const SizedBox(width: 6),
+            const SizedBox(height: 4),
             Text(
-              'Hoàn: ${CurrencyFormatter.format(ticket.refundAmount!)}',
+              'Dự kiến hoàn: ${CurrencyFormatter.format(ticket.refundAmount!)}',
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.successDark,
                 fontWeight: FontWeight.w700,

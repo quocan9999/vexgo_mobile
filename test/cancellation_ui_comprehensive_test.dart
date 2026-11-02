@@ -236,7 +236,7 @@ void main() {
         // Disclaimer
         expect(
           find.text(
-            'Hủy vé không đồng nghĩa đã hoàn tiền ngay. Trạng thái hoàn tiền cần được đối soát và xử lý theo chính sách hoàn tiền.',
+            'Hệ thống không hoàn tiền online. Sau khi hủy vé, vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền theo chính sách nhà xe.',
           ),
           findsOneWidget,
         );
@@ -649,7 +649,7 @@ void main() {
         expect(find.textContaining('Số tiền dự kiến hoàn:'), findsOneWidget);
         expect(find.textContaining('160.000'), findsOneWidget);
         expect(
-          find.textContaining('Hủy vé không đồng nghĩa đã hoàn tiền.'),
+          find.textContaining('Hệ thống không hoàn tiền online.'),
           findsOneWidget,
         );
 

@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class _MockTicketRepo extends MockBookingRepository {
   final Map<String, TicketModel> ticketsById = {};
   final Map<String, TicketModel> ticketsByCode = {};
   int getTicketByIdCalls = 0;
+  int cancelCalls = 0;
   Completer<TicketModel?>? nextGetTicketCompleter;
 
   void addTicket(TicketModel ticket) {
@@ -68,6 +70,7 @@ class _MockTicketRepo extends MockBookingRepository {
     String? reason,
     required double expectedCancelFeeRate,
   }) async {
+    cancelCalls++;
     return {'success': true, 'refundAmount': 200000};
   }
 }
@@ -417,6 +420,98 @@ void main() {
         );
         expect(find.text('Thay đổi kế hoạch cá nhân'), findsOneWidget);
         expect(find.text(CurrencyFormatter.format(315000)), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Cancelled ticket explains manual refund and opens support without sending a request',
+      (tester) async {
+        final router = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, _) =>
+                  TicketDetailScreen(initialTicket: cancelledTicket),
+            ),
+            GoRoute(
+              path: '/support-chat',
+              builder: (_, _) =>
+                  const Scaffold(body: Text('Support destination')),
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+        await tester.pumpWidget(
+          BlocProvider.value(
+            value: bloc,
+            child: MaterialApp.router(routerConfig: router),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.text('Liên hệ hỗ trợ'),
+          300,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('Hệ thống không hoàn tiền online'),
+          findsOneWidget,
+        );
+        await tester.tap(find.text('Liên hệ hỗ trợ'));
+        await tester.pumpAndSettle();
+        expect(find.text('Support destination'), findsOneWidget);
+        expect(repo.cancelCalls, 0);
+      },
+    );
+
+    testWidgets(
+      'Guest cancelled lookup explains support login and opens existing chat route',
+      (tester) async {
+        final router = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, _) => const Scaffold(body: GuestTicketLookupPanel()),
+            ),
+            GoRoute(
+              path: '/support-chat',
+              builder: (_, _) =>
+                  const Scaffold(body: Text('Support login destination')),
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+        await tester.pumpWidget(
+          BlocProvider.value(
+            value: bloc,
+            child: MaterialApp.router(routerConfig: router),
+          ),
+        );
+        await tester.enterText(
+          find.byKey(const Key('lookup-ticket-code')),
+          cancelledTicket.ticketCode,
+        );
+        await tester.enterText(
+          find.byKey(const Key('lookup-phone')),
+          '0901234567',
+        );
+        await tester.tap(find.text('Tra cứu vé'));
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.text('Liên hệ hỗ trợ'),
+          300,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('Đăng nhập để chat với nhà xe'),
+          findsOneWidget,
+        );
+        await tester.tap(find.text('Liên hệ hỗ trợ'));
+        await tester.pumpAndSettle();
+        expect(find.text('Support login destination'), findsOneWidget);
+        expect(repo.cancelCalls, 0);
       },
     );
 

@@ -1,3 +1,5 @@
+import 'package:go_router/go_router.dart';
+import 'package:vexgo_app/app/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/features/user/receipts/presentation/receipt_entry_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -135,6 +137,16 @@ class _GuestTicketLookupPanelState extends State<GuestTicketLookupPanel> {
             onPressed: _reader.refresh,
             child: const Text('Cập nhật trạng thái vé'),
           ),
+          if (state.ticket!.status == TicketStatus.cancelled) ...[
+            const Text(
+              'Hệ thống không hoàn tiền online. Để yêu cầu hoàn tiền sau khi hủy vé, vui lòng liên hệ hỗ trợ và cung cấp mã vé. Đăng nhập để chat với nhà xe.',
+            ),
+            TextButton.icon(
+              onPressed: () => context.push(AppRoutes.supportChat),
+              icon: const Icon(Icons.support_agent),
+              label: const Text('Liên hệ hỗ trợ'),
+            ),
+          ],
           if (state.ticket!.status == TicketStatus.upcoming)
             OutlinedButton(
               onPressed: () => GuestCancelTicketSheet.show(context, _reader),

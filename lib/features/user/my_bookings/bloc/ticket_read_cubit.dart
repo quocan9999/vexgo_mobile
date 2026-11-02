@@ -276,7 +276,7 @@ class TicketReadCubit extends Cubit<TicketReadState> {
           error: cancelled ? null : errorMessage ?? state.error,
           cancellationUncertain: _uncertainCancellation,
           message: accepted || cancelled
-              ? 'Yêu cầu hủy vé đã được xác nhận. Việc hoàn tiền cần được kiểm tra riêng.'
+              ? 'Yêu cầu hủy vé đã được xác nhận. Vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền; hệ thống không hoàn tiền online.'
               : null,
         ),
       );

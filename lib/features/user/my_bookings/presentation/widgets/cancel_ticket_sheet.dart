@@ -709,7 +709,7 @@ class _CancelTicketSheetState extends State<CancelTicketSheet> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Hủy vé không đồng nghĩa đã hoàn tiền ngay. Trạng thái hoàn tiền cần được đối soát và xử lý theo chính sách hoàn tiền.',
+                                'Hệ thống không hoàn tiền online. Sau khi hủy vé, vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền theo chính sách nhà xe.',
                                 style: DiscoveryTextStyles.caption.copyWith(
                                   color: DiscoveryColors.neutral600,
                                   fontSize: 11,

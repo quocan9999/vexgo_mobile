@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vexgo_app/app/routes.dart';
 import 'package:vexgo_app/features/user/receipts/presentation/receipt_entry_button.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -539,7 +540,7 @@ class _TicketDetailContent extends StatelessWidget {
                     const SizedBox(width: AppDimensions.sm),
                     Expanded(
                       child: Text(
-                        'Vé này đã bị hủy. Trạng thái hoàn tiền chưa được xác nhận. Vui lòng kiểm tra với nhà xe hoặc đơn vị thanh toán.',
+                        'Vé này đã bị hủy. Hệ thống không hoàn tiền online. Vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền theo chính sách nhà xe.',
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.errorDark,
                           height: 1.4,
@@ -548,6 +549,11 @@ class _TicketDetailContent extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              const SizedBox(height: AppDimensions.sm),
+              CustomButton(
+                text: 'Liên hệ hỗ trợ',
+                onPressed: () => context.push(AppRoutes.supportChat),
               ),
               const SizedBox(height: AppDimensions.sm),
               CustomButton(
