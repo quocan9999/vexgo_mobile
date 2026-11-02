@@ -131,6 +131,8 @@ class _FakeBookingRepo implements BookingRepository {
   int quoteCalls = 0;
   String? lastCode;
   String? lastPhone;
+  int? lastPickupTripPointId;
+  int? lastDropoffTripPointId;
   bool shouldFailQuote = false;
   int discountToReturn = 0;
 
@@ -143,10 +145,14 @@ class _FakeBookingRepo implements BookingRepository {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     quoteCalls++;
     lastCode = promotionCode;
     lastPhone = contactPhone;
+    lastPickupTripPointId = pickupTripPointId;
+    lastDropoffTripPointId = dropoffTripPointId;
     if (shouldFailQuote) {
       throw StateError('Mã khuyến mãi không hợp lệ hoặc đã hết lượt dùng.');
     }
@@ -320,6 +326,56 @@ Future<void> _pumpWithViewport(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  testWidgets(
+    'Changing either trip point invalidates and requotes with its ID',
+    (tester) async {
+      final repo = _FakeBookingRepo();
+      final bloc = await _createStep5Bloc(
+        tester,
+        seatRepo: _FakeSeatRepo(),
+        bookingRepo: repo,
+      );
+      addTearDown(bloc.close);
+      expect(bloc.state.quote, isNotNull);
+      bloc.add(
+        const SelectPickupPointEvent(
+          StopPointModel(
+            id: '15',
+            tripPointId: 15,
+            name: 'Bến A',
+            time: '09:00',
+            address: 'A',
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(bloc.state.quote, isNull);
+      bloc.add(const RefreshBookingQuoteEvent());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(repo.lastPickupTripPointId, 15);
+      expect(bloc.state.quote, isNotNull);
+      bloc.add(
+        const SelectDropoffPointEvent(
+          StopPointModel(
+            id: '16',
+            tripPointId: 16,
+            name: 'Bến B',
+            time: '15:00',
+            address: 'B',
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(bloc.state.quote, isNull);
+      bloc.add(const RefreshBookingQuoteEvent());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(repo.lastPickupTripPointId, 15);
+      expect(repo.lastDropoffTripPointId, 16);
+      expect(bloc.state.quote, isNotNull);
+    },
+  );
   setUpAll(() async {
     final loader = FontLoader('VexGoJakarta')
       ..addFont(rootBundle.load('assets/fonts/PlusJakartaSans.ttf'));

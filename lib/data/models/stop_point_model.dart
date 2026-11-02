@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 
 class StopPointModel extends Equatable {
   final String id;
+  final int? tripPointId;
+  final num surcharge;
   final String name;
   final String time;
   final String address;
@@ -10,6 +12,8 @@ class StopPointModel extends Equatable {
 
   const StopPointModel({
     required this.id,
+    this.tripPointId,
+    this.surcharge = 0,
     required this.name,
     required this.time,
     required this.address,
@@ -19,7 +23,9 @@ class StopPointModel extends Equatable {
 
   factory StopPointModel.fromJson(Map<String, dynamic> json) {
     return StopPointModel(
-      id: json['id'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      tripPointId: (json['diemDonTraChuyenXeId'] as num?)?.toInt(),
+      surcharge: json['phuPhi'] as num? ?? 0,
       name: json['name'] as String? ?? '',
       time: json['time'] as String? ?? '',
       address: json['address'] as String? ?? '',
@@ -30,6 +36,8 @@ class StopPointModel extends Equatable {
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    if (tripPointId != null) 'diemDonTraChuyenXeId': tripPointId,
+    'phuPhi': surcharge,
     'name': name,
     'time': time,
     'address': address,
@@ -51,5 +59,14 @@ class StopPointModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, time, address, type, isDefault];
+  List<Object?> get props => [
+    id,
+    tripPointId,
+    surcharge,
+    name,
+    time,
+    address,
+    type,
+    isDefault,
+  ];
 }

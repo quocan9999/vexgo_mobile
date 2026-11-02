@@ -109,6 +109,13 @@ class LogoutEvent extends AuthEvent {
   const LogoutEvent();
 }
 
+class HydratePushPreferenceEvent extends AuthEvent {
+  final bool enabled;
+  const HydratePushPreferenceEvent(this.enabled);
+  @override
+  List<Object?> get props => [enabled];
+}
+
 class ClearPendingRegistrationEvent extends AuthEvent {
   const ClearPendingRegistrationEvent();
 }

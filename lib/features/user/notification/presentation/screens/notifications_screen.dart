@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/network/token_storage.dart';
+import 'package:vexgo_app/data/repositories/booking_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -12,8 +14,77 @@ import '../../bloc/notification_bloc.dart';
 import '../../bloc/notification_event.dart';
 import '../../bloc/notification_state.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen>
+    with WidgetsBindingObserver {
+  bool _opening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    context.read<NotificationBloc>().add(const LoadNotificationsEvent());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<NotificationBloc>().add(const LoadNotificationsEvent());
+    }
+  }
+
+  Future<void> _openNotification(NotificationModel item) async {
+    if (_opening || context.read<NotificationBloc>().state.requiresLogin) {
+      return;
+    }
+    context.read<NotificationBloc>().add(MarkNotificationAsReadEvent(item.id));
+    if (item.ticketId == null) {
+      if (item.ticketCode != null || item.bookingId != null) {
+        context.push('/my-tickets');
+      }
+      return;
+    }
+    _opening = true;
+    final version = TokenStorage.sessionVersion;
+    try {
+      final ticket = await context.read<BookingRepository>().getTicketById(
+        item.ticketId!,
+      );
+      if (!mounted ||
+          version != TokenStorage.sessionVersion ||
+          context.read<NotificationBloc>().state.requiresLogin) {
+        return;
+      }
+      if (ticket == null) throw StateError('Ticket unavailable');
+      await context.push('/ticket-detail', extra: ticket);
+    } catch (_) {
+      if (mounted &&
+          version == TokenStorage.sessionVersion &&
+          !context.read<NotificationBloc>().state.requiresLogin) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Không thể mở vé. Vui lòng thử lại trong Vé của tôi.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      _opening = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,12 +244,7 @@ class NotificationsScreen extends StatelessWidget {
                             final item = list[index];
                             return _NotificationItemCard(
                               item: item,
-                              onTap: () {
-                                bloc.add(MarkNotificationAsReadEvent(item.id));
-                                if (item.ticketCode != null) {
-                                  context.push('/my-tickets');
-                                }
-                              },
+                              onTap: () => _openNotification(item),
                             );
                           },
                         ),

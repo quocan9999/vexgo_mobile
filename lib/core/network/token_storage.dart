@@ -61,6 +61,10 @@ class TokenStorage {
   static Future<void> _writes = Future<void>.value();
   static final _invalidations = StreamController<void>.broadcast(sync: true);
   static final _sessionChanges = StreamController<void>.broadcast(sync: true);
+  static final _credentialChanges = StreamController<void>.broadcast(
+    sync: true,
+  );
+  static Stream<void> get credentialChanges => _credentialChanges.stream;
 
   /// Changes on login/logout, but stays stable during refresh token rotation.
   static int get sessionVersion => _sessionVersion;
@@ -189,7 +193,9 @@ class TokenStorage {
       if (expectedVersion == _sessionVersion) await clearTokens();
       return false;
     }
-    return !_cleared && expectedVersion == _sessionVersion;
+    final current = !_cleared && expectedVersion == _sessionVersion;
+    if (current) _credentialChanges.add(null);
+    return current;
   }
 
   /// Check if user has an active access token

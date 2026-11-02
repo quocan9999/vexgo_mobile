@@ -152,6 +152,8 @@ class _FakeBookingRepository implements BookingRepository {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     quoteCalls++;
     lastQuotePhone = contactPhone;

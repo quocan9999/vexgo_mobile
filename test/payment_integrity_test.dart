@@ -30,6 +30,8 @@ class FakeBookingRemoteDataSource implements BookingRemoteDataSource {
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     if (errorToThrow != null) throw errorToThrow!;
     return createdBooking =
@@ -68,6 +70,8 @@ class FakeBookingRemoteDataSource implements BookingRemoteDataSource {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async => throw UnimplementedError();
 
   @override

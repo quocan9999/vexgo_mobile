@@ -1,3 +1,7 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../notification/bloc/notification_bloc.dart';
+import '../notification/bloc/notification_event.dart';
+import '../notification/bloc/notification_state.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +13,13 @@ class MainShellScreen extends StatelessWidget {
 
   const MainShellScreen({super.key, required this.navigationShell});
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(BuildContext context, int index) {
+    if (index == 2) {
+      final bloc = context.read<NotificationBloc>();
+      if (bloc.state.status != NotificationStatus.initial) {
+        bloc.add(const LoadNotificationsEvent());
+      }
+    }
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
@@ -33,7 +43,7 @@ class MainShellScreen extends StatelessWidget {
         ),
         child: BottomNavigationBar(
           currentIndex: navigationShell.currentIndex,
-          onTap: _onItemTapped,
+          onTap: (index) => _onItemTapped(context, index),
           backgroundColor: Colors.white,
           selectedItemColor: navigationShell.currentIndex == 0
               ? DiscoveryColors.primary

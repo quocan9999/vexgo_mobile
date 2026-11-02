@@ -461,6 +461,8 @@ class _MockCountingBookingRepository extends HybridBookingRepository {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async => BookingQuoteModel(
     unitPrice: 250000,
     seatCount: seatIds.length,
@@ -485,6 +487,8 @@ class _MockCountingBookingRepository extends HybridBookingRepository {
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     createBookingCallCount++;
     return BookingModel(

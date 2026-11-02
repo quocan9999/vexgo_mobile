@@ -239,6 +239,8 @@ abstract class BookingRepository {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   });
 
   Future<PromotionValidationModel> validatePromotion({
@@ -253,6 +255,8 @@ abstract class BookingRepository {
     required List<int> seatIds,
     required String pickupPoint,
     required String dropoffPoint,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
@@ -379,6 +383,8 @@ class MockBookingRepository implements BookingRepository {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     const unitPrice = 280000;
     final seatCount = seatIds.length;
@@ -441,6 +447,8 @@ class MockBookingRepository implements BookingRepository {
     required List<int> seatIds,
     required String pickupPoint,
     required String dropoffPoint,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
@@ -653,6 +661,8 @@ class HybridBookingRepository implements BookingRepository {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     try {
       return await remoteBookingDataSource.getBookingQuote(
@@ -660,6 +670,8 @@ class HybridBookingRepository implements BookingRepository {
         seatIds: seatIds,
         promotionCode: promotionCode,
         contactPhone: contactPhone,
+        pickupTripPointId: pickupTripPointId,
+        dropoffTripPointId: dropoffTripPointId,
       );
     } catch (e) {
       if (kDebugMode) {
@@ -671,6 +683,8 @@ class HybridBookingRepository implements BookingRepository {
           seatIds: seatIds,
           promotionCode: promotionCode,
           contactPhone: contactPhone,
+          pickupTripPointId: pickupTripPointId,
+          dropoffTripPointId: dropoffTripPointId,
         );
       }
       rethrow;
@@ -715,6 +729,8 @@ class HybridBookingRepository implements BookingRepository {
     required List<int> seatIds,
     required String pickupPoint,
     required String dropoffPoint,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
@@ -735,6 +751,8 @@ class HybridBookingRepository implements BookingRepository {
         seatIds: seatIds,
         pickupPoint: pickupPoint,
         dropoffPoint: dropoffPoint,
+        pickupTripPointId: pickupTripPointId,
+        dropoffTripPointId: dropoffTripPointId,
         contact: contact,
         promotionCode: promotionCode,
         holdToken: holdToken,
@@ -931,12 +949,16 @@ class RealBookingRepository implements BookingRepository {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) {
     return remoteBookingDataSource.getBookingQuote(
       tripId: tripId,
       seatIds: seatIds,
       promotionCode: promotionCode,
       contactPhone: contactPhone,
+      pickupTripPointId: pickupTripPointId,
+      dropoffTripPointId: dropoffTripPointId,
     );
   }
 
@@ -961,6 +983,8 @@ class RealBookingRepository implements BookingRepository {
     required List<int> seatIds,
     required String pickupPoint,
     required String dropoffPoint,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
@@ -980,6 +1004,8 @@ class RealBookingRepository implements BookingRepository {
       seatIds: seatIds,
       pickupPoint: pickupPoint,
       dropoffPoint: dropoffPoint,
+      pickupTripPointId: pickupTripPointId,
+      dropoffTripPointId: dropoffTripPointId,
       contact: contact,
       promotionCode: promotionCode,
       holdToken: holdToken,

@@ -13,6 +13,8 @@ abstract class BookingRemoteDataSource {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   });
 
   Future<PromotionValidationModel> validatePromotion({
@@ -27,6 +29,8 @@ abstract class BookingRemoteDataSource {
     required List<int> seatIds,
     required String pickupPoint,
     required String dropoffPoint,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
@@ -54,10 +58,14 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     final body = {
       'tripId': tripId,
       'seatIds': seatIds,
+      'diemDonChuyenXeId': ?pickupTripPointId,
+      'diemTraChuyenXeId': ?dropoffTripPointId,
       if (contactPhone != null && contactPhone.trim().isNotEmpty)
         'contactPhone': contactPhone.trim(),
       if (promotionCode != null && promotionCode.isNotEmpty)
@@ -104,6 +112,8 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required List<int> seatIds,
     required String pickupPoint,
     required String dropoffPoint,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
     required PassengerInfo contact,
     String? promotionCode,
     String? holdToken,
@@ -118,6 +128,8 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     final body = {
       'tripId': tripId,
       'seatIds': seatIds,
+      'diemDonChuyenXeId': ?pickupTripPointId,
+      'diemTraChuyenXeId': ?dropoffTripPointId,
       'pickupPoint': pickupPoint,
       'dropoffPoint': dropoffPoint,
       'contact': contact.toJson(),

@@ -10,6 +10,8 @@ class NotificationModel extends Equatable {
   final DateTime createdAt;
   final bool isRead;
   final String? ticketCode;
+  final String? ticketId;
+  final String? bookingId;
   final String? voucherCode;
 
   const NotificationModel({
@@ -20,6 +22,8 @@ class NotificationModel extends Equatable {
     required this.createdAt,
     this.isRead = false,
     this.ticketCode,
+    this.ticketId,
+    this.bookingId,
     this.voucherCode,
   });
 
@@ -31,6 +35,8 @@ class NotificationModel extends Equatable {
     DateTime? createdAt,
     bool? isRead,
     String? ticketCode,
+    String? ticketId,
+    String? bookingId,
     String? voucherCode,
   }) {
     return NotificationModel(
@@ -41,6 +47,8 @@ class NotificationModel extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       isRead: isRead ?? this.isRead,
       ticketCode: ticketCode ?? this.ticketCode,
+      ticketId: ticketId ?? this.ticketId,
+      bookingId: bookingId ?? this.bookingId,
       voucherCode: voucherCode ?? this.voucherCode,
     );
   }
@@ -82,6 +90,8 @@ class NotificationModel extends Equatable {
       createdAt: createdAt,
       isRead: isRead,
       ticketCode: json['ticketCode'] as String?,
+      ticketId: json['ticketId']?.toString(),
+      bookingId: json['bookingId']?.toString(),
       voucherCode: json['voucherCode'] as String?,
     );
   }
@@ -111,6 +121,8 @@ class NotificationModel extends Equatable {
       'createdAt': createdAt.toIso8601String(),
       'isRead': isRead,
       if (ticketCode != null) 'ticketCode': ticketCode,
+      if (ticketId != null) 'ticketId': ticketId,
+      if (bookingId != null) 'bookingId': bookingId,
       if (voucherCode != null) 'voucherCode': voucherCode,
     };
   }
@@ -124,6 +136,8 @@ class NotificationModel extends Equatable {
     createdAt,
     isRead,
     ticketCode,
+    ticketId,
+    bookingId,
     voucherCode,
   ];
 }

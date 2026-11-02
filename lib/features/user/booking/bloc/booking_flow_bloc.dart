@@ -473,7 +473,15 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     Emitter<BookingFlowState> emit,
   ) {
     if (_sessionInvalidated || state.isCheckoutLocked) return;
-    emit(state.copyWith(selectedPickupPoint: event.point));
+    _invalidateQuote();
+    emit(
+      state.copyWith(
+        selectedPickupPoint: event.point,
+        clearQuote: true,
+        quoteLoading: false,
+        quoteError: null,
+      ),
+    );
   }
 
   void _onSelectDropoffPoint(
@@ -481,7 +489,15 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     Emitter<BookingFlowState> emit,
   ) {
     if (_sessionInvalidated || state.isCheckoutLocked) return;
-    emit(state.copyWith(selectedDropoffPoint: event.point));
+    _invalidateQuote();
+    emit(
+      state.copyWith(
+        selectedDropoffPoint: event.point,
+        clearQuote: true,
+        quoteLoading: false,
+        quoteError: null,
+      ),
+    );
   }
 
   Future<void> _onUpdatePassengerInfo(
@@ -576,7 +592,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
 
   String _quoteKey(BookingFlowState draft) {
     final ids = draft.selectedSeats.map((seat) => seat.id).toList()..sort();
-    return '${draft.trip?.id}|${ids.join(',')}|${draft.passengerName.trim()}|${draft.passengerPhone.trim()}|${draft.passengerEmail.trim()}|${draft.requestedPromotionCode}|${TokenStorage.sessionVersion}';
+    return '${draft.trip?.id}|${ids.join(',')}|${draft.passengerName.trim()}|${draft.passengerPhone.trim()}|${draft.passengerEmail.trim()}|${draft.selectedPickupPoint?.tripPointId}|${draft.selectedDropoffPoint?.tripPointId}|${draft.requestedPromotionCode}|${TokenStorage.sessionVersion}';
   }
 
   bool get _hasCurrentQuote =>
@@ -611,6 +627,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
             ? null
             : draft.requestedPromotionCode,
         contactPhone: draft.passengerPhone.trim(),
+        pickupTripPointId: draft.selectedPickupPoint?.tripPointId,
+        dropoffTripPointId: draft.selectedDropoffPoint?.tripPointId,
       );
       if (_sessionInvalidated ||
           _closing ||
@@ -1099,6 +1117,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           seatIds: draft.selectedSeats.map((s) => s.numericSeatId!).toList(),
           pickupPoint: draft.selectedPickupPoint!.name,
           dropoffPoint: draft.selectedDropoffPoint!.name,
+          pickupTripPointId: draft.selectedPickupPoint?.tripPointId,
+          dropoffTripPointId: draft.selectedDropoffPoint?.tripPointId,
           contact: PassengerInfo(
             fullName: draft.passengerName.trim(),
             phone: draft.passengerPhone.trim(),

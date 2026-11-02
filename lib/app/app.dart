@@ -1,4 +1,7 @@
 import 'dart:async';
+import '../core/notifications/push_notifications.dart';
+import '../core/network/token_storage.dart';
+import '../features/user/notification/bloc/notification_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/network/api_config.dart';
@@ -18,6 +21,8 @@ import '../core/network/support_chat_socket.dart';
 import '../data/repositories/support_chat_repository.dart';
 import '../features/user/support_chat/bloc/support_chat_cubit.dart';
 import 'routes.dart';
+
+final _pushMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 class VexGoApp extends StatelessWidget {
   const VexGoApp({super.key});
@@ -81,6 +86,7 @@ class VexGoApp extends StatelessWidget {
         ],
         child: _SessionSynchronization(
           child: MaterialApp.router(
+            scaffoldMessengerKey: _pushMessengerKey,
             title: 'VexGo - Đặt vé xe khách trực tuyến',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
@@ -100,21 +106,59 @@ class _SessionSynchronization extends StatefulWidget {
       _SessionSynchronizationState();
 }
 
-class _SessionSynchronizationState extends State<_SessionSynchronization> {
+class _SessionSynchronizationState extends State<_SessionSynchronization>
+    with WidgetsBindingObserver {
   StreamSubscription<AuthState>? _subscription;
+  StreamSubscription<PushSignal>? _pushSubscription;
   String? _previousSession;
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final auth = context.read<AuthBloc>();
     _synchronize(auth.state);
     _subscription = auth.stream.listen(_synchronize);
+    _pushSubscription = PushNotificationsService.instance.signals.listen((
+      signal,
+    ) {
+      if (!mounted ||
+          signal.sessionVersion != TokenStorage.sessionVersion ||
+          !auth.state.isAuthenticated) {
+        return;
+      }
+      context.read<NotificationBloc>().add(const LoadNotificationsEvent());
+      if (signal.opened) {
+        AppRoutes.router.go(AppRoutes.notifications);
+      } else {
+        _pushMessengerKey.currentState?.showSnackBar(
+          const SnackBar(content: Text('Bạn có cập nhật mới về vé.')),
+        );
+      }
+    });
   }
 
   void _synchronize(AuthState state) {
     final key = state.isAuthenticated
         ? state.user!.taiKhoanId.toString()
         : null;
+    if (key != _previousSession) {
+      final version = TokenStorage.sessionVersion;
+      unawaited(
+        PushNotificationsService.instance
+            .setSession(state.isAuthenticated ? state.user!.taiKhoanId : null)
+            .then((enabled) {
+              if (mounted &&
+                  version == TokenStorage.sessionVersion &&
+                  context.read<AuthBloc>().state.user?.taiKhoanId ==
+                      state.user?.taiKhoanId) {
+                context.read<AuthBloc>().add(
+                  HydratePushPreferenceEvent(enabled),
+                );
+              }
+            })
+            .catchError((Object _) {}),
+      );
+    }
     context.read<MyTicketsBloc>().setSession(key);
     context.read<SupportChatCubit>().setSession(key);
     context.read<NotificationBloc>().setSession(key);
@@ -126,8 +170,17 @@ class _SessionSynchronizationState extends State<_SessionSynchronization> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pushSubscription?.cancel();
     _subscription?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(PushNotificationsService.instance.refreshRegistration());
+    }
   }
 
   @override

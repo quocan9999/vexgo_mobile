@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:vexgo_app/core/notifications/push_notifications.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/core/network/api_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,6 +38,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RedeemPointsEvent>(_onRedeemPoints);
     on<ToggleLanguageEvent>(_onToggleLanguage);
     on<TogglePushNotificationEvent>(_onTogglePushNotification);
+    on<HydratePushPreferenceEvent>(
+      (event, emit) => emit(state.copyWith(pushEnabled: event.enabled)),
+    );
     on<LogoutEvent>(_onLogout);
     on<ClearPendingRegistrationEvent>(_onClearPendingRegistration);
   }
@@ -302,15 +306,44 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  void _onTogglePushNotification(
+  Future<void> _onTogglePushNotification(
     TogglePushNotificationEvent event,
     Emitter<AuthState> emit,
-  ) {
+  ) async {
+    final accountId = state.user?.taiKhoanId;
+    if (accountId == null) {
+      await PushNotificationsService.instance.clearSession();
+      if (!emit.isDone) {
+        emit(
+          state.copyWith(
+            pushEnabled: false,
+            clearMessages: true,
+            errorMessage: event.enabled
+                ? 'Vui lòng đăng nhập để bật thông báo đẩy.'
+                : null,
+            successMessage: event.enabled ? null : 'Đã tắt thông báo đẩy',
+          ),
+        );
+      }
+      return;
+    }
+    final version = TokenStorage.sessionVersion;
+    final enabled = await PushNotificationsService.instance.setEnabled(
+      accountId,
+      event.enabled,
+    );
+    if (emit.isDone ||
+        version != TokenStorage.sessionVersion ||
+        state.user?.taiKhoanId != accountId) {
+      return;
+    }
     emit(
       state.copyWith(
-        pushEnabled: event.enabled,
-        successMessage: event.enabled
+        pushEnabled: enabled,
+        successMessage: enabled
             ? 'Đã bật thông báo đẩy'
+            : event.enabled
+            ? 'Chưa thể bật thông báo. Kiểm tra quyền thông báo và cấu hình bản cài.'
             : 'Đã tắt thông báo đẩy',
       ),
     );
@@ -318,6 +351,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
     _generation++;
+    await PushNotificationsService.instance.clearSession();
     emit(
       state.copyWith(
         status: AuthStatus.unauthenticated,

@@ -51,6 +51,8 @@ class RiskBookingRepository implements BookingRepository {
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     bookings++;
     if (!bookingStarted.isCompleted) bookingStarted.complete();

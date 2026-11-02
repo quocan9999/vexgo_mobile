@@ -142,6 +142,8 @@ class _MockBookingRepo extends MockBookingRepository {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     quoteCalls++;
     final subtotal = seatIds.length * 190000;
@@ -195,6 +197,8 @@ class _FakeBookingRepo implements BookingRepository {
     required List<int> seatIds,
     String? promotionCode,
     String? contactPhone,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     quoteCalls++;
     final subtotal = seatIds.length * 190000;
@@ -222,6 +226,8 @@ class _FakeBookingRepo implements BookingRepository {
     String? promotionCode,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    int? pickupTripPointId,
+    int? dropoffTripPointId,
   }) async {
     createApiBookingCalls++;
     return bookingToReturn ??
