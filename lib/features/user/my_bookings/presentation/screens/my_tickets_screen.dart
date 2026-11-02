@@ -499,7 +499,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
         icon = Icons.cancel_presentation_rounded;
         title = 'Không có vé nào bị hủy';
         subtitle =
-            'Mọi giao dịch hủy vé và hoàn tiền theo chính sách nhà xe sẽ được ghi nhận tại đây.';
+            'Các vé đã hủy được hiển thị tại đây. Để yêu cầu hoàn tiền, vui lòng liên hệ hỗ trợ.';
         break;
     }
 

@@ -96,7 +96,7 @@ class BookingGuideScreen extends StatelessWidget {
     ),
     (
       '6. Hủy vé và hỗ trợ',
-      'Mở Chi tiết vé và chọn hủy nếu vé còn cho phép. Xem điều kiện, phí và số tiền hoàn được hệ thống hiển thị trước khi xác nhận. Theo dõi trạng thái hoàn tiền trong thông báo. Bạn có thể vào Chat với nhà xe trong Tài khoản để trao đổi khi cần.',
+      'Mở Chi tiết vé và chọn hủy nếu vé còn cho phép. Xem điều kiện, phí và số tiền hoàn được hệ thống hiển thị trước khi xác nhận. Hệ thống không hoàn tiền online. Sau khi hủy vé, liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền theo chính sách nhà xe. Bạn có thể mở Chat với nhà xe trong Tài khoản để trao đổi.',
     ),
   ];
   @override

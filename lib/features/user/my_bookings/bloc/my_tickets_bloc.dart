@@ -284,8 +284,8 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
         cancelled,
         TicketCancellationStatus.succeeded,
         payload['refundAmount'] != null
-            ? 'Hủy vé ${fresh.ticketCode} thành công. Số tiền dự kiến hoàn: ${payload['refundAmount']} đ. Việc hoàn tiền cần được xác nhận riêng.'
-            : 'Hủy vé ${fresh.ticketCode} thành công, đang chờ xử lý hoàn tiền. Kết quả hoàn tiền cần được xác nhận riêng.',
+            ? 'Hủy vé ${fresh.ticketCode} thành công. Số tiền dự kiến hoàn: ${payload['refundAmount']} đ. Vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền; hệ thống không hoàn tiền online.'
+            : 'Hủy vé ${fresh.ticketCode} thành công. Vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền; hệ thống không hoàn tiền online.',
       );
     } catch (error) {
       if (!current()) return;
@@ -311,7 +311,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
               emit,
               checked,
               TicketCancellationStatus.succeeded,
-              'Đã xác nhận vé bị hủy. Việc hoàn tiền cần được xác nhận riêng.',
+              'Đã xác nhận vé bị hủy. Vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền; hệ thống không hoàn tiền online.',
             );
             return;
           }
@@ -380,7 +380,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
           emit,
           checked,
           TicketCancellationStatus.succeeded,
-          'Đã xác nhận vé bị hủy. Việc hoàn tiền cần được xác nhận riêng.',
+          'Đã xác nhận vé bị hủy. Vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền; hệ thống không hoàn tiền online.',
         );
         return;
       }
@@ -461,8 +461,8 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       updatedList[currentIndex] = updatedTicket;
 
       final successMessage = serverRefund != null
-          ? 'Hủy vé ${ticket.ticketCode} thành công! Số tiền hoàn lại: $serverRefund đ.'
-          : 'Yêu cầu hủy vé ${ticket.ticketCode} đã được tiếp nhận và đang chờ xử lý hoàn tiền.';
+          ? 'Hủy vé ${ticket.ticketCode} thành công. Số tiền dự kiến hoàn: $serverRefund đ. Vui lòng liên hệ hỗ trợ để yêu cầu hoàn tiền; hệ thống không hoàn tiền online.'
+          : 'Yêu cầu hủy vé ${ticket.ticketCode} đã được tiếp nhận. Vui lòng liên hệ hỗ trợ để yêu cầu hoàn tiền sau khi vé được xác nhận hủy; hệ thống không hoàn tiền online.';
 
       emit(
         state.copyWith(

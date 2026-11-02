@@ -281,7 +281,7 @@ void main() {
           find.textContaining('Lý do: Thay đổi lịch công tác'),
           findsOneWidget,
         );
-        expect(find.textContaining('Hoàn: 315.000'), findsOneWidget);
+        expect(find.textContaining('Dự kiến hoàn: 315.000'), findsOneWidget);
         expect(repo.getMyTicketsCalls, equals(1));
       },
     );

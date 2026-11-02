@@ -705,10 +705,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('Tiền hoàn đã được gửi'), findsNothing);
       expect(
-        find.textContaining('Trạng thái hoàn tiền chưa được xác nhận'),
+        find.textContaining('Hệ thống không hoàn tiền online'),
         findsOneWidget,
       );
-      expect(find.text('Số tiền hoàn (chưa xác nhận):'), findsOneWidget);
+      expect(find.text('Số tiền dự kiến hoàn:'), findsOneWidget);
     },
   );
 }

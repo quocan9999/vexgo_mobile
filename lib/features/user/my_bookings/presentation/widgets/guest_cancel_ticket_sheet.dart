@@ -326,8 +326,9 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                             ),
                             const SizedBox(height: 8),
                             const Text(
-                              'Hủy vé không đồng nghĩa đã hoàn tiền. '
-                              'Trạng thái hoàn tiền cần được xác nhận riêng.',
+                              'Hệ thống không hoàn tiền online. Sau khi hủy vé, '
+                              'vui lòng liên hệ hỗ trợ và cung cấp mã vé '
+                              'để yêu cầu hoàn tiền theo chính sách nhà xe.',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: DiscoveryColors.neutral600,

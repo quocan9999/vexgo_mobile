@@ -535,7 +535,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
 
                 if (ticket.status == TicketStatus.cancelled) ...[
                   _buildInfoLine(
-                    label: 'Số tiền hoàn (chưa xác nhận):',
+                    label: 'Số tiền dự kiến hoàn:',
                     value: ticket.refundAmount != null
                         ? CurrencyFormatter.format(ticket.refundAmount!)
                         : 'Chưa có dữ liệu',
