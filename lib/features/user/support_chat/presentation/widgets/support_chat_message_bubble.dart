@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/design/discovery_theme.dart';
 import '../../../../../data/models/support_chat_model.dart';
@@ -49,7 +50,7 @@ class SupportChatMessageBubble extends StatelessWidget {
               Text(
                 _formatTime(message.createdAt),
                 style: const TextStyle(
-                  fontFamily: 'VexGoJakarta',
+                  fontFamily: AppTypography.fontFamily,
                   fontSize: 10,
                   color: DiscoveryColors.neutral500,
                 ),
@@ -118,7 +119,7 @@ class SupportChatMessageBubble extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontFamily: 'VexGoJakarta',
+                        fontFamily: AppTypography.fontFamily,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: DiscoveryColors.primary,
@@ -147,7 +148,7 @@ class SupportChatMessageBubble extends StatelessWidget {
                 Text(
                   '$timeStr${isOwn ? ' • $deliveryText' : ''}',
                   style: TextStyle(
-                    fontFamily: 'VexGoJakarta',
+                    fontFamily: AppTypography.fontFamily,
                     fontSize: 10,
                     fontWeight: isOwn && message.read
                         ? FontWeight.w600

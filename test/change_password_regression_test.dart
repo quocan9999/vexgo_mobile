@@ -13,7 +13,7 @@ import 'package:vexgo_app/data/repositories/auth_repository.dart';
 import 'package:vexgo_app/features/user/profile/bloc/auth_bloc.dart';
 import 'package:vexgo_app/features/user/profile/bloc/auth_event.dart';
 import 'package:vexgo_app/features/user/profile/bloc/auth_state.dart';
-import 'package:vexgo_app/features/user/profile/presentation/widgets/change_password_dialog.dart';
+import 'package:vexgo_app/features/user/profile/presentation/screens/change_password_screen.dart';
 
 const user = UserModel(
   taiKhoanId: 42,
@@ -204,7 +204,7 @@ void main() {
         BlocProvider.value(
           value: bloc,
           child: const MaterialApp(
-            home: Scaffold(body: ChangePasswordDialog()),
+            home: Scaffold(body: ChangePasswordScreen()),
           ),
         ),
       );
@@ -224,7 +224,7 @@ void main() {
       await tester.pump();
       expect(repository.oldValue, ' old pass ');
       expect(repository.newValue, ' new pass ');
-      expect(find.byType(ChangePasswordDialog), findsOneWidget);
+      expect(find.byType(ChangePasswordScreen), findsOneWidget);
       expect(
         tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
         isNull,
@@ -232,8 +232,62 @@ void main() {
       repository.result.completeError(Exception('Mật khẩu cũ không đúng'));
       await tester.pump();
       expect(find.text('Mật khẩu cũ không đúng'), findsOneWidget);
-      expect(find.byType(ChangePasswordDialog), findsOneWidget);
+      expect(find.byType(ChangePasswordScreen), findsOneWidget);
       expect(find.text('Đổi mật khẩu thành công.'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'Password opens as a page, preserves focus order and keeps save above keyboard',
+    (tester) async {
+      final bloc = await authenticated(PasswordRepository());
+      addTearDown(bloc.close);
+      tester.view.physicalSize = const Size(320, 740);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: bloc,
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () => ChangePasswordScreen.show(context),
+                  child: const Text('Open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      final oldField = find.byKey(const ValueKey('Mật khẩu hiện tại'));
+      final nextField = find.byKey(const ValueKey('Mật khẩu mới'));
+      await tester.tap(oldField);
+      await tester.enterText(oldField, 'old-pass');
+      await tester.testTextInput.receiveAction(TextInputAction.next);
+      await tester.pump();
+      expect(
+        tester
+            .widget<EditableText>(
+              find.descendant(
+                of: nextField,
+                matching: find.byType(EditableText),
+              ),
+            )
+            .focusNode
+            .hasFocus,
+        isTrue,
+      );
+      tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+      await tester.pumpAndSettle();
+      final saveRect = tester.getRect(find.text('Lưu mật khẩu'));
+      expect(saveRect.bottom, lessThanOrEqualTo(460));
+      expect(tester.takeException(), isNull);
     },
   );
 
@@ -251,7 +305,7 @@ void main() {
             home: Scaffold(
               body: Builder(
                 builder: (context) => TextButton(
-                  onPressed: () => ChangePasswordDialog.show(context),
+                  onPressed: () => ChangePasswordScreen.show(context),
                   child: const Text('Open'),
                 ),
               ),
@@ -279,7 +333,7 @@ void main() {
         expect(repository.calls, 1);
       }
 
-      final dialogContext = tester.element(find.byType(ChangePasswordDialog));
+      final dialogContext = tester.element(find.byType(ChangePasswordScreen));
       showDialog<void>(
         context: dialogContext,
         builder: (context) => AlertDialog(
@@ -317,7 +371,7 @@ void main() {
       }
       await tester.pumpAndSettle();
 
-      expect(find.byType(ChangePasswordDialog), findsNothing);
+      expect(find.byType(ChangePasswordScreen), findsNothing);
       expect(find.text('Independent modal'), findsOneWidget);
       expect(repository.calls, outcome == 'success' ? 1 : 0);
       expect(
@@ -329,7 +383,7 @@ void main() {
       await tester.tap(find.text('Close independent modal'));
       await tester.pumpAndSettle();
       expect(find.text('Open'), findsOneWidget);
-      expect(find.byType(ChangePasswordDialog), findsNothing);
+      expect(find.byType(ChangePasswordScreen), findsNothing);
     });
   }
 
@@ -346,7 +400,7 @@ void main() {
           home: Scaffold(
             body: Builder(
               builder: (context) => TextButton(
-                onPressed: () => ChangePasswordDialog.show(context),
+                onPressed: () => ChangePasswordScreen.show(context),
                 child: const Text('Open'),
               ),
             ),
@@ -370,10 +424,10 @@ void main() {
     );
     await tester.tap(find.text('Lưu mật khẩu'));
     await tester.pump();
-    expect(find.byType(ChangePasswordDialog), findsOneWidget);
+    expect(find.byType(ChangePasswordScreen), findsOneWidget);
     repository.result.complete('Đổi mật khẩu thành công.');
     await tester.pumpAndSettle();
-    expect(find.byType(ChangePasswordDialog), findsNothing);
+    expect(find.byType(ChangePasswordScreen), findsNothing);
     expect(find.text('Đổi mật khẩu thành công.'), findsOneWidget);
   });
 }

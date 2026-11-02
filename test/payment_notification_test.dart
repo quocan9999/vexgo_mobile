@@ -1,3 +1,4 @@
+import 'package:vexgo_app/features/user/notification/bloc/notification_event.dart';
 import 'package:vexgo_app/features/user/main_shell/main_shell_screen.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -82,6 +83,47 @@ void main() {
       expect(n.copyWith(isRead: true).ticketId, '42');
     },
   );
+  testWidgets(
+    'Flat notification categories filter locally and follow an external selection reset with large text',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 740);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repo = _Notifications();
+      final bloc = NotificationBloc(notificationRepository: repo);
+      addTearDown(bloc.close);
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: bloc,
+          child: MaterialApp(
+            builder: (_, child) => MediaQuery(
+              data: const MediaQueryData(
+                size: Size(320, 740),
+                textScaler: TextScaler.linear(2),
+              ),
+              child: child!,
+            ),
+            home: const NotificationsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final loads = repo.loads;
+      expect(find.text('Paid booking'), findsOneWidget);
+      await tester.ensureVisible(find.text('Ưu đãi'));
+      await tester.tap(find.text('Ưu đãi'));
+      await tester.pumpAndSettle();
+      expect(bloc.state.activeTabIndex, 2);
+      expect(find.text('Paid booking'), findsNothing);
+      bloc.add(const ChangeNotificationTabEvent(0));
+      await tester.pumpAndSettle();
+      expect(find.text('Paid booking'), findsOneWidget);
+      expect(repo.loads, loads);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   for (final logout in [false, true]) {
     testWidgets(
       'opens only authoritative ticket; ignores pending result after logout=$logout',

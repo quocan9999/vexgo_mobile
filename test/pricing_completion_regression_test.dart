@@ -533,7 +533,7 @@ void main() {
     await tester.tap(find.text('Chọn hoặc nhập mã khuyến mãi'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), 'FREE');
-    await tester.tap(find.text('Kiểm tra mã'));
+    await tester.tap(find.text('Áp dụng'));
     await tester.pumpAndSettle();
     await tester.runAsync(
       () => bloc.stream

@@ -8,6 +8,7 @@ import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
 import '../widgets/booking_cargo_section_card.dart';
 import '../widgets/seat_hold_countdown_bar.dart';
 import '../widgets/voucher_selection_sheet.dart';
+import '../widgets/promotion_code_sheet.dart';
 
 class Step5TripSummary extends StatelessWidget {
   final BookingFlowState state;
@@ -924,44 +925,8 @@ class Step5TripSummary extends StatelessWidget {
     );
   }
 
-  Future<void> _enterPromotion(BuildContext context) async {
-    var code = state.requestedPromotionCode;
-    final selected = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Mã khuyến mãi'),
-        content: TextFormField(
-          initialValue: code,
-          autofocus: true,
-          textCapitalization: TextCapitalization.characters,
-          decoration: const InputDecoration(labelText: 'Nhập mã khuyến mãi'),
-          onChanged: (value) => code = value,
-          onFieldSubmitted: (value) => Navigator.of(dialogContext).pop(value),
-        ),
-        actions: [
-          if (state.requestedPromotionCode.isNotEmpty)
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(''),
-              child: const Text('Bỏ mã'),
-            ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Đóng'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(code),
-            child: const Text('Kiểm tra mã'),
-          ),
-        ],
-      ),
-    );
-    if (selected == null || bloc.isClosed) return;
-    bloc.add(
-      selected.trim().isEmpty
-          ? const RemoveVoucherEvent()
-          : ApplyPromotionCodeEvent(selected),
-    );
-  }
+  Future<void> _enterPromotion(BuildContext context) =>
+      PromotionCodeSheet.show(context, bloc);
 
   Widget _buildEditButton({
     required String label,

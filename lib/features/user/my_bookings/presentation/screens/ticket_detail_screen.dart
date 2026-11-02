@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart' hide ButtonType;
 import 'package:vexgo_app/core/network/token_storage.dart';
-import 'package:vexgo_app/core/widgets/custom_app_bar.dart';
+import 'package:vexgo_app/core/widgets/tab_page_header.dart';
 import 'package:vexgo_app/core/widgets/custom_button.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_bloc.dart';
@@ -63,7 +63,10 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
           }
           return Scaffold(
             backgroundColor: DiscoveryColors.background,
-            appBar: const CustomAppBar(title: 'Chi tiết vé xe'),
+            appBar: const TabPageHeader(
+              title: 'Chi tiết vé xe',
+              showBackButton: true,
+            ),
             body: Center(
               child: state.status == TicketReadStatus.loading
                   ? Column(
@@ -174,15 +177,13 @@ class _TicketDetailContent extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: DiscoveryColors.background,
-      appBar: CustomAppBar(
+      appBar: TabPageHeader(
         title: 'Chi tiết vé xe',
+        showBackButton: true,
         actions: [
           IconButton(
             tooltip: 'Cập nhật trạng thái vé',
-            icon: const Icon(
-              Icons.refresh_rounded,
-              color: DiscoveryColors.neutral800,
-            ),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: context.read<TicketReadCubit>().refresh,
           ),
         ],

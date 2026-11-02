@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/widgets/flat_filter_bar.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/data/repositories/booking_repository.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,7 @@ import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_text_styles.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
-import 'package:vexgo_app/core/widgets/custom_app_bar.dart';
+import 'package:vexgo_app/core/widgets/tab_page_header.dart';
 import 'package:vexgo_app/core/widgets/empty_state.dart';
 import 'package:vexgo_app/data/models/notification_model.dart';
 import '../../bloc/notification_bloc.dart';
@@ -104,73 +105,34 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
         return Scaffold(
           backgroundColor: AppColors.background,
-          appBar: CustomAppBar(
+          appBar: TabPageHeader(
             title: 'Thông báo',
-            automaticallyImplyLeading: Navigator.of(context).canPop(),
             actions: [
-              if (unreadCount > 0)
-                TextButton(
-                  onPressed: () =>
-                      bloc.add(const MarkAllNotificationsAsReadEvent()),
-                  child: Text(
-                    'Đọc tất cả',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+              TabHeaderAction(
+                label: 'Đọc tất cả',
+                icon: Icons.done_all_rounded,
+                onPressed:
+                    !state.requiresLogin &&
+                        unreadCount > 0 &&
+                        state.status != NotificationStatus.loading
+                    ? () => bloc.add(const MarkAllNotificationsAsReadEvent())
+                    : null,
+              ),
             ],
           ),
           body: Column(
             children: [
-              // 1. Category Tabs
               if (state.hasCategories)
-                Container(
-                  height: 48,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    border: Border(
-                      bottom: BorderSide(color: AppColors.neutral200),
-                    ),
-                  ),
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppDimensions.base,
-                      vertical: 6,
-                    ),
-                    children: [
-                      _buildTab(
-                        context,
-                        title: 'Tất cả',
-                        count: unreadCount,
-                        index: 0,
-                        activeIndex: state.activeTabIndex,
-                      ),
-                      const SizedBox(width: AppDimensions.xs),
-                      _buildTab(
-                        context,
-                        title: 'Chuyến đi',
-                        index: 1,
-                        activeIndex: state.activeTabIndex,
-                      ),
-                      const SizedBox(width: AppDimensions.xs),
-                      _buildTab(
-                        context,
-                        title: 'Ưu đãi',
-                        index: 2,
-                        activeIndex: state.activeTabIndex,
-                      ),
-                      const SizedBox(width: AppDimensions.xs),
-                      _buildTab(
-                        context,
-                        title: 'Hệ thống',
-                        index: 3,
-                        activeIndex: state.activeTabIndex,
-                      ),
-                    ],
-                  ),
+                FlatFilterBar(
+                  selectedIndex: state.activeTabIndex,
+                  onChanged: (index) =>
+                      bloc.add(ChangeNotificationTabEvent(index)),
+                  options: [
+                    FlatFilterOption('Tất cả', count: unreadCount),
+                    const FlatFilterOption('Chuyến đi'),
+                    const FlatFilterOption('Ưu đãi'),
+                    const FlatFilterOption('Hệ thống'),
+                  ],
                 ),
 
               // 2. Notification List
@@ -209,22 +171,31 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                         ),
                       )
                     : list.isEmpty
-                    ? Column(
-                        children: [
-                          Expanded(
-                            child: EmptyState(
-                              icon: Icons.notifications_off_outlined,
-                              title: 'Chưa có thông báo nào',
-                              message:
-                                  'Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.',
+                    ? LayoutBuilder(
+                        builder: (context, constraints) => SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const EmptyState(
+                                  icon: Icons.notifications_off_outlined,
+                                  title: 'Chưa có thông báo nào',
+                                  message:
+                                      'Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.',
+                                ),
+                                TextButton(
+                                  onPressed: () =>
+                                      bloc.add(const LoadNotificationsEvent()),
+                                  child: const Text('Tải lại'),
+                                ),
+                              ],
                             ),
                           ),
-                          TextButton(
-                            onPressed: () =>
-                                bloc.add(const LoadNotificationsEvent()),
-                            child: const Text('Tải lại'),
-                          ),
-                        ],
+                        ),
                       )
                     : RefreshIndicator(
                         onRefresh: () async {
@@ -254,62 +225,6 @@ class _NotificationsScreenState extends State<NotificationsScreen>
           ),
         );
       },
-    );
-  }
-
-  Widget _buildTab(
-    BuildContext context, {
-    required String title,
-    int? count,
-    required int index,
-    required int activeIndex,
-  }) {
-    final isSelected = index == activeIndex;
-
-    return InkWell(
-      onTap: () => context.read<NotificationBloc>().add(
-        ChangeNotificationTabEvent(index),
-      ),
-      borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.neutral100,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: AppTextStyles.caption.copyWith(
-                color: isSelected ? Colors.white : AppColors.neutral700,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                fontSize: 12,
-              ),
-            ),
-            if (count != null && count > 0) ...[
-              const SizedBox(width: 4),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: AppColors.secondary,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '$count',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    height: 1,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 }

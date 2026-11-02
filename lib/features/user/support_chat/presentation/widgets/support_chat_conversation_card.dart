@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/design/discovery_theme.dart';
 import '../../../../../data/models/support_chat_model.dart';
@@ -117,7 +118,7 @@ class SupportChatConversationCard extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontFamily: 'VexGoJakarta',
+                                  fontFamily: AppTypography.fontFamily,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: statusConfig.fg,

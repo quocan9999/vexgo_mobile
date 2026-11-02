@@ -13,7 +13,7 @@ import 'package:vexgo_app/features/user/profile/bloc/auth_event.dart';
 import 'package:vexgo_app/features/user/profile/bloc/auth_state.dart';
 import 'package:vexgo_app/features/user/profile/presentation/screens/profile_screen.dart';
 import 'package:vexgo_app/features/user/profile/presentation/widgets/auth_modal_sheet.dart';
-import 'package:vexgo_app/features/user/profile/presentation/widgets/change_password_dialog.dart';
+import 'package:vexgo_app/features/user/profile/presentation/screens/change_password_screen.dart';
 import 'package:vexgo_app/features/user/profile/presentation/widgets/edit_profile_dialog.dart';
 
 class _MockProfileAuthRepo extends MockAuthRepository {
@@ -135,10 +135,10 @@ void main() {
       expect(find.text('Đăng xuất tài khoản'), findsNothing);
 
       // App Info section exists
-      expect(find.text('THÔNG TIN ỨNG DỤNG'), findsOneWidget);
+      expect(find.text('THÔNG TIN ỨNG DỤNG'), findsNothing);
       expect(find.text('Ngôn ngữ'), findsOneWidget);
       expect(find.text('Tiếng Việt'), findsOneWidget);
-      expect(find.text('1.0.0'), findsOneWidget);
+      expect(find.text('Phiên bản 1.0.0'), findsOneWidget);
 
       // Tapping CTA opens AuthModalSheet
       await tester.tap(find.text('ĐĂNG NHẬP / ĐĂNG KÝ'));
@@ -174,7 +174,7 @@ void main() {
         expect(find.text('850 điểm'), findsOneWidget);
 
         // Account management section
-        expect(find.text('QUẢN LÝ TÀI KHOẢN'), findsOneWidget);
+        expect(find.text('QUẢN LÝ TÀI KHOẢN'), findsNothing);
         expect(find.text('Thông tin cá nhân'), findsOneWidget);
         expect(find.text('Đổi mật khẩu'), findsOneWidget);
 
@@ -188,9 +188,9 @@ void main() {
         expect(find.text('Ví Voucher & Khuyến mãi'), findsNothing);
 
         // App info
-        expect(find.text('THÔNG TIN ỨNG DỤNG'), findsOneWidget);
+        expect(find.text('THÔNG TIN ỨNG DỤNG'), findsNothing);
         expect(find.text('Tiếng Việt'), findsOneWidget);
-        expect(find.text('1.0.0'), findsOneWidget);
+        expect(find.text('Phiên bản 1.0.0'), findsOneWidget);
 
         // Logout button is present
         expect(find.text('Đăng xuất tài khoản'), findsOneWidget);
@@ -597,7 +597,7 @@ void main() {
     );
   });
 
-  group('ChangePasswordDialog Enhanced UI Tests', () {
+  group('ChangePasswordScreen Enhanced UI Tests', () {
     late _MockProfileAuthRepo repo;
     late AuthBloc authBloc;
     late UserModel testUser;
@@ -622,7 +622,7 @@ void main() {
           BlocProvider<AuthBloc>.value(
             value: authBloc,
             child: const MaterialApp(
-              home: Scaffold(body: ChangePasswordDialog()),
+              home: Scaffold(body: ChangePasswordScreen()),
             ),
           ),
         );
@@ -660,7 +660,7 @@ void main() {
     );
 
     testWidgets(
-      'F01 Probe: ChangePasswordDialog automatically revokes and clears controllers when switching account from A to B',
+      'F01 Probe: ChangePasswordScreen automatically revokes and clears controllers when switching account from A to B',
       (tester) async {
         final authBloc = AuthBloc(authRepository: repo);
         addTearDown(authBloc.close);
@@ -675,7 +675,7 @@ void main() {
               home: Scaffold(
                 body: Builder(
                   builder: (context) => ElevatedButton(
-                    onPressed: () => ChangePasswordDialog.show(context),
+                    onPressed: () => ChangePasswordScreen.show(context),
                     child: const Text('Open Dialog'),
                   ),
                 ),
@@ -688,7 +688,7 @@ void main() {
         // Open dialog
         await tester.tap(find.text('Open Dialog'));
         await tester.pumpAndSettle();
-        expect(find.byType(ChangePasswordDialog), findsOneWidget);
+        expect(find.byType(ChangePasswordScreen), findsOneWidget);
 
         // Type current password into form
         await tester.enterText(
@@ -709,7 +709,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Dialog must be revoked / closed
-        expect(find.byType(ChangePasswordDialog), findsNothing);
+        expect(find.byType(ChangePasswordScreen), findsNothing);
       },
     );
   });
@@ -831,7 +831,12 @@ void main() {
         // 1. Menu rendered with no overflow
         expect(find.byType(ProfileScreen), findsOneWidget);
         expect(find.text('Tiếng Việt'), findsOneWidget);
-        expect(find.text('1.0.0'), findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.text('Phiên bản 1.0.0'),
+          160,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.text('Phiên bản 1.0.0'), findsOneWidget);
         expect(tester.takeException(), isNull);
 
         // 2. Open logout confirmation dialog (inherits 320dp and 2.0x text scale via MaterialApp.builder)

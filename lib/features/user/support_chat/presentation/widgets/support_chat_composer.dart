@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/design/discovery_theme.dart';
 
@@ -54,7 +55,7 @@ class SupportChatComposer extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Nhắn tin cho nhà xe…',
                   hintStyle: TextStyle(
-                    fontFamily: 'VexGoJakarta',
+                    fontFamily: AppTypography.fontFamily,
                     fontSize: isDense ? 12 : 14,
                     color: DiscoveryColors.neutral500,
                   ),
