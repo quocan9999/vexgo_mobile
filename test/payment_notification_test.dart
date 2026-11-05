@@ -213,6 +213,14 @@ void main() {
               StatefulShellBranch(
                 routes: [
                   GoRoute(
+                    path: '/shipments',
+                    builder: (_, _) => const Text('Shipments content'),
+                  ),
+                ],
+              ),
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
                     path: '/notifications',
                     builder: (_, _) => const NotificationsScreen(),
                   ),

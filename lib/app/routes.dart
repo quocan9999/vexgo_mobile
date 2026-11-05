@@ -18,6 +18,7 @@ import '../features/user/search_trips/presentation/screens/search_trips_screen.d
 import '../features/user/round_trip/round_trip_request.dart';
 import '../features/user/round_trip/presentation/screens/round_trip_search_screen.dart';
 import '../features/user/round_trip/presentation/screens/round_trip_booking_screen.dart';
+import '../features/user/shipments/presentation/screens/shipments_host_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -27,6 +28,8 @@ final GlobalKey<NavigatorState> _homeNavigatorKey = GlobalKey<NavigatorState>(
 );
 final GlobalKey<NavigatorState> _ticketsNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'tickets');
+final GlobalKey<NavigatorState> _shipmentsNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shipments');
 final GlobalKey<NavigatorState> _notificationsNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'notifications');
 final GlobalKey<NavigatorState> _profileNavigatorKey =
@@ -48,6 +51,7 @@ class AppRoutes {
   static const String bookingReceipt = '/booking-receipt';
   static const String roundTripSearch = '/round-trip/search';
   static const String roundTripBooking = '/round-trip/booking';
+  static const String shipments = '/shipments';
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -206,7 +210,19 @@ class AppRoutes {
             ],
           ),
 
-          // Branch 3: Thông báo
+          // Branch 3: Gửi hàng
+          StatefulShellBranch(
+            navigatorKey: _shipmentsNavigatorKey,
+            routes: [
+              GoRoute(
+                path: shipments,
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: ShipmentsHostScreen()),
+              ),
+            ],
+          ),
+
+          // Branch 4: Thông báo
           StatefulShellBranch(
             navigatorKey: _notificationsNavigatorKey,
             routes: [
@@ -218,7 +234,7 @@ class AppRoutes {
             ],
           ),
 
-          // Branch 4: Tài khoản
+          // Branch 5: Tài khoản
           StatefulShellBranch(
             navigatorKey: _profileNavigatorKey,
             routes: [

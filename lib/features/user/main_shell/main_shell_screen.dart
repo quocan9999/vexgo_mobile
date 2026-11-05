@@ -14,9 +14,9 @@ class MainShellScreen extends StatelessWidget {
   const MainShellScreen({super.key, required this.navigationShell});
 
   void _onItemTapped(BuildContext context, int index) {
-    if (index == 2) {
-      final bloc = context.read<NotificationBloc>();
-      if (bloc.state.status != NotificationStatus.initial) {
+    if (index == 3) {
+      final bloc = context.read<NotificationBloc?>();
+      if (bloc != null && bloc.state.status != NotificationStatus.initial) {
         bloc.add(const LoadNotificationsEvent());
       }
     }
@@ -30,67 +30,77 @@ class MainShellScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x14000000),
-              blurRadius: 16,
-              offset: Offset(0, -3),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: navigationShell.currentIndex,
-          onTap: (index) => _onItemTapped(context, index),
-          backgroundColor: Colors.white,
-          selectedItemColor: navigationShell.currentIndex == 0
-              ? DiscoveryColors.primary
-              : AppColors.primary,
-          unselectedItemColor: AppColors.neutral400,
-          selectedLabelStyle:
-              (navigationShell.currentIndex == 0
-                      ? DiscoveryTextStyles.caption
-                      : AppTextStyles.caption)
-                  .copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                    color: AppColors.primary,
-                  ),
-          unselectedLabelStyle:
-              (navigationShell.currentIndex == 0
-                      ? DiscoveryTextStyles.caption
-                      : AppTextStyles.caption)
-                  .copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 12,
-                    color: AppColors.neutral400,
-                  ),
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.directions_bus_outlined),
-              activeIcon: Icon(Icons.directions_bus_rounded),
-              label: 'Trang chủ',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.confirmation_number_outlined),
-              activeIcon: Icon(Icons.confirmation_number_rounded),
-              label: 'Vé của tôi',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_none_rounded),
-              activeIcon: Icon(Icons.notifications_rounded),
-              label: 'Thông báo',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
-              label: 'Tài khoản',
-            ),
-          ],
+      bottomNavigationBar: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: 1.15,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x14000000),
+                blurRadius: 16,
+                offset: Offset(0, -3),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            currentIndex: navigationShell.currentIndex,
+            onTap: (index) => _onItemTapped(context, index),
+            backgroundColor: Colors.white,
+            selectedItemColor: navigationShell.currentIndex == 0
+                ? DiscoveryColors.primary
+                : AppColors.primary,
+            unselectedItemColor: AppColors.neutral400,
+            selectedFontSize: 11,
+            unselectedFontSize: 11,
+            selectedLabelStyle:
+                (navigationShell.currentIndex == 0
+                        ? DiscoveryTextStyles.caption
+                        : AppTextStyles.caption)
+                    .copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                      color: AppColors.primary,
+                    ),
+            unselectedLabelStyle:
+                (navigationShell.currentIndex == 0
+                        ? DiscoveryTextStyles.caption
+                        : AppTextStyles.caption)
+                    .copyWith(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                      color: AppColors.neutral400,
+                    ),
+            type: BottomNavigationBarType.fixed,
+            elevation: 0,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.directions_bus_outlined),
+                activeIcon: Icon(Icons.directions_bus_rounded),
+                label: 'Trang chủ',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.confirmation_number_outlined),
+                activeIcon: Icon(Icons.confirmation_number_rounded),
+                label: 'Vé của tôi',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.local_shipping_outlined),
+                activeIcon: Icon(Icons.local_shipping_rounded),
+                label: 'Gửi hàng',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.notifications_none_rounded),
+                activeIcon: Icon(Icons.notifications_rounded),
+                label: 'Thông báo',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline_rounded),
+                activeIcon: Icon(Icons.person_rounded),
+                label: 'Tài khoản',
+              ),
+            ],
+          ),
         ),
       ),
     );

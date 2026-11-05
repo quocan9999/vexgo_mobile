@@ -17,9 +17,15 @@ class TabPageHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) => AppBar(
-    automaticallyImplyLeading: showBackButton,
+    automaticallyImplyLeading: false,
+    leading: showBackButton
+        ? BackButton(
+            color: Colors.white,
+            onPressed: () => Navigator.maybePop(context),
+          )
+        : null,
     centerTitle: false,
-    titleSpacing: 20,
+    titleSpacing: showBackButton ? 0 : 20,
     toolbarHeight: kToolbarHeight,
     backgroundColor: DiscoveryColors.header,
     foregroundColor: Colors.white,

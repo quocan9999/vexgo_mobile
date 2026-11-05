@@ -286,7 +286,16 @@ class ApiClient {
     Map<String, String>? headers,
     bool requiresAuth = false,
     bool optionalAuth = false,
+    int? expectedSessionVersion,
   }) async {
+    void assertExpectedSession() {
+      if (expectedSessionVersion != null &&
+          expectedSessionVersion != TokenStorage.sessionVersion) {
+        throw UnauthorizedException();
+      }
+    }
+
+    assertExpectedSession();
     final uri = _buildUri(path, queryParams);
     final reqHeaders = await _buildHeaders(
       extraHeaders: headers,
@@ -294,6 +303,7 @@ class ApiClient {
       optionalAuth: optionalAuth,
     );
 
+    assertExpectedSession();
     try {
       final encodedBody = body != null ? jsonEncode(body) : null;
       if (kDebugMode) {
