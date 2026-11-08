@@ -3,6 +3,7 @@ import '../core/notifications/push_notifications.dart';
 import '../core/network/token_storage.dart';
 import '../features/user/notification/bloc/notification_event.dart';
 import 'package:flutter/material.dart';
+import '../data/repositories/ai_chatbot_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/network/api_config.dart';
 import '../core/theme/app_theme.dart';
@@ -33,6 +34,9 @@ class VexGoApp extends StatelessWidget {
 
     return MultiRepositoryProvider(
       providers: [
+        RepositoryProvider<AiChatbotRepository>(
+          create: (_) => RealAiChatbotRepository(),
+        ),
         RepositoryProvider<BookingReceiptRepository>(
           create: (_) => BookingReceiptRepository.forCurrentMode(),
         ),

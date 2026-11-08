@@ -189,7 +189,13 @@ void main() {
 
         // App info
         expect(find.text('THÔNG TIN ỨNG DỤNG'), findsNothing);
+        expect(find.text('Trợ lý AI'), findsOneWidget);
         expect(find.text('Tiếng Việt'), findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.text('Phiên bản 1.0.0'),
+          100,
+          scrollable: find.byType(Scrollable).first,
+        );
         expect(find.text('Phiên bản 1.0.0'), findsOneWidget);
 
         // Logout button is present

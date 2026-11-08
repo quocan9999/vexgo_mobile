@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../data/repositories/ai_chatbot_repository.dart';
+import '../features/user/ai_chatbot/presentation/screens/ai_chatbot_screen.dart';
 import '../data/models/booking_receipt_model.dart';
 import '../features/user/receipts/presentation/booking_receipt_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -48,6 +51,7 @@ class AppRoutes {
   static const String bookingSuccess = '/booking-success';
   static const String ticketDetail = '/ticket-detail';
   static const String supportChat = '/support-chat';
+  static const String aiChatbot = '/ai-chatbot';
   static const String bookingReceipt = '/booking-receipt';
   static const String roundTripSearch = '/round-trip/search';
   static const String roundTripBooking = '/round-trip/booking';
@@ -58,6 +62,17 @@ class AppRoutes {
     initialLocation: home,
     routes: [
       // Top-level pushed routes (without BottomNavBar)
+      GoRoute(
+        path: aiChatbot,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final company = state.extra;
+          return AiChatbotScreen(
+            repository: context.read<AiChatbotRepository>(),
+            initialCompanyId: company is int && company > 0 ? company : null,
+          );
+        },
+      ),
       GoRoute(
         path: bookingReceipt,
         parentNavigatorKey: _rootNavigatorKey,

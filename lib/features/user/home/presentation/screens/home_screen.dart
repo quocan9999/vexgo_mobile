@@ -1,5 +1,6 @@
 import 'package:vexgo_app/features/user/app_info/presentation/screens/app_information_screen.dart';
 import '../widgets/available_offers_section.dart';
+import '../../../ai_chatbot/presentation/widgets/ai_chatbot_entry_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -165,6 +166,10 @@ class _HomeScreenContent extends StatelessWidget {
             SliverToBoxAdapter(
               child: AvailableOffersSection(operators: state.operators),
             ),
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+            sliver: SliverToBoxAdapter(child: AiChatbotEntryCard()),
+          ),
           if (state.popularRoutes.isNotEmpty)
             const SliverToBoxAdapter(child: PopularRoutesSection()),
           if (state.operators.isNotEmpty)

@@ -91,6 +91,11 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () => context.push(AppRoutes.supportChat),
                   ),
                   _MenuRow(
+                    icon: Icons.smart_toy_outlined,
+                    title: 'Trợ lý AI',
+                    onTap: () => context.push(AppRoutes.aiChatbot),
+                  ),
+                  _MenuRow(
                     icon: Icons.info_outline_rounded,
                     title: 'Thông tin VexGo',
                     onTap: () => openAppInformation(
