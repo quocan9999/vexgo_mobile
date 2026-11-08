@@ -2,6 +2,12 @@
 
 Ngày 08/11/2026. Người nhận: lead Backend/Web. Phạm vi này là đề xuất contract để triển khai tiếp, chưa phải API đã có.
 
+## Phân công đã chốt
+
+**Lead chỉ triển khai Backend/API, persistence/context và tích hợp support-chat phía server. Codex phụ trách toàn bộ Flutter.** Các đoạn “Flutter tiếp theo” chỉ mô tả consumer để lead thiết kế contract; không phải việc giao lead và không yêu cầu lead sửa Mobile. Lead bàn giao API contract + kết quả kiểm thử Backend, sau đó Codex nối và kiểm thử Flutter/Android.
+
+Mobile hiện đã commit chatbot tại `316a444` (local, chưa push); các thay đổi hành lý và tính năng khác vẫn giữ riêng ngoài commit.
+
 ## Mốc code và phạm vi
 
 - Backend PR #69: https://github.com/quocan9999/vexgo/pull/69 . Commit sửa ban đầu `0177105`; lead ghép develop vào nhánh tại `2e29c46` (develop `73108dd`, PR #70). Trạng thái Open là snapshot lần kiểm tra trước; kiểm tra lại trước khi làm, không tạo lại PR cho các sửa đã có.
