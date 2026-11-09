@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -148,20 +149,22 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                         children: [
                           Expanded(
                             child: Text(
-                              'Đánh giá chuyến đi',
+                              context.l10n.uiRateYourTrip,
                               style: Theme.of(context).textTheme.titleLarge,
                             ),
                           ),
                           IconButton(
-                            tooltip: 'Đóng',
+                            tooltip: context.l10n.uiClose,
                             onPressed: () => Navigator.pop(context),
                             icon: const Icon(Icons.close),
                           ),
                         ],
                       ),
                       if (!valid)
-                        const Text(
-                          'Phiên tài khoản đã thay đổi. Vui lòng mở lại đánh giá.',
+                        Text(
+                          context
+                              .l10n
+                              .uiYourAccountSessionHasChangedOpenTheReview,
                         )
                       else ...[
                         Text(owned.trip.operatorName),
@@ -180,17 +183,20 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                             '${review.rating}/5 sao',
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
-                          if (review.isEdited) const Text('Đã chỉnh sửa'),
+                          if (review.isEdited) Text(context.l10n.uiEdited),
                           const SizedBox(height: 8),
                           Text(
                             review.comment.isEmpty
-                                ? 'Không có nội dung nhận xét.'
+                                ? context.l10n.uiNoWrittenReview
                                 : review.comment,
                           ),
                           if (review.replyContent != null) ...[
                             const Divider(height: 28),
                             Text(
-                              'Phản hồi từ ${review.responderName ?? 'nhà xe'}',
+                              context.l10n.uiReplyFrom(
+                                review.responderName ??
+                                    context.l10n.uiOperatore2807c,
+                              ),
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                             const SizedBox(height: 6),
@@ -210,7 +216,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                                           _editing = true;
                                         }),
                                   icon: const Icon(Icons.edit_outlined),
-                                  label: const Text('Sửa đánh giá'),
+                                  label: Text(context.l10n.uiEditReview),
                                 ),
                               TextButton.icon(
                                 onPressed: busy || uncertain || failed
@@ -218,16 +224,16 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                                     : () =>
                                           setState(() => _confirmDelete = true),
                                 icon: const Icon(Icons.delete_outline),
-                                label: const Text('Xóa đánh giá'),
+                                label: Text(context.l10n.uiDeleteReview),
                               ),
                             ],
                           ),
                           if (review.isEditable == false)
-                            const Text('Đã hết thời hạn chỉnh sửa 3 ngày.'),
+                            Text(context.l10n.uiThe3DayEditingPeriodHasEnded),
                         ],
                         if (_confirmDelete) ...[
                           const Divider(),
-                          const Text('Xóa đánh giá và phản hồi kèm theo?'),
+                          Text(context.l10n.uiDeleteThisReviewAndItsReplies),
                           Wrap(
                             spacing: 8,
                             children: [
@@ -237,7 +243,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                                     : () => setState(
                                         () => _confirmDelete = false,
                                       ),
-                                child: const Text('Giữ lại'),
+                                child: Text(context.l10n.uiKeep),
                               ),
                               TextButton(
                                 onPressed: busy || uncertain || failed
@@ -251,24 +257,24 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                                           ),
                                         );
                                       },
-                                child: const Text('Xác nhận xóa'),
+                                child: Text(context.l10n.uiConfirmDeletion),
                               ),
                             ],
                           ),
                         ],
                         if (form) ...[
                           if (ApiConfig.isDemoMode) ...[
-                            const Text('Điểm bạn hài lòng nhất'),
+                            Text(context.l10n.uiWhatDidYouLikeMost),
                             Wrap(
                               spacing: 8,
                               children:
                                   [
-                                        'Đúng giờ',
-                                        'Xe sạch sẽ',
-                                        'Lái xe an toàn',
-                                        'Nhân viên nhiệt tình',
-                                        'Tiện nghi đầy đủ',
-                                        'Đón trả thuận tiện',
+                                        context.l10n.uiOnTime,
+                                        context.l10n.uiCleanVehicle,
+                                        context.l10n.uiSafeDriving,
+                                        context.l10n.uiHelpfulStaff,
+                                        context.l10n.uiGoodAmenities,
+                                        context.l10n.uiConvenientPickUpDropOff,
                                       ]
                                       .map(
                                         (tag) => FilterChip(
@@ -315,9 +321,9 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                             maxLines: 6,
                             maxLength: 1000,
                             enabled: !busy && !uncertain && !failed && editable,
-                            decoration: const InputDecoration(
-                              labelText: 'Nhận xét chi tiết',
-                              hintText: 'Chia sẻ trải nghiệm chuyến đi',
+                            decoration: InputDecoration(
+                              labelText: context.l10n.uiDetailedReview,
+                              hintText: context.l10n.uiShareYourTripExperience,
                               border: OutlineInputBorder(),
                             ),
                           ),
@@ -331,7 +337,9 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                               backgroundColor: AppColors.primary,
                             ),
                             child: Text(
-                              review == null ? 'Gửi đánh giá' : 'Lưu thay đổi',
+                              review == null
+                                  ? context.l10n.uiSubmitReview
+                                  : context.l10n.uiSaveChanges,
                             ),
                           ),
                           if (review != null)
@@ -339,7 +347,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                               onPressed: busy
                                   ? null
                                   : () => setState(() => _editing = false),
-                              child: const Text('Hủy chỉnh sửa'),
+                              child: Text(context.l10n.uiCancelEditing),
                             ),
                         ],
                         Wrap(
@@ -348,27 +356,29 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                             TextButton.icon(
                               onPressed: busy ? null : _refresh,
                               icon: const Icon(Icons.refresh),
-                              label: const Text('Tải lại đánh giá'),
+                              label: Text(context.l10n.uiRefreshReview),
                             ),
                             TextButton.icon(
                               onPressed: () => showDialog<void>(
                                 context: context,
                                 builder: (_) => AlertDialog(
                                   scrollable: true,
-                                  title: const Text('Về đánh giá'),
-                                  content: const Text(
-                                    'Gửi đánh giá trong 7 ngày kể từ khi khởi hành. Bạn có thể sửa trong 3 ngày sau khi gửi. Quyền sửa do máy chủ xác nhận. Bạn có thể xóa đánh giá của mình.',
+                                  title: Text(context.l10n.uiAboutReviews),
+                                  content: Text(
+                                    context
+                                        .l10n
+                                        .uiSubmitAReviewWithin7DaysOfDeparture,
                                   ),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
-                                      child: const Text('Đã hiểu'),
+                                      child: Text(context.l10n.uiGotIt),
                                     ),
                                   ],
                                 ),
                               ),
                               icon: const Icon(Icons.info_outline),
-                              label: const Text('Thông tin'),
+                              label: Text(context.l10n.uiInformation),
                             ),
                           ],
                         ),

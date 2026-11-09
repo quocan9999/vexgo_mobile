@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,7 +101,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         final messenger = ScaffoldMessenger.of(context);
         _dismissOwnRoute();
         messenger.showSnackBar(
-          const SnackBar(content: Text('Đổi mật khẩu thành công.')),
+          SnackBar(content: Text(context.l10n.uiPasswordChangedSuccessfully)),
         );
       }
     },
@@ -200,8 +201,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 size: 20,
               ),
               tooltip: showPassword
-                  ? 'Ẩn $semanticLabel'
-                  : 'Hiện $semanticLabel',
+                  ? LocaleController.strings.uiHide(semanticLabel)
+                  : LocaleController.strings.uiShow(semanticLabel),
               onPressed: busy ? null : onToggle,
             ),
           ),
@@ -214,7 +215,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         child: Scaffold(
           backgroundColor: DiscoveryColors.background,
           appBar: AppBar(
-            title: const Text('Đổi mật khẩu'),
+            title: Text(context.l10n.uiChangePassword),
             leading: BackButton(onPressed: busy ? null : _dismissOwnRoute),
           ),
           body: SafeArea(
@@ -231,16 +232,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Text(
-                              'Bảo vệ tài khoản của bạn',
+                            Text(
+                              context.l10n.uiKeepYourAccountSecure,
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Nhập mật khẩu hiện tại và mật khẩu mới. Không chia sẻ mật khẩu với người khác.',
+                            Text(
+                              context
+                                  .l10n
+                                  .uiEnterYourCurrentAndNewPasswordsDoNot,
                             ),
                             const SizedBox(height: 24),
                             Form(
@@ -250,52 +253,61 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   field(
-                                    label: 'Mật khẩu hiện tại',
+                                    label: context.l10n.uiCurrentPassword,
                                     controller: _old,
                                     showPassword: _showOldPassword,
                                     onToggle: () => setState(
                                       () =>
                                           _showOldPassword = !_showOldPassword,
                                     ),
-                                    semanticLabel: 'mật khẩu hiện tại',
+                                    semanticLabel:
+                                        context.l10n.uiCurrentPassword03603d,
                                     validate: (value) =>
                                         value == null || value.isEmpty
-                                        ? 'Nhập mật khẩu hiện tại.'
+                                        ? context
+                                              .l10n
+                                              .uiEnterYourCurrentPassword
                                         : null,
                                   ),
                                   field(
-                                    label: 'Mật khẩu mới',
+                                    label: context.l10n.uiNewPassword,
                                     controller: _next,
                                     showPassword: _showNewPassword,
                                     onToggle: () => setState(
                                       () =>
                                           _showNewPassword = !_showNewPassword,
                                     ),
-                                    semanticLabel: 'mật khẩu mới',
+                                    semanticLabel:
+                                        context.l10n.uiNewPassword31bb86,
                                     validate: (value) {
                                       final length = utf8
                                           .encode(value ?? '')
                                           .length;
                                       if (length < 8 || length > 72) {
-                                        return 'Mật khẩu cần dài 8–72 byte UTF-8.';
+                                        return context
+                                            .l10n
+                                            .uiPasswordMustBe872Utf8Bytes;
                                       }
                                       if (value == _old.text) {
-                                        return 'Mật khẩu mới phải khác mật khẩu hiện tại.';
+                                        return context
+                                            .l10n
+                                            .uiYourNewPasswordMustDifferFromYourCurrent;
                                       }
                                       return null;
                                     },
                                   ),
                                   field(
-                                    label: 'Xác nhận mật khẩu mới',
+                                    label: context.l10n.uiConfirmNewPassword,
                                     controller: _confirm,
                                     showPassword: _showConfirmPassword,
                                     onToggle: () => setState(
                                       () => _showConfirmPassword =
                                           !_showConfirmPassword,
                                     ),
-                                    semanticLabel: 'mật khẩu xác nhận',
+                                    semanticLabel:
+                                        context.l10n.uiPasswordConfirmation,
                                     validate: (value) => value != _next.text
-                                        ? 'Mật khẩu xác nhận không khớp.'
+                                        ? context.l10n.uiPasswordsDoNotMatch
                                         : null,
                                   ),
                                   if (_submitted &&
@@ -345,7 +357,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             ),
                           ),
                           child: Text(
-                            busy ? 'Đang lưu…' : 'Lưu mật khẩu',
+                            busy
+                                ? context.l10n.uiSaving
+                                : context.l10n.uiSavePassword,
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -61,11 +62,14 @@ class DateSelectorStrip extends StatelessWidget {
 
           String dateTitle;
           if (isToday) {
-            dateTitle = 'Hôm nay';
+            dateTitle = context.l10n.uiToday;
           } else if (isTomorrow) {
-            dateTitle = 'Ngày mai';
+            dateTitle = context.l10n.uiTomorrow;
           } else {
-            const weekdays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+            final weekdays =
+                Localizations.localeOf(context).languageCode == 'en'
+                ? const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                : const ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
             final weekdayName = weekdays[date.weekday - 1];
             final dayMonth = DateFormat('dd/MM').format(date);
             dateTitle = '$weekdayName, $dayMonth';
@@ -74,7 +78,7 @@ class DateSelectorStrip extends StatelessWidget {
           return Semantics(
             button: true,
             selected: isSelected,
-            label: '$dateTitle, giá $priceK',
+            label: context.l10n.uiFare(dateTitle, priceK),
             child: InkWell(
               onTap: () => onDateSelected(date),
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),

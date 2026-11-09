@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,7 +63,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (mounted) {
         setState(() {
           _busy = false;
-          _error = 'Phiên đã thay đổi. Vui lòng mở lại Quên mật khẩu.';
+          _error = context.l10n.uiYourSessionHasChangedOpenForgotPasswordAgain;
         });
       }
     });
@@ -103,9 +105,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _error = switch (error) {
           ApiException e => e.message,
           NetworkException _ =>
-            'Chưa xác nhận được kết quả từ máy chủ. Nếu vừa đặt lại mật khẩu, hãy thử đăng nhập bằng mật khẩu mới; nếu chưa được, yêu cầu OTP mới.',
+            context.l10n.uiTheServerResultCouldNotBeConfirmedTry,
           FormatException e => e.message,
-          _ => 'Không thể hoàn tất. Vui lòng thử lại.',
+          _ => context.l10n.uiUnableToCompletePleaseTryAgain,
         };
         // Proof is single use: never automatically replay a reset after an
         // uncertain response or a failed/expired proof. Obtain a new OTP.
@@ -138,7 +140,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (!_form.currentState!.validate()) return;
     final challenge = _challenge;
     if (challenge == null || !challenge.expiresAt.isAfter(DateTime.now())) {
-      setState(() => _error = 'Mã OTP đã hết hạn. Vui lòng gửi lại mã.');
+      setState(() => _error = context.l10n.uiThisCodeHasExpiredRequestANewCode);
       return;
     }
     await _perform(() async {
@@ -157,7 +159,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final proof = _proof;
     if (proof == null || !proof.expiresAt.isAfter(DateTime.now())) {
       _startOver();
-      setState(() => _error = 'Xác thực đã hết hạn. Vui lòng yêu cầu OTP mới.');
+      setState(
+        () => _error = context.l10n.uiVerificationHasExpiredRequestANewCode,
+      );
       return;
     }
     await _perform(() async {
@@ -193,14 +197,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       autocorrect: false,
       keyboardType: TextInputType.visiblePassword,
       decoration: InputDecoration(
-        labelText: confirm ? 'Xác nhận mật khẩu mới' : 'Mật khẩu mới',
+        labelText: confirm
+            ? context.l10n.uiConfirmNewPassword
+            : context.l10n.uiNewPassword,
         helperText: confirm
             ? null
-            : '8–72 byte UTF-8; ký tự có dấu có thể chiếm nhiều byte.',
+            : context.l10n.uiLabel872Utf8BytesAccentedCharactersMay,
         helperMaxLines: 3,
         errorMaxLines: 3,
         suffixIcon: IconButton(
-          tooltip: visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu',
+          tooltip: visible
+              ? context.l10n.uiHidePassword
+              : context.l10n.uiShowPassword,
           onPressed: _busy
               ? null
               : () => setState(() {
@@ -216,8 +224,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       ),
       validator: (value) => confirm
-          ? (value != _password.text ? 'Hai mật khẩu chưa khớp.' : null)
-          : PasswordRecoveryRepository.validatePassword(value ?? ''),
+          ? (value != _password.text
+                ? context.l10n.uiPasswordsDoNotMatchYet
+                : null)
+          : localizedClientValidation(
+              context,
+              PasswordRecoveryRepository.validatePassword(value ?? ''),
+            ),
     );
   }
 
@@ -226,7 +239,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final disabled = _busy || _revoked;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quên mật khẩu'),
+        title: Text(context.l10n.uiForgotPassword),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -243,15 +256,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(switch (_step) {
-                      _RecoveryStep.phone => 'Lấy lại quyền truy cập',
-                      _RecoveryStep.otp => 'Xác thực số điện thoại',
-                      _RecoveryStep.password => 'Đặt mật khẩu mới',
-                      _RecoveryStep.done => 'Đặt lại mật khẩu thành công',
+                      _RecoveryStep.phone => context.l10n.uiRecoverYourAccount,
+                      _RecoveryStep.otp => context.l10n.uiVerifyPhoneNumber,
+                      _RecoveryStep.password => context.l10n.uiSetANewPassword,
+                      _RecoveryStep.done =>
+                        context.l10n.uiPasswordResetSuccessfully,
                     }, style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 16),
                     if (_step == _RecoveryStep.phone) ...[
-                      const Text(
-                        'Nhập số điện thoại đã đăng ký để yêu cầu mã xác thực.',
+                      Text(
+                        context.l10n.uiEnterYourRegisteredPhoneNumberToRequestA,
                       ),
                       const SizedBox(height: 24),
                       TextFormField(
@@ -261,9 +275,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         autofillHints: const [
                           AutofillHints.telephoneNumberNational,
                         ],
-                        decoration: const InputDecoration(
-                          labelText: 'Số điện thoại',
-                          hintText: 'Ví dụ: 0912345678',
+                        decoration: InputDecoration(
+                          labelText: context.l10n.uiPhoneNumber,
+                          hintText: context.l10n.uiExample0912345678,
                           errorMaxLines: 3,
                         ),
                         validator: (value) {
@@ -273,14 +287,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             );
                             return null;
                           } on FormatException catch (e) {
-                            return e.message;
+                            return localizedClientLabel(context, e.message);
                           }
                         },
                       ),
                     ],
                     if (_step == _RecoveryStep.otp) ...[
                       Text(
-                        'Nhập mã OTP gồm 6 chữ số cho ${_phone.text.trim()}.',
+                        context.l10n.uiEnterThe6DigitVerificationCodeFor(
+                          _phone.text.trim(),
+                        ),
                       ),
                       const SizedBox(height: 24),
                       TextFormField(
@@ -292,14 +308,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(6),
                         ],
-                        decoration: const InputDecoration(
-                          labelText: 'Mã OTP',
+                        decoration: InputDecoration(
+                          labelText: context.l10n.uiVerificationCode,
                           errorMaxLines: 3,
                         ),
                         validator: (value) =>
                             RegExp(r'^\d{6}$').hasMatch(value ?? '')
                             ? null
-                            : 'Nhập đủ 6 chữ số.',
+                            : context.l10n.uiEnterAll6Digits,
                       ),
                       const SizedBox(height: 12),
                       TextButton(
@@ -308,14 +324,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             : () => _request(resend: true),
                         child: Text(
                           _resendSeconds > 0
-                              ? 'Gửi lại mã sau $_resendSeconds giây'
-                              : 'Gửi lại mã OTP',
+                              ? context.l10n.uiResendCodeInSeconds(
+                                  _resendSeconds,
+                                )
+                              : context.l10n.uiResendCode,
                         ),
                       ),
                     ],
                     if (_step == _RecoveryStep.password) ...[
-                      const Text(
-                        'Sau khi đặt lại mật khẩu, các phiên đăng nhập cũ sẽ hết hiệu lực.',
+                      Text(
+                        context
+                            .l10n
+                            .uiResettingYourPasswordWillEndYourExistingSign,
                       ),
                       const SizedBox(height: 24),
                       _passwordField(_password, confirm: false),
@@ -323,15 +343,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       _passwordField(_confirm, confirm: true),
                     ],
                     if (_step == _RecoveryStep.done)
-                      const Text(
-                        'Vui lòng đăng nhập bằng mật khẩu mới để tiếp tục.',
-                      ),
+                      Text(context.l10n.uiSignInWithYourNewPasswordToContinue),
                     if (_error != null) ...[
                       const SizedBox(height: 16),
                       Semantics(
                         liveRegion: true,
                         child: Text(
-                          _error!,
+                          localizedClientLabel(context, _error!),
                           style: const TextStyle(color: AppColors.error),
                         ),
                       ),
@@ -359,10 +377,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ),
                               )
                             : Text(switch (_step) {
-                                _RecoveryStep.phone => 'Yêu cầu mã OTP',
-                                _RecoveryStep.otp => 'Xác nhận OTP',
-                                _RecoveryStep.password => 'Đặt lại mật khẩu',
-                                _RecoveryStep.done => 'Về đăng nhập',
+                                _RecoveryStep.phone =>
+                                  context.l10n.uiRequestCode,
+                                _RecoveryStep.otp => context.l10n.uiVerifyCode,
+                                _RecoveryStep.password =>
+                                  context.l10n.uiResetPassword,
+                                _RecoveryStep.done =>
+                                  context.l10n.uiBackToSignIn,
                               }),
                       ),
                     ),
@@ -370,7 +391,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         _step == _RecoveryStep.password)
                       TextButton(
                         onPressed: disabled ? null : _startOver,
-                        child: const Text('Đổi số điện thoại / Bắt đầu lại'),
+                        child: Text(context.l10n.uiChangePhoneNumberStartAgain),
                       ),
                   ],
                 ),

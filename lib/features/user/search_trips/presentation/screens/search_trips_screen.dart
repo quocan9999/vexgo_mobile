@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -79,11 +80,11 @@ class _SearchTripsView extends StatelessWidget {
           backgroundColor: DiscoveryColors.background,
           appBar: DiscoveryAppBar(
             title: '$fromCityName - $toCityName',
-            subtitle: '$dateStr • $ticketCount vé',
+            subtitle: context.l10n.uiTickets719a21(dateStr, ticketCount),
             actions: [
               IconButton(
                 icon: const Icon(Icons.tune_rounded, color: Colors.white),
-                tooltip: 'Bộ lọc',
+                tooltip: context.l10n.uiFilters,
                 onPressed: () async {
                   final newFilter = await TripFilterSheet.show(
                     context,
@@ -154,8 +155,10 @@ class _SearchTripsView extends StatelessWidget {
                     Expanded(
                       child: Text(
                         state.status == SearchTripsStatus.loading
-                            ? 'Đang tìm kiếm chuyến xe...'
-                            : 'Tìm thấy ${state.filteredTrips.length} chuyến xe',
+                            ? context.l10n.uiSearchingForTrips
+                            : context.l10n.uiTripsFound(
+                                state.filteredTrips.length,
+                              ),
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral600,
                           fontWeight: FontWeight.w600,
@@ -167,8 +170,9 @@ class _SearchTripsView extends StatelessWidget {
                     if (state.currentFilter.hasActiveFilters)
                       Semantics(
                         button: true,
-                        label:
-                            'Xóa bộ lọc (${state.currentFilter.activeFilterCount})',
+                        label: context.l10n.uiClearFilters(
+                          state.currentFilter.activeFilterCount,
+                        ),
                         child: InkWell(
                           onTap: () => bloc.add(const ResetFilterEvent()),
                           borderRadius: BorderRadius.circular(
@@ -189,7 +193,9 @@ class _SearchTripsView extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 2),
                                 Text(
-                                  'Xóa lọc (${state.currentFilter.activeFilterCount})',
+                                  context.l10n.uiClearFiltersa8df77(
+                                    state.currentFilter.activeFilterCount,
+                                  ),
                                   style: DiscoveryTextStyles.caption.copyWith(
                                     color: DiscoveryColors.secondary,
                                     fontWeight: FontWeight.w700,
@@ -229,10 +235,9 @@ class _SearchTripsView extends StatelessWidget {
     if (state.status == SearchTripsStatus.failure) {
       return _buildEmptyOrErrorState(
         icon: Icons.error_outline_rounded,
-        title: 'Có lỗi xảy ra',
-        message:
-            state.errorMessage ?? 'Không thể tải danh sách chuyến xe lúc này.',
-        buttonText: 'Thử lại',
+        title: context.l10n.uiSomethingWentWrong,
+        message: state.errorMessage ?? context.l10n.uiUnableToLoadTripsRightNow,
+        buttonText: context.l10n.uiTryAgain,
         buttonType: ButtonType.primary,
         onButtonPressed: () {
           bloc.add(
@@ -249,10 +254,9 @@ class _SearchTripsView extends StatelessWidget {
     if (state.filteredTrips.isEmpty) {
       return _buildEmptyOrErrorState(
         icon: Icons.directions_bus_outlined,
-        title: 'Không tìm thấy chuyến xe phù hợp',
-        message:
-            'Không có chuyến xe nào thỏa mãn các tiêu chí lọc của bạn. Hãy thử thay đổi bộ lọc.',
-        buttonText: 'Thiết lập lại bộ lọc',
+        title: context.l10n.uiNoMatchingTrips,
+        message: context.l10n.uiNoTripsMatchYourFiltersTryChangingThe,
+        buttonText: context.l10n.uiResetFilters,
         buttonType: ButtonType.secondary,
         onButtonPressed: () => bloc.add(const ResetFilterEvent()),
       );

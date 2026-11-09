@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
@@ -91,7 +92,7 @@ class _ShipmentMyListViewState extends State<ShipmentMyListView> {
             children: [
               CustomTextField(
                 controller: _searchController,
-                hintText: 'Tìm kiếm theo mã vận đơn...',
+                hintText: context.l10n.uiSearchByShipmentCode,
                 prefixIcon: const Icon(
                   Icons.search_rounded,
                   color: DiscoveryColors.neutral500,
@@ -109,15 +110,27 @@ class _ShipmentMyListViewState extends State<ShipmentMyListView> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildFilterChip('Tất cả', null),
-                    _buildFilterChip('Mới tạo', ShipmentStatus.created),
-                    _buildFilterChip('Đã tiếp nhận', ShipmentStatus.accepted),
+                    _buildFilterChip(context.l10n.uiAll, null),
                     _buildFilterChip(
-                      'Đang vận chuyển',
+                      context.l10n.uiCreated,
+                      ShipmentStatus.created,
+                    ),
+                    _buildFilterChip(
+                      context.l10n.uiAccepted,
+                      ShipmentStatus.accepted,
+                    ),
+                    _buildFilterChip(
+                      context.l10n.uiInTransit,
                       ShipmentStatus.inTransit,
                     ),
-                    _buildFilterChip('Đã giao', ShipmentStatus.delivered),
-                    _buildFilterChip('Đã hủy', ShipmentStatus.cancelled),
+                    _buildFilterChip(
+                      context.l10n.uiDelivered,
+                      ShipmentStatus.delivered,
+                    ),
+                    _buildFilterChip(
+                      context.l10n.uiCancelled,
+                      ShipmentStatus.cancelled,
+                    ),
                   ],
                 ),
               ),
@@ -154,7 +167,7 @@ class _ShipmentMyListViewState extends State<ShipmentMyListView> {
                         ),
                         const SizedBox(height: 16),
                         CustomButton(
-                          text: 'Thử lại',
+                          text: context.l10n.uiTryAgain,
                           onPressed: () => _fetch(),
                           type: ButtonType.primary,
                         ),
@@ -163,11 +176,10 @@ class _ShipmentMyListViewState extends State<ShipmentMyListView> {
                   ),
                 )
               : records.isEmpty
-              ? const EmptyState(
+              ? EmptyState(
                   icon: Icons.inventory_2_outlined,
-                  title: 'Chưa có đơn gửi hàng nào',
-                  message:
-                      'Bạn chưa tạo đơn gửi hàng nào hoặc không có đơn phù hợp bộ lọc.',
+                  title: context.l10n.uiNoShipmentsYet,
+                  message: context.l10n.uiYouHaveNoShipmentsYetOrNoneMatch,
                 )
               : RefreshIndicator(
                   onRefresh: () async => _fetch(),
@@ -197,7 +209,7 @@ class _ShipmentMyListViewState extends State<ShipmentMyListView> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.chevron_left_rounded),
-                  tooltip: 'Trang trước',
+                  tooltip: context.l10n.uiPreviousPage,
                   onPressed: pageData.page > 1
                       ? () => _fetch(page: pageData.page - 1)
                       : null,
@@ -308,7 +320,7 @@ class _ShipmentMyListViewState extends State<ShipmentMyListView> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Người nhận: ${item.receiverName}',
+                      context.l10n.uiRecipient3b3790(item.receiverName),
                       style: const TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 12,
@@ -316,7 +328,7 @@ class _ShipmentMyListViewState extends State<ShipmentMyListView> {
                       ),
                     ),
                     Text(
-                      '${item.itemsCount} kiện',
+                      context.l10n.uiItems930257(item.itemsCount),
                       style: const TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 12,

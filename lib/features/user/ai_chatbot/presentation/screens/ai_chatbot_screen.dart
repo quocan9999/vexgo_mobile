@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -212,8 +213,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
     final repo = _resolveTripRepository(context);
     if (repo == null) {
       setState(() {
-        _tripLookupError =
-            'Chưa tải được thông tin chuyến xe từ máy chủ. Vui lòng thử lại sau.';
+        _tripLookupError = context.l10n.uiUnableToLoadTripDetailsFromTheServer;
       });
       return;
     }
@@ -237,8 +237,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
       if (trip == null) {
         setState(() {
           _verifyingTripId = null;
-          _tripLookupError =
-              'Chuyến xe không còn khả dụng hoặc chưa tải được dữ liệu thực tế.';
+          _tripLookupError = context.l10n.uiThisTripIsNoLongerAvailableOrLive;
         });
         return;
       }
@@ -247,7 +246,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
         setState(() {
           _verifyingTripId = null;
           _tripLookupError =
-              'Chuyến xe không có thông tin ngày khởi hành hợp lệ từ máy chủ.';
+              context.l10n.uiTheServerDidNotProvideAValidDeparture;
         });
         return;
       }
@@ -271,8 +270,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
       }
       setState(() {
         _verifyingTripId = null;
-        _tripLookupError =
-            'Chưa tải được thông tin chuyến xe từ máy chủ. Vui lòng thử lại sau.';
+        _tripLookupError = context.l10n.uiUnableToLoadTripDetailsFromTheServer;
       });
     }
   }
@@ -450,7 +448,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
       leading: canPop
           ? IconButton(
               key: const Key('ai-chatbot-back-btn'),
-              tooltip: 'Quay lại',
+              tooltip: context.l10n.uiBack,
               constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => context.pop(),
@@ -469,7 +467,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Trợ lý AI',
+              context.l10n.uiAiAssistant,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: (isShort ? DiscoveryTextStyles.h4 : DiscoveryTextStyles.h3)
@@ -482,7 +480,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
         if (state.sessionToken != null)
           IconButton(
             key: const Key('ai-chatbot-read-history-btn'),
-            tooltip: 'Xem phản hồi đã lưu',
+            tooltip: context.l10n.uiViewSavedResponses,
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             onPressed: (state.sending || state.loadingHistory)
                 ? null
@@ -491,7 +489,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
           ),
         IconButton(
           key: const Key('ai-chatbot-new-conv-btn'),
-          tooltip: 'Hội thoại mới',
+          tooltip: context.l10n.uiNewConversation,
           constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           onPressed: () {
             final nextShow = !_showNewConversationConfirm;
@@ -504,7 +502,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
         ),
         IconButton(
           key: const Key('ai-chatbot-header-support-btn'),
-          tooltip: 'Chat với nhân viên',
+          tooltip: context.l10n.uiChatWithSupport,
           constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           onPressed: _handleOpenSupportChat,
           icon: const Icon(Icons.support_agent_rounded, color: Colors.white),
@@ -544,7 +542,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
-                  'Đang lọc theo nhà xe #$companyId',
+                  context.l10n.uiFilteringByOperator(companyId),
                   style: DiscoveryTextStyles.bodySmall.copyWith(
                     color: DiscoveryColors.primaryDark,
                     fontWeight: FontWeight.w700,
@@ -570,7 +568,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
               _syncControllerWithDraft('');
               unawaited(_cubit.loadSuggestions());
             },
-            child: const Text('Bỏ lọc nhà xe'),
+            child: Text(context.l10n.uiClearOperatorFilter),
           ),
         ],
       ),
@@ -593,7 +591,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Bắt đầu hội thoại mới?',
+            context.l10n.uiStartANewConversation,
             style: DiscoveryTextStyles.titleSmall.copyWith(
               color: DiscoveryColors.neutral900,
               fontWeight: FontWeight.w800,
@@ -601,7 +599,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Thao tác này mở một phiên trò chuyện mới trên ứng dụng và không xóa các yêu cầu đã gửi lên máy chủ trước đó.',
+            context.l10n.uiThisStartsANewConversationInTheApp,
             style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 12,
@@ -622,7 +620,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () => _handleStartNewConversation(keepDraft: false),
-                child: const Text('Tạo phiên mới'),
+                child: Text(context.l10n.uiStartNewSession),
               ),
               OutlinedButton(
                 key: const Key('ai-chatbot-confirm-new-keep-btn'),
@@ -632,7 +630,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
                   side: const BorderSide(color: DiscoveryColors.primary),
                 ),
                 onPressed: () => _handleStartNewConversation(keepDraft: true),
-                child: const Text('Tạo mới & Giữ nháp'),
+                child: Text(context.l10n.uiStartNewKeepDraft),
               ),
               TextButton(
                 key: const Key('ai-chatbot-cancel-new-btn'),
@@ -642,7 +640,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
                 ),
                 onPressed: () =>
                     setState(() => _showNewConversationConfirm = false),
-                child: const Text('Đóng'),
+                child: Text(context.l10n.uiClose),
               ),
             ],
           ),

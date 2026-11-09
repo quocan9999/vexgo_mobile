@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'shipment_cancellation_section.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -114,7 +115,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã sao chép $label: $text'),
+        content: Text(context.l10n.uiCopiedd3e09c(label, text)),
         duration: const Duration(seconds: 1),
       ),
     );
@@ -141,7 +142,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 const SizedBox(height: 12),
                 Text(
                   widget.state.refreshError ??
-                      'Không tìm thấy chi tiết vận đơn.',
+                      context.l10n.uiShipmentDetailsNotFound,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: AppTypography.fontFamily,
@@ -151,7 +152,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 ),
                 const SizedBox(height: 16),
                 CustomButton(
-                  text: 'Tạo đơn mới',
+                  text: context.l10n.uiCreateNewShipment,
                   onPressed: widget.onNewShipment,
                   type: ButtonType.primary,
                 ),
@@ -194,8 +195,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'MÃ VẬN ĐƠN',
+                          Text(
+                            context.l10n.uiShipmentCode9dec85,
                             style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 11,
@@ -225,14 +226,14 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                                   size: 18,
                                   color: DiscoveryColors.primary,
                                 ),
-                                tooltip: 'Sao chép mã vận đơn',
+                                tooltip: context.l10n.uiCopyShipmentCode,
                                 constraints: const BoxConstraints(
                                   minWidth: 48,
                                   minHeight: 48,
                                 ),
                                 onPressed: () => _copyToClipboard(
                                   record.identity.waybillCode,
-                                  'mã vận đơn',
+                                  context.l10n.uiShipmentCode09837d,
                                 ),
                               ),
                             ],
@@ -247,8 +248,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Mã đơn hàng: ',
+                    Text(
+                      context.l10n.uiBookingCoded6f725,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 13,
@@ -269,20 +270,22 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                     ),
                     IconButton(
                       icon: const Icon(Icons.copy_rounded, size: 16),
-                      tooltip: 'Sao chép mã đơn',
+                      tooltip: context.l10n.uiCopyBookingCodeffae60,
                       constraints: const BoxConstraints(
                         minWidth: 48,
                         minHeight: 48,
                       ),
                       onPressed: () => _copyToClipboard(
                         record.identity.orderCode,
-                        'mã đơn hàng',
+                        context.l10n.uiBookingCodeee647d,
                       ),
                     ),
                   ],
                 ),
                 Text(
-                  'Ngày tạo đơn: ${DateFormatter.formatDayMonthYear(record.sentAt.toLocal())}',
+                  context.l10n.uiCreatedb409e6(
+                    DateFormatter.formatDayMonthYear(record.sentAt.toLocal()),
+                  ),
                   style: const TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 13,
@@ -291,7 +294,9 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 ),
                 if (record.expectedSendDate != null) ...[
                   Text(
-                    'Ngày dự kiến gửi: ${record.expectedSendDate}',
+                    context.l10n.uiExpectedShippingDate(
+                      record.expectedSendDate ?? '—',
+                    ),
                     style: const TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 13,
@@ -325,8 +330,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Hạn mang hàng ra bến:',
+                        Text(
+                          context.l10n.uiDropOffDeadline,
                           style: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 12,
@@ -373,7 +378,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '${record.trip.carrier} • ${record.trip.code ?? 'Chưa phân chuyến'}',
+                        '${record.trip.carrier} • ${record.trip.code ?? context.l10n.uiNoTripAssigned}',
                         style: const TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 14,
@@ -386,7 +391,10 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Tuyến: ${record.trip.origin} → ${record.trip.destination}',
+                  context.l10n.uiRoute97d69f(
+                    record.trip.origin,
+                    record.trip.destination,
+                  ),
                   style: const TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 13,
@@ -395,8 +403,12 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 ),
                 Text(
                   record.trip.departure == null
-                      ? 'Chưa phân chuyến'
-                      : 'Khởi hành: ${DateFormatter.formatFullDate(record.trip.departure!.toLocal())}',
+                      ? context.l10n.uiNoTripAssigned
+                      : context.l10n.uiDeparture(
+                          DateFormatter.formatFullDate(
+                            record.trip.departure!.toLocal(),
+                          ),
+                        ),
                   style: const TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 13,
@@ -407,7 +419,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 _buildPointRow(
                   icon: Icons.trip_origin_rounded,
                   iconColor: DiscoveryColors.primary,
-                  label: 'Điểm gửi hàng',
+                  label: context.l10n.uiDropOffPoint,
                   name: record.pickup.name,
                   address: record.pickup.address,
                 ),
@@ -415,7 +427,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 _buildPointRow(
                   icon: Icons.location_on_rounded,
                   iconColor: DiscoveryColors.secondary,
-                  label: 'Điểm nhận hàng',
+                  label: context.l10n.uiCollectionPoint,
                   name: record.dropoff.name,
                   address: record.dropoff.address,
                 ),
@@ -435,8 +447,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Thông tin giao nhận',
+                Text(
+                  context.l10n.uiDeliveryInformation,
                   style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 14,
@@ -452,8 +464,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Người gửi:',
+                          Text(
+                            context.l10n.uiSenderfeefc2,
                             style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 12,
@@ -495,8 +507,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Người nhận:',
+                          Text(
+                            context.l10n.uiRecipient2a6b0f,
                             style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 12,
@@ -553,7 +565,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Danh sách kiện hàng (${record.items.length} kiện)',
+                  context.l10n.uiItemsCount(record.items.length),
                   style: const TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 14,
@@ -601,7 +613,10 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Loại: ${pkg.category} • Khối lượng: ${pkg.weight} kg/kiện',
+                          context.l10n.uiTypeWeightKgItem(
+                            pkg.category,
+                            pkg.weight,
+                          ),
                           style: const TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 12,
@@ -611,7 +626,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                         if (pkg.dimensions != null &&
                             pkg.dimensions!.isNotEmpty) ...[
                           Text(
-                            'Kích thước: ${pkg.dimensions}',
+                            context.l10n.uiDimensions(pkg.dimensions ?? '—'),
                             style: const TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 12,
@@ -621,7 +636,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                         ],
                         if (pkg.note != null && pkg.note!.isNotEmpty) ...[
                           Text(
-                            'Ghi chú: ${pkg.note}',
+                            context.l10n.uiNotes(pkg.note ?? '—'),
                             style: const TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 12,
@@ -652,8 +667,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
               children: [
                 Text(
                   record.confirmedAt == null
-                      ? 'Cước dự tính'
-                      : 'Cước phí xác nhận',
+                      ? context.l10n.uiEstimatedFee321adb
+                      : context.l10n.uiConfirmedFee,
                   style: const TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 14,
@@ -663,8 +678,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 ),
                 if (record.confirmedAt == null) ...[
                   const SizedBox(height: 4),
-                  const Text(
-                    'Cước phí thực tế sẽ được cân đo và xác nhận tại bến.',
+                  Text(
+                    context.l10n.uiTheFinalFeeWillBeConfirmedAfterWeighing,
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 12,
@@ -674,7 +689,9 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 ] else ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Đã xác nhận: ${_formatLocalDateTime(record.confirmedAt!)}',
+                    context.l10n.uiConfirmed(
+                      _formatLocalDateTime(record.confirmedAt!),
+                    ),
                     style: const TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 12,
@@ -683,17 +700,20 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                   ),
                 ],
                 const SizedBox(height: 8),
-                _buildFeeRow('Cước cơ bản', record.baseFee),
-                _buildFeeRow('Phụ phí dịch vụ', record.serviceFee),
+                _buildFeeRow(context.l10n.uiBaseFee, record.baseFee),
+                _buildFeeRow(
+                  context.l10n.uiServiceSurcharge,
+                  record.serviceFee,
+                ),
                 if (record.discount > 0)
-                  _buildFeeRow('Giảm giá', -record.discount),
+                  _buildFeeRow(context.l10n.uiDiscount, -record.discount),
                 const Divider(height: 16, color: DiscoveryColors.neutral200),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Tổng cước',
+                        context.l10n.uiTotalShippingFee,
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 15,
@@ -716,13 +736,13 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                 ),
                 if (record.paidAmount != null) ...[
                   const SizedBox(height: 6),
-                  _buildFeeRow('Đã thanh toán', record.paidAmount!),
+                  _buildFeeRow(context.l10n.uiPaid, record.paidAmount!),
                 ],
                 if (record.outstandingAmount != null &&
                     record.status != ShipmentStatus.cancelled) ...[
                   const SizedBox(height: 4),
                   _buildFeeRow(
-                    'Còn phải thanh toán',
+                    context.l10n.uiAmountOutstanding,
                     record.outstandingAmount!,
                   ),
                 ],
@@ -733,7 +753,7 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
 
           // Payment Handling Block
           if (record.status == ShipmentStatus.cancelled) ...[
-            const Text('Đơn đã hủy; không cần mang hàng ra bến cho đơn này.'),
+            Text(context.l10n.uiThisShipmentIsCancelledDoNotBringItems),
           ] else if (!isOnline) ...[
             // COUNTER PAYMENT VIEW
             Container(
@@ -751,8 +771,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                     size: 36,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Thanh toán tại bến xe',
+                  Text(
+                    context.l10n.uiPayAtTheStation,
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 16,
@@ -762,7 +782,11 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${record.payer == ShipmentPayer.sender ? 'Người gửi' : 'Người nhận'} thanh toán trực tiếp tại quầy bến xe khi gửi hoặc nhận hàng.',
+                    context.l10n.uiPaysAtTheStationCounterWhenDroppingOff(
+                      record.payer == ShipmentPayer.sender
+                          ? context.l10n.uiSender53bc00
+                          : context.l10n.uiRecipient449171,
+                    ),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontFamily: AppTypography.fontFamily,
@@ -778,8 +802,10 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                     size: 160.0,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Mã QR nhận diện vận đơn tại bến\n(Quét để đối chiếu tại quầy, không phải mã thanh toán chuyển khoản)',
+                  Text(
+                    context
+                        .l10n
+                        .uiShipmentIdentificationQrCodeForVerificationAtThe,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
@@ -793,13 +819,15 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
           ] else ...[
             Text(
               isPaid
-                  ? 'Đã xác nhận thanh toán thành công!'
+                  ? context.l10n.uiPaymentConfirmedSuccessfully
                   : verifiedPayment?.requiresReconciliation == true
-                  ? 'Giao dịch đang đối soát'
-                  : 'Đơn thanh toán trực tuyến trước đây. Liên hệ nhà xe để kiểm tra trạng thái, không chuyển thêm tiền.',
+                  ? context.l10n.uiPaymentReconciliationInProgress
+                  : context
+                        .l10n
+                        .uiThisShipmentPreviouslyUsedOnlinePaymentContactThe,
             ),
             CustomButton(
-              text: 'Kiểm tra trạng thái',
+              text: context.l10n.uiCheckStatus,
               onPressed: () => widget.cubit.refreshPayment(),
               type: ButtonType.outline,
             ),
@@ -812,14 +840,14 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
 
           // Bottom CTA Buttons
           CustomButton(
-            text: 'Tạo đơn gửi hàng khác',
+            text: context.l10n.uiCreateAnotherShipment,
             onPressed: widget.onNewShipment,
             type: ButtonType.primary,
           ),
           if (widget.onGoToList != null) ...[
             const SizedBox(height: 10),
             CustomButton(
-              text: 'Xem danh sách đơn gửi hàng',
+              text: context.l10n.uiViewShipments,
               onPressed: widget.onGoToList!,
               type: ButtonType.outline,
             ),

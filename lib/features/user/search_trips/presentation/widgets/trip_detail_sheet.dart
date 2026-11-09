@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,7 +78,7 @@ class TripDetailSheet extends StatelessWidget {
                             ),
                             const SizedBox(height: AppDimensions.md),
                             Text(
-                              'Không thể tải chi tiết chuyến',
+                              context.l10n.uiUnableToLoadTripDetails,
                               style: DiscoveryTextStyles.titleMedium.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
@@ -84,7 +86,13 @@ class TripDetailSheet extends StatelessWidget {
                             ),
                             const SizedBox(height: AppDimensions.xs),
                             Text(
-                              state.error ?? 'Đã xảy ra lỗi khi tải dữ liệu.',
+                              localizedClientLabel(
+                                context,
+                                state.error ??
+                                    context
+                                        .l10n
+                                        .uiAnErrorOccurredWhileLoadingData,
+                              ),
                               style: DiscoveryTextStyles.bodySmall.copyWith(
                                 color: DiscoveryColors.neutral600,
                               ),
@@ -98,7 +106,7 @@ class TripDetailSheet extends StatelessWidget {
                               children: [
                                 Semantics(
                                   button: true,
-                                  label: 'Đóng chi tiết chuyến',
+                                  label: context.l10n.uiCloseTripDetails,
                                   child: OutlinedButton(
                                     style: OutlinedButton.styleFrom(
                                       minimumSize: const Size(96, 44),
@@ -110,12 +118,12 @@ class TripDetailSheet extends StatelessWidget {
                                     ),
                                     onPressed: () =>
                                         Navigator.of(context).pop(),
-                                    child: const Text('Đóng'),
+                                    child: Text(context.l10n.uiClose),
                                   ),
                                 ),
                                 Semantics(
                                   button: true,
-                                  label: 'Thử lại tải chi tiết chuyến',
+                                  label: context.l10n.uiRetryLoadingTripDetails,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: DiscoveryColors.primary,
@@ -130,7 +138,7 @@ class TripDetailSheet extends StatelessWidget {
                                     onPressed: context
                                         .read<TripDetailCubit>()
                                         .load,
-                                    child: const Text('Thử lại'),
+                                    child: Text(context.l10n.uiTryAgain),
                                   ),
                                 ),
                               ],
@@ -284,11 +292,11 @@ class _TripDetailContent extends StatelessWidget {
                 unselectedLabelColor: DiscoveryColors.neutral500,
                 indicatorColor: DiscoveryColors.primary,
                 indicatorWeight: 2.5,
-                tabs: const [
-                  Tab(text: 'Hình ảnh xe'),
-                  Tab(text: 'Tiện ích'),
-                  Tab(text: 'Đón / Trả'),
-                  Tab(text: 'Chính sách hủy'),
+                tabs: [
+                  Tab(text: context.l10n.uiVehiclePhotos),
+                  Tab(text: context.l10n.uiAmenities),
+                  Tab(text: context.l10n.uiPickUpDropOff),
+                  Tab(text: context.l10n.uiCancellationPolicy),
                 ],
               ),
             ),
@@ -344,7 +352,7 @@ class _TripDetailContent extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Giá chỉ từ',
+                          context.l10n.uiFaresFrom,
                           style: DiscoveryTextStyles.caption.copyWith(
                             color: DiscoveryColors.neutral500,
                           ),
@@ -360,8 +368,8 @@ class _TripDetailContent extends StatelessWidget {
 
                     final ctaBtn = DiscoveryButton(
                       text: trip.availableSeats > 0
-                          ? 'CHỌN CHUYẾN NÀY'
-                          : 'CHUYẾN XE ĐÃ HẾT CHỖ',
+                          ? context.l10n.uiSelectThisTrip
+                          : context.l10n.uiSoldOut,
                       type: ButtonType.secondary,
                       height: isCompactHeight ? 42 : 48,
                       width: isNarrow ? double.infinity : null,
@@ -444,7 +452,9 @@ class _TripDetailContent extends StatelessWidget {
                   ),
                   const SizedBox(height: AppDimensions.sm),
                   Text(
-                    'Chưa có hình ảnh thực tế cho chuyến xe này',
+                    LocaleController
+                        .strings
+                        .uiNoVehiclePhotosAreAvailableForThisTrip,
                     style: DiscoveryTextStyles.bodyMedium.copyWith(
                       color: DiscoveryColors.neutral600,
                     ),
@@ -474,7 +484,9 @@ class _TripDetailContent extends StatelessWidget {
                 ),
                 const SizedBox(height: AppDimensions.sm),
                 Text(
-                  'Chưa có thông tin tiện ích cho chuyến xe này',
+                  LocaleController
+                      .strings
+                      .uiNoAmenityInformationIsAvailableForThisTrip,
                   style: DiscoveryTextStyles.bodyMedium.copyWith(
                     color: DiscoveryColors.neutral600,
                   ),
@@ -555,7 +567,9 @@ class _TripDetailContent extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Điểm đón • ${trip.departureTime}',
+                        LocaleController.strings.uiPickUpb65f22(
+                          trip.departureTime,
+                        ),
                         style: DiscoveryTextStyles.titleSmall.copyWith(
                           color: DiscoveryColors.primary,
                           fontWeight: FontWeight.w700,
@@ -604,7 +618,9 @@ class _TripDetailContent extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Điểm trả • ${trip.arrivalTime}',
+                        LocaleController.strings.uiDropOff37f63f(
+                          trip.arrivalTime,
+                        ),
                         style: DiscoveryTextStyles.titleSmall.copyWith(
                           color: DiscoveryColors.secondary,
                           fontWeight: FontWeight.w700,
@@ -640,8 +656,10 @@ class _TripDetailContent extends StatelessWidget {
       padding: const EdgeInsets.all(AppDimensions.base),
       children: [
         _buildPolicyRow(
-          'Điều kiện hủy vé',
-          'Mở chi tiết vé để xem điều kiện, phí hủy và số tiền hoàn do hệ thống xác nhận trước khi hủy.',
+          LocaleController.strings.uiCancellationConditions,
+          LocaleController
+              .strings
+              .uiOpenTicketDetailsToCheckConfirmedCancellationConditions,
         ),
         const SizedBox(height: AppDimensions.md),
         Container(
@@ -660,7 +678,9 @@ class _TripDetailContent extends StatelessWidget {
               const SizedBox(width: AppDimensions.sm),
               Expanded(
                 child: Text(
-                  'Lưu ý: Vào dịp Lễ/Tết chính sách hoàn hủy vé sẽ tuân theo quy định riêng của nhà xe.',
+                  LocaleController
+                      .strings
+                      .uiNoteDuringPublicHolidaysTheOperatorSSpecial,
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.neutral800,
                   ),

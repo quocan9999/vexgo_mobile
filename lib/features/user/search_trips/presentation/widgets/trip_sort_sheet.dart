@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -46,7 +48,7 @@ class TripSortSheet extends StatelessWidget {
           ),
           const SizedBox(height: AppDimensions.md),
           Text(
-            'Sắp xếp theo',
+            context.l10n.uiSortBy,
             style: DiscoveryTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: AppDimensions.sm),
@@ -63,7 +65,7 @@ class TripSortSheet extends StatelessWidget {
                 size: 20,
               ),
               title: Text(
-                sort.label,
+                localizedClientLabel(context, sort.label),
                 style: DiscoveryTextStyles.bodyMedium.copyWith(
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected

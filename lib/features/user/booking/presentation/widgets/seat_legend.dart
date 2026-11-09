@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 
@@ -20,21 +21,25 @@ class SeatLegend extends StatelessWidget {
         spacing: 12,
         runSpacing: 8,
         children: [
-          _item('Trống', Colors.white, DiscoveryColors.neutral400),
           _item(
-            'Đang chọn',
+            context.l10n.uiAvailable,
+            Colors.white,
+            DiscoveryColors.neutral400,
+          ),
+          _item(
+            context.l10n.uiSelected,
             DiscoveryColors.primary,
             DiscoveryColors.primary,
             Icons.check,
           ),
           _item(
-            'Đang giữ',
+            context.l10n.uiHeld,
             const Color(0xFFFEF3C7),
             const Color(0xFFB45309),
             Icons.hourglass_bottom,
           ),
           _item(
-            'Đã đặt',
+            context.l10n.uiBooked,
             DiscoveryColors.neutral200,
             DiscoveryColors.neutral500,
             Icons.close,

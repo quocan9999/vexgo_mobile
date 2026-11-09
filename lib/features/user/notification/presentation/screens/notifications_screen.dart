@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/widgets/flat_filter_bar.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/data/repositories/booking_repository.dart';
@@ -75,10 +77,8 @@ class _NotificationsScreenState extends State<NotificationsScreen>
           version == TokenStorage.sessionVersion &&
           !context.read<NotificationBloc>().state.requiresLogin) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Không thể mở vé. Vui lòng thử lại trong Vé của tôi.',
-            ),
+          SnackBar(
+            content: Text(context.l10n.uiUnableToOpenTheTicketTryAgainIn),
           ),
         );
       }
@@ -94,9 +94,11 @@ class _NotificationsScreenState extends State<NotificationsScreen>
           current.errorMessage != null &&
           current.errorMessage != previous.errorMessage,
       listener: (context, state) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(localizedClientLabel(context, state.errorMessage!)),
+          ),
+        );
       },
       builder: (context, state) {
         final bloc = context.read<NotificationBloc>();
@@ -106,10 +108,10 @@ class _NotificationsScreenState extends State<NotificationsScreen>
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: TabPageHeader(
-            title: 'Thông báo',
+            title: context.l10n.uiNotifications,
             actions: [
               TabHeaderAction(
-                label: 'Đọc tất cả',
+                label: context.l10n.uiMarkAllAsRead,
                 icon: Icons.done_all_rounded,
                 onPressed:
                     !state.requiresLogin &&
@@ -128,10 +130,10 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                   onChanged: (index) =>
                       bloc.add(ChangeNotificationTabEvent(index)),
                   options: [
-                    FlatFilterOption('Tất cả', count: unreadCount),
-                    const FlatFilterOption('Chuyến đi'),
-                    const FlatFilterOption('Ưu đãi'),
-                    const FlatFilterOption('Hệ thống'),
+                    FlatFilterOption(context.l10n.uiAll, count: unreadCount),
+                    FlatFilterOption(context.l10n.uiTrips),
+                    FlatFilterOption(context.l10n.uiOffers),
+                    FlatFilterOption(context.l10n.uiSystem),
                   ],
                 ),
 
@@ -142,10 +144,10 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text('Đăng nhập để xem thông báo.'),
+                            Text(context.l10n.uiSignInToViewNotifications),
                             TextButton(
                               onPressed: () => context.go('/profile'),
-                              child: const Text('Đăng nhập'),
+                              child: Text(context.l10n.uiSignIn),
                             ),
                           ],
                         ),
@@ -155,11 +157,11 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text('Không thể tải thông báo.'),
+                            Text(context.l10n.uiUnableToLoadNotifications),
                             TextButton(
                               onPressed: () =>
                                   bloc.add(const LoadNotificationsEvent()),
-                              child: const Text('Thử lại'),
+                              child: Text(context.l10n.uiTryAgain),
                             ),
                           ],
                         ),
@@ -181,16 +183,17 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const EmptyState(
+                                EmptyState(
                                   icon: Icons.notifications_off_outlined,
-                                  title: 'Chưa có thông báo nào',
-                                  message:
-                                      'Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.',
+                                  title: context.l10n.uiNoNotificationsYet,
+                                  message: context
+                                      .l10n
+                                      .uiThereAreNoNotificationsInThisCategoryTrip,
                                 ),
                                 TextButton(
                                   onPressed: () =>
                                       bloc.add(const LoadNotificationsEvent()),
-                                  child: const Text('Tải lại'),
+                                  child: Text(context.l10n.uiRefresh),
                                 ),
                               ],
                             ),

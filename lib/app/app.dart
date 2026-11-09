@@ -1,3 +1,5 @@
+import '../core/localization/locale_controller.dart';
+import '../l10n/app_localizations.dart';
 import 'dart:async';
 import '../core/notifications/push_notifications.dart';
 import '../core/network/token_storage.dart';
@@ -99,12 +101,19 @@ class VexGoApp extends StatelessWidget {
           ),
         ],
         child: _SessionSynchronization(
-          child: MaterialApp.router(
-            scaffoldMessengerKey: _pushMessengerKey,
-            title: 'VexGo - Đặt vé xe khách trực tuyến',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            routerConfig: AppRoutes.router,
+          child: ValueListenableBuilder<Locale>(
+            valueListenable: LocaleController.instance,
+            builder: (context, locale, _) => MaterialApp.router(
+              locale: locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              scaffoldMessengerKey: _pushMessengerKey,
+              onGenerateTitle: (context) =>
+                  context.l10n.uiVexgoOnlineBusBooking,
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              routerConfig: AppRoutes.router,
+            ),
           ),
         ),
       ),
@@ -145,7 +154,9 @@ class _SessionSynchronizationState extends State<_SessionSynchronization>
         AppRoutes.router.go(AppRoutes.notifications);
       } else {
         _pushMessengerKey.currentState?.showSnackBar(
-          const SnackBar(content: Text('Bạn có cập nhật mới về vé.')),
+          SnackBar(
+            content: Text(LocaleController.strings.uiYouHaveANewTicketUpdate),
+          ),
         );
       }
     });

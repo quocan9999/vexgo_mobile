@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -12,32 +13,32 @@ class ShipmentStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, bg, fg) = switch (status) {
       ShipmentStatus.created => (
-        'Mới tạo',
+        context.l10n.uiCreated,
         DiscoveryColors.primaryLight,
         DiscoveryColors.primary,
       ),
       ShipmentStatus.accepted => (
-        'Đã tiếp nhận',
+        context.l10n.uiAccepted,
         DiscoveryColors.infoLight,
         DiscoveryColors.info,
       ),
       ShipmentStatus.inTransit => (
-        'Đang vận chuyển',
+        context.l10n.uiInTransit,
         DiscoveryColors.warningLight,
         DiscoveryColors.warningDark,
       ),
       ShipmentStatus.delivered => (
-        'Đã giao',
+        context.l10n.uiDelivered,
         DiscoveryColors.successLight,
         DiscoveryColors.successDark,
       ),
       ShipmentStatus.cancelled => (
-        'Đã hủy',
+        context.l10n.uiCancelled,
         DiscoveryColors.errorLight,
         DiscoveryColors.errorDark,
       ),
       ShipmentStatus.unknown => (
-        'Chưa xác định',
+        context.l10n.uiUnknown,
         DiscoveryColors.neutral100,
         DiscoveryColors.neutral600,
       ),
@@ -85,23 +86,23 @@ class ShipmentPaymentBadge extends StatelessWidget {
     final Color fg;
 
     if (requiresReconciliation) {
-      label = 'Đang đối soát';
+      label = context.l10n.uiReconciling;
       bg = DiscoveryColors.warningLight;
       fg = DiscoveryColors.warningDark;
     } else if (paid) {
-      label = 'Đã thanh toán';
+      label = context.l10n.uiPaid;
       bg = DiscoveryColors.successLight;
       fg = DiscoveryColors.successDark;
     } else if (pendingOnline) {
-      label = 'Chờ thanh toán';
+      label = context.l10n.uiAwaitingPaymentac4098;
       bg = DiscoveryColors.warningLight;
       fg = DiscoveryColors.warningDark;
     } else if (counter) {
-      label = 'Thanh toán tại bến';
+      label = context.l10n.uiPayAtStation;
       bg = DiscoveryColors.primaryLight;
       fg = DiscoveryColors.primary;
     } else {
-      label = rawStatus ?? 'Chưa xác định';
+      label = rawStatus ?? context.l10n.uiUnknown;
       bg = DiscoveryColors.neutral100;
       fg = DiscoveryColors.neutral600;
     }

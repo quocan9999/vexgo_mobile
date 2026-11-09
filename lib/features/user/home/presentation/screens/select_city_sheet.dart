@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -146,7 +147,7 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
             padding: const EdgeInsets.symmetric(horizontal: AppDimensions.base),
             child: CustomTextField(
               controller: _searchController,
-              hintText: 'Tìm tỉnh thành, bến xe, văn phòng...',
+              hintText: context.l10n.uiSearchCitiesStationsOrOffices,
               prefixIcon: const Icon(
                 Icons.search_rounded,
                 color: DiscoveryColors.neutral400,
@@ -185,7 +186,7 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                       ),
                       const SizedBox(width: AppDimensions.xs),
                       Text(
-                        'Địa điểm phổ biến',
+                        context.l10n.uiPopularLocations,
                         style: DiscoveryTextStyles.titleSmall.copyWith(
                           color: DiscoveryColors.neutral700,
                           fontWeight: FontWeight.w600,
@@ -201,7 +202,9 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                       final isSelected = widget.currentCity?.id == city.id;
                       return ChoiceChip(
                         label: Text(
-                          city.isLegacy ? '${city.name} (cũ)' : city.name,
+                          city.isLegacy
+                              ? context.l10n.uiFormer(city.name)
+                              : city.name,
                         ),
                         selected: isSelected,
                         selectedColor: DiscoveryColors.primaryLight,
@@ -230,7 +233,7 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
 
                 // All Filtered Cities
                 Text(
-                  'Tất cả địa điểm',
+                  context.l10n.uiAllLocations,
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.neutral500,
                     fontWeight: FontWeight.w600,
@@ -245,7 +248,7 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                     ),
                     child: Center(
                       child: Text(
-                        'Không tìm thấy địa điểm phù hợp',
+                        context.l10n.uiNoMatchingLocations,
                         style: DiscoveryTextStyles.bodyMedium.copyWith(
                           color: DiscoveryColors.neutral500,
                         ),
@@ -295,7 +298,7 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                         ),
                         title: Text(
                           city.isLegacy
-                              ? '${city.name} (địa danh cũ)'
+                              ? context.l10n.uiFormerLocationName(city.name)
                               : city.name,
                           style: DiscoveryTextStyles.titleSmall.copyWith(
                             fontWeight: isSelected
@@ -308,12 +311,15 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                         ),
                         subtitle: Text(
                           city.backendValue == null
-                              ? '${city.region} • ${city.stations.length} bến xe/điểm đón'
+                              ? context.l10n.uiStationsStops(
+                                  city.region,
+                                  city.stations.length,
+                                )
                               : [
                                   if (city.region.isNotEmpty) city.region,
                                   city.kind == 'district'
-                                      ? 'Quận/huyện'
-                                      : 'Tỉnh/thành phố',
+                                      ? context.l10n.uiDistrict
+                                      : context.l10n.uiProvinceOrCity,
                                   if (city.legacyNote?.isNotEmpty == true)
                                     city.legacyNote!,
                                 ].join(' • '),
@@ -327,7 +333,7 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(city),
                               child: Text(
-                                'Chọn',
+                                context.l10n.uiSelect,
                                 style: DiscoveryTextStyles.bodySmall.copyWith(
                                   color: DiscoveryColors.primary,
                                   fontWeight: FontWeight.w700,

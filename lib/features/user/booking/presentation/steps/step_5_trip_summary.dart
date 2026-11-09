@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,7 +77,7 @@ class Step5TripSummary extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Đang cập nhật giá vé & ưu đãi...',
+                    context.l10n.uiUpdatingFaresOffers,
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.neutral500,
                     ),
@@ -132,7 +133,7 @@ class Step5TripSummary extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Cập nhật giá vé',
+                                context.l10n.uiUpdateFare,
                                 style: DiscoveryTextStyles.caption.copyWith(
                                   color: DiscoveryColors.primary,
                                   fontWeight: FontWeight.w700,
@@ -150,10 +151,10 @@ class Step5TripSummary extends StatelessWidget {
             ),
 
           // Section Title
-          Text('Xem lại thông tin chuyến đi', style: DiscoveryTextStyles.h4),
+          Text(context.l10n.uiReviewYourBooking, style: DiscoveryTextStyles.h4),
           const SizedBox(height: 4),
           Text(
-            'Vui lòng kiểm tra kỹ thông tin hành trình và hành khách trước khi sang bước thanh toán.',
+            context.l10n.uiCheckYourJourneyAndPassengerDetailsBeforeProceeding,
             style: DiscoveryTextStyles.caption.copyWith(
               color: DiscoveryColors.neutral500,
             ),
@@ -190,7 +191,8 @@ class Step5TripSummary extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                trip?.operatorName ?? 'Nhà xe',
+                                trip?.operatorName ??
+                                    context.l10n.uiBusOperator,
                                 style: DiscoveryTextStyles.titleMedium.copyWith(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
@@ -210,7 +212,7 @@ class Step5TripSummary extends StatelessWidget {
                     );
 
                     final editBtn = _buildEditButton(
-                      label: 'Sửa đón/trả',
+                      label: context.l10n.uiEditPickUpDropOff,
                       onPressed: state.isCheckoutLocked
                           ? null
                           : () => bloc.add(const GoToStepEvent(1)),
@@ -391,7 +393,7 @@ class Step5TripSummary extends StatelessWidget {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            'Chỗ ngồi đã chọn',
+                            context.l10n.uiSelectedSeats,
                             overflow: TextOverflow.ellipsis,
                             style: DiscoveryTextStyles.titleMedium.copyWith(
                               fontSize: 15,
@@ -410,7 +412,9 @@ class Step5TripSummary extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            '${state.selectedSeats.length} chỗ',
+                            context.l10n.uiSeats4f4448(
+                              state.selectedSeats.length,
+                            ),
                             style: DiscoveryTextStyles.caption.copyWith(
                               color: DiscoveryColors.primaryDark,
                               fontWeight: FontWeight.w700,
@@ -422,7 +426,7 @@ class Step5TripSummary extends StatelessWidget {
                     );
 
                     final editBtn = _buildEditButton(
-                      label: 'Đổi ghế',
+                      label: context.l10n.uiChangeSeats,
                       onPressed: state.isCheckoutLocked
                           ? null
                           : () => bloc.add(const GoToStepEvent(0)),
@@ -496,12 +500,12 @@ class Step5TripSummary extends StatelessWidget {
                 ),
                 // Expose explicit comma-separated text string for accessibility and test matchers
                 Semantics(
-                  label: 'Ghế: $seatNames',
+                  label: context.l10n.uiSeats9c637d(seatNames),
                   child: ExcludeSemantics(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Text(
-                        'Vị trí chỗ ngồi: $seatNames',
+                        context.l10n.uiSeatLocations(seatNames),
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral500,
                           fontSize: 11.5,
@@ -543,7 +547,7 @@ class Step5TripSummary extends StatelessWidget {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            'Thông tin hành khách',
+                            context.l10n.uiPassengerInformation,
                             overflow: TextOverflow.ellipsis,
                             style: DiscoveryTextStyles.titleMedium.copyWith(
                               fontSize: 15,
@@ -555,7 +559,7 @@ class Step5TripSummary extends StatelessWidget {
                     );
 
                     final editBtn = _buildEditButton(
-                      label: 'Sửa',
+                      label: context.l10n.uiEdit,
                       onPressed: state.isCheckoutLocked
                           ? null
                           : () => bloc.add(const GoToStepEvent(3)),
@@ -584,19 +588,19 @@ class Step5TripSummary extends StatelessWidget {
 
                 _buildRowInfo(
                   icon: Icons.person_rounded,
-                  label: 'Họ tên',
+                  label: context.l10n.uiFullName3da3c8,
                   value: state.passengerName.isNotEmpty
                       ? state.passengerName
-                      : 'Chưa nhập',
+                      : context.l10n.uiNotEntered,
                   isBold: true,
                 ),
                 const SizedBox(height: 8),
                 _buildRowInfo(
                   icon: Icons.phone_iphone_rounded,
-                  label: 'Số điện thoại',
+                  label: context.l10n.uiPhoneNumber,
                   value: state.passengerPhone.isNotEmpty
                       ? state.passengerPhone
-                      : 'Chưa nhập',
+                      : context.l10n.uiNotEntered,
                 ),
                 const SizedBox(height: 8),
                 _buildRowInfo(
@@ -604,7 +608,7 @@ class Step5TripSummary extends StatelessWidget {
                   label: 'Email',
                   value: state.passengerEmail.isNotEmpty
                       ? state.passengerEmail
-                      : 'Chưa cung cấp (tùy chọn)',
+                      : context.l10n.uiNotProvidedOptional,
                   valueColor: state.passengerEmail.isNotEmpty
                       ? null
                       : DiscoveryColors.neutral500,
@@ -659,7 +663,7 @@ class Step5TripSummary extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Mã khuyến mãi & ưu đãi',
+                        context.l10n.uiPromoCodesOffers,
                         style: DiscoveryTextStyles.titleMedium.copyWith(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -677,8 +681,8 @@ class Step5TripSummary extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
                       state.quoteLoading
-                          ? 'Đang kiểm tra mã: $promotionCode'
-                          : 'Mã chưa được xác nhận: $promotionCode',
+                          ? context.l10n.uiCheckingCode(promotionCode)
+                          : context.l10n.uiCodeNotConfirmed(promotionCode),
                       style: DiscoveryTextStyles.bodySmall,
                     ),
                   ),
@@ -705,7 +709,10 @@ class Step5TripSummary extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Mã đã áp dụng: ${state.appliedVoucher?.code ?? state.requestedPromotionCode}',
+                                context.l10n.uiAppliedCode(
+                                  state.appliedVoucher?.code ??
+                                      state.requestedPromotionCode,
+                                ),
                                 style: DiscoveryTextStyles.bodyMedium.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: DiscoveryColors.successDark,
@@ -713,8 +720,12 @@ class Step5TripSummary extends StatelessWidget {
                               ),
                               Text(
                                 state.discountAmount > 0
-                                    ? 'Tiết kiệm được ${CurrencyFormatter.format(state.discountAmount)}'
-                                    : 'Mã hợp lệ',
+                                    ? context.l10n.uiYouSave(
+                                        CurrencyFormatter.format(
+                                          state.discountAmount,
+                                        ),
+                                      )
+                                    : context.l10n.uiValidCode,
                                 style: DiscoveryTextStyles.caption.copyWith(
                                   color: DiscoveryColors.successDark,
                                   fontWeight: FontWeight.w600,
@@ -729,7 +740,7 @@ class Step5TripSummary extends StatelessWidget {
                               ? null
                               : () => bloc.add(const RemoveVoucherEvent()),
                           child: Text(
-                            'Bỏ mã',
+                            context.l10n.uiRemoveCode,
                             style: DiscoveryTextStyles.bodySmall.copyWith(
                               color: DiscoveryColors.error,
                               fontWeight: FontWeight.w700,
@@ -783,7 +794,7 @@ class Step5TripSummary extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Chọn hoặc nhập mã khuyến mãi',
+                                  context.l10n.uiSelectOrEnterAPromoCode,
                                   style: DiscoveryTextStyles.bodyMedium
                                       .copyWith(
                                         fontWeight: FontWeight.w700,
@@ -791,7 +802,7 @@ class Step5TripSummary extends StatelessWidget {
                                       ),
                                 ),
                                 Text(
-                                  'Nhập mã để hệ thống kiểm tra điều kiện',
+                                  context.l10n.uiEnterACodeToCheckEligibility,
                                   style: DiscoveryTextStyles.caption.copyWith(
                                     color: DiscoveryColors.neutral500,
                                   ),
@@ -835,7 +846,7 @@ class Step5TripSummary extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Chi tiết thanh toán',
+                        context.l10n.uiPaymentDetails,
                         style: DiscoveryTextStyles.titleMedium.copyWith(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -846,22 +857,22 @@ class Step5TripSummary extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 _buildPriceRow(
-                  label: 'Giá vé (${state.selectedSeats.length} chỗ)',
+                  label: context.l10n.uiFareSeats(state.selectedSeats.length),
                   value: state.quotedSubtotal != null
                       ? CurrencyFormatter.format(state.quotedSubtotal!)
                       : (state.seatsTotalAmount != null
                             ? CurrencyFormatter.format(state.seatsTotalAmount!)
-                            : 'Chưa có giá vé'),
+                            : context.l10n.uiFareUnavailable),
                 ),
                 const SizedBox(height: 8),
                 _buildPriceRow(
-                  label: 'Phí dịch vụ',
+                  label: context.l10n.uiServiceFee,
                   value: state.quotedServiceFee == null
                       ? (state.requiresAuthoritativeQuote
-                            ? 'Đang xác minh'
-                            : 'Miễn phí')
+                            ? context.l10n.uiVerifying
+                            : context.l10n.uiFree)
                       : (state.quotedServiceFee == 0
-                            ? 'Miễn phí'
+                            ? context.l10n.uiFree
                             : CurrencyFormatter.format(
                                 state.quotedServiceFee!,
                               )),
@@ -870,7 +881,7 @@ class Step5TripSummary extends StatelessWidget {
                 if (state.discountAmount > 0) ...[
                   const SizedBox(height: 8),
                   _buildPriceRow(
-                    label: 'Giảm giá ưu đãi',
+                    label: context.l10n.uiPromotionalDiscount,
                     value: '-${CurrencyFormatter.format(state.discountAmount)}',
                     valueColor: DiscoveryColors.secondary,
                   ),
@@ -888,9 +899,10 @@ class Step5TripSummary extends StatelessWidget {
                       return Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: _buildPriceRow(
-                          label: 'Phí hành lý tham khảo (tạm tính)',
-                          value:
-                              '${CurrencyFormatter.format(refFee)} (chưa cộng vào đơn)',
+                          label: context.l10n.uiEstimatedLuggageFee,
+                          value: context.l10n.uiNotAddedToBooking(
+                            CurrencyFormatter.format(refFee),
+                          ),
                           valueColor: DiscoveryColors.neutral700,
                         ),
                       );
@@ -899,10 +911,10 @@ class Step5TripSummary extends StatelessWidget {
                 if (BookingCargoSummaryBox.hasCargo(state: state)) ...[
                   const SizedBox(height: 8),
                   _buildPriceRow(
-                    label: 'Tiền vé sau ưu đãi',
+                    label: context.l10n.uiFareAfterDiscounts,
                     value: state.ticketFinalAmount != null
                         ? CurrencyFormatter.format(state.ticketFinalAmount!)
-                        : 'Chưa có giá vé',
+                        : context.l10n.uiFareUnavailable,
                   ),
                   const SizedBox(height: 8),
                   _buildPriceRow(
@@ -914,7 +926,7 @@ class Step5TripSummary extends StatelessWidget {
                         ? CurrencyFormatter.format(
                             state.checkoutBooking!.shippingFee!,
                           )
-                        : 'Cước vật phẩm thanh toán riêng tại bến',
+                        : context.l10n.uiItemFeesArePaidSeparatelyAtTheStation,
                     valueColor: state.checkoutBooking?.shippingFee != null
                         ? DiscoveryColors.neutral900
                         : DiscoveryColors.secondary,
@@ -924,12 +936,12 @@ class Step5TripSummary extends StatelessWidget {
                 const Divider(height: 1, color: DiscoveryColors.divider),
                 const SizedBox(height: 10),
                 _buildPriceRow(
-                  label: 'Tổng tiền cần thanh toán',
+                  label: context.l10n.uiTotalDue,
                   value: state.finalAmount != null
                       ? CurrencyFormatter.format(state.finalAmount!)
                       : (state.cargo.enabled
-                            ? 'Xác định khi tạo đơn'
-                            : 'Chưa có giá vé'),
+                            ? context.l10n.uiCalculatedWhenBookingIsCreated
+                            : context.l10n.uiFareUnavailable),
                   valueColor: DiscoveryColors.secondary,
                   isTotal: true,
                 ),
@@ -958,7 +970,7 @@ class Step5TripSummary extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Giá vé và ưu đãi được hệ thống xác nhận theo ghế, chuyến đi và thông tin liên hệ. Vé chỉ có hiệu lực sau khi xác minh thanh toán.',
+                    context.l10n.uiFaresAndOffersAreConfirmedBasedOnYour,
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.neutral700,
                       fontWeight: FontWeight.w500,

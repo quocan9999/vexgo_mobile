@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
@@ -111,7 +112,7 @@ class RoundTripTripCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Đã chọn',
+                        context.l10n.uiSelected40b56a,
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -225,7 +226,9 @@ class RoundTripTripCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      isSoldOut ? 'Hết vé' : 'Còn ${trip.availableSeats} chỗ',
+                      isSoldOut
+                          ? context.l10n.uiSoldOut838424
+                          : context.l10n.uiSeatsLeft(trip.availableSeats),
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: isSoldOut
                             ? DiscoveryColors.neutral500
@@ -254,7 +257,7 @@ class RoundTripTripCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Chi tiết',
+                  context.l10n.uiDetails,
                   style: DiscoveryTextStyles.bodySmall.copyWith(
                     color: DiscoveryColors.neutral700,
                     fontWeight: FontWeight.w600,
@@ -283,8 +286,10 @@ class RoundTripTripCard extends StatelessWidget {
                 ),
                 child: Text(
                   isSelected
-                      ? 'Đang chọn'
-                      : (isSoldOut ? 'Hết chỗ' : 'Chọn chuyến'),
+                      ? context.l10n.uiSelected
+                      : (isSoldOut
+                            ? context.l10n.uiSoldOutfec774
+                            : context.l10n.uiSelectTrip),
                   style: DiscoveryTextStyles.bodySmall.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,

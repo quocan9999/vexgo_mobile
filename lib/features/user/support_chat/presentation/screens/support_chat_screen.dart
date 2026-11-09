@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -117,7 +119,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
             backgroundColor: DiscoveryColors.surface,
             elevation: 0,
             title: Text(
-              'Chat với nhà xe',
+              context.l10n.uiChatWithOperator,
               style: (isShort ? DiscoveryTextStyles.h4 : DiscoveryTextStyles.h3)
                   .copyWith(color: DiscoveryColors.neutral900),
             ),
@@ -151,8 +153,8 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                   SizedBox(height: isShort ? 12 : 20),
                   Text(
                     ApiConfig.isDemoMode
-                        ? 'Chat cần kết nối máy chủ ở chế độ trực tuyến.'
-                        : 'Đăng nhập để trò chuyện với nhà xe.',
+                        ? context.l10n.uiChatRequiresAnOnlineServerConnection
+                        : context.l10n.uiSignInToChatWithTheOperator,
                     textAlign: TextAlign.center,
                     style:
                         (isShort
@@ -178,8 +180,8 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                         ),
                       ),
                       onPressed: () => AuthModalSheet.show(context),
-                      child: const Text(
-                        'Đăng nhập',
+                      child: Text(
+                        context.l10n.uiSignIn,
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontWeight: FontWeight.w600,
@@ -205,7 +207,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                 backgroundColor: DiscoveryColors.surface,
                 elevation: 0,
                 title: Text(
-                  'Chat với nhà xe',
+                  context.l10n.uiChatWithOperator,
                   style:
                       (isShort
                               ? DiscoveryTextStyles.h4
@@ -246,7 +248,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                 surfaceTintColor: Colors.transparent,
                 leading: selected != null || _choosing
                     ? IconButton(
-                        tooltip: 'Quay lại',
+                        tooltip: context.l10n.uiBack,
                         icon: const Icon(
                           Icons.arrow_back,
                           color: DiscoveryColors.neutral900,
@@ -266,7 +268,9 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                   children: [
                     Text(
                       selected?.companyName ??
-                          (_choosing ? 'Chọn nhà xe' : 'Chat với nhà xe'),
+                          (_choosing
+                              ? context.l10n.uiSelectOperator
+                              : context.l10n.uiChatWithOperator),
                       style:
                           (isShort
                                   ? DiscoveryTextStyles.h4
@@ -277,7 +281,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                     ),
                     if (selected != null)
                       Text(
-                        selected.statusLabel,
+                        localizedClientLabel(context, selected.statusLabel),
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: isShort ? 10 : 12,
@@ -291,7 +295,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                 actions: [
                   if (selected != null && selected.canSend && !state.closing)
                     IconButton(
-                      tooltip: 'Kết thúc hội thoại',
+                      tooltip: context.l10n.uiEndConversation,
                       icon: const Icon(
                         Icons.stop_circle_outlined,
                         color: DiscoveryColors.error,
@@ -299,7 +303,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                       onPressed: _toggleCloseConfirmation,
                     ),
                   IconButton(
-                    tooltip: 'Tải lại',
+                    tooltip: context.l10n.uiRefresh,
                     icon: const Icon(
                       Icons.refresh,
                       color: DiscoveryColors.neutral800,
@@ -321,8 +325,8 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                       elevation: 3,
                       onPressed: _choose,
                       icon: const Icon(Icons.add_comment_outlined),
-                      label: const Text(
-                        'Hội thoại mới',
+                      label: Text(
+                        context.l10n.uiNewConversation,
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontWeight: FontWeight.w600,
@@ -350,9 +354,11 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                               color: DiscoveryColors.warningDark,
                             ),
                             const SizedBox(width: 6),
-                            const Expanded(
+                            Expanded(
                               child: Text(
-                                'Realtime đang kết nối lại. Bạn vẫn có thể gửi và tải lại tin nhắn.',
+                                context
+                                    .l10n
+                                    .uiReconnectingLiveChatYouCanStillSendAnd,
                                 style: TextStyle(
                                   fontFamily: AppTypography.fontFamily,
                                   fontSize: 11,
@@ -384,7 +390,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                state.error!,
+                                localizedClientLabel(context, state.error!),
                                 style: const TextStyle(
                                   fontFamily: AppTypography.fontFamily,
                                   fontSize: 11,
@@ -397,7 +403,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                             IconButton(
                               visualDensity: VisualDensity.compact,
                               padding: EdgeInsets.zero,
-                              tooltip: 'Thử lại',
+                              tooltip: context.l10n.uiTryAgain,
                               icon: const Icon(
                                 Icons.refresh,
                                 size: 18,
@@ -456,8 +462,8 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Text(
-                                'Nhân viên đang nhập…',
+                              Text(
+                                context.l10n.uiSupportIsTyping,
                                 style: TextStyle(
                                   fontFamily: AppTypography.fontFamily,
                                   fontSize: 12,
@@ -484,8 +490,10 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                               top: BorderSide(color: DiscoveryColors.divider),
                             ),
                           ),
-                          child: const Text(
-                            'Hội thoại đã kết thúc hoặc chưa thể gửi tin. Mở hội thoại mới để được hỗ trợ.',
+                          child: Text(
+                            context
+                                .l10n
+                                .uiThisConversationHasEndedOrMessagesCannotBe,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
@@ -526,7 +534,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Kết thúc hội thoại này? Bạn có thể mở hội thoại mới sau đó.',
+                context.l10n.uiEndThisConversationYouCanStartANew,
                 style: DiscoveryTextStyles.bodyMedium.copyWith(
                   color: DiscoveryColors.neutral900,
                   fontWeight: FontWeight.w600,
@@ -544,7 +552,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
           children: [
             OutlinedButton(
               onPressed: _keepConversation,
-              child: const Text('Giữ hội thoại'),
+              child: Text(context.l10n.uiKeepConversation),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
@@ -556,7 +564,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                 setState(() => _confirmClose = false);
                 unawaited(cubit.closeConversation());
               },
-              child: const Text('Kết thúc'),
+              child: Text(context.l10n.uiEnd),
             ),
           ],
         ),
@@ -573,7 +581,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
               child: TextButton.icon(
                 onPressed: _choose,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Không tải được nhà xe. Thử lại'),
+                label: Text(context.l10n.uiUnableToLoadOperatorsTryAgain),
               ),
             );
           }
@@ -586,9 +594,9 @@ class _SupportChatScreenState extends State<SupportChatScreen>
               .where((c) => int.tryParse(c.id) != null)
               .toList();
           if (companies.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'Chưa có nhà xe để liên hệ.',
+                context.l10n.uiNoOperatorsAreAvailableToContactYet,
                 style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   color: DiscoveryColors.neutral600,
@@ -632,7 +640,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                     ),
                   ),
                   subtitle: Text(
-                    'Mở hoặc tiếp tục hội thoại',
+                    context.l10n.uiOpenOrContinueConversation,
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.neutral600,
                     ),
@@ -687,7 +695,9 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Bạn chưa có hội thoại nào. Chọn “Hội thoại mới” để liên hệ nhà xe.',
+                    context
+                        .l10n
+                        .uiYouHaveNoConversationsYetSelectNewConversation,
                     textAlign: TextAlign.center,
                     style: DiscoveryTextStyles.bodyMedium.copyWith(
                       color: DiscoveryColors.neutral600,
@@ -711,7 +721,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                       ? null
                       : () => cubit.loadConversations(more: true),
                   icon: const Icon(Icons.arrow_downward_rounded, size: 16),
-                  label: const Text('Tải thêm hội thoại'),
+                  label: Text(context.l10n.uiLoadMoreConversations),
                 ),
               ),
             ),
@@ -746,7 +756,7 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                           ? null
                           : () => cubit.refresh(older: true),
                       icon: const Icon(Icons.history_rounded, size: 16),
-                      label: const Text('Tải tin nhắn trước'),
+                      label: Text(context.l10n.uiLoadEarlierMessages),
                     ),
                   ),
                 );
@@ -755,8 +765,8 @@ class _SupportChatScreenState extends State<SupportChatScreen>
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   messages.isEmpty
-                      ? 'Chưa có tin nhắn. Gửi lời chào để bắt đầu.'
-                      : 'Bắt đầu hội thoại',
+                      ? context.l10n.uiNoMessagesYetSayHelloToStart
+                      : context.l10n.uiStartConversation,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: AppTypography.fontFamily,

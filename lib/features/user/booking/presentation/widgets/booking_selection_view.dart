@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
@@ -66,12 +67,10 @@ class BookingSelectionView extends StatelessWidget {
                           children: [
                             const Icon(Icons.error_outline, size: 36),
                             const SizedBox(height: 12),
-                            const Text(
-                              'Không thể tải sơ đồ ghế. Vui lòng thử lại.',
-                            ),
+                            Text(context.l10n.uiUnableToLoadTheSeatMapTryAgain),
                             const SizedBox(height: 16),
                             DiscoveryButton(
-                              text: 'Thử lại',
+                              text: context.l10n.uiTryAgain,
                               onPressed: onRetry,
                             ),
                           ],
@@ -148,8 +147,13 @@ class BookingSelectionDock extends StatelessWidget {
                             children: [
                               Text(
                                 state.selectedSeats.isEmpty
-                                    ? 'Vui lòng chọn chỗ'
-                                    : 'Đã chọn ${state.selectedSeats.length} chỗ: ${state.selectedSeats.map((s) => s.name).join(', ')}',
+                                    ? context.l10n.uiSelectYourSeats
+                                    : context.l10n.uiSelectedSeatsdead0d(
+                                        state.selectedSeats.length,
+                                        state.selectedSeats
+                                            .map((s) => s.name)
+                                            .join(', '),
+                                      ),
                                 style: DiscoveryTextStyles.bodySmall,
                               ),
                               const SizedBox(height: 2),
@@ -157,8 +161,12 @@ class BookingSelectionDock extends StatelessWidget {
                                 state.selectedSeats.isEmpty
                                     ? CurrencyFormatter.format(0)
                                     : state.seatsTotalAmount == null
-                                    ? 'Chưa có giá vé'
-                                    : '${CurrencyFormatter.format(state.seatsTotalAmount)} ⌃',
+                                    ? context.l10n.uiFareUnavailable
+                                    : context.l10n.ui(
+                                        CurrencyFormatter.format(
+                                          state.seatsTotalAmount,
+                                        ),
+                                      ),
                                 style: DiscoveryTextStyles.titleMedium.copyWith(
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -169,14 +177,14 @@ class BookingSelectionDock extends StatelessWidget {
                       )
                     : DiscoveryButton(
                         text: state.step == BookingStep.pickupPoint
-                            ? 'Đổi ghế'
-                            : 'Điểm đón',
+                            ? context.l10n.uiChangeSeats
+                            : context.l10n.uiPickUpcdcaa5,
                         type: ButtonType.outline,
                         onPressed: busy ? null : onBack,
                       );
 
                 final next = DiscoveryButton(
-                  text: 'Tiếp tục',
+                  text: context.l10n.uiContinue,
                   type: ButtonType.secondary,
                   isLoading: busy,
                   width: double.infinity,
@@ -201,10 +209,10 @@ class BookingSelectionDock extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       seats
-                          ? 'Bạn sẽ chọn điểm đón/trả ở bước tiếp theo'
+                          ? context.l10n.uiYouWillSelectPickUpDropOffPoints
                           : state.step == BookingStep.pickupPoint
-                          ? 'Tiếp theo: chọn điểm trả'
-                          : 'Tiếp theo: thông tin hành khách',
+                          ? context.l10n.uiNextSelectDropOff
+                          : context.l10n.uiNextPassengerDetails,
                       textAlign: TextAlign.center,
                       style: DiscoveryTextStyles.caption,
                     ),
@@ -238,12 +246,12 @@ class BookingSelectionDock extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'Chi tiết ghế đã chọn',
+                        context.l10n.uiSelectedSeatDetails,
                         style: DiscoveryTextStyles.titleMedium,
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Đóng',
+                      tooltip: context.l10n.uiClose,
                       onPressed: () => Navigator.pop(sheetContext),
                       icon: const Icon(Icons.close),
                     ),
@@ -257,12 +265,12 @@ class BookingSelectionDock extends StatelessWidget {
                       runSpacing: 4,
                       children: [
                         Text(
-                          'Ghế ${seat.name} • Tầng ${seat.floor}',
+                          context.l10n.uiSeatDeck(seat.name, seat.floor),
                           style: DiscoveryTextStyles.bodyMedium,
                         ),
                         Text(
                           seat.price == null
-                              ? 'Chưa có giá vé'
+                              ? context.l10n.uiFareUnavailable
                               : CurrencyFormatter.format(seat.price),
                           style: DiscoveryTextStyles.bodyMedium,
                         ),
@@ -272,8 +280,10 @@ class BookingSelectionDock extends StatelessWidget {
                 const Divider(),
                 Text(
                   state.seatsTotalAmount == null
-                      ? 'Chưa xác định tổng tiền'
-                      : 'Tạm tính: ${CurrencyFormatter.format(state.seatsTotalAmount)}',
+                      ? context.l10n.uiTotalNotYetConfirmed
+                      : context.l10n.uiEstimate(
+                          CurrencyFormatter.format(state.seatsTotalAmount),
+                        ),
                   style: DiscoveryTextStyles.titleMedium,
                 ),
               ],

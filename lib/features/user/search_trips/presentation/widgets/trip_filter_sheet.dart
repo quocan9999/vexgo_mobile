@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -114,7 +116,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
               children: [
                 Expanded(
                   child: Text(
-                    'Bộ lọc tìm kiếm',
+                    context.l10n.uiSearchFilters,
                     style: DiscoveryTextStyles.h3.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -125,7 +127,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 TextButton(
                   onPressed: _reset,
                   child: Text(
-                    'Thiết lập lại',
+                    context.l10n.uiReset,
                     style: DiscoveryTextStyles.bodyMedium.copyWith(
                       color: DiscoveryColors.secondary,
                       fontWeight: FontWeight.w600,
@@ -144,7 +146,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
               children: [
                 // 1. Giờ xuất bến
                 Text(
-                  'GIỜ XUẤT BẾN',
+                  context.l10n.uiDepartureTime,
                   style: DiscoveryTextStyles.caption.copyWith(
                     fontWeight: FontWeight.w700,
                     color: DiscoveryColors.neutral500,
@@ -158,7 +160,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                   children: TimeSlot.values.map((slot) {
                     final isSelected = _selectedTimeSlots.contains(slot);
                     return FilterChip(
-                      label: Text(slot.label),
+                      label: Text(localizedClientLabel(context, slot.label)),
                       selected: isSelected,
                       selectedColor: DiscoveryColors.primaryLight,
                       backgroundColor: DiscoveryColors.neutral50,
@@ -198,7 +200,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                   children: [
                     Flexible(
                       child: Text(
-                        'KHOẢNG GIÁ',
+                        context.l10n.uiFareRange,
                         style: DiscoveryTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
                           color: DiscoveryColors.neutral500,
@@ -246,7 +248,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 // 3. Nhà xe
                 if (widget.availableOperators.isNotEmpty) ...[
                   Text(
-                    'NHÀ XE',
+                    context.l10n.uiBusOperatorb6c7ac,
                     style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
                       color: DiscoveryColors.neutral500,
@@ -288,7 +290,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 // 4. Loại xe
                 if (widget.availableVehicleTypes.isNotEmpty) ...[
                   Text(
-                    'LOẠI XE',
+                    context.l10n.uiVehicleType,
                     style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
                       color: DiscoveryColors.neutral500,
@@ -330,7 +332,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
                 // 5. Tiện ích
                 if (widget.availableAmenities.isNotEmpty) ...[
                   Text(
-                    'TIỆN ÍCH TRÊN XE',
+                    context.l10n.uiOnboardAmenities,
                     style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
                       color: DiscoveryColors.neutral500,
@@ -394,7 +396,7 @@ class _TripFilterSheetState extends State<TripFilterSheet> {
             child: SafeArea(
               top: false,
               child: DiscoveryButton(
-                text: 'ÁP DỤNG BỘ LỌC',
+                text: context.l10n.uiApplyFilters,
                 width: double.infinity,
                 type: ButtonType.primary,
                 onPressed: () {

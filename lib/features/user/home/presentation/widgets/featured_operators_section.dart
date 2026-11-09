@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -118,7 +119,7 @@ class FeaturedOperatorsSection extends StatelessWidget {
                     const SizedBox(width: AppDimensions.sm),
                     Expanded(
                       child: Text(
-                        'Chính sách: ${op.policy!}',
+                        context.l10n.uiPolicy(op.policy!),
                         style: DiscoveryTextStyles.bodySmall.copyWith(
                           color: DiscoveryColors.neutral600,
                         ),
@@ -156,7 +157,7 @@ class FeaturedOperatorsSection extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Nhà xe uy tín đối tác',
+                      context.l10n.uiOurBusOperatorPartners,
                       style: DiscoveryTextStyles.h3.copyWith(
                         fontWeight: FontWeight.w700,
                       ),

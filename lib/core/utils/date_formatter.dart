@@ -1,3 +1,4 @@
+import '../localization/locale_controller.dart';
 import 'package:intl/intl.dart';
 
 class DateFormatter {
@@ -13,7 +14,17 @@ class DateFormatter {
       'Thứ 7',
       'Chủ nhật',
     ];
-    final String weekday = weekdays[date.weekday - 1];
+    final String weekday = LocaleController.instance.value.languageCode == 'en'
+        ? const [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday',
+          ][date.weekday - 1]
+        : weekdays[date.weekday - 1];
     final String formattedDate = DateFormat('dd/MM/yyyy').format(date);
     return '$weekday, $formattedDate';
   }
@@ -36,6 +47,9 @@ class DateFormatter {
       'Thứ 7',
       'CN',
     ];
-    return weekdays[date.weekday - 1];
+    return LocaleController.instance.value.languageCode == 'en'
+        ? const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][date.weekday -
+              1]
+        : weekdays[date.weekday - 1];
   }
 }

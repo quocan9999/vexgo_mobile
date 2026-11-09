@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import '../widgets/booking_rate_limit_view.dart';
 import 'package:vexgo_app/app/routes.dart';
 import 'dart:async';
@@ -149,8 +151,11 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
           _luggagePassengerCount != null &&
           _luggagePassengerCount != passengerCount &&
           hadLuggage) {
-        _luggageSeatChangeNotice =
-            'Số ghế đã thay đổi ($_luggagePassengerCount → $passengerCount hành khách). Vui lòng kiểm tra lại hạn mức hành lý theo số hành khách mới.';
+        _luggageSeatChangeNotice = context.l10n
+            .uiPassengerCountChangedCheckTheLuggageAllowanceFor(
+              _luggagePassengerCount ?? 0,
+              passengerCount,
+            );
         if (state.cargo.enabled && !state.isCheckoutLocked) {
           unawaited(
             bloc.applyDraftAction(const SetBookingCargoEnabledEvent(false)),
@@ -246,21 +251,21 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
     final shouldExit = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Thoát khỏi đặt vé?'),
+        title: Text(context.l10n.uiLeaveBooking),
         content: Text(
           state.isCheckoutLocked
-              ? 'Đơn hiện tại chưa hoàn tất xác minh. Kiểm tra trong Vé của tôi trước khi tạo đơn khác.'
-              : 'Bạn có chắc chắn muốn rời khỏi tiến trình đặt vé này không? Vị trí ghế đang giữ sẽ được giải phóng cho người khác.',
+              ? context.l10n.uiThisBookingHasNotBeenFullyVerifiedCheck
+              : context.l10n.uiLeaveThisBookingYourHeldSeatsWillBe,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Tiếp tục đặt vé'),
+            child: Text(context.l10n.uiContinueBooking),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'Rời khỏi',
+            child: Text(
+              context.l10n.uiLeave,
               style: TextStyle(color: AppColors.error),
             ),
           ),
@@ -302,20 +307,20 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
             showDialog(
               context: context,
               builder: (ctx) => AlertDialog(
-                title: const Row(
+                title: Row(
                   children: [
                     Icon(Icons.timer_off_rounded, color: AppColors.error),
                     SizedBox(width: 8),
-                    Text('Hết giờ giữ ghế'),
+                    Text(context.l10n.uiSeatHoldExpired),
                   ],
                 ),
-                content: const Text(
-                  'Thời gian giữ ghế tạm thời (10 phút) đã kết thúc. Vị trí ghế đã được giải phóng để nhường cho khách khác. Vui lòng chọn lại chỗ ngồi để tiếp tục.',
+                content: Text(
+                  context.l10n.uiTheTemporary10MinuteSeatHoldHasEnded,
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Đã hiểu'),
+                    child: Text(context.l10n.uiGotIt),
                   ),
                 ],
               ),
@@ -323,7 +328,9 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage!),
+                content: Text(
+                  localizedClientLabel(context, state.errorMessage!),
+                ),
                 backgroundColor: AppColors.error,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -379,25 +386,23 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
   }
 
   Widget _sessionChangedView(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Đặt vé')),
+    appBar: AppBar(title: Text(context.l10n.uiBookTickets)),
     body: SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Phiên tài khoản đã thay đổi.',
+            Text(
+              context.l10n.uiYourAccountSessionHasChanged,
               key: ValueKey('booking-session-changed'),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Vui lòng mở lại đặt vé. Nếu đã gửi tạo đơn, hãy đăng nhập đúng tài khoản và kiểm tra Vé của tôi trước khi tạo đơn khác. Ghế chưa tạo đơn sẽ được yêu cầu giải phóng hoặc tự hết hạn theo máy chủ.',
-            ),
+            Text(context.l10n.uiOpenBookingAgainIfYouSubmittedABooking),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () => context.pop(),
-              child: const Text('Rời khỏi đặt vé'),
+              child: Text(context.l10n.uiLeaveBooking6d56ab),
             ),
           ],
         ),

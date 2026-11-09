@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -47,7 +48,7 @@ class BookingCompactHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   IconButton(
-                    tooltip: 'Quay lại',
+                    tooltip: context.l10n.uiBack,
                     constraints: BoxConstraints(
                       minWidth: 48,
                       minHeight: compact ? 40 : 48,
@@ -62,7 +63,7 @@ class BookingCompactHeader extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          trip?.operatorName ?? 'Đặt vé',
+                          trip?.operatorName ?? context.l10n.uiBookTickets,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: DiscoveryTextStyles.titleMedium.copyWith(
@@ -95,7 +96,7 @@ class BookingCompactHeader extends StatelessWidget {
                       child: Semantics(
                         button: true,
                         enabled: !busy,
-                        label: 'Chi tiết xe',
+                        label: context.l10n.uiVehicleDetails,
                         child: TextButton(
                           onPressed: busy ? null : onDetails,
                           style: TextButton.styleFrom(
@@ -110,7 +111,7 @@ class BookingCompactHeader extends StatelessWidget {
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
-                              'Chi tiết xe',
+                              context.l10n.uiVehicleDetails,
                               style: DiscoveryTextStyles.bodySmall.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -151,13 +152,13 @@ class BookingStepperCompact extends StatefulWidget {
   final bool enabled;
   final bool compact;
 
-  static const List<String> stepTitles = [
-    'Chọn chỗ',
-    'Điểm đón',
-    'Điểm trả',
-    'Thông tin',
-    'Xác nhận',
-    'Thanh toán vé',
+  static List<String> get stepTitles => [
+    LocaleController.strings.uiSelectSeats,
+    LocaleController.strings.uiPickUpcdcaa5,
+    LocaleController.strings.uiDropOffa7cf52,
+    LocaleController.strings.uiInformation,
+    LocaleController.strings.uiConfirm,
+    LocaleController.strings.uiPayForTickets,
   ];
 
   const BookingStepperCompact({
@@ -250,7 +251,7 @@ class BookingStepperCompactState extends State<BookingStepperCompact> {
   }
 
   Widget _buildScrollView() {
-    const stepTitles = BookingStepperCompact.stepTitles;
+    final stepTitles = BookingStepperCompact.stepTitles;
 
     return SingleChildScrollView(
       key: const ValueKey('booking-stepper-scroll'),
@@ -296,10 +297,10 @@ class BookingStepperCompactState extends State<BookingStepperCompact> {
   }) {
     final canTap = widget.enabled && isPassed && widget.onStepTapped != null;
     final statusText = isActive
-        ? 'đang chọn'
+        ? context.l10n.uiCurrentStep
         : isPassed
-        ? 'đã hoàn thành'
-        : 'chưa tới';
+        ? context.l10n.uiCompleted
+        : context.l10n.uiUpcomingStep;
 
     final badgeChild = isPassed
         ? const Icon(Icons.check, size: 12, color: Colors.white)
@@ -358,8 +359,12 @@ class BookingStepperCompactState extends State<BookingStepperCompact> {
         button: isPassed,
         enabled: canTap,
         selected: isActive,
-        label:
-            'Bước ${index + 1}/${BookingStepperCompact.stepTitles.length}: $title, $statusText',
+        label: context.l10n.uiStep(
+          index + 1,
+          BookingStepperCompact.stepTitles.length,
+          title,
+          statusText,
+        ),
         onTap: canTap ? () => widget.onStepTapped!(index) : null,
         child: InkWell(
           onTap: canTap ? () => widget.onStepTapped!(index) : null,
@@ -443,7 +448,10 @@ class BookingStepper extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      'Bước ${currentStep.stepNumber}/$totalSteps',
+                      context.l10n.uiStepd0a756(
+                        currentStep.stepNumber,
+                        totalSteps,
+                      ),
                       style: AppTextStyles.caption.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w700,

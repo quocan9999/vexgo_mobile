@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'booking_evidence_details.dart';
 import 'package:flutter/material.dart';
@@ -70,20 +72,20 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
 
   @override
   Widget build(BuildContext context) => ApiConfig.isDemoMode
-      ? const Scaffold(
-          appBar: CustomAppBar(title: 'Chứng từ thanh toán'),
+      ? Scaffold(
+          appBar: CustomAppBar(title: context.l10n.uiPaymentReceipt),
           body: SafeArea(
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                'Tra cứu chứng từ chỉ khả dụng khi kết nối hệ thống thật.',
+                context.l10n.uiReceiptLookupIsAvailableOnlyWhenConnectedTo,
               ),
             ),
           ),
         )
       : Scaffold(
           backgroundColor: AppColors.background,
-          appBar: const CustomAppBar(title: 'Chứng từ thanh toán'),
+          appBar: CustomAppBar(title: context.l10n.uiPaymentReceipt),
           body: BlocConsumer<BookingReceiptCubit, BookingReceiptState>(
             bloc: _reader,
             listener: (_, state) {
@@ -101,13 +103,11 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
                 padding: const EdgeInsets.all(16),
                 children: [
                   Text(
-                    'Tra cứu chứng từ đặt vé',
+                    context.l10n.uiLookUpBookingReceipt,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Nhập mã vé hoặc mã đặt vé và số điện thoại đặt vé. Đơn gắn tài khoản cần đăng nhập đúng tài khoản đã đặt.',
-                  ),
+                  Text(context.l10n.uiEnterTheTicketOrBookingCodeAndBooking),
                   const SizedBox(height: 16),
                   Form(
                     key: _form,
@@ -119,13 +119,13 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
                           enabled: !busy && !invalid,
                           autocorrect: false,
                           enableSuggestions: false,
-                          decoration: const InputDecoration(
-                            labelText: 'Mã vé hoặc mã đặt vé',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.uiTicketOrBookingCode,
                           ),
                           onChanged: (_) => _reader.clear(),
                           validator: (value) =>
                               value == null || value.trim().isEmpty
-                              ? 'Vui lòng nhập mã vé hoặc mã đặt vé.'
+                              ? context.l10n.uiEnterATicketOrBookingCode
                               : null,
                         ),
                         const SizedBox(height: 12),
@@ -134,8 +134,8 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
                           controller: _phone,
                           enabled: !busy && !invalid,
                           keyboardType: TextInputType.phone,
-                          decoration: const InputDecoration(
-                            labelText: 'Số điện thoại đặt vé',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.uiBookingPhoneNumber,
                           ),
                           onChanged: (_) => _reader.clear(),
                           validator: (value) =>
@@ -143,11 +143,11 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
                                 r'^(?:\+84|0)(?:3[2-9]|5[689]|7[06-9]|8[1-9]|9\d)\d{7}$',
                               ).hasMatch(value?.trim() ?? '')
                               ? null
-                              : 'Số điện thoại không hợp lệ.',
+                              : context.l10n.uiInvalidPhoneNumber,
                         ),
                         const SizedBox(height: 16),
                         CustomButton(
-                          text: 'Tra cứu chứng từ',
+                          text: context.l10n.uiLookUpReceipt,
                           isLoading: busy,
                           onPressed: invalid || busy ? null : _lookup,
                           width: double.infinity,
@@ -161,9 +161,14 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
                       child: Semantics(
                         liveRegion: true,
                         child: Text(
-                          invalid
-                              ? 'Phiên đã thay đổi. Vui lòng đóng và mở lại tra cứu chứng từ.'
-                              : state.error!,
+                          localizedClientLabel(
+                            context,
+                            invalid
+                                ? context
+                                      .l10n
+                                      .uiYourSessionHasChangedCloseAndReopenReceipt
+                                : state.error!,
+                          ),
                           style: const TextStyle(color: AppColors.error),
                         ),
                       ),
@@ -171,7 +176,7 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
                   if (state.status == ReceiptStatus.failure && !invalid)
                     TextButton(
                       onPressed: _lookup,
-                      child: const Text('Thử lại'),
+                      child: Text(context.l10n.uiTryAgain),
                     ),
                   if (state.receipt != null && !invalid) ...[
                     const SizedBox(height: 20),
@@ -179,7 +184,7 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
                     const SizedBox(height: 12),
                     OutlinedButton(
                       onPressed: _reader.refresh,
-                      child: const Text('Cập nhật chứng từ'),
+                      child: Text(context.l10n.uiRefreshReceipt),
                     ),
                   ],
                 ],
@@ -192,7 +197,8 @@ class _BookingReceiptScreenState extends State<BookingReceiptScreen>
 class _ReceiptContent extends StatelessWidget {
   final BookingReceipt receipt;
   const _ReceiptContent(this.receipt);
-  String display(String value) => value.isEmpty ? 'Chưa cung cấp' : value;
+  String display(String value) =>
+      value.isEmpty ? LocaleController.strings.uiNotProvided05547c : value;
   String date(DateTime value) => DateFormat(
     'HH:mm dd/MM/yyyy',
   ).format(value.toUtc().add(const Duration(hours: 7)));
@@ -217,35 +223,38 @@ class _ReceiptContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Đã thanh toán',
+          Text(
+            context.l10n.uiPaid,
             style: TextStyle(
               color: AppColors.successDark,
               fontWeight: FontWeight.bold,
             ),
           ),
-          row('Mã đặt vé', receipt.bookingCode),
-          row('Mã giao dịch', receipt.orderCode),
-          row('Ngày đặt (giờ Việt Nam)', date(receipt.createdAt)),
+          row(context.l10n.uiBookingCoded4f872, receipt.bookingCode),
+          row(context.l10n.uiTransactionCode, receipt.orderCode),
+          row(context.l10n.uiBookingDateVietnamTime, date(receipt.createdAt)),
           const Divider(),
-          row('Hành khách', receipt.passengerName),
-          row('Số điện thoại', receipt.passengerPhone),
+          row(context.l10n.uiPassengerbd8a66, receipt.passengerName),
+          row(context.l10n.uiPhoneNumber, receipt.passengerPhone),
           if (receipt.passengerEmail.isNotEmpty)
             row('Email', receipt.passengerEmail),
           const Divider(),
-          row('Nhà xe', receipt.company),
-          row('Tuyến', receipt.route),
-          row('Loại xe', receipt.vehicle),
+          row(context.l10n.uiBusOperator, receipt.company),
+          row(context.l10n.uiRoute, receipt.route),
+          row(context.l10n.uiVehicleType9fc822, receipt.vehicle),
           if (receipt.departureAt != null)
-            row('Khởi hành (giờ Việt Nam)', date(receipt.departureAt!)),
-          row('Điểm đón', receipt.pickup),
+            row(
+              context.l10n.uiDepartureVietnamTime,
+              date(receipt.departureAt!),
+            ),
+          row(context.l10n.uiPickUpcdcaa5, receipt.pickup),
           StopSnapshotDetails(
             snapshot: receipt.pickupSnapshot,
             departure: receipt.departureAt,
             pickup: true,
             showAddress: true,
           ),
-          row('Điểm trả', receipt.dropoff),
+          row(context.l10n.uiDropOffa7cf52, receipt.dropoff),
           StopSnapshotDetails(
             snapshot: receipt.dropoffSnapshot,
             departure: receipt.departureAt,
@@ -254,18 +263,21 @@ class _ReceiptContent extends StatelessWidget {
           ),
           const Divider(),
           Text(
-            'Vé trong đơn (${receipt.tickets.length})',
+            context.l10n.uiTicketsInBooking(receipt.tickets.length),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           for (final ticket in receipt.tickets)
             row(
-              'Ghế ${display(ticket.seat)} • ${switch (ticket.status) {
-                'DA_THANH_TOAN' => 'Đã thanh toán',
-                'DA_DAT' => 'Đã đặt',
-                'HOAN_TAT' || 'DA_SU_DUNG' => 'Đã sử dụng',
-                'HUY' || 'DA_HUY' => 'Đã hủy',
-                _ => 'Chưa xác minh trạng thái vé',
-              }}',
+              context.l10n.uiSeatba07d4(
+                display(ticket.seat),
+                switch (ticket.status) {
+                  'DA_THANH_TOAN' => context.l10n.uiPaid,
+                  'DA_DAT' => context.l10n.uiBooked,
+                  'HOAN_TAT' || 'DA_SU_DUNG' => context.l10n.uiUsed,
+                  'HUY' || 'DA_HUY' => context.l10n.uiCancelled,
+                  _ => context.l10n.uiTicketStatusUnverified,
+                },
+              ),
               '${ticket.code}\n${CurrencyFormatter.format(ticket.price)}',
             ),
           if (receipt.cargo.isNotEmpty) ...[
@@ -278,25 +290,31 @@ class _ReceiptContent extends StatelessWidget {
           ],
           const Divider(),
           row(
-            'Tiền vé trước giảm',
+            context.l10n.uiFareBeforeDiscounts,
             CurrencyFormatter.format(receipt.originalSubtotal),
           ),
           if (receipt.promotionCode.isNotEmpty)
-            row('Mã giảm giá', receipt.promotionCode),
-          row('Giảm giá', CurrencyFormatter.format(receipt.discount)),
+            row(context.l10n.uiPromoCode5683b7, receipt.promotionCode),
           row(
-            'Tiền vé sau giảm',
+            context.l10n.uiDiscount,
+            CurrencyFormatter.format(receipt.discount),
+          ),
+          row(
+            context.l10n.uiFareAfterDiscounts4a0d51,
             CurrencyFormatter.format(receipt.ticketSubtotal),
           ),
           row(
             cargoSettlementLabel(receipt.cargoPayment),
             CurrencyFormatter.format(receipt.cargoFee),
           ),
-          row('Tổng thanh toán', CurrencyFormatter.format(receipt.total)),
-          row('Phương thức thanh toán', receipt.paymentMethod),
+          row(
+            context.l10n.uiTotalPayment43f8d6,
+            CurrencyFormatter.format(receipt.total),
+          ),
+          row(context.l10n.uiPaymentMethodc216d3, receipt.paymentMethod),
           const SizedBox(height: 12),
-          const Text(
-            'Đây là chứng từ đặt vé/thanh toán, không phải hóa đơn GTGT. Nếu cần hóa đơn GTGT, vui lòng liên hệ nhà xe. Chứng từ này không thay thế mã QR lên xe.',
+          Text(
+            context.l10n.uiThisIsABookingPaymentReceiptNotA,
             style: TextStyle(fontSize: 12, color: AppColors.neutral600),
           ),
         ],

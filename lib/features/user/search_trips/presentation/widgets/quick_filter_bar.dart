@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -40,8 +42,8 @@ class QuickFilterBar extends StatelessWidget {
           Semantics(
             button: true,
             label: activeCount > 0
-                ? 'Mở bộ lọc, có $activeCount bộ lọc đang chọn'
-                : 'Mở bộ lọc',
+                ? context.l10n.uiOpenFiltersFiltersSelected(activeCount)
+                : context.l10n.uiOpenFilters,
             child: InkWell(
               onTap: onOpenFilterSheet,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
@@ -73,7 +75,7 @@ class QuickFilterBar extends StatelessWidget {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      'Bộ lọc',
+                      context.l10n.uiFilters,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: activeCount > 0
                             ? DiscoveryColors.primary
@@ -112,7 +114,9 @@ class QuickFilterBar extends StatelessWidget {
           // Sort Button
           Semantics(
             button: true,
-            label: 'Sắp xếp theo: ${currentSort.label}',
+            label: context.l10n.uiSortBy58dd7b(
+              localizedClientLabel(context, currentSort.label),
+            ),
             child: InkWell(
               onTap: onOpenSortSheet,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
@@ -136,7 +140,7 @@ class QuickFilterBar extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      currentSort.label,
+                      localizedClientLabel(context, currentSort.label),
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.neutral700,
                         fontWeight: FontWeight.w600,
@@ -153,7 +157,7 @@ class QuickFilterBar extends StatelessWidget {
 
           // Quick Filter: Sáng (06-12h)
           _buildQuickChip(
-            label: 'Sáng (06:00 - 12:00)',
+            label: context.l10n.uiMorning06001200,
             isSelected: currentFilter.selectedTimeSlots.contains(
               TimeSlot.morning,
             ),
@@ -176,7 +180,7 @@ class QuickFilterBar extends StatelessWidget {
 
           // Quick Filter: Tối (18-24h)
           _buildQuickChip(
-            label: 'Tối (18:00 - 24:00)',
+            label: context.l10n.uiEvening18002400,
             isSelected: currentFilter.selectedTimeSlots.contains(
               TimeSlot.evening,
             ),

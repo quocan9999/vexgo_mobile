@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -95,9 +96,8 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               borderColor: DiscoveryColors.error,
               icon: Icons.warning_rounded,
               iconColor: DiscoveryColors.error,
-              title: 'Mã đơn bị trùng lặp',
-              message:
-                  'Mã đơn hàng hoặc mã chuyển khoản giữa 2 chiều bị trùng. Để bảo vệ giao dịch, mã QR đã bị khóa. Vui lòng liên hệ tổng đài hỗ trợ.',
+              title: context.l10n.uiDuplicateBookingCodes,
+              message: context.l10n.uiTheTwoLegsHaveDuplicateBookingOrTransfer,
             ),
           ] else if (hasUnknown) ...[
             _buildAlertBanner(
@@ -105,9 +105,9 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               borderColor: DiscoveryColors.warning,
               icon: Icons.help_outline_rounded,
               iconColor: DiscoveryColors.warningDark,
-              title: 'Cần xác minh trạng thái đơn',
+              title: context.l10n.uiBookingStatusNeedsVerification,
               message:
-                  'Không nhận được phản hồi tạo đơn từ máy chủ. Vui lòng không tạo lại đơn mới để tránh trừ tiền 2 lần. Hãy kiểm tra mục Vé của tôi hoặc bấm "Kiểm tra" bên dưới.',
+                  context.l10n.uiNoBookingConfirmationWasReceivedDoNotCreate,
             ),
           ] else if (partiallyPaid && !widget.state.canDisplayCombo(now)) ...[
             _buildAlertBanner(
@@ -115,10 +115,17 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               borderColor: DiscoveryColors.primary,
               icon: Icons.check_circle_rounded,
               iconColor: DiscoveryColors.primary,
-              title: 'Đã thanh toán 1 chiều',
+              title: context.l10n.uiOneLegPaid,
               message: widget.state.requestedComboCode != null
-                  ? 'Đã ghi nhận thanh toán một chặng. Hãy kiểm tra lại cả hai đơn; không chuyển khoản thêm trong lúc chờ đối soát.'
-                  : 'Bạn đã thanh toán thành công cho ${out.paymentConfirmed ? "Lượt đi" : "Lượt về"}. Vui lòng hoàn tất thanh toán cho ${out.paymentConfirmed ? "Lượt về" : "Lượt đi"} để hoàn thành chuyến khứ hồi.',
+                  ? context.l10n.uiPaymentForOneLegIsRecordedCheckBoth
+                  : context.l10n.uiPaymentForIsCompletePayForToComplete(
+                      out.paymentConfirmed
+                          ? context.l10n.uiOutbound
+                          : context.l10n.uiReturn,
+                      out.paymentConfirmed
+                          ? context.l10n.uiReturn
+                          : context.l10n.uiOutbound,
+                    ),
             ),
           ] else ...[
             _buildAlertBanner(
@@ -127,11 +134,11 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               icon: Icons.payment_rounded,
               iconColor: DiscoveryColors.primary,
               title: widget.state.requestedComboCode == null
-                  ? 'Thanh toán riêng từng chiều'
-                  : 'Thanh toán chung hai chiều',
+                  ? context.l10n.uiPayForEachLegSeparately
+                  : context.l10n.uiPayForBothLegsTogether,
               message: widget.state.requestedComboCode == null
-                  ? 'Chuyển khoản đúng số tiền và nội dung riêng cho từng chặng.'
-                  : 'Chỉ chuyển khoản sau khi có đủ hai đơn và mã QR chung. Không chuyển thêm nếu giao dịch đang chờ xác minh.',
+                  ? context.l10n.uiTransferTheExactAmountAndReferenceForEach
+                  : context.l10n.uiTransferOnlyAfterBothBookingsAndTheCombined,
             ),
           ],
 
@@ -149,7 +156,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               key: const ValueKey('round-trip-combo-check-all'),
               onPressed: widget.state.busy ? null : widget.onRecheckAll,
               icon: const Icon(Icons.refresh),
-              label: const Text('Kiểm tra lại cả hai đơn'),
+              label: Text(context.l10n.uiCheckBothBookings),
             ),
             const SizedBox(height: 16),
           ],
@@ -158,8 +165,10 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
           _buildLegPaymentCard(
             context,
             leg: TripLeg.outbound,
-            title:
-                '1. Thanh toán Lượt đi: ${widget.request.origin.name} → ${widget.request.destination.name}',
+            title: context.l10n.ui1OutboundPayment(
+              widget.request.origin.name,
+              widget.request.destination.name,
+            ),
             state: out,
             now: now,
           ),
@@ -170,8 +179,10 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
           _buildLegPaymentCard(
             context,
             leg: TripLeg.inbound,
-            title:
-                '2. Thanh toán Lượt về: ${widget.request.destination.name} → ${widget.request.origin.name}',
+            title: context.l10n.ui2ReturnPayment(
+              widget.request.destination.name,
+              widget.request.origin.name,
+            ),
             state: back,
             now: now,
           ),
@@ -188,7 +199,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                     Icons.confirmation_number_outlined,
                     size: 18,
                   ),
-                  label: const Text('Vé của tôi'),
+                  label: Text(context.l10n.uiMyTickets),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, 44),
                     side: const BorderSide(color: DiscoveryColors.neutral300),
@@ -203,7 +214,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                 child: OutlinedButton.icon(
                   onPressed: widget.onOpenSupport,
                   icon: const Icon(Icons.chat_outlined, size: 18),
-                  label: const Text('Hỗ trợ khách hàng'),
+                  label: Text(context.l10n.uiCustomerSupport),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, 44),
                     side: const BorderSide(color: DiscoveryColors.neutral300),
@@ -283,7 +294,10 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Thanh toán vé khứ hồi', style: DiscoveryTextStyles.titleSmall),
+          Text(
+            context.l10n.uiRoundTripPayment,
+            style: DiscoveryTextStyles.titleSmall,
+          ),
           const SizedBox(height: 12),
           Text(
             CurrencyFormatter.format(amount),
@@ -303,44 +317,44 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                 width: 200,
                 height: 200,
                 fit: BoxFit.contain,
-                errorBuilder: (_, error, stack) => const SizedBox(
+                errorBuilder: (_, error, stack) => SizedBox(
                   height: 64,
                   child: Center(
-                    child: Text(
-                      'Không tải được ảnh QR. Dùng thông tin chuyển khoản bên dưới.',
-                    ),
+                    child: Text(context.l10n.uiUnableToLoadTheQrImageUseThe),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 12),
             _buildCopyableRow(
-              label: 'Ngân hàng',
+              label: context.l10n.uiBank,
               value: account.bankId,
               copyText: account.bankId,
             ),
             const SizedBox(height: 8),
             _buildCopyableRow(
-              label: 'Số tài khoản',
+              label: context.l10n.uiAccountNumber,
               value: account.accountNumber,
               copyText: account.accountNumber,
             ),
             const SizedBox(height: 8),
             _buildCopyableRow(
-              label: 'Chủ tài khoản',
+              label: context.l10n.uiAccountHolder,
               value: account.accountName,
               copyText: account.accountName,
             ),
             const SizedBox(height: 8),
             _buildCopyableRow(
-              label: 'Nội dung',
+              label: context.l10n.uiReference,
               value: code,
               copyText: code,
               highlight: true,
             ),
           ] else
-            const Text(
-              'Chưa có cấu hình tài khoản nhận tiền. Vui lòng liên hệ hỗ trợ.',
+            Text(
+              context
+                  .l10n
+                  .uiReceivingAccountDetailsAreNotConfiguredContactSupport,
             ),
           const SizedBox(height: 16),
           SizedBox(
@@ -349,7 +363,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               key: const ValueKey('round-trip-combo-recheck'),
               onPressed: widget.onRecheckAll,
               icon: const Icon(Icons.refresh),
-              label: const Text('Kiểm tra thanh toán hai chiều'),
+              label: Text(context.l10n.uiCheckPaymentForBothLegs),
             ),
           ),
         ],
@@ -439,7 +453,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'ĐÃ THANH TOÁN',
+                        context.l10n.uiPaida446a8,
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.successDark,
                           fontWeight: FontWeight.w800,
@@ -459,7 +473,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'HẾT HẠN',
+                    context.l10n.uiExpired303872,
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.neutral600,
                       fontWeight: FontWeight.w700,
@@ -477,7 +491,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'CHỜ THANH TOÁN',
+                    context.l10n.uiAwaitingPayment,
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.warningDark,
                       fontWeight: FontWeight.w700,
@@ -495,7 +509,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'CHƯA TẠO ĐƠN',
+                    context.l10n.uiNotBooked,
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.neutral600,
                       fontWeight: FontWeight.w700,
@@ -510,15 +524,15 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
           // Order ID & Amount
           if (booking != null) ...[
             _buildCopyableRow(
-              label: 'Mã đơn hàng',
+              label: context.l10n.uiBookingCode,
               value: '#${booking.bookingId}',
               copyText: '${booking.bookingId}',
             ),
             const SizedBox(height: 6),
             _buildCopyableRow(
               label: widget.state.requestedComboCode != null
-                  ? 'Mã giao dịch chặng'
-                  : 'Nội dung CK',
+                  ? context.l10n.uiLegTransactionCode
+                  : context.l10n.uiTransferReference,
               value: booking.orderCode ?? '',
               copyText: booking.orderCode ?? '',
               highlight: true,
@@ -540,7 +554,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                       runSpacing: 2,
                       children: [
                         Text(
-                          'Tiền vé sau ưu đãi',
+                          context.l10n.uiFareAfterDiscounts,
                           style: DiscoveryTextStyles.bodySmall.copyWith(
                             color: DiscoveryColors.neutral600,
                           ),
@@ -592,7 +606,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                 runSpacing: 2,
                 children: [
                   Text(
-                    'Số tiền cần chuyển',
+                    context.l10n.uiAmountToTransfer,
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.neutral600,
                     ),
@@ -621,7 +635,9 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
           ] else ...[
             if (state.selectedSeats.isNotEmpty)
               Text(
-                'Ghế đã chọn: ${state.selectedSeats.map((s) => s.name).join(", ")}',
+                context.l10n.uiSelectedSeats09ff88(
+                  state.selectedSeats.map((s) => s.name).join(", "),
+                ),
                 style: DiscoveryTextStyles.bodySmall.copyWith(
                   color: DiscoveryColors.neutral700,
                   fontWeight: FontWeight.w600,
@@ -638,7 +654,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                   runSpacing: 2,
                   children: [
                     Text(
-                      'Số tiền dự kiến',
+                      context.l10n.uiEstimatedAmount,
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral600,
                       ),
@@ -755,8 +771,10 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                   Expanded(
                     child: Text(
                       !needsTicketSync
-                          ? 'Đã xuất vé điện tử thành công.'
-                          : 'Hệ thống đã nhận thanh toán, đang cập nhật vé.',
+                          ? context.l10n.uiETicketsIssuedSuccessfully
+                          : context
+                                .l10n
+                                .uiPaymentReceivedTicketsAreBeingUpdated,
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.successDark,
                         fontWeight: FontWeight.w600,
@@ -769,7 +787,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
           ] else if (isExpired) ...[
             const SizedBox(height: 10),
             Text(
-              'Đơn hàng đã quá thời hạn thanh toán. Nếu bạn đã chuyển khoản, hãy bấm nút "Kiểm tra thanh toán" dưới đây.',
+              context.l10n.uiThePaymentDeadlineHasExpiredIfYouAlready,
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.neutral600,
               ),
@@ -788,7 +806,11 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                     ? null
                     : () => widget.onRecheck(leg),
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: Text(isPaid ? 'Đồng bộ lại vé' : 'Kiểm tra thanh toán'),
+                label: Text(
+                  isPaid
+                      ? context.l10n.uiSyncTickets
+                      : context.l10n.uiCheckPayment,
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: DiscoveryColors.primary,
                   foregroundColor: Colors.white,
@@ -824,7 +846,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                     ),
                     elevation: 0,
                   ),
-                  child: const Text('Thử lại / Tạo đơn chiều này'),
+                  child: Text(context.l10n.uiRetryBookThisLeg),
                 ),
               ),
             if (widget.onEditMissingLeg != null) ...[
@@ -843,7 +865,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text('Chọn lại ghế / điểm đón trả chiều này'),
+                  child: Text(context.l10n.uiReselectSeatsStopsForThisLeg),
                 ),
               ),
             ],
@@ -857,7 +879,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
     final diff = expiresAt.difference(now);
     if (diff.isNegative) {
       return Text(
-        'Đã hết hạn thanh toán',
+        context.l10n.uiPaymentDeadlineExpiredbda98b,
         style: DiscoveryTextStyles.caption.copyWith(
           color: DiscoveryColors.error,
           fontWeight: FontWeight.w700,
@@ -878,7 +900,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
         ),
         const SizedBox(width: 4),
         Text(
-          'Hết hạn sau: $mins:$secs',
+          context.l10n.uiExpiresIn(mins, secs),
           style: DiscoveryTextStyles.caption.copyWith(
             color: DiscoveryColors.warningDark,
             fontWeight: FontWeight.w700,
@@ -898,20 +920,20 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
       child: Column(
         children: [
           _buildCopyableRow(
-            label: 'Ngân hàng',
+            label: context.l10n.uiBank,
             value: VietQrConfig.bankId,
             copyText: VietQrConfig.bankId,
           ),
           const SizedBox(height: 6),
           _buildCopyableRow(
-            label: 'Số tài khoản',
+            label: context.l10n.uiAccountNumber,
             value: VietQrConfig.accountNumber,
             copyText: VietQrConfig.accountNumber,
             highlight: true,
           ),
           const SizedBox(height: 6),
           _buildCopyableRow(
-            label: 'Chủ tài khoản',
+            label: context.l10n.uiAccountHolder,
             value: VietQrConfig.accountName,
             copyText: VietQrConfig.accountName,
           ),
@@ -941,7 +963,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
             ),
           ),
           IconButton(
-            tooltip: 'Sao chép $label',
+            tooltip: context.l10n.uiCopy4ecb8d(label),
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             icon: const Icon(
               Icons.copy_rounded,
@@ -952,8 +974,8 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               await Clipboard.setData(ClipboardData(text: copyText));
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Đã sao chép'),
+                SnackBar(
+                  content: Text(context.l10n.uiCopied),
                   duration: Duration(seconds: 1),
                 ),
               );

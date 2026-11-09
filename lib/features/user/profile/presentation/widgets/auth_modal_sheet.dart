@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'dart:async';
 import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:flutter/material.dart';
@@ -84,9 +86,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
     final pass = _passwordController.text;
     if (phone.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập đầy đủ Số điện thoại và Mật khẩu'),
-        ),
+        SnackBar(content: Text(context.l10n.uiEnterYourPhoneNumberAndPassword)),
       );
       return;
     }
@@ -104,7 +104,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
 
     if (phone.isEmpty || name.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập đầy đủ thông tin đăng ký')),
+        SnackBar(content: Text(context.l10n.uiCompleteAllRegistrationFields)),
       );
       return;
     }
@@ -120,7 +120,9 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
     final otp = _otpController.text.trim();
     if (otp.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập đủ 6 chữ số mã OTP')),
+        SnackBar(
+          content: Text(context.l10n.uiEnterTheFull6DigitVerificationCode),
+        ),
       );
       return;
     }
@@ -156,7 +158,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           setState(() => _busy = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.errorMessage!),
+              content: Text(localizedClientLabel(context, state.errorMessage!)),
               backgroundColor: AppColors.error,
             ),
           );
@@ -210,7 +212,9 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           children: [
             Expanded(
               child: Text(
-                _isRegister ? 'Đăng ký tài khoản VexGo' : 'Đăng nhập VexGo',
+                _isRegister
+                    ? context.l10n.uiCreateAVexgoAccount
+                    : context.l10n.uiSignInToVexgo,
                 style: AppTextStyles.titleMedium.copyWith(
                   fontWeight: FontWeight.w800,
                   fontSize: 18,
@@ -264,7 +268,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
                     ),
                     child: Center(
                       child: Text(
-                        'Đăng nhập',
+                        context.l10n.uiSignIn,
                         style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: !_isRegister
                               ? FontWeight.w700
@@ -302,7 +306,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
                     ),
                     child: Center(
                       child: Text(
-                        'Đăng ký mới',
+                        context.l10n.uiCreateAccount,
                         style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: _isRegister
                               ? FontWeight.w700
@@ -325,13 +329,13 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         // If register, ask for Full name
         if (_isRegister) ...[
           Text(
-            'Họ và tên *',
+            context.l10n.uiFullName,
             style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: AppDimensions.xs),
           CustomTextField(
             controller: _nameController,
-            hintText: 'Nhập họ và tên đầy đủ',
+            hintText: context.l10n.uiEnterYourFullName,
             prefixIcon: const Icon(
               Icons.person_outline_rounded,
               color: AppColors.neutral500,
@@ -342,13 +346,13 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
 
         // Số điện thoại
         Text(
-          'Số điện thoại *',
+          context.l10n.uiPhoneNumber42d534,
           style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: AppDimensions.xs),
         CustomTextField(
           controller: _phoneController,
-          hintText: 'Ví dụ: 0987654321',
+          hintText: context.l10n.uiExample0987654321,
           keyboardType: TextInputType.phone,
           prefixIcon: const Icon(
             Icons.phone_iphone_rounded,
@@ -360,13 +364,13 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
 
         // Mật khẩu
         Text(
-          'Mật khẩu *',
+          context.l10n.uiPassword,
           style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: AppDimensions.xs),
         CustomTextField(
           controller: _passwordController,
-          hintText: 'Nhập mật khẩu',
+          hintText: context.l10n.uiEnterPassword,
           obscureText: _isObscurePassword,
           prefixIcon: const Icon(
             Icons.lock_outline_rounded,
@@ -411,14 +415,16 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
                         _passwordController.clear();
                       }
                     },
-              child: const Text('Quên mật khẩu?'),
+              child: Text(context.l10n.uiForgotPassword1630fc),
             ),
           ),
         const SizedBox(height: AppDimensions.lg),
 
         // Action button
         CustomButton(
-          text: _isRegister ? 'TIẾP TỤC (XÁC THỰC OTP)' : 'ĐĂNG NHẬP NGAY',
+          text: _isRegister
+              ? context.l10n.uiContinueVerifyPhone
+              : context.l10n.uiSignInfe480c,
           width: double.infinity,
           type: ButtonType.primary,
           isLoading: _busy,
@@ -429,7 +435,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
 
         Center(
           child: Text(
-            'Bằng việc tiếp tục, bạn đồng ý với Điều khoản sử dụng của VexGo',
+            context.l10n.uiByContinuingYouAgreeToVexgoSTerms,
             style: AppTextStyles.caption.copyWith(
               color: AppColors.neutral500,
               fontSize: 11,
@@ -473,7 +479,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         const SizedBox(height: AppDimensions.md),
 
         Text(
-          'Xác thực mã OTP',
+          context.l10n.uiVerifyYourCode,
           style: AppTextStyles.titleMedium.copyWith(
             fontWeight: FontWeight.w800,
             fontSize: 20,
@@ -483,7 +489,9 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md),
           child: Text(
-            'Mã xác thực gồm 6 chữ số đã được gửi đến số điện thoại ${_phoneController.text.trim()}',
+            context.l10n.uiA6DigitVerificationCodeWasSentTo(
+              _phoneController.text.trim(),
+            ),
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.neutral600,
             ),
@@ -507,7 +515,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         const SizedBox(height: AppDimensions.sm),
         if (ApiConfig.isDemoMode)
           Text(
-            '(Gợi ý mã thử nghiệm: 123456)',
+            context.l10n.uiTestCodeHint123456,
             style: AppTextStyles.caption.copyWith(
               color: AppColors.neutral500,
               fontStyle: FontStyle.italic,
@@ -519,7 +527,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         // Countdown and Resend button
         if (_otpCountdown > 0)
           Text(
-            'Gửi lại mã sau $_otpCountdown giây',
+            context.l10n.uiResendCodeInSeconds(_otpCountdown),
             style: AppTextStyles.caption.copyWith(color: AppColors.neutral500),
           )
         else
@@ -536,7 +544,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
                       ),
                     );
                   },
-            child: const Text('Gửi lại mã OTP'),
+            child: Text(context.l10n.uiResendCode),
           ),
 
         const SizedBox(height: AppDimensions.lg),
@@ -545,7 +553,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           children: [
             Expanded(
               child: CustomButton(
-                text: 'QUAY LẠI',
+                text: context.l10n.uiBackb26cc0,
                 type: ButtonType.outline,
                 onPressed: _busy
                     ? null
@@ -560,7 +568,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
             const SizedBox(width: AppDimensions.md),
             Expanded(
               child: CustomButton(
-                text: 'XÁC NHẬN',
+                text: context.l10n.uiConfirm592364,
                 type: ButtonType.primary,
                 isLoading: _busy,
                 onPressed: _busy ? null : _onVerifyOtp,

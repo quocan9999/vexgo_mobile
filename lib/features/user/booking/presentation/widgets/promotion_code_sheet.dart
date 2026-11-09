@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../../../core/network/token_storage.dart';
@@ -71,7 +72,7 @@ class _PromotionCodeSheetState extends State<PromotionCodeSheet> {
     }
     final code = _code.text.trim().toUpperCase();
     if (!remove && code.isEmpty) {
-      setState(() => _error = 'Nhập mã khuyến mãi để tiếp tục.');
+      setState(() => _error = context.l10n.uiEnterAPromoCodeToContinue);
       _focus.requestFocus();
       return;
     }
@@ -97,7 +98,7 @@ class _PromotionCodeSheetState extends State<PromotionCodeSheet> {
       } else {
         setState(
           () => _error =
-              result.quoteError ?? 'Chưa xác nhận được mã. Vui lòng thử lại.',
+              result.quoteError ?? context.l10n.uiUnableToVerifyTheCodeTryAgain,
         );
       }
     } finally {
@@ -132,9 +133,9 @@ class _PromotionCodeSheetState extends State<PromotionCodeSheet> {
               children: [
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Mã khuyến mãi',
+                        context.l10n.uiPromoCode,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -143,13 +144,13 @@ class _PromotionCodeSheetState extends State<PromotionCodeSheet> {
                     ),
                     IconButton(
                       onPressed: _dismiss,
-                      tooltip: 'Đóng',
+                      tooltip: context.l10n.uiClose,
                       icon: const Icon(Icons.close),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text('Nhập mã để kiểm tra ưu đãi cho chuyến đi của bạn.'),
+                Text(context.l10n.uiEnterACodeToCheckOffersForYour),
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _code,
@@ -160,8 +161,8 @@ class _PromotionCodeSheetState extends State<PromotionCodeSheet> {
                   textCapitalization: TextCapitalization.characters,
                   textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
-                    labelText: 'Nhập mã khuyến mãi',
-                    hintText: 'Ví dụ: VEXGO30',
+                    labelText: context.l10n.uiEnterPromoCode,
+                    hintText: context.l10n.uiExampleVexgo30,
                     errorText: _error,
                     errorMaxLines: 4,
                     border: const OutlineInputBorder(),
@@ -179,13 +180,15 @@ class _PromotionCodeSheetState extends State<PromotionCodeSheet> {
                     style: FilledButton.styleFrom(
                       backgroundColor: DiscoveryColors.primary,
                     ),
-                    child: Text(_busy ? 'Đang kiểm tra…' : 'Áp dụng'),
+                    child: Text(
+                      _busy ? context.l10n.uiChecking : context.l10n.uiApply,
+                    ),
                   ),
                 ),
                 if (widget.bloc.state.requestedPromotionCode.isNotEmpty)
                   TextButton(
                     onPressed: _busy ? null : () => _apply(remove: true),
-                    child: const Text('Bỏ mã'),
+                    child: Text(context.l10n.uiRemoveCode),
                   ),
               ],
             ),

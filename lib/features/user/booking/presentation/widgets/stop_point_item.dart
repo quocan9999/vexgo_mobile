@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
@@ -21,7 +22,7 @@ class StopPointItem extends StatelessWidget {
       checked: isSelected,
       inMutuallyExclusiveGroup: true,
       label:
-          '${point.name}, ${point.time}, ${point.typeLabel}, ${point.address}',
+          '${point.name}, ${point.time}, ${localizedClientLabel(context, point.typeLabel)}, ${point.address}',
       child: Material(
         color: isSelected ? DiscoveryColors.primaryLight : Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -87,7 +88,7 @@ class StopPointItem extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              point.typeLabel,
+                              localizedClientLabel(context, point.typeLabel),
                               style: DiscoveryTextStyles.caption.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: DiscoveryColors.neutral700,

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -10,23 +11,24 @@ class PromoBannersSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final banners = [
       {
-        'tag': 'ƯU ĐÃI THÀNH VIÊN MỚI',
-        'title': 'Giảm ngay 20% cho chuyến xe đầu tiên',
-        'subtitle': 'Nhập mã HELLOVEXGO • Tối đa 60.000đ',
+        'tag': context.l10n.uiNewMemberOffer,
+        'title': context.l10n.uiSave20OnYourFirstTrip,
+        'subtitle': context.l10n.uiUseHellovexgoUpToVnd60000,
         'gradient': [const Color(0xFF0060C4), const Color(0xFF003B7A)],
         'icon': Icons.card_giftcard_rounded,
       },
       {
-        'tag': 'HOT DEAL TUẦN NÀY',
-        'title': 'Tuyến Sài Gòn - Đà Lạt giảm 50.000đ',
-        'subtitle': 'Áp dụng cho nhà xe Phương Trang & Thành Bưởi',
+        'tag': context.l10n.uiThisWeekSDeal,
+        'title': context.l10n.uiSaveVnd50000OnSaigonDaLat,
+        'subtitle': context.l10n.uiForPhNgTrangThNhBI,
         'gradient': [const Color(0xFFFF6F00), const Color(0xFFD84315)],
         'icon': Icons.local_fire_department_rounded,
       },
       {
-        'tag': 'BẢO HIỂM CHUYẾN ĐI',
-        'title': 'Cam kết giữ chỗ 100% an tâm',
-        'subtitle': 'Đền bù gấp rưỡi nếu nhà xe không có chỗ',
+        'tag': context.l10n.uiTripProtection,
+        'title': context.l10n.uiTravelWithAGuaranteedSeat,
+        'subtitle':
+            context.l10n.uiLabel150CompensationIfTheOperatorCannotProvideYour,
         'gradient': [const Color(0xFF0F9D58), const Color(0xFF0B6F3E)],
         'icon': Icons.verified_user_rounded,
       },
@@ -42,7 +44,7 @@ class PromoBannersSection extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Ưu đãi nổi bật',
+                  context.l10n.uiFeaturedOffers,
                   style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -51,7 +53,7 @@ class PromoBannersSection extends StatelessWidget {
               TextButton(
                 onPressed: () {},
                 child: Text(
-                  'Xem tất cả',
+                  context.l10n.uiViewAll,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,

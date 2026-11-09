@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -54,7 +55,9 @@ class AiChatbotUncertainBanner extends StatelessWidget {
                 Expanded(
                   child: Text(
                     message ??
-                        'Chưa xác định được câu hỏi đã xử lý hay chưa. Giữ lại bản nháp; không gửi lại tự động.',
+                        context
+                            .l10n
+                            .uiItIsUnclearWhetherYourQuestionWasProcessed,
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.neutral900,
                       fontWeight: FontWeight.w700,
@@ -67,8 +70,8 @@ class AiChatbotUncertainBanner extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               hasKnownSession
-                  ? 'Bạn có thể kiểm tra các phản hồi đã lưu của phiên hiện tại trước, hoặc chủ động bắt đầu hội thoại mới. Lưu ý: câu hỏi vừa gửi có thể đã được máy chủ tiếp nhận.'
-                  : 'Do phản hồi đầu tiên bị gián đoạn trước khi nhận mã phiên nên chưa thể đối chiếu lịch sử trên máy chủ. Bạn có thể bắt đầu hội thoại mới và giữ lại câu hỏi nháp.',
+                  ? context.l10n.uiYouCanCheckSavedResponsesForThisSession
+                  : context.l10n.uiTheFirstResponseWasInterruptedBeforeASession,
               style: TextStyle(
                 fontFamily: AppTypography.fontFamily,
                 fontSize: 11.5,
@@ -104,7 +107,7 @@ class AiChatbotUncertainBanner extends StatelessWidget {
                             ),
                           )
                         : const Icon(Icons.history_rounded, size: 16),
-                    label: const Text('Kiểm tra phản hồi đã lưu'),
+                    label: Text(context.l10n.uiCheckSavedResponses),
                   ),
                 ElevatedButton.icon(
                   key: const Key('ai-chatbot-uncertain-new-keep-btn'),
@@ -118,7 +121,7 @@ class AiChatbotUncertainBanner extends StatelessWidget {
                   ),
                   onPressed: onNewConversationKeepDraft,
                   icon: const Icon(Icons.restart_alt_rounded, size: 16),
-                  label: const Text('Hội thoại mới (Giữ nháp)'),
+                  label: Text(context.l10n.uiNewConversationKeepDraft),
                 ),
                 TextButton(
                   key: const Key('ai-chatbot-uncertain-new-clear-btn'),
@@ -127,7 +130,7 @@ class AiChatbotUncertainBanner extends StatelessWidget {
                     foregroundColor: DiscoveryColors.neutral700,
                   ),
                   onPressed: onNewConversationClearDraft,
-                  child: const Text('Hội thoại mới (Xóa nháp)'),
+                  child: Text(context.l10n.uiNewConversationClearDraft),
                 ),
               ],
             ),
@@ -228,7 +231,7 @@ class AiChatbotHistoryCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Bản ghi phản hồi từ máy chủ (Chỉ đọc)',
+                  context.l10n.uiServerResponseRecordReadOnly,
                   style: DiscoveryTextStyles.titleSmall.copyWith(
                     color: DiscoveryColors.neutral900,
                     fontWeight: FontWeight.w800,
@@ -237,7 +240,7 @@ class AiChatbotHistoryCard extends StatelessWidget {
               ),
               IconButton(
                 key: const Key('ai-chatbot-history-refresh-btn'),
-                tooltip: 'Tải lại phản hồi đã lưu',
+                tooltip: context.l10n.uiRefreshSavedResponses,
                 constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 onPressed: loading ? null : onRefresh,
                 icon: loading
@@ -258,7 +261,7 @@ class AiChatbotHistoryCard extends StatelessWidget {
             ],
           ),
           Text(
-            'Bản ghi chỉ đọc từ máy chủ (hiển thị các tin nhắn đã lưu của phiên này); không tự thay thế hội thoại trên máy hoặc tự mở khóa câu hỏi đang gián đoạn.',
+            context.l10n.uiReadOnlyServerRecordOfThisSessionS,
             style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 11.5,
@@ -268,9 +271,9 @@ class AiChatbotHistoryCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (loading && snapshot == null)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
-              child: Text('Đang tải lịch sử phản hồi…'),
+              child: Text(context.l10n.uiLoadingResponseHistory),
             )
           else if (error != null)
             Container(
@@ -291,7 +294,7 @@ class AiChatbotHistoryCard extends StatelessWidget {
           else if (snapshot != null) ...[
             if (snapshot!.messages.isEmpty)
               Text(
-                'Chưa có phản hồi nào được lưu trong phiên này.',
+                context.l10n.uiNoResponsesAreSavedInThisSessionYet,
                 style: DiscoveryTextStyles.bodySmall.copyWith(
                   color: DiscoveryColors.neutral700,
                 ),
@@ -318,10 +321,10 @@ class AiChatbotHistoryCard extends StatelessWidget {
                         children: [
                           Text(
                             msg.role == 'ASSISTANT'
-                                ? 'Trợ lý AI'
+                                ? context.l10n.uiAiAssistant
                                 : msg.role == 'USER'
-                                ? 'Người dùng'
-                                : 'Hệ thống',
+                                ? context.l10n.uiUser
+                                : context.l10n.uiSystem,
                             style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 11,
@@ -350,7 +353,11 @@ class AiChatbotHistoryCard extends StatelessWidget {
                       if (msg.citations.isNotEmpty) ...[
                         const SizedBox(height: 6),
                         Text(
-                          'Nguồn: ${msg.citations.map((c) => '${c.documentCode} (${c.title})').join('; ')}',
+                          context.l10n.uiSource(
+                            msg.citations
+                                .map((c) => '${c.documentCode} (${c.title})')
+                                .join('; '),
+                          ),
                           style: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 11,
@@ -364,7 +371,7 @@ class AiChatbotHistoryCard extends StatelessWidget {
                           (t) => Padding(
                             padding: const EdgeInsets.only(bottom: 2),
                             child: Text(
-                              '• ${t.operator} (${t.code}): ${t.origin} → ${t.destination} • ${t.departureTime} • ${t.price != null ? CurrencyFormatter.format(t.price!) : 'Chưa có giá'}',
+                              '• ${t.operator} (${t.code}): ${t.origin} → ${t.destination} • ${t.departureTime} • ${t.price != null ? CurrencyFormatter.format(t.price!) : context.l10n.uiPriceUnavailable}',
                               style: TextStyle(
                                 fontFamily: AppTypography.fontFamily,
                                 fontSize: 11,
@@ -388,7 +395,7 @@ class AiChatbotHistoryCard extends StatelessWidget {
                               Icons.support_agent_rounded,
                               size: 16,
                             ),
-                            label: const Text('Chat với nhân viên'),
+                            label: Text(context.l10n.uiChatWithSupport),
                           ),
                         ),
                       ],

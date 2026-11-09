@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -78,8 +79,11 @@ class BookingBottomBar extends StatelessWidget {
             children: [
               Text(
                 hasSeats
-                    ? 'Ghế: $seatNames (${state.selectedSeats.length} chỗ)'
-                    : 'Vui lòng chọn chỗ',
+                    ? LocaleController.strings.uiSeatsCount(
+                        seatNames,
+                        state.selectedSeats.length,
+                      )
+                    : LocaleController.strings.uiSelectYourSeats,
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   color: hasSeats ? AppColors.primary : AppColors.neutral500,
@@ -92,8 +96,8 @@ class BookingBottomBar extends StatelessWidget {
                 hasSeats
                     ? (state.seatsTotalAmount != null
                           ? CurrencyFormatter.format(state.seatsTotalAmount!)
-                          : 'Chưa có giá vé')
-                    : '0 đ',
+                          : LocaleController.strings.uiFareUnavailable)
+                    : CurrencyFormatter.format(0),
                 style: AppTextStyles.price.copyWith(fontSize: 18),
               ),
             ],
@@ -103,7 +107,7 @@ class BookingBottomBar extends StatelessWidget {
         SizedBox(
           width: 140,
           child: CustomButton(
-            text: 'Tiếp tục',
+            text: LocaleController.strings.uiContinue,
             onPressed:
                 (hasSeats &&
                     state.seatsTotalAmount != null &&
@@ -122,7 +126,7 @@ class BookingBottomBar extends StatelessWidget {
         Expanded(
           flex: 1,
           child: CustomButton(
-            text: 'Quay lại',
+            text: LocaleController.strings.uiBack,
             type: ButtonType.outline,
             onPressed: onBack,
           ),
@@ -131,7 +135,7 @@ class BookingBottomBar extends StatelessWidget {
         Expanded(
           flex: 2,
           child: CustomButton(
-            text: 'Chọn điểm trả',
+            text: LocaleController.strings.uiSelectDropOff,
             onPressed: state.isPickupValid ? onNext : null,
           ),
         ),
@@ -145,7 +149,7 @@ class BookingBottomBar extends StatelessWidget {
         Expanded(
           flex: 1,
           child: CustomButton(
-            text: 'Quay lại',
+            text: LocaleController.strings.uiBack,
             type: ButtonType.outline,
             onPressed: onBack,
           ),
@@ -154,7 +158,7 @@ class BookingBottomBar extends StatelessWidget {
         Expanded(
           flex: 2,
           child: CustomButton(
-            text: 'Nhập thông tin',
+            text: LocaleController.strings.uiEnterDetails,
             onPressed: state.isDropoffValid ? onNext : null,
           ),
         ),
@@ -173,7 +177,7 @@ class BookingBottomBar extends StatelessWidget {
         Expanded(
           flex: 1,
           child: CustomButton(
-            text: 'Quay lại',
+            text: LocaleController.strings.uiBack,
             type: ButtonType.outline,
             onPressed: isBusy ? null : onBack,
           ),
@@ -182,7 +186,7 @@ class BookingBottomBar extends StatelessWidget {
         Expanded(
           flex: 2,
           child: CustomButton(
-            text: 'Tiếp tục',
+            text: LocaleController.strings.uiContinue,
             onPressed:
                 (!isBusy &&
                     hasActiveHold &&
@@ -205,7 +209,7 @@ class BookingBottomBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Tổng thanh toán:',
+                LocaleController.strings.uiTotalPayment,
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.neutral500,
                 ),
@@ -215,8 +219,10 @@ class BookingBottomBar extends StatelessWidget {
                 state.finalAmount != null
                     ? CurrencyFormatter.format(state.finalAmount)
                     : state.cargo.enabled
-                    ? 'Phí gửi hàng được xác định khi tạo đơn'
-                    : 'Đang xác minh giá',
+                    ? LocaleController
+                          .strings
+                          .uiShippingFeeIsCalculatedWhenBookingIsCreated
+                    : LocaleController.strings.uiVerifyingFare,
                 style: AppTextStyles.price.copyWith(
                   fontSize: state.finalAmount == null && state.cargo.enabled
                       ? 14
@@ -231,7 +237,7 @@ class BookingBottomBar extends StatelessWidget {
         SizedBox(
           width: 170,
           child: CustomButton(
-            text: 'Thanh toán',
+            text: LocaleController.strings.uiPayment,
             onPressed: state.canProceed ? onNext : null,
           ),
         ),
@@ -247,7 +253,7 @@ class BookingBottomBar extends StatelessWidget {
         SizedBox(
           width: 88,
           child: CustomButton(
-            text: 'Quay lại',
+            text: LocaleController.strings.uiBack,
             type: ButtonType.outline,
             onPressed: state.isCheckoutLocked ? null : onBack,
           ),
@@ -256,12 +262,14 @@ class BookingBottomBar extends StatelessWidget {
         Expanded(
           child: CustomButton(
             text: state.pendingBookingId != null
-                ? 'Kiểm tra đơn hiện tại'
+                ? LocaleController.strings.uiCheckCurrentBooking
                 : state.finalAmount != null
-                ? 'Thanh toán ${CurrencyFormatter.format(state.finalAmount)}'
+                ? LocaleController.strings.uiPay(
+                    CurrencyFormatter.format(state.finalAmount),
+                  )
                 : state.cargo.enabled
-                ? 'Tạo đơn & Thanh toán'
-                : 'Đang xác minh giá',
+                ? LocaleController.strings.uiBookPay
+                : LocaleController.strings.uiVerifyingFare,
             isLoading: isSubmitting,
             prefixIcon: const Icon(
               Icons.shield_rounded,

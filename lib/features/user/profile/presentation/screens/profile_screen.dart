@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/features/user/app_info/presentation/screens/app_information_screen.dart';
 import 'package:vexgo_app/core/widgets/tab_page_header.dart';
 import 'package:go_router/go_router.dart';
@@ -21,13 +23,15 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const TabPageHeader(title: 'Tài khoản'),
+      appBar: TabPageHeader(title: context.l10n.uiAccount),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state.successMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.successMessage!),
+                content: Text(
+                  localizedClientLabel(context, state.successMessage!),
+                ),
                 backgroundColor: DiscoveryColors.successDark,
                 duration: const Duration(seconds: 2),
               ),
@@ -36,7 +40,9 @@ class ProfileScreen extends StatelessWidget {
           if (state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage!),
+                content: Text(
+                  localizedClientLabel(context, state.errorMessage!),
+                ),
                 backgroundColor: DiscoveryColors.error,
               ),
             );
@@ -54,12 +60,12 @@ class ProfileScreen extends StatelessWidget {
                   const LinearProgressIndicator(),
                 if (state.status == AuthStatus.failure && user == null)
                   ListTile(
-                    title: const Text('Không thể tải phiên đăng nhập.'),
+                    title: Text(context.l10n.uiUnableToLoadYourSession),
                     trailing: TextButton(
                       onPressed: () => context.read<AuthBloc>().add(
                         const CheckAuthStatusEvent(),
                       ),
-                      child: const Text('Thử lại'),
+                      child: Text(context.l10n.uiTryAgain),
                     ),
                   ),
                 if (isAuthenticated && user != null)
@@ -71,42 +77,47 @@ class ProfileScreen extends StatelessWidget {
                   if (isAuthenticated && user != null) ...[
                     _MenuRow(
                       icon: Icons.stars_outlined,
-                      title: 'Điểm tích lũy VexGo',
-                      trailingText: '${user.diemTichLuy} điểm',
+                      title: context.l10n.uiVexgoPoints,
+                      trailingText: context.l10n.uiPoints746cfa(
+                        user.diemTichLuy,
+                      ),
                     ),
                     _MenuRow(
                       icon: Icons.person_outline_rounded,
-                      title: 'Thông tin cá nhân',
+                      title: context.l10n.uiPersonalInformation,
                       onTap: () => EditProfileDialog.show(context, user: user),
                     ),
                     _MenuRow(
                       icon: Icons.lock_outline_rounded,
-                      title: 'Đổi mật khẩu',
+                      title: context.l10n.uiChangePassword,
                       onTap: () => ChangePasswordScreen.show(context),
                     ),
                   ],
                   _MenuRow(
                     icon: Icons.forum_outlined,
-                    title: 'Chat với nhà xe',
+                    title: context.l10n.uiChatWithOperator,
                     onTap: () => context.push(AppRoutes.supportChat),
                   ),
                   _MenuRow(
                     icon: Icons.smart_toy_outlined,
-                    title: 'Trợ lý AI',
+                    title: context.l10n.uiAiAssistant,
                     onTap: () => context.push(AppRoutes.aiChatbot),
                   ),
                   _MenuRow(
                     icon: Icons.info_outline_rounded,
-                    title: 'Thông tin VexGo',
+                    title: context.l10n.uiAboutVexgo,
                     onTap: () => openAppInformation(
                       context,
                       const AppInformationScreen(),
                     ),
                   ),
-                  const _MenuRow(
+                  _MenuRow(
                     icon: Icons.language_rounded,
-                    title: 'Ngôn ngữ',
-                    trailingText: 'Tiếng Việt',
+                    title: context.l10n.uiLanguage,
+                    trailingText: context.l10n.localeName == 'en'
+                        ? 'English'
+                        : context.l10n.uiTiNgViT,
+                    onTap: () => _selectLanguage(context),
                   ),
                 ]),
                 if (isAuthenticated) ...[
@@ -114,7 +125,7 @@ class ProfileScreen extends StatelessWidget {
                   _buildMenuList([
                     _MenuRow(
                       icon: Icons.logout_rounded,
-                      title: 'Đăng xuất tài khoản',
+                      title: context.l10n.uiSignOut6827e6,
                       color: DiscoveryColors.error,
                       onTap: () => _confirmLogout(context),
                     ),
@@ -123,7 +134,7 @@ class ProfileScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                   child: Text(
-                    'Phiên bản 1.0.0',
+                    context.l10n.uiVersion100,
                     textAlign: TextAlign.center,
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.neutral600,
@@ -136,6 +147,50 @@ class ProfileScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _selectLanguage(BuildContext context) async {
+    final controller = LocaleController.instance;
+    final chosen = await showModalBottomSheet<String>(
+      context: context,
+      useSafeArea: true,
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(title: Text(sheetContext.l10n.uiLanguage)),
+            for (final option in {
+              'vi': context.l10n.uiTiNgViT,
+              'en': 'English',
+            }.entries)
+              ListTile(
+                title: Text(option.value),
+                selected: controller.value.languageCode == option.key,
+                trailing: controller.value.languageCode == option.key
+                    ? const Icon(Icons.check_rounded)
+                    : null,
+                onTap: () => Navigator.pop(sheetContext, option.key),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (chosen == null) return;
+    try {
+      await controller.select(chosen);
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            chosen == 'en'
+                ? 'Language changed for this session. Unable to save your preference.'
+                : context.l10n.uiLanguageChangedForThisSessionUnableToSave,
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildUserCard(BuildContext context, UserModel user) {
@@ -204,7 +259,7 @@ class ProfileScreen extends StatelessWidget {
                 Text(
                   user.email != null && user.email!.trim().isNotEmpty
                       ? user.email!
-                      : 'Chưa cập nhật email',
+                      : context.l10n.uiNoEmailAdded,
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.neutral500,
                   ),
@@ -223,7 +278,7 @@ class ProfileScreen extends StatelessWidget {
               color: DiscoveryColors.primary,
               size: 26,
             ),
-            tooltip: 'Chỉnh sửa hồ sơ',
+            tooltip: context.l10n.uiEditProfile,
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           ),
         ],
@@ -258,7 +313,7 @@ class ProfileScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Chào mừng bạn đến với VexGo',
+                      context.l10n.uiWelcomeToVexgo,
                       style: DiscoveryTextStyles.titleMedium.copyWith(
                         fontWeight: FontWeight.w700,
                         color: DiscoveryColors.neutral900,
@@ -266,7 +321,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Đăng nhập để đặt vé thuận tiện và quản lý thông tin chuyến đi',
+                      context.l10n.uiSignInForEasierBookingAndToManage,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.neutral500,
                       ),
@@ -288,8 +343,8 @@ class ProfileScreen extends StatelessWidget {
               ),
               minimumSize: const Size(double.infinity, 48),
             ),
-            child: const Text(
-              'ĐĂNG NHẬP / ĐĂNG KÝ',
+            child: Text(
+              context.l10n.uiSignInSignUp,
               style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.5),
             ),
           ),
@@ -410,7 +465,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Đăng xuất',
+                context.l10n.uiSignOut,
                 style: DiscoveryTextStyles.titleMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   color: DiscoveryColors.neutral900,
@@ -420,7 +475,7 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
         content: Text(
-          'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản VexGo không?',
+          context.l10n.uiAreYouSureYouWantToSignOut,
           style: DiscoveryTextStyles.bodyMedium.copyWith(
             color: DiscoveryColors.neutral700,
           ),
@@ -431,7 +486,7 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Ở lại'),
+            child: Text(context.l10n.uiStay),
           ),
           FilledButton(
             onPressed: () {
@@ -446,8 +501,8 @@ class ProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Đăng xuất',
+            child: Text(
+              context.l10n.uiSignOut,
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),

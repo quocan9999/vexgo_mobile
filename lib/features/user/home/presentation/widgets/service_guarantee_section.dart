@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -11,27 +12,26 @@ class ServiceGuaranteeSection extends StatelessWidget {
     final guarantees = [
       {
         'icon': Icons.verified_user_rounded,
-        'title': 'Chắc chắn có chỗ 100%',
-        'desc': 'Hoàn tiền 150% nếu nhà xe không giữ đúng chỗ của bạn.',
+        'title': context.l10n.uiGuaranteedSeats,
+        'desc': context.l10n.uiLabel150RefundIfTheOperatorDoesNotHonour,
         'color': AppColors.primary,
       },
       {
         'icon': Icons.support_agent_rounded,
-        'title': 'Hỗ trợ khách hàng 24/7',
-        'desc':
-            'Tổng đài viên luôn sẵn sàng giải đáp và xử lý phát sinh trên hành trình.',
+        'title': context.l10n.uiLabel247CustomerSupport,
+        'desc': context.l10n.uiOurSupportTeamIsHereToHelpThroughout,
         'color': AppColors.secondary,
       },
       {
         'icon': Icons.price_check_rounded,
-        'title': 'Nhiều ưu đãi & Giá minh bạch',
-        'desc': 'Giá vé niêm yết rõ ràng từ nhà xe, không phụ phí ẩn.',
+        'title': context.l10n.uiGreatOffersTransparentFares,
+        'desc': context.l10n.uiClearlyListedOperatorFaresWithNoHiddenCharges,
         'color': AppColors.success,
       },
       {
         'icon': Icons.qr_code_2_rounded,
-        'title': 'Vé điện tử nhanh chóng',
-        'desc': 'Lên xe chỉ với một chạm quét mã QR trên điện thoại.',
+        'title': context.l10n.uiConvenientETickets,
+        'desc': context.l10n.uiBoardWithAScanOfTheQrCode,
         'color': const Color(0xFF7928CA),
       },
     ];
@@ -42,7 +42,7 @@ class ServiceGuaranteeSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Cam kết dịch vụ từ VexGo',
+            context.l10n.uiTheVexgoServicePromise,
             style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: AppDimensions.sm),

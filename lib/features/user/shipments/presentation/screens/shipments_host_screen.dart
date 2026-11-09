@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
@@ -123,8 +124,8 @@ class _ShipmentsHostScreenState extends State<ShipmentsHostScreen> {
 
     if (phase == ShipmentCreationPhase.submitting) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đang xử lý tạo đơn, vui lòng đợi trong giây lát...'),
+        SnackBar(
+          content: Text(context.l10n.uiCreatingYourShipmentPleaseWait),
           duration: Duration(seconds: 2),
         ),
       );
@@ -135,19 +136,19 @@ class _ShipmentsHostScreenState extends State<ShipmentsHostScreen> {
       final shouldLeave = await showDialog<bool>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          title: const Text('Cảnh báo đơn hàng chưa xác minh'),
-          content: const Text(
-            'Kết quả tạo đơn chưa được máy chủ xác nhận. Bạn có chắc muốn rời khỏi màn hình này?',
+          title: Text(context.l10n.uiUnverifiedShipmentWarning),
+          content: Text(
+            context.l10n.uiTheServerHasNotConfirmedThisShipmentLeave,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogCtx).pop(false),
-              child: const Text('Ở lại'),
+              child: Text(context.l10n.uiStay),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogCtx).pop(true),
-              child: const Text(
-                'Rời khỏi',
+              child: Text(
+                context.l10n.uiLeave,
                 style: TextStyle(color: DiscoveryColors.error),
               ),
             ),
@@ -169,9 +170,9 @@ class _ShipmentsHostScreenState extends State<ShipmentsHostScreen> {
         listener: (context, state) {
           if (state.phase == ShipmentCreationPhase.invalidated) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
+              SnackBar(
                 content: Text(
-                  'Phiên làm việc đã thay đổi. Dữ liệu đã được làm mới.',
+                  context.l10n.uiYourSessionHasChangedDataHasBeenRefreshed,
                 ),
                 backgroundColor: DiscoveryColors.warningDark,
               ),
@@ -211,7 +212,11 @@ class _ShipmentsHostScreenState extends State<ShipmentsHostScreen> {
         builder: (context, state) {
           final isAuth =
               context.watch<AuthBloc?>()?.state.isAuthenticated ?? false;
-          final tabs = ['Tạo đơn', 'Tra cứu', if (isAuth) 'Đơn của tôi'];
+          final tabs = [
+            context.l10n.uiCreateShipment,
+            context.l10n.uiTrackShipment,
+            if (isAuth) context.l10n.uiMyShipments,
+          ];
 
           // Clamp selected tab index if auth status changed
           final safeIndex = _selectedTabIndex >= tabs.length
@@ -252,13 +257,13 @@ class _ShipmentsHostScreenState extends State<ShipmentsHostScreen> {
               backgroundColor: DiscoveryColors.background,
               appBar: TabPageHeader(
                 title: showDetail
-                    ? 'Chi tiết vận đơn'
+                    ? context.l10n.uiShipmentDetails
                     : (state.phase == ShipmentCreationPhase.uncertain &&
                           !_uncertainLookupActive)
-                    ? 'Kết quả tạo đơn'
+                    ? context.l10n.uiShipmentCreationResult
                     : _uncertainLookupActive
-                    ? 'Tra cứu vận đơn'
-                    : 'Gửi hàng',
+                    ? context.l10n.uiLookUpShipment
+                    : context.l10n.uiShipments,
                 showBackButton: showBackInHeader,
               ),
               body: SafeArea(
@@ -284,7 +289,7 @@ class _ShipmentsHostScreenState extends State<ShipmentsHostScreen> {
                                     }
                                     _selectedTabIndex = idx;
                                   });
-                                  if (title == 'Đơn của tôi' &&
+                                  if (idx == 2 &&
                                       state.myShipments == null &&
                                       !state.loadingMine) {
                                     _cubit.loadMine(

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/features/user/app_info/presentation/screens/app_information_screen.dart';
 import '../widgets/available_offers_section.dart';
 import '../../../ai_chatbot/presentation/widgets/ai_chatbot_entry_card.dart';
@@ -77,7 +78,7 @@ class _HomeScreenContent extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        tooltip: 'Thông báo',
+                        tooltip: context.l10n.uiNotifications,
                         icon: const Icon(
                           Icons.notifications_none_outlined,
                           color: Colors.white,
@@ -85,7 +86,7 @@ class _HomeScreenContent extends StatelessWidget {
                         onPressed: () => context.go('/notifications'),
                       ),
                       IconButton(
-                        tooltip: 'Tài khoản và hỗ trợ',
+                        tooltip: context.l10n.uiAccountAndSupport,
                         icon: const Icon(
                           Icons.headset_mic_outlined,
                           color: Colors.white,
@@ -105,14 +106,14 @@ class _HomeScreenContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Bạn muốn đi đâu?',
+                    context.l10n.uiWhereWouldYouLikeToGo,
                     style: DiscoveryTextStyles.h1.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Tìm chuyến xe phù hợp cho hành trình của bạn.',
+                    context.l10n.uiFindTheRightBusForYourJourney,
                     style: DiscoveryTextStyles.bodyMedium,
                   ),
                   const SizedBox(height: 20),
@@ -135,19 +136,19 @@ class _HomeScreenContent extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Chưa tải được dữ liệu tìm chuyến',
+                              context.l10n.uiUnableToLoadTripSearch,
                               style: DiscoveryTextStyles.titleMedium,
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Kiểm tra kết nối và thử lại nhé.',
+                              context.l10n.uiCheckYourConnectionAndTryAgain,
                               style: DiscoveryTextStyles.bodyMedium,
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 16),
                             DiscoveryButton(
-                              text: 'Thử lại',
+                              text: context.l10n.uiTryAgain,
                               onPressed: () => context.read<HomeBloc>().add(
                                 const LoadHomeDataEvent(),
                               ),

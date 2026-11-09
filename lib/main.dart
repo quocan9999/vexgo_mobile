@@ -1,3 +1,4 @@
+import 'core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app/app.dart';
@@ -7,6 +8,7 @@ import 'core/notifications/push_notifications.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await TokenStorage.init();
+  await LocaleController.instance.restore();
   try {
     await initializePushFirebase();
   } catch (_) {

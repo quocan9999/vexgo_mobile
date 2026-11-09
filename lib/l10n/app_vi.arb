@@ -1,0 +1,3122 @@
+{
+  "@@locale": "vi",
+  "uiHome": "Trang chủ",
+  "uiMyTickets": "Vé của tôi",
+  "uiShipments": "Gửi hàng",
+  "uiNotifications": "Thông báo",
+  "uiAccount": "Tài khoản",
+  "uiLanguage": "Ngôn ngữ",
+  "uiTiNgViT": "Tiếng Việt",
+  "uiTryAgain": "Thử lại",
+  "uiRefresh": "Tải lại",
+  "uiClose": "Đóng",
+  "uiCancel": "Hủy",
+  "uiStay": "Ở lại",
+  "uiBack": "Quay lại",
+  "uiSignIn": "Đăng nhập",
+  "uiSignOut": "Đăng xuất",
+  "uiSignUp": "Đăng ký",
+  "uiCreateAccount": "Đăng ký mới",
+  "uiConfirm": "Xác nhận",
+  "uiSave": "Lưu",
+  "uiAll": "Tất cả",
+  "uiSelect": "Chọn",
+  "uiContinue": "Tiếp tục",
+  "uiNo": "Không",
+  "uiYes": "Có",
+  "uiSelectOrigin": "Chọn điểm đi",
+  "uiSelectDestination": "Chọn điểm đến",
+  "uiDestination": "Điểm đến",
+  "uiOrigin": "Điểm đi",
+  "uiOrigind7f375": "Điểm xuất phát",
+  "uiSelectOrigin829747": "Chọn điểm xuất phát",
+  "uiSwapOriginAndDestination": "Đổi chiều điểm đi và điểm đến",
+  "uiBusOperator": "Nhà xe",
+  "uiAccountAndSupport": "Tài khoản và hỗ trợ",
+  "uiWhereWouldYouLikeToGo": "Bạn muốn đi đâu?",
+  "uiFindTheRightBusForYourJourney": "Tìm chuyến xe phù hợp cho hành trình của bạn.",
+  "uiUnableToLoadTripSearch": "Chưa tải được dữ liệu tìm chuyến",
+  "uiCheckYourConnectionAndTryAgain": "Kiểm tra kết nối và thử lại nhé.",
+  "uiSearchCitiesStationsOrOffices": "Tìm tỉnh thành, bến xe, văn phòng...",
+  "uiPopularLocations": "Địa điểm phổ biến",
+  "uiAllLocations": "Tất cả địa điểm",
+  "uiNoMatchingLocations": "Không tìm thấy địa điểm phù hợp",
+  "uiDistrict": "Quận/huyện",
+  "uiProvinceOrCity": "Tỉnh/thành phố",
+  "uiOperatorOffers": "Ưu đãi nhà xe",
+  "uiRefreshOffers": "Làm mới ưu đãi",
+  "uiUnableToLoadThisOperatorSOffers": "Chưa tải được ưu đãi của nhà xe này.",
+  "uiRetryOffers": "Thử lại ưu đãi",
+  "uiThereAreNoCurrentOffersForThisOperator": "Hiện chưa có ưu đãi đang mở cho nhà xe này.",
+  "uiEligibilityIsCheckedAgainWhenYouBook": "Điều kiện áp dụng được kiểm tra lại khi đặt vé.",
+  "uiOfferCodeCopied": "Đã sao chép mã ưu đãi.",
+  "uiOurBusOperatorPartners": "Nhà xe uy tín đối tác",
+  "uiPopularRoutes": "Tuyến đường phổ biến",
+  "uiFrom": "Từ ",
+  "uiViewFares": "Xem giá vé",
+  "uiNewMemberOffer": "ƯU ĐÃI THÀNH VIÊN MỚI",
+  "uiSave20OnYourFirstTrip": "Giảm ngay 20% cho chuyến xe đầu tiên",
+  "uiUseHellovexgoUpToVnd60000": "Nhập mã HELLOVEXGO • Tối đa 60.000đ",
+  "uiThisWeekSDeal": "HOT DEAL TUẦN NÀY",
+  "uiSaveVnd50000OnSaigonDaLat": "Tuyến Sài Gòn - Đà Lạt giảm 50.000đ",
+  "uiForPhNgTrangThNhBI": "Áp dụng cho nhà xe Phương Trang & Thành Bưởi",
+  "uiTripProtection": "BẢO HIỂM CHUYẾN ĐI",
+  "uiTravelWithAGuaranteedSeat": "Cam kết giữ chỗ 100% an tâm",
+  "uiLabel150CompensationIfTheOperatorCannotProvideYour": "Đền bù gấp rưỡi nếu nhà xe không có chỗ",
+  "uiFeaturedOffers": "Ưu đãi nổi bật",
+  "uiViewAll": "Xem tất cả",
+  "uiRoundTrip": "Khứ hồi",
+  "uiToggleRoundTrip": "Bật tắt vé khứ hồi",
+  "uiDepartureDate": "Ngày đi",
+  "uiReturnDate": "Ngày về",
+  "uiFindTrips": "Tìm chuyến",
+  "uiIntercityParcelShippingIsComingSoon": "Dịch vụ Gửi hàng hóa theo xe khách liên tỉnh sẽ sớm ra mắt theo đề cương!",
+  "uiComingSoon": "Sắp có",
+  "uiGuaranteedSeats": "Chắc chắn có chỗ 100%",
+  "uiLabel150RefundIfTheOperatorDoesNotHonour": "Hoàn tiền 150% nếu nhà xe không giữ đúng chỗ của bạn.",
+  "uiLabel247CustomerSupport": "Hỗ trợ khách hàng 24/7",
+  "uiOurSupportTeamIsHereToHelpThroughout": "Tổng đài viên luôn sẵn sàng giải đáp và xử lý phát sinh trên hành trình.",
+  "uiGreatOffersTransparentFares": "Nhiều ưu đãi & Giá minh bạch",
+  "uiClearlyListedOperatorFaresWithNoHiddenCharges": "Giá vé niêm yết rõ ràng từ nhà xe, không phụ phí ẩn.",
+  "uiConvenientETickets": "Vé điện tử nhanh chóng",
+  "uiBoardWithAScanOfTheQrCode": "Lên xe chỉ với một chạm quét mã QR trên điện thoại.",
+  "uiTheVexgoServicePromise": "Cam kết dịch vụ từ VexGo",
+  "uiChatWithOperator": "Chat với nhà xe",
+  "uiPhoneNumber": "Số điện thoại",
+  "uiFullName": "Họ và tên *",
+  "uiPhoneNumber42d534": "Số điện thoại *",
+  "uiPasswordChangedSuccessfully": "Đổi mật khẩu thành công.",
+  "uiChangePassword": "Đổi mật khẩu",
+  "uiKeepYourAccountSecure": "Bảo vệ tài khoản của bạn",
+  "uiEnterYourCurrentAndNewPasswordsDoNot": "Nhập mật khẩu hiện tại và mật khẩu mới. Không chia sẻ mật khẩu với người khác.",
+  "uiCurrentPassword": "Mật khẩu hiện tại",
+  "uiCurrentPassword03603d": "mật khẩu hiện tại",
+  "uiEnterYourCurrentPassword": "Nhập mật khẩu hiện tại.",
+  "uiNewPassword": "Mật khẩu mới",
+  "uiNewPassword31bb86": "mật khẩu mới",
+  "uiPasswordMustBe872Utf8Bytes": "Mật khẩu cần dài 8–72 byte UTF-8.",
+  "uiYourNewPasswordMustDifferFromYourCurrent": "Mật khẩu mới phải khác mật khẩu hiện tại.",
+  "uiConfirmNewPassword": "Xác nhận mật khẩu mới",
+  "uiPasswordConfirmation": "mật khẩu xác nhận",
+  "uiPasswordsDoNotMatch": "Mật khẩu xác nhận không khớp.",
+  "uiSaving": "Đang lưu…",
+  "uiSavePassword": "Lưu mật khẩu",
+  "uiYourSessionHasChangedOpenForgotPasswordAgain": "Phiên đã thay đổi. Vui lòng mở lại Quên mật khẩu.",
+  "uiTheServerResultCouldNotBeConfirmedTry": "Chưa xác nhận được kết quả từ máy chủ. Nếu vừa đặt lại mật khẩu, hãy thử đăng nhập bằng mật khẩu mới; nếu chưa được, yêu cầu OTP mới.",
+  "uiUnableToCompletePleaseTryAgain": "Không thể hoàn tất. Vui lòng thử lại.",
+  "uiThisCodeHasExpiredRequestANewCode": "Mã OTP đã hết hạn. Vui lòng gửi lại mã.",
+  "uiVerificationHasExpiredRequestANewCode": "Xác thực đã hết hạn. Vui lòng yêu cầu OTP mới.",
+  "uiLabel872Utf8BytesAccentedCharactersMay": "8–72 byte UTF-8; ký tự có dấu có thể chiếm nhiều byte.",
+  "uiHidePassword": "Ẩn mật khẩu",
+  "uiShowPassword": "Hiện mật khẩu",
+  "uiPasswordsDoNotMatchYet": "Hai mật khẩu chưa khớp.",
+  "uiForgotPassword": "Quên mật khẩu",
+  "uiRecoverYourAccount": "Lấy lại quyền truy cập",
+  "uiVerifyPhoneNumber": "Xác thực số điện thoại",
+  "uiSetANewPassword": "Đặt mật khẩu mới",
+  "uiPasswordResetSuccessfully": "Đặt lại mật khẩu thành công",
+  "uiEnterYourRegisteredPhoneNumberToRequestA": "Nhập số điện thoại đã đăng ký để yêu cầu mã xác thực.",
+  "uiExample0912345678": "Ví dụ: 0912345678",
+  "uiVerificationCode": "Mã OTP",
+  "uiEnterAll6Digits": "Nhập đủ 6 chữ số.",
+  "uiResendCode": "Gửi lại mã OTP",
+  "uiResettingYourPasswordWillEndYourExistingSign": "Sau khi đặt lại mật khẩu, các phiên đăng nhập cũ sẽ hết hiệu lực.",
+  "uiSignInWithYourNewPasswordToContinue": "Vui lòng đăng nhập bằng mật khẩu mới để tiếp tục.",
+  "uiRequestCode": "Yêu cầu mã OTP",
+  "uiVerifyCode": "Xác nhận OTP",
+  "uiResetPassword": "Đặt lại mật khẩu",
+  "uiBackToSignIn": "Về đăng nhập",
+  "uiChangePhoneNumberStartAgain": "Đổi số điện thoại / Bắt đầu lại",
+  "uiUnableToLoadYourSession": "Không thể tải phiên đăng nhập.",
+  "uiVexgoPoints": "Điểm tích lũy VexGo",
+  "uiPersonalInformation": "Thông tin cá nhân",
+  "uiAiAssistant": "Trợ lý AI",
+  "uiAboutVexgo": "Thông tin VexGo",
+  "uiSignOut6827e6": "Đăng xuất tài khoản",
+  "uiVersion100": "Phiên bản 1.0.0",
+  "uiNoEmailAdded": "Chưa cập nhật email",
+  "uiEditProfile": "Chỉnh sửa hồ sơ",
+  "uiWelcomeToVexgo": "Chào mừng bạn đến với VexGo",
+  "uiSignInForEasierBookingAndToManage": "Đăng nhập để đặt vé thuận tiện và quản lý thông tin chuyến đi",
+  "uiSignInSignUp": "ĐĂNG NHẬP / ĐĂNG KÝ",
+  "uiAreYouSureYouWantToSignOut": "Bạn có chắc chắn muốn đăng xuất khỏi tài khoản VexGo không?",
+  "uiEnterYourPhoneNumberAndPassword": "Vui lòng nhập đầy đủ Số điện thoại và Mật khẩu",
+  "uiCompleteAllRegistrationFields": "Vui lòng nhập đầy đủ thông tin đăng ký",
+  "uiEnterTheFull6DigitVerificationCode": "Vui lòng nhập đủ 6 chữ số mã OTP",
+  "uiCreateAVexgoAccount": "Đăng ký tài khoản VexGo",
+  "uiSignInToVexgo": "Đăng nhập VexGo",
+  "uiEnterYourFullName": "Nhập họ và tên đầy đủ",
+  "uiExample0987654321": "Ví dụ: 0987654321",
+  "uiPassword": "Mật khẩu *",
+  "uiEnterPassword": "Nhập mật khẩu",
+  "uiForgotPassword1630fc": "Quên mật khẩu?",
+  "uiContinueVerifyPhone": "TIẾP TỤC (XÁC THỰC OTP)",
+  "uiSignInfe480c": "ĐĂNG NHẬP NGAY",
+  "uiByContinuingYouAgreeToVexgoSTerms": "Bằng việc tiếp tục, bạn đồng ý với Điều khoản sử dụng của VexGo",
+  "uiVerifyYourCode": "Xác thực mã OTP",
+  "uiTestCodeHint123456": "(Gợi ý mã thử nghiệm: 123456)",
+  "uiBackb26cc0": "QUAY LẠI",
+  "uiConfirm592364": "XÁC NHẬN",
+  "uiFullNameIsRequired": "Họ và tên không được để trống",
+  "uiEditPersonalInformation": "Chỉnh sửa thông tin cá nhân",
+  "uiUpdateYourVexgoProfile": "Cập nhật hồ sơ tài khoản VexGo",
+  "uiVerified": "Đã xác thực",
+  "uiNotVerified": "Chưa xác thực",
+  "uiYourPhoneNumberIsUsedToSignIn": "Số điện thoại dùng để đăng nhập và tra cứu vé, không thể thay đổi.",
+  "uiNationalIdNumber": "Số CCCD / CMND",
+  "uiLabel12Digits": "12 chữ số",
+  "uiDateOfBirthYyyyMmDd": "Ngày sinh (YYYY-MM-DD)",
+  "uiSaveChanges": "Lưu thay đổi",
+  "uiVexgoRewardPoints": "Điểm tích lũy VexGo Points",
+  "uiPoints": "điểm",
+  "uiRedeemPoints": "Đổi điểm",
+  "uiYouHaveReachedTheHighestMembershipTier": "Bạn đã đạt hạng thành viên cao nhất!",
+  "uiVnd30000VoucherForAnyTrip": "Voucher 30.000đ mọi chuyến xe",
+  "uiVnd50000VoucherForDaLatVung": "Voucher 50.000đ chặng Đà Lạt/Vũng Tàu",
+  "uiVnd100000VoucherForNorthSouthTrips": "Voucher 100.000đ chặng Bắc - Nam",
+  "uiVexgoRewardPoints7b38b8": "Điểm thưởng VexGo Points",
+  "uiAvailableToRedeem": "Khả dụng để đổi thưởng",
+  "uiRedeemPointsForVouchers": "ĐỔI ĐIỂM LẤY VOUCHER",
+  "uiRedeem": "Đổi mã",
+  "uiPointsHistory": "LỊCH SỬ TÍCH & DÙNG ĐIỂM",
+  "uiNoPointsTransactionsYet": "Chưa có lịch sử giao dịch điểm.",
+  "uiUnableToOpenTheTicketTryAgainIn": "Không thể mở vé. Vui lòng thử lại trong Vé của tôi.",
+  "uiMarkAllAsRead": "Đọc tất cả",
+  "uiTrips": "Chuyến đi",
+  "uiOffers": "Ưu đãi",
+  "uiSystem": "Hệ thống",
+  "uiSignInToViewNotifications": "Đăng nhập để xem thông báo.",
+  "uiUnableToLoadNotifications": "Không thể tải thông báo.",
+  "uiNoNotificationsYet": "Chưa có thông báo nào",
+  "uiThereAreNoNotificationsInThisCategoryTrip": "Bạn chưa có thông báo trong mục này. Các cập nhật chuyến đi và ưu đãi sẽ xuất hiện tại đây.",
+  "uiFilters": "Bộ lọc",
+  "uiSearchingForTrips": "Đang tìm kiếm chuyến xe...",
+  "uiSomethingWentWrong": "Có lỗi xảy ra",
+  "uiUnableToLoadTripsRightNow": "Không thể tải danh sách chuyến xe lúc này.",
+  "uiNoMatchingTrips": "Không tìm thấy chuyến xe phù hợp",
+  "uiNoTripsMatchYourFiltersTryChangingThe": "Không có chuyến xe nào thỏa mãn các tiêu chí lọc của bạn. Hãy thử thay đổi bộ lọc.",
+  "uiResetFilters": "Thiết lập lại bộ lọc",
+  "uiToday": "Hôm nay",
+  "uiTomorrow": "Ngày mai",
+  "uiOpenFilters": "Mở bộ lọc",
+  "uiMorning06001200": "Sáng (06:00 - 12:00)",
+  "uiEvening18002400": "Tối (18:00 - 24:00)",
+  "uiThisTripIsSoldOut": "Chuyến xe đã hết chỗ",
+  "uiTripDetails": "Chi tiết chuyến xe",
+  "uiSelectTrip": "Chọn chuyến",
+  "uiUnableToLoadTripDetails": "Không thể tải chi tiết chuyến",
+  "uiAnErrorOccurredWhileLoadingData": "Đã xảy ra lỗi khi tải dữ liệu.",
+  "uiCloseTripDetails": "Đóng chi tiết chuyến",
+  "uiRetryLoadingTripDetails": "Thử lại tải chi tiết chuyến",
+  "uiVehiclePhotos": "Hình ảnh xe",
+  "uiAmenities": "Tiện ích",
+  "uiPickUpDropOff": "Đón / Trả",
+  "uiCancellationPolicy": "Chính sách hủy",
+  "uiFaresFrom": "Giá chỉ từ",
+  "uiSelectThisTrip": "CHỌN CHUYẾN NÀY",
+  "uiSoldOut": "CHUYẾN XE ĐÃ HẾT CHỖ",
+  "uiNoVehiclePhotosAreAvailableForThisTrip": "Chưa có hình ảnh thực tế cho chuyến xe này",
+  "uiNoAmenityInformationIsAvailableForThisTrip": "Chưa có thông tin tiện ích cho chuyến xe này",
+  "uiCancellationConditions": "Điều kiện hủy vé",
+  "uiOpenTicketDetailsToCheckConfirmedCancellationConditions": "Mở chi tiết vé để xem điều kiện, phí hủy và số tiền hoàn do hệ thống xác nhận trước khi hủy.",
+  "uiNoteDuringPublicHolidaysTheOperatorSSpecial": "Lưu ý: Vào dịp Lễ/Tết chính sách hoàn hủy vé sẽ tuân theo quy định riêng của nhà xe.",
+  "uiSearchFilters": "Bộ lọc tìm kiếm",
+  "uiReset": "Thiết lập lại",
+  "uiDepartureTime": "GIỜ XUẤT BẾN",
+  "uiFareRange": "KHOẢNG GIÁ",
+  "uiBusOperatorb6c7ac": "NHÀ XE",
+  "uiVehicleType": "LOẠI XE",
+  "uiOnboardAmenities": "TIỆN ÍCH TRÊN XE",
+  "uiApplyFilters": "ÁP DỤNG BỘ LỌC",
+  "uiSortBy": "Sắp xếp theo",
+  "uiBookTickets": "Đặt vé",
+  "uiPayment": "Thanh toán",
+  "uiLeaveBooking": "Thoát khỏi đặt vé?",
+  "uiThisBookingHasNotBeenFullyVerifiedCheck": "Đơn hiện tại chưa hoàn tất xác minh. Kiểm tra trong Vé của tôi trước khi tạo đơn khác.",
+  "uiLeaveThisBookingYourHeldSeatsWillBe": "Bạn có chắc chắn muốn rời khỏi tiến trình đặt vé này không? Vị trí ghế đang giữ sẽ được giải phóng cho người khác.",
+  "uiContinueBooking": "Tiếp tục đặt vé",
+  "uiLeave": "Rời khỏi",
+  "uiTimeExpired": "Hết thời gian",
+  "uiExpired": "hết hạn",
+  "uiSeatHoldExpired": "Hết giờ giữ ghế",
+  "uiTheTemporary10MinuteSeatHoldHasEnded": "Thời gian giữ ghế tạm thời (10 phút) đã kết thúc. Vị trí ghế đã được giải phóng để nhường cho khách khác. Vui lòng chọn lại chỗ ngồi để tiếp tục.",
+  "uiGotIt": "Đã hiểu",
+  "uiYourAccountSessionHasChanged": "Phiên tài khoản đã thay đổi.",
+  "uiOpenBookingAgainIfYouSubmittedABooking": "Vui lòng mở lại đặt vé. Nếu đã gửi tạo đơn, hãy đăng nhập đúng tài khoản và kiểm tra Vé của tôi trước khi tạo đơn khác. Ghế chưa tạo đơn sẽ được yêu cầu giải phóng hoặc tự hết hạn theo máy chủ.",
+  "uiLeaveBooking6d56ab": "Rời khỏi đặt vé",
+  "uiTicketCodeCopied": "Đã sao chép mã vé vào bộ nhớ tạm!",
+  "uiTicketInformation": "Thông tin vé",
+  "uiYourSessionHasChangedOpenYourTicketAgain": "Phiên đã thay đổi. Vui lòng mở lại vé của bạn.",
+  "uiGoToHome": "Về trang chủ",
+  "uiVexgoETicket": "Vé điện tử VexGo",
+  "uiBookingSuccessful": "Đặt vé thành công!",
+  "uiYourPaymentHasBeenConfirmed": "Giao dịch đã được hệ thống xác nhận",
+  "uiTicketCode": "Mã vé:",
+  "uiCopyTicketCode": "Sao chép mã vé",
+  "uiPaid": "Đã thanh toán",
+  "uiDepartureDateefda3f": "Ngày đi:",
+  "uiPickUpTime": "Giờ đón:",
+  "uiPickUp": "Điểm đón:",
+  "uiDropOff": "Điểm trả:",
+  "uiSeats": "Chỗ ngồi:",
+  "uiTotalPayment": "Tổng thanh toán:",
+  "uiNumberOfTickets": "Số lượng vé:",
+  "uiShowThisCodeToTheAttendantWhenBoarding": "Đưa mã này cho phụ xe khi lên xe",
+  "uiPaymentMustBeConfirmedBeforeABoardingCode": "Chưa có xác nhận thanh toán để hiển thị mã lên xe.",
+  "uiPassengerInformation": "Thông tin hành khách",
+  "uiFullName2d81b7": "Họ tên:",
+  "uiPhoneNumber3179db": "Số điện thoại:",
+  "uiSaveYourTicketCodeAndBookingPhoneNumber": "Lưu mã vé và số điện thoại đã dùng khi đặt vé để tra cứu vé không cần đăng nhập.",
+  "uiViewMyTickets": "Xem vé của tôi",
+  "uiNotProvided": "Chưa cập nhật",
+  "uiNoSeatsAreOnSaleForThisTrip": "Chuyến xe chưa có ghế mở bán.",
+  "uiEnterThePassengerSFullName": "Vui lòng nhập họ và tên hành khách",
+  "uiFullNameMustHaveAtLeast2Characters": "Họ và tên cần ít nhất 2 ký tự",
+  "uiEnterAContactPhoneNumber": "Vui lòng nhập số điện thoại liên hệ",
+  "uiInvalidPhoneNumberEG0912345678Or84912345678": "Số điện thoại không hợp lệ (ví dụ: 0912345678 hoặc +84912345678)",
+  "uiInvalidEmailAddressEGNameEmailCom": "Email không đúng định dạng (ví dụ: ten@email.com)",
+  "uiBookingContactDetails": "Thông tin liên hệ cho đơn đặt vé",
+  "uiUsedToConfirmYourBookingAndArrangePick": "Dùng để xác nhận thông tin đặt chỗ và liên hệ đón trả trong chuyến đi này.",
+  "uiFullNamead9f29": "Họ và tên",
+  "uiExampleNguyNVNAn": "Ví dụ: Nguyễn Văn An",
+  "uiVietnameseMobileNumbersStartingWith0Or84": "Hỗ trợ số di động Việt Nam bắt đầu bằng 0 hoặc +84.",
+  "uiEmailOptional": "Email (tùy chọn)",
+  "uiExampleNameGmailCom": "Ví dụ: nguyenvanan@gmail.com",
+  "uiOptionalIfEnteredUseAValidEmailAddress": "Không bắt buộc. Nếu nhập, vui lòng dùng đúng định dạng email.",
+  "uiUpdatingFaresOffers": "Đang cập nhật giá vé & ưu đãi...",
+  "uiUpdateFare": "Cập nhật giá vé",
+  "uiReviewYourBooking": "Xem lại thông tin chuyến đi",
+  "uiCheckYourJourneyAndPassengerDetailsBeforeProceeding": "Vui lòng kiểm tra kỹ thông tin hành trình và hành khách trước khi sang bước thanh toán.",
+  "uiEditPickUpDropOff": "Sửa đón/trả",
+  "uiSelectedSeats": "Chỗ ngồi đã chọn",
+  "uiChangeSeats": "Đổi ghế",
+  "uiEdit": "Sửa",
+  "uiFullName3da3c8": "Họ tên",
+  "uiNotEntered": "Chưa nhập",
+  "uiNotProvidedOptional": "Chưa cung cấp (tùy chọn)",
+  "uiPromoCodesOffers": "Mã khuyến mãi & ưu đãi",
+  "uiValidCode": "Mã hợp lệ",
+  "uiRemoveCode": "Bỏ mã",
+  "uiSelectOrEnterAPromoCode": "Chọn hoặc nhập mã khuyến mãi",
+  "uiEnterACodeToCheckEligibility": "Nhập mã để hệ thống kiểm tra điều kiện",
+  "uiPaymentDetails": "Chi tiết thanh toán",
+  "uiFareUnavailable": "Chưa có giá vé",
+  "uiServiceFee": "Phí dịch vụ",
+  "uiVerifying": "Đang xác minh",
+  "uiFree": "Miễn phí",
+  "uiPromotionalDiscount": "Giảm giá ưu đãi",
+  "uiEstimatedLuggageFee": "Phí hành lý tham khảo (tạm tính)",
+  "uiFareAfterDiscounts": "Tiền vé sau ưu đãi",
+  "uiItemFeesArePaidSeparatelyAtTheStation": "Cước vật phẩm thanh toán riêng tại bến",
+  "uiTotalDue": "Tổng tiền cần thanh toán",
+  "uiCalculatedWhenBookingIsCreated": "Xác định khi tạo đơn",
+  "uiFaresAndOffersAreConfirmedBasedOnYour": "Giá vé và ưu đãi được hệ thống xác nhận theo ghế, chuyến đi và thông tin liên hệ. Vé chỉ có hiệu lực sau khi xác minh thanh toán.",
+  "uiBookingResultNotConfirmed": "Kết quả tạo đơn chưa xác định",
+  "uiTheServerHasNotConfirmedThisBookingDo": "Máy chủ chưa phản hồi trạng thái tạo đơn. Không gửi lại yêu cầu để tránh trừ tiền nhiều lần. Vui lòng kiểm tra mục \"Vé của tôi\" hoặc liên hệ tổng đài.",
+  "uiPaymentAmount": "Số tiền thanh toán",
+  "uiTripInformation": "Thông tin chuyến đi",
+  "uiSelectPaymentMethod": "Chọn phương thức thanh toán",
+  "uiVietqrBankTransfer": "Chuyển khoản VietQR",
+  "uiScanTheQrCodeForAutomaticConfirmation24": "Quét mã QR tự động xác nhận 24/7 (Hỗ trợ mọi ngân hàng & ví điện tử)",
+  "uiRecommended": "Khuyên dùng",
+  "uiMomoWallet": "Ví MoMo",
+  "uiInstantPaymentWithMomoDemo": "Thanh toán tức thì qua ứng dụng MoMo (Demo)",
+  "uiZalopayWallet": "Ví ZaloPay",
+  "uiSecurePaymentWithZalopayOrZaloDemo": "Thanh toán an toàn với ví ZaloPay hoặc Zalo (Demo)",
+  "uiDomesticBankCard": "Thẻ ATM nội địa",
+  "uiInternetBankingWithOver40VietnameseBanksDemo": "Internet Banking hơn 40 ngân hàng Việt Nam (Demo)",
+  "uiInternationalCard": "Thẻ quốc tế",
+  "uiPayWithVisaMastercardOrJcbDemo": "Thanh toán thẻ Visa, MasterCard, JCB (Demo)",
+  "uiTicketsAreIssuedOnlyAfterPaymentIsConfirmed": "Chỉ xuất vé sau khi hệ thống xác nhận thanh toán",
+  "uiPaymentConfirmed": "Đã xác nhận thanh toán",
+  "uiPaymentForThisBookingHasBeenConfirmedYour": "Hệ thống đã ghi nhận thanh toán thành công cho đơn hàng này. Vé điện tử đang được đồng bộ và xử lý phát hành. Vui lòng nhấn \"Kiểm tra kết quả thanh toán\" ở thanh bên dưới để làm mới trạng thái vé.",
+  "uiPaymentDeadlineExpired": "Đơn đặt vé đã hết hạn thanh toán",
+  "uiTheSeatHoldAndPaymentDeadlineHaveExpired": "Thời gian giữ chỗ và thanh toán của đơn đã kết thúc. Vui lòng không thực hiện chuyển khoản cho đơn này. Nếu đã chuyển tiền sát giờ, vui lòng nhấn \"Kiểm tra kết quả thanh toán\" hoặc liên hệ tổng đài hỗ trợ.",
+  "uiTimeLeftToPay": "Thời gian thanh toán còn lại:",
+  "uiCopyBookingCode": "Sao chép mã đặt vé",
+  "uiFareAfterDiscountsfb669a": "Tiền vé sau ưu đãi:",
+  "uiTotalBookingPayment": "Tổng đơn thanh toán:",
+  "uiSaveYourTicketCodeAndContactPhoneNumber": "Lưu mã vé và tra cứu bằng số điện thoại liên hệ để kiểm tra đơn sau khi rời màn hình.",
+  "uiVietqrTransferDetails": "Thông tin chuyển khoản VietQR",
+  "uiScanTheQrCodeWithYourBankingApp": "Quét mã QR qua app ngân hàng hoặc sao chép thông tin chuyển khoản chính xác bên dưới:",
+  "uiCopyTransferReference": "Sao chép nội dung chuyển khoản",
+  "uiCopyAccountNumber": "Sao chép số tài khoản",
+  "uiCopyAmount": "Sao chép số tiền",
+  "uiUnableToLoadTheQrCodeUseThe": "Không tải được QR. Bạn có thể chuyển khoản theo thông tin và nội dung bên trên.",
+  "uiPaymentIsPending": "Giao dịch thanh toán đang chờ xử lý",
+  "uiPaymentLink": "đường dẫn thanh toán",
+  "uiAboutYourETicket": "Lưu ý về vé điện tử",
+  "uiWhenABookingExpires": "Lưu ý khi đơn hàng hết hạn",
+  "uiAfterMakingATransfer": "Hướng dẫn sau khi chuyển tiền",
+  "uiThisBookingCannotBePaidYetOrIts": "Đơn hiện tại chưa đủ điều kiện thanh toán hoặc chưa xác minh được trạng thái. ",
+  "uiDoNotTransferMoreMoneyTapCheckPayment": "Vui lòng không chuyển thêm tiền. Nhấn \"Kiểm tra kết quả thanh toán\" ",
+  "uiToCheckThisBookingOrContactSupportIf": "để kiểm tra đơn hiện tại hoặc liên hệ hỗ trợ nếu đã chuyển khoản.",
+  "uiSelectYourSeats": "Vui lòng chọn chỗ",
+  "uiSelectDropOff": "Chọn điểm trả",
+  "uiEnterDetails": "Nhập thông tin",
+  "uiShippingFeeIsCalculatedWhenBookingIsCreated": "Phí gửi hàng được xác định khi tạo đơn",
+  "uiVerifyingFare": "Đang xác minh giá",
+  "uiCheckCurrentBooking": "Kiểm tra đơn hiện tại",
+  "uiBookPay": "Tạo đơn & Thanh toán",
+  "uiItemsWithYourTicket": "Gửi hàng kèm vé",
+  "uiEnterLengthWidthAndHeightEachMustBe": "Nhập đủ dài, rộng, cao; mỗi chiều phải lớn hơn 0.",
+  "uiLengthWidthAndHeightMustBeValidNumbers": "Kích thước dài, rộng, cao phải là số hợp lệ lớn hơn 0.",
+  "uiMaximumDimensionsAre1508080Cm": "Kích thước tối đa cho phép là 150 × 80 × 80 cm.",
+  "uiItems": "Hàng",
+  "uiLightItems": "Hàng nhẹ",
+  "uiBulkyItems": "Hàng cồng kềnh",
+  "uiMotorbike": "Xe máy",
+  "uiBicycle": "Xe đạp",
+  "uiBulkyItemsBicycle": "Hàng cồng kềnh / Xe đạp",
+  "uiStandard": "Tiêu chuẩn",
+  "uiFragile": "Dễ vỡ",
+  "uiHighValue": "Giá trị cao",
+  "uiRegisterParcelsAMotorbikeOrABicycleFor": "Đăng ký gửi kiện hàng, xe máy hoặc xe đạp đi cùng chuyến xe",
+  "uiThisBookingHasBeenCreatedOrIsProcessing": "Đơn hàng đã tạo hoặc đang xử lý. Thông tin gửi hàng đã được khóa để đảm bảo đồng bộ.",
+  "uiItemFeesArePaidSeparatelyAtTheStation6c5a15": "Cước vật phẩm thanh toán riêng tại bến. Thông tin người nhận được lấy theo thông tin liên hệ đặt vé và sức chứa được máy chủ xác nhận khi tạo đơn.",
+  "uiUnableToLoadItemOptions": "Không tải được tùy chọn gửi hàng.",
+  "uiCheckingShippingServiceCapacityAndDropOffCollection": "Đang kiểm tra dịch vụ gửi hàng, sức chứa và điểm gửi/nhận...",
+  "uiRemoveItems": "Bỏ gửi hàng",
+  "uiThisTripDoesNotAcceptItemsForShipping": "Chuyến xe không nhận gửi hàng.",
+  "uiTurnOffItemsWithYourTicketToContinue": "Vui lòng tắt gửi hàng kèm vé để tiếp tục đặt vé hành khách như bình thường.",
+  "uiThisTripHasNoValidItemDropOff": "Chuyến xe chưa cấu hình điểm gửi/nhận hàng hợp lệ.",
+  "uiRemainingItemCapacityOnThisTrip": "Sức chứa gửi hàng còn lại trên chuyến",
+  "uiItemDropOffCollectionPoints": "Điểm gửi & nhận hàng trên tuyến",
+  "uiItemDropOffPoint": "Điểm gửi hàng *",
+  "uiItemCollectionPoint": "Điểm nhận hàng *",
+  "uiNoValidItemCategoriesAreAvailableForThis": "Chuyến xe chưa có danh mục hàng hóa hợp lệ. Không thể thêm kiện hàng.",
+  "uiAddItem": "Thêm kiện hàng",
+  "uiNoItemsAddedTapAddItemToEnter": "Chưa có kiện hàng nào. Nhấn \"Thêm kiện hàng\" để khai báo thông tin hàng gửi.",
+  "uiEditItem": "Sửa kiện hàng",
+  "uiRemoveItem": "Xóa kiện hàng",
+  "uiAddNewItem": "Thêm kiện hàng mới",
+  "uiItemCategory": "Phân loại kiện hàng",
+  "uiItemName": "Tên kiện hàng *",
+  "uiEGHondaVisionMotorbikeSportsBicycle": "VD: Xe máy Honda Vision / Xe đạp thể thao",
+  "uiEGGiftBoxDocumentsSuitcase": "VD: Thùng quà, tài liệu, vali...",
+  "uiQuantity": "Số lượng *",
+  "uiFixedWeightKg": "Khối lượng cố định (kg)",
+  "uiWeightKg40": "Khối lượng (kg, ≤40) *",
+  "uiOptionalDimensionsCmMaximum1508080Cm": "Kích thước tùy chọn (cm - tối đa 150 × 80 × 80 cm)",
+  "uiLength150": "Dài (≤150)",
+  "uiWidth80": "Rộng (≤80)",
+  "uiHeight80": "Cao (≤80)",
+  "uiVehicleModelType": "Dòng xe / Loại xe",
+  "uiLicencePlate": "Biển số xe",
+  "uiHandlingService": "Dịch vụ bảo quản",
+  "uiItemNotesOptional": "Ghi chú kiện hàng (tùy chọn)",
+  "uiUpdateItem": "Cập nhật kiện hàng",
+  "uiSaveItem": "Lưu kiện hàng",
+  "uiItemsAccompanyingYourTicket": "Thông tin gửi hàng kèm vé",
+  "uiShipmentCode": "Mã vận đơn gửi hàng",
+  "uiShippingRoute": "Tuyến gửi hàng",
+  "uiConfirmedItems": "Kiện hàng đã xác nhận:",
+  "uiRegisteredItems": "Kiện hàng đăng ký gửi:",
+  "uiAccompaniedLuggage": "Hành lý đi kèm",
+  "uiThisBookingSessionHasEnded": "Phiên đặt vé đã kết thúc.",
+  "uiDiscardUnsavedDetails": "Bỏ phần đang nhập?",
+  "uiUnsavedDetailsWillBeDiscardedSavedItemsWill": "Mục chưa lưu sẽ bị bỏ. Các kiện đã lưu vẫn được giữ nguyên.",
+  "uiKeepEditing": "Nhập tiếp",
+  "uiDiscardUnsavedDetails5d5a16": "Bỏ phần đang nhập",
+  "uiEstimatedFee": "Cước phí dự tính",
+  "uiThisEstimateUsesTheOperatorSPackagesAnd": "Cước được dự tính theo gói của nhà xe và có thể thay đổi sau khi kiểm tra vật phẩm. Thanh toán tại bến khi giao vật phẩm, không cộng vào tiền vé thanh toán trực tuyến.",
+  "uiSaveOrDiscardTheCurrentItemBeforeFinishing": "Lưu hoặc hủy mục đang nhập trước khi hoàn tất.",
+  "uiLuggageInformation": "Thông tin hành lý",
+  "uiCarryOnLuggageIsFreeWithinTheOperator": "Hành lý xách tay được miễn phí trong hạn mức nhà xe. Thêm kiện ký gửi hoặc phương tiện để xem cước dự tính. Các lựa chọn được quản lý riêng theo từng chặng.",
+  "uiOperatorCarryOnAllowance": "Hạn mức xách tay theo nhà xe",
+  "uiEachPassengerMayBringOneCarryOnItem": "Mỗi hành khách được mang một kiện xách tay trong hạn mức. Kiện vượt hạn mức cần kiểm tra điều kiện ký gửi. Hạn mức áp dụng theo chuyến đang chọn.",
+  "uiVehicles": "Phương tiện",
+  "uiNeedsReview": "Cần kiểm tra lại",
+  "uiYourSessionHasChangedOpenBookingAgain": "Phiên đã thay đổi. Vui lòng mở lại đặt vé.",
+  "uiEditLuggage": "Sửa hành lý",
+  "uiAddCheckedLuggage": "Thêm hành lý ký gửi",
+  "uiViewLuggage": "Xem hành lý",
+  "uiEnterAValidCarryOnWeight0Kg": "Nhập khối lượng xách tay hợp lệ (> 0 kg).",
+  "uiCarryOnQuantityMustBeAtLeast1": "Số kiện xách tay phải từ 1 trở lên.",
+  "uiCheckedLuggage": "Hành lý ký gửi",
+  "uiAccompanyingBicycle": "Xe đạp đi kèm",
+  "uiEnterAllThreeDimensionsOrLeaveAllThree": "Nhập đủ cả 3 chiều Dài, Rộng, Cao (hoặc để trống cả 3).",
+  "uiLengthWidthAndHeightMustBeValidNumbers8bcef9": "Kích thước Dài, Rộng, Cao phải là số hợp lệ lớn hơn 0.",
+  "uiItemWeightMustBeAValidNumberGreater": "Khối lượng hàng phải là số hợp lệ lớn hơn 0.",
+  "uiLuggageItem": "Kiện hành lý",
+  "uiEnterALuggageItemName": "Vui lòng nhập tên kiện hành lý.",
+  "uiQuantityMustBeAWholeNumber1": "Số lượng phải là số nguyên ≥ 1.",
+  "uiCheckTheLuggageWeightAndDimensions": "Vui lòng kiểm tra lại khối lượng và kích thước kiện hành lý.",
+  "uiTheCarryOnItemHasChangedStartThe": "Kiện xách tay đã thay đổi. Vui lòng mở lại thao tác chuyển ký gửi.",
+  "uiDismissMessage": "Đóng thông báo",
+  "uiThisBookingHasBeenCreatedOrIsProcessing81566a": "Đơn hàng đã tạo hoặc đang xử lý. Thông tin hành lý đi kèm đã được khóa để đảm bảo đồng bộ.",
+  "uiYourSignInSessionHasChangedOpenBooking": "Phiên đăng nhập đã thay đổi. Vui lòng mở lại đặt vé để khai báo hành lý.",
+  "uiSelectedNoCheckedLuggagePassengerTicketsOnly": "Đang chọn: Không thêm hành lý ký gửi (chỉ đặt vé hành khách).",
+  "uiViewPolicyAddLuggage": "Xem chính sách & Khai báo hành lý đi kèm",
+  "uiLoadingTheOperatorSLuggagePolicyAndTrip": "Đang tải chính sách hành lý của nhà xe và sức chứa trên chuyến...",
+  "uiNoCheckedLuggage": "Không thêm hành lý ký gửi",
+  "uiUnableToLoadTheLuggagePolicy": "Không tải được chính sách hành lý.",
+  "uiThisLuggagePolicyIsOver5MinutesOld": "Chính sách hành lý đã quá hạn 5 phút. Vui lòng tải lại để tiếp tục.",
+  "uiRefreshPolicy": "Tải lại chính sách",
+  "ui1FreeCarryOnLuggage": "1. Hành lý xách tay miễn phí",
+  "uiCarryOnRules": "Quy định xách tay",
+  "uiEachPassengerMayRegisterOneCarryOnItem": "Mỗi hành khách được khai báo một kiện xách tay trong hạn mức. Kiện vượt hạn mức có thể chuyển sang ký gửi khi chuyến xe còn nhận.",
+  "uiEditCarryOnItem": "Sửa kiện xách tay",
+  "uiRemoveCarryOnItem": "Xóa kiện xách tay",
+  "uiMoveToCheckedLuggage": "Chuyển sang hành lý ký gửi",
+  "uiAddCarryOnItem": "Khai báo kiện xách tay",
+  "uiAddFreeCarryOnItem": "Khai báo kiện xách tay miễn phí",
+  "uiSaveCarryOnItem": "Lưu kiện xách tay",
+  "uiThisTripDoesNotAcceptCheckedLuggage": "Chuyến xe không nhận hành lý ký gửi.",
+  "uiYouCanStillBringFreeCarryOnLuggage": "Bạn vẫn có thể mang hành lý xách tay miễn phí đúng hạn mức hoặc bấm \"Không thêm hành lý ký gửi\" để tiếp tục đặt vé.",
+  "uiLuggageQuantitiesAndTypesDependOnRemainingCapacity": "Số lượng và loại hành lý phụ thuộc sức chứa còn lại của chuyến xe. Hệ thống sẽ kiểm tra khi bạn chọn hành lý.",
+  "uiThisTripHasNoValidCheckedLuggageDrop": "Chuyến xe chưa cấu hình điểm gửi/nhận hành lý ký gửi hợp lệ.",
+  "uiBicycleMotorbike": "Xe đạp / Xe máy",
+  "uiCheckedLuggageDropOffCollectionPoints": "Điểm gửi & nhận hành lý ký gửi trên tuyến",
+  "uiLuggageDropOffPoint": "Điểm gửi hành lý *",
+  "uiLuggageCollectionPoint": "Điểm nhận hành lý *",
+  "uiEditCheckedLuggage": "Sửa hành lý ký gửi",
+  "uiRemoveCheckedLuggage": "Xóa hành lý ký gửi",
+  "uiAddAccompanyingVehicle": "Thêm phương tiện gửi kèm",
+  "uiAddCheckedLuggageItem": "Thêm kiện hành lý ký gửi",
+  "uiSelectLuggagePackageSMLXl": "Chọn gói hành lý (S / M / L / XL):",
+  "uiAccompanyingVehicleType": "Loại phương tiện đi kèm:",
+  "uiMotorbikeCategoryEstimatedFee": "Phân nhóm xe máy (Phí tham khảo):",
+  "uiVehicleName": "Tên phương tiện *",
+  "uiLuggageItemName": "Tên kiện hành lý *",
+  "uiEGHondaVisionMotorbikeGiantBicycle": "VD: Xe máy Honda Vision / Xe đạp Giant",
+  "uiEGSuitcaseGiftBox": "VD: Vali hành lý, thùng quà...",
+  "uiSpecifiedWeightKg": "Khối lượng quy định (kg)",
+  "uiWeightKg": "Khối lượng (kg) *",
+  "uiDetailedDimensions": "Kích thước chi tiết",
+  "uiDimensionsAndVolumetricWeight": "Kích thước và khối lượng quy đổi",
+  "uiEnterActualDimensionsInCmVolumetricWeightLength": "Nhập số đo thực tế theo cm. Khối lượng quy đổi = Dài × Rộng × Cao / 5.000, làm tròn một chữ số thập phân. Khối lượng tính cước là số lớn hơn giữa cân nặng và khối lượng quy đổi. Không dùng kích thước tối đa của gói thay cho số đo thực tế.",
+  "uiLengthCm": "Dài (cm)",
+  "uiWidthCm": "Rộng (cm)",
+  "uiHandlingAndNotes": "Bảo quản và ghi chú",
+  "uiSelectSuitableHandlingForFragileOrValuableItems": "Chọn dịch vụ phù hợp nếu kiện dễ vỡ hoặc có giá trị. Phụ phí hiển thị theo chính sách nhà xe.",
+  "uiNotesOptional": "Ghi chú (tùy chọn)",
+  "uiUpdateCheckedItem": "Cập nhật mục ký gửi",
+  "uiSaveCheckedItem": "Lưu mục ký gửi",
+  "uiCheckingPackageEligibility": "Đang kiểm tra điều kiện gói",
+  "uiThisFeeIsEstimatedUsingTheOperatorS": "Đây là cước dự tính theo gói của nhà xe. Thanh toán tại bến khi giao vật phẩm, không cộng vào tiền vé thanh toán trực tuyến.",
+  "uiFragileItems": "Hàng dễ vỡ",
+  "uiHighValueItems": "Hàng giá trị cao",
+  "uiManualMotorbike": "Xe số",
+  "uiLargeDisplacementMotorbike": "Xe phân khối lớn",
+  "uiYourSeatHoldHasExpiredSelectYourSeats": "Thời gian giữ ghế đã hết. Vui lòng chọn lại ghế.",
+  "uiEnterAValidNameAndPhoneNumberTo": "Nhập họ tên và số điện thoại hợp lệ để tiếp tục",
+  "uiCompleteLuggageDetailsOrSelectNoCheckedLuggage": "Hoàn tất hành lý đi kèm hoặc chọn \"Không thêm hành lý ký gửi\"",
+  "uiCompleteItemDetailsOrTurnOffShippingTo": "Hoàn tất thông tin gửi hàng hoặc tắt gửi hàng để tiếp tục",
+  "uiNextReviewBookingPromoCode": "Tiếp theo: xem lại đặt vé & mã ưu đãi",
+  "uiCheckPaymentResult": "Kiểm tra kết quả thanh toán",
+  "uiPaidf4bf31": "Đã thanh toán:",
+  "uiBookingValue": "Giá trị đơn:",
+  "uiPaymentConfirmedTapCheckToGetYourTickets": "Đã xác nhận thanh toán. Nhấn kiểm tra để nhận vé.",
+  "uiTheBookingPaymentDeadlineHasExpired": "Đơn đặt vé đã hết hạn thanh toán.",
+  "uiResultUnconfirmedCheckMyTickets": "Kết quả chưa xác định. Vui lòng kiểm tra Vé của tôi.",
+  "uiYourExistingBookingIsPreservedCheckItBefore": "Đơn đã tạo vẫn được giữ nguyên. Hãy kiểm tra đơn hiện tại trước khi tiếp tục; không tạo đơn thay thế.",
+  "uiYourEnteredDetailsAreKeptSeatAvailabilityAnd": "Thông tin bạn đã nhập được giữ lại. Trước khi tiếp tục, hệ thống sẽ kiểm tra lại chỗ trống và thời gian giữ ghế.",
+  "uiCheckTicketBooking": "Kiểm tra vé/đơn",
+  "uiBackToBooking": "Quay lại đặt vé",
+  "uiContactSupport": "Liên hệ hỗ trợ",
+  "uiUnableToLoadTheSeatMapTryAgain": "Không thể tải sơ đồ ghế. Vui lòng thử lại.",
+  "uiPickUpcdcaa5": "Điểm đón",
+  "uiYouWillSelectPickUpDropOffPoints": "Bạn sẽ chọn điểm đón/trả ở bước tiếp theo",
+  "uiNextSelectDropOff": "Tiếp theo: chọn điểm trả",
+  "uiNextPassengerDetails": "Tiếp theo: thông tin hành khách",
+  "uiSelectedSeatDetails": "Chi tiết ghế đã chọn",
+  "uiTotalNotYetConfirmed": "Chưa xác định tổng tiền",
+  "uiVehicleDetails": "Chi tiết xe",
+  "uiSelectSeats": "Chọn chỗ",
+  "uiDropOffa7cf52": "Điểm trả",
+  "uiInformation": "Thông tin",
+  "uiPayForTickets": "Thanh toán vé",
+  "uiCurrentStep": "đang chọn",
+  "uiCompleted": "đã hoàn thành",
+  "uiUpcomingStep": "chưa tới",
+  "uiEnterAPromoCodeToContinue": "Nhập mã khuyến mãi để tiếp tục.",
+  "uiUnableToVerifyTheCodeTryAgain": "Chưa xác nhận được mã. Vui lòng thử lại.",
+  "uiPromoCode": "Mã khuyến mãi",
+  "uiEnterACodeToCheckOffersForYour": "Nhập mã để kiểm tra ưu đãi cho chuyến đi của bạn.",
+  "uiEnterPromoCode": "Nhập mã khuyến mãi",
+  "uiExampleVexgo30": "Ví dụ: VEXGO30",
+  "uiChecking": "Đang kiểm tra…",
+  "uiApply": "Áp dụng",
+  "uiUnavailable": "Không khả dụng",
+  "uiHeld": "Đang giữ",
+  "uiBooked": "Đã đặt",
+  "uiSelected": "Đang chọn",
+  "uiAvailable": "Trống",
+  "uiLowerDeck": "Tầng dưới",
+  "uiUpperDeck": "Tầng trên",
+  "uiDriverSSteeringWheel": "Vô lăng tài xế",
+  "uiFront": "Đầu xe",
+  "uiDoor": "Cửa lên xuống",
+  "uiNoSeatMapAvailable": "Chưa có sơ đồ ghế.",
+  "uiRear": "Cuối xe",
+  "uiNoStopsAreAvailableForThisTripGo": "Chưa có điểm dừng cho chuyến xe này. Vui lòng quay lại chọn chuyến khác.",
+  "uiThePromoCodeIsInvalidOrExpired": "Mã giảm giá không hợp lệ hoặc đã hết hạn!",
+  "uiSelectAVexgoPromoCode": "Chọn mã giảm giá VexGo",
+  "uiEnterPromoCodeac6007": "Nhập mã khuyến mãi...",
+  "uiRemove": "Gỡ bỏ",
+  "uiSelected40b56a": "Đã chọn",
+  "uiUseNow": "Dùng ngay",
+  "uiCancellationReason": "Lý do hủy",
+  "uiOther": "Khác",
+  "uiCheckStatus": "Kiểm tra trạng thái",
+  "uiCancelled": "Đã hủy",
+  "uiBookingPhoneNumber": "Số điện thoại đặt vé",
+  "uiInvalidPhoneNumber": "Số điện thoại không hợp lệ.",
+  "uiLookUpPaymentReceipt": "Tra cứu chứng từ thanh toán",
+  "uiSignInToViewAllTickets": "Đăng nhập để xem tất cả vé",
+  "uiEnterTicketCodeVxgOrPhoneNumber": "Nhập mã vé (VXG-...) hoặc SĐT tra cứu...",
+  "uiClearSearch": "Xóa tìm kiếm",
+  "uiUpcoming": "Sắp đi",
+  "uiPastTrips": "Đã đi",
+  "uiUnableToLoadTickets": "Không thể tải danh sách vé",
+  "uiAnErrorOccurredWhileLoadingDataTryAgain": "Đã xảy ra lỗi trong quá trình tải dữ liệu. Vui lòng thử lại.",
+  "uiNoMatchingTickets": "Không tìm thấy vé phù hợp",
+  "uiClearSearchFilters": "Xóa bộ lọc tìm kiếm",
+  "uiNoUpcomingTrips": "Chưa có chuyến xe nào sắp đi",
+  "uiDiscoverIntercityBusTripsAtGreatFares": "Khám phá ngay hàng trăm chuyến xe khách liên tỉnh chất lượng cao với giá ưu đãi!",
+  "uiNoPastTripsYet": "Chưa có lịch sử chuyến đi",
+  "uiYourCompletedTripsWillAppearHereSoYou": "Các chuyến xe bạn đã hoàn thành sẽ hiển thị tại đây để bạn có thể xem lại hoặc đánh giá.",
+  "uiNoCancelledTickets": "Không có vé nào bị hủy",
+  "uiCancelledTicketsAppearHereContactSupportToRequest": "Các vé đã hủy được hiển thị tại đây. Để yêu cầu hoàn tiền, vui lòng liên hệ hỗ trợ.",
+  "uiFindATrip": "Tìm chuyến ngay",
+  "uiTicketDetails": "Chi tiết vé xe",
+  "uiLoadingTicketDetails": "Đang tải thông tin vé...",
+  "uiUnableToLoadTicketDetails": "Không thể tải thông tin vé.",
+  "uiContactNumberCopied": "Đã sao chép số liên hệ.",
+  "uiRefreshTicketStatus": "Cập nhật trạng thái vé",
+  "uiTripContactDetails": "Thông tin liên hệ chuyến đi",
+  "uiTheOperatorHasNotProvidedAContactNumber": "Nhà xe chưa cung cấp số liên hệ.",
+  "uiCopyNumber": "Sao chép số",
+  "uiFindAnotherTrip": "Tìm chuyến khác",
+  "uiCancelTicket": "Hủy vé",
+  "uiRateYourTrip": "Đánh giá chuyến đi",
+  "uiBookThisTripAgain": "Đặt lại chuyến xe này",
+  "uiThisTicketHasBeenCancelledOnlineRefundsAre": "Vé này đã bị hủy. Hệ thống không hoàn tiền online. Vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền theo chính sách nhà xe.",
+  "uiFindANewTicket": "Tìm vé mới",
+  "uiYourSessionHasChangedOpenTicketDetailsAgain": "Phiên đã thay đổi. Vui lòng mở lại thông tin vé.",
+  "uiVexgoOperator": "Nhà xe VexGo",
+  "uiQualityBusService": "Xe khách chất lượng cao",
+  "uiBoardingQrCodeTapToEnlarge": "Mã QR lên xe, chạm để phóng to",
+  "uiTapToEnlargeQrCode": "Chạm để phóng to mã QR",
+  "uiUseThisCodeWhenBoardingAtYourPick": "Dùng mã này khi lên xe tại điểm đón",
+  "uiSeat": "Chỗ ngồi",
+  "uiDepartureDate6d003e": "Ngày khởi hành",
+  "uiPassenger": "Hành khách:",
+  "uiTicketEmail": "Email nhận vé:",
+  "uiPaymentMethod": "Thanh toán qua:",
+  "uiTicketFare": "Giá vé này:",
+  "uiEstimatedRefund": "Số tiền dự kiến hoàn:",
+  "uiNoDataAvailable": "Chưa có dữ liệu",
+  "uiCancellationReason525ac0": "Lý do hủy:",
+  "uiCancelledOnRequest": "Hủy theo yêu cầu",
+  "uiThisTicketIsCancelledTheQrCodeIs": "Vé đã bị hủy. Mã QR không khả dụng.",
+  "uiThisTripIsCompleted": "Chuyến đi đã hoàn thành.",
+  "uiPaymentNotYetConfirmed": "Chưa có xác nhận thanh toán",
+  "uiTheQrCodeIsNotAvailableForThis": "Mã QR chưa khả dụng cho vé này.",
+  "uiUnpaid": "Chưa thanh toán",
+  "uiChangeOfPlans": "Thay đổi kế hoạch cá nhân",
+  "uiThePreviousCancellationResultIsUnconfirmedCheckIts": "Chưa xác minh kết quả hủy trước đó. Vui lòng kiểm tra trạng thái.",
+  "uiNoValidCancellationFeeIsAvailable": "Không có thông tin phí hủy hợp lệ.",
+  "uiUnableToLoadTicketDetailsAndCancellationFees": "Không thể tải thông tin vé và phí hủy. Vui lòng thử lại.",
+  "uiBookedTheWrongDepartureDateTime": "Đặt nhầm ngày/giờ khởi hành",
+  "uiFoundAlternativeTransport": "Tìm được phương tiện di chuyển khác",
+  "uiHealthReasonsUnexpectedCommitments": "Lý do sức khỏe / việc bận đột xuất",
+  "uiLoadingCurrentCancellationFee": "Đang tải phí hủy hiện tại...",
+  "uiCancelBusTicket": "Hủy vé xe",
+  "uiUnableToCancelTicket": "Không thể hủy vé",
+  "uiThisTicketIsNotEligibleForOnlineCancellation": "Không đủ điều kiện hủy vé trực tuyến",
+  "uiCopy": "Sao chép",
+  "uiGotItClose": "Đã hiểu và Đóng",
+  "uiTicketAmountPaid": "Tiền vé đã thanh toán:",
+  "uiTicketValue": "Giá trị vé:",
+  "uiEstimatedRefundAmount": "Số tiền dự kiến hoàn lại:",
+  "uiOnlineRefundsAreNotAvailableAfterCancellingContact": "Hệ thống không hoàn tiền online. Sau khi hủy vé, vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền theo chính sách nhà xe.",
+  "uiSelectCancellationReason": "Chọn lý do hủy vé",
+  "uiEnterASpecificReason": "Nhập lý do cụ thể",
+  "uiPleaseDescribeYourReasonForCancelling": "Vui lòng nêu rõ lý do hủy...",
+  "uiConfirmCancellation": "Xác nhận hủy vé",
+  "uiKeepTicketClose": "Giữ vé / Đóng",
+  "uiCancellationResultIsUnconfirmedCheckStatusOnlyDo": "Chưa xác minh kết quả hủy. Chỉ kiểm tra trạng thái, không gửi lại yêu cầu.",
+  "uiEstimatedRefundff7ba3": "Số tiền dự kiến hoàn: ",
+  "uiOnlineRefundsAreNotAvailableAfterCancelling": "Hệ thống không hoàn tiền online. Sau khi hủy vé, ",
+  "uiContactSupportWithYourTicketCode": "vui lòng liên hệ hỗ trợ và cung cấp mã vé ",
+  "uiToRequestARefundUnderTheOperatorS": "để yêu cầu hoàn tiền theo chính sách nhà xe.",
+  "uiIAgreeToCancelWithTheFeeShown": "Tôi đồng ý hủy vé với mức phí trên.",
+  "uiLookUpATicketWithoutSigningIn": "Tra cứu vé không cần đăng nhập",
+  "uiEnterYourTicketCodeAndThePhoneNumber": "Nhập mã vé và số điện thoại đã dùng khi đặt vé.",
+  "uiTicketCode3c82be": "Mã vé",
+  "uiEnterATicketCode": "Vui lòng nhập mã vé.",
+  "uiLookUpTicket": "Tra cứu vé",
+  "uiOnlineRefundsAreNotAvailableAfterCancellingContact311d2f": "Hệ thống không hoàn tiền online. Để yêu cầu hoàn tiền sau khi hủy vé, vui lòng liên hệ hỗ trợ và cung cấp mã vé. Đăng nhập để chat với nhà xe.",
+  "uiYourAccountSessionHasChangedOpenTheReview": "Phiên tài khoản đã thay đổi. Vui lòng mở lại đánh giá.",
+  "uiEdited": "Đã chỉnh sửa",
+  "uiNoWrittenReview": "Không có nội dung nhận xét.",
+  "uiEditReview": "Sửa đánh giá",
+  "uiDeleteReview": "Xóa đánh giá",
+  "uiThe3DayEditingPeriodHasEnded": "Đã hết thời hạn chỉnh sửa 3 ngày.",
+  "uiDeleteThisReviewAndItsReplies": "Xóa đánh giá và phản hồi kèm theo?",
+  "uiKeep": "Giữ lại",
+  "uiConfirmDeletion": "Xác nhận xóa",
+  "uiWhatDidYouLikeMost": "Điểm bạn hài lòng nhất",
+  "uiOnTime": "Đúng giờ",
+  "uiCleanVehicle": "Xe sạch sẽ",
+  "uiSafeDriving": "Lái xe an toàn",
+  "uiHelpfulStaff": "Nhân viên nhiệt tình",
+  "uiGoodAmenities": "Tiện nghi đầy đủ",
+  "uiConvenientPickUpDropOff": "Đón trả thuận tiện",
+  "uiDetailedReview": "Nhận xét chi tiết",
+  "uiShareYourTripExperience": "Chia sẻ trải nghiệm chuyến đi",
+  "uiSubmitReview": "Gửi đánh giá",
+  "uiCancelEditing": "Hủy chỉnh sửa",
+  "uiRefreshReview": "Tải lại đánh giá",
+  "uiAboutReviews": "Về đánh giá",
+  "uiSubmitAReviewWithin7DaysOfDeparture": "Gửi đánh giá trong 7 ngày kể từ khi khởi hành. Bạn có thể sửa trong 3 ngày sau khi gửi. Quyền sửa do máy chủ xác nhận. Bạn có thể xóa đánh giá của mình.",
+  "uiETicketCode": "Mã vé điện tử (E-Ticket)",
+  "uiTicketCode782acf": "Mã vé: ",
+  "uiShowThisCodeToTheAttendantOrDriver": "Đưa mã này cho Phụ xe hoặc Tài xế quét soát vé khi lên xe",
+  "uiSeatfd20bf": "Ghế",
+  "uiTotal": "Tổng tiền",
+  "uiViewTicketQr": "Xem vé & QR",
+  "uiViewDetails": "Xem chi tiết",
+  "uiReview": "Đánh giá",
+  "uiViewReview": "Xem đánh giá",
+  "uiBookARoundTrip": "Đặt vé khứ hồi",
+  "uiTripDetailsMissing": "Thiếu dữ liệu chuyến đi",
+  "uiTheSelectedTripPairCouldNotBeFound": "Không tìm thấy thông tin cặp chuyến đã chọn. Vui lòng quay lại tìm chuyến.",
+  "uiBackToSearch": "Quay lại tìm kiếm",
+  "uiOutbound": "Lượt đi",
+  "uiReturn": "Lượt về",
+  "uiLeavePayment": "Rời khỏi trang thanh toán?",
+  "uiYourBookingHasBeenRecordedLeavingWillNot": "Đơn hàng của bạn đã được ghi nhận trên hệ thống. Việc rời khỏi đây sẽ không tự động hủy đơn. Bạn có thể tra cứu và thanh toán lại tại mục \"Vé của tôi\".",
+  "uiLeaveRoundTripBooking": "Thoát khỏi đặt vé khứ hồi?",
+  "uiLeaveThisBookingYourHeldSeatsWillBea1380d": "Bạn có chắc chắn muốn rời khỏi tiến trình đặt vé không? Vị trí ghế đang giữ sẽ được giải phóng cho hành khách khác.",
+  "uiNoSeatsSelected": "Chưa chọn ghế",
+  "uiSignInSessionChanged": "Phiên đăng nhập đã thay đổi",
+  "uiYouHaveSignedOutOrYourSessionHas": "Tài khoản đã đăng xuất hoặc thay đổi phiên. Vui lòng quay lại tìm kiếm chuyến đi mới.",
+  "uiGoToHome8a211a": "Về Trang chủ",
+  "uiInvalidSearchDetails": "Thông tin tìm kiếm không hợp lệ.",
+  "uiFindRoundTrips": "Tìm chuyến khứ hồi",
+  "uiUnableToFindTrips": "Không thể tìm chuyến",
+  "uiTheRouteOrDepartureReturnDatesAreInvalid": "Dữ liệu tuyến đường hoặc ngày đi/về không hợp lệ.",
+  "uiOutboundSelected": "Lượt đi (Đã chọn)",
+  "uiReturnSelected": "Lượt về (Đã chọn)",
+  "uiThisOutboundTripDoesNotMatchTheSelected": "Chuyến đi không tương thích với chuyến về đã chọn.",
+  "uiSelectAnOutboundTripFirstOrCheckThe": "Vui lòng chọn chuyến đi trước hoặc kiểm tra giờ khởi hành.",
+  "uiTheReturnTripMustDepartAfterTheOutbound": "Chuyến về phải khởi hành sau khi chuyến đi đến nơi (kể cả chuyến qua đêm).",
+  "uiOutbound4e8b02": "đi",
+  "uiReturn36c588": "về",
+  "uiNoteRefreshingReloadsBothLegsAndResetsYour": "Lưu ý: Tải lại sẽ làm mới cả hai chặng và đặt lại lựa chọn.",
+  "uiOutboundeff5da": "lượt đi",
+  "uiReturn8bcd7d": "lượt về",
+  "uiChangeTrip": "Đổi chuyến",
+  "uiOutboundNotSelected": "Đi: Chưa chọn",
+  "uiReturnNotSelected": "Về: Chưa chọn",
+  "uiPassengerDetailsAreKeptFromTheExistingBooking": "Thông tin hành khách được giữ theo đơn đã tạo. Bạn có thể đổi ghế và điểm đón/trả của chiều còn lại.",
+  "uiPassengerDetailsApplyToBothOutboundAndReturn": "Thông tin hành khách sẽ được áp dụng chung cho cả Lượt đi và Lượt về.",
+  "uiContactInformation": "Thông tin liên hệ",
+  "uiTicketEmailOptional": "Email nhận vé (tùy chọn)",
+  "uiNotesForTheOperatorOptional": "Ghi chú cho nhà xe (tùy chọn)",
+  "uiEGPickUpAtTheJunctionCarrying": "Đón tại ngã tư, có hành lý cồng kềnh...",
+  "uiConfirmDetails": "Xác nhận thông tin",
+  "uiDuplicateBookingCodes": "Mã đơn bị trùng lặp",
+  "uiTheTwoLegsHaveDuplicateBookingOrTransfer": "Mã đơn hàng hoặc mã chuyển khoản giữa 2 chiều bị trùng. Để bảo vệ giao dịch, mã QR đã bị khóa. Vui lòng liên hệ tổng đài hỗ trợ.",
+  "uiBookingStatusNeedsVerification": "Cần xác minh trạng thái đơn",
+  "uiNoBookingConfirmationWasReceivedDoNotCreate": "Không nhận được phản hồi tạo đơn từ máy chủ. Vui lòng không tạo lại đơn mới để tránh trừ tiền 2 lần. Hãy kiểm tra mục Vé của tôi hoặc bấm \"Kiểm tra\" bên dưới.",
+  "uiOneLegPaid": "Đã thanh toán 1 chiều",
+  "uiPaymentForOneLegIsRecordedCheckBoth": "Đã ghi nhận thanh toán một chặng. Hãy kiểm tra lại cả hai đơn; không chuyển khoản thêm trong lúc chờ đối soát.",
+  "uiPayForEachLegSeparately": "Thanh toán riêng từng chiều",
+  "uiPayForBothLegsTogether": "Thanh toán chung hai chiều",
+  "uiTransferTheExactAmountAndReferenceForEach": "Chuyển khoản đúng số tiền và nội dung riêng cho từng chặng.",
+  "uiTransferOnlyAfterBothBookingsAndTheCombined": "Chỉ chuyển khoản sau khi có đủ hai đơn và mã QR chung. Không chuyển thêm nếu giao dịch đang chờ xác minh.",
+  "uiCheckBothBookings": "Kiểm tra lại cả hai đơn",
+  "uiCustomerSupport": "Hỗ trợ khách hàng",
+  "uiRoundTripPayment": "Thanh toán vé khứ hồi",
+  "uiUnableToLoadTheQrImageUseThe": "Không tải được ảnh QR. Dùng thông tin chuyển khoản bên dưới.",
+  "uiBank": "Ngân hàng",
+  "uiAccountNumber": "Số tài khoản",
+  "uiAccountHolder": "Chủ tài khoản",
+  "uiReference": "Nội dung",
+  "uiReceivingAccountDetailsAreNotConfiguredContactSupport": "Chưa có cấu hình tài khoản nhận tiền. Vui lòng liên hệ hỗ trợ.",
+  "uiCheckPaymentForBothLegs": "Kiểm tra thanh toán hai chiều",
+  "uiPaida446a8": "ĐÃ THANH TOÁN",
+  "uiExpired303872": "HẾT HẠN",
+  "uiAwaitingPayment": "CHỜ THANH TOÁN",
+  "uiNotBooked": "CHƯA TẠO ĐƠN",
+  "uiBookingCode": "Mã đơn hàng",
+  "uiLegTransactionCode": "Mã giao dịch chặng",
+  "uiTransferReference": "Nội dung CK",
+  "uiAmountToTransfer": "Số tiền cần chuyển",
+  "uiEstimatedAmount": "Số tiền dự kiến",
+  "uiETicketsIssuedSuccessfully": "Đã xuất vé điện tử thành công.",
+  "uiPaymentReceivedTicketsAreBeingUpdated": "Hệ thống đã nhận thanh toán, đang cập nhật vé.",
+  "uiThePaymentDeadlineHasExpiredIfYouAlready": "Đơn hàng đã quá thời hạn thanh toán. Nếu bạn đã chuyển khoản, hãy bấm nút \"Kiểm tra thanh toán\" dưới đây.",
+  "uiSyncTickets": "Đồng bộ lại vé",
+  "uiCheckPayment": "Kiểm tra thanh toán",
+  "uiRetryBookThisLeg": "Thử lại / Tạo đơn chiều này",
+  "uiReselectSeatsStopsForThisLeg": "Chọn lại ghế / điểm đón trả chiều này",
+  "uiPaymentDeadlineExpiredbda98b": "Đã hết hạn thanh toán",
+  "uiCopied": "Đã sao chép",
+  "uiRoundTripBookingSuccessful": "Đặt vé khứ hồi thành công!",
+  "uiPaymentIsConfirmedAndETicketsAreIssued": "Cả 2 chặng đã được xác nhận thanh toán và xuất vé điện tử.",
+  "uiVerifyingFares": "Đang xác minh giá...",
+  "uiLeadPassenger": "Hành khách đại diện",
+  "uiCostSummary": "Tổng kết chi phí",
+  "uiTotalPayment0a622e": "Tổng tiền thanh toán",
+  "uiEstimatedItemFeesArePaidAtTheStation": "Cước vật phẩm dự tính được thanh toán tại bến, không cộng vào tiền vé của hai chiều.",
+  "uiNoteTheTwoBookingsAreCreatedInSequence": "Lưu ý: Hai đơn hàng sẽ được tạo tuần tự và thanh toán riêng từng chiều.",
+  "uiOutboundb6646f": "LƯỢT ĐI",
+  "uiReturnc7af78": "LƯỢT VỀ",
+  "uiChangeSeatsStops": "Đổi ghế / điểm đón trả",
+  "uiRemoveVoucher": "Gỡ voucher",
+  "uiLegFare": "Giá vé chặng",
+  "uiSoldOut838424": "Hết vé",
+  "uiDetails": "Chi tiết",
+  "uiSoldOutfec774": "Hết chỗ",
+  "uiPickUpTimeAtStop": "Giờ đón tại điểm",
+  "uiDropOffTimeAtStop": "Giờ trả tại điểm",
+  "uiAccompanyingItemsWholeBooking": "Vật phẩm đi kèm (toàn đơn)",
+  "uiItems73b007": "Vật phẩm",
+  "uiPaymentReceipt": "Chứng từ thanh toán",
+  "uiReceiptLookupIsAvailableOnlyWhenConnectedTo": "Tra cứu chứng từ chỉ khả dụng khi kết nối hệ thống thật.",
+  "uiLookUpBookingReceipt": "Tra cứu chứng từ đặt vé",
+  "uiEnterTheTicketOrBookingCodeAndBooking": "Nhập mã vé hoặc mã đặt vé và số điện thoại đặt vé. Đơn gắn tài khoản cần đăng nhập đúng tài khoản đã đặt.",
+  "uiTicketOrBookingCode": "Mã vé hoặc mã đặt vé",
+  "uiEnterATicketOrBookingCode": "Vui lòng nhập mã vé hoặc mã đặt vé.",
+  "uiLookUpReceipt": "Tra cứu chứng từ",
+  "uiYourSessionHasChangedCloseAndReopenReceipt": "Phiên đã thay đổi. Vui lòng đóng và mở lại tra cứu chứng từ.",
+  "uiRefreshReceipt": "Cập nhật chứng từ",
+  "uiNotProvided05547c": "Chưa cung cấp",
+  "uiBookingCoded4f872": "Mã đặt vé",
+  "uiTransactionCode": "Mã giao dịch",
+  "uiBookingDateVietnamTime": "Ngày đặt (giờ Việt Nam)",
+  "uiPassengerbd8a66": "Hành khách",
+  "uiRoute": "Tuyến",
+  "uiVehicleType9fc822": "Loại xe",
+  "uiDepartureVietnamTime": "Khởi hành (giờ Việt Nam)",
+  "uiUsed": "Đã sử dụng",
+  "uiTicketStatusUnverified": "Chưa xác minh trạng thái vé",
+  "uiFareBeforeDiscounts": "Tiền vé trước giảm",
+  "uiPromoCode5683b7": "Mã giảm giá",
+  "uiDiscount": "Giảm giá",
+  "uiFareAfterDiscounts4a0d51": "Tiền vé sau giảm",
+  "uiTotalPayment43f8d6": "Tổng thanh toán",
+  "uiPaymentMethodc216d3": "Phương thức thanh toán",
+  "uiThisIsABookingPaymentReceiptNotA": "Đây là chứng từ đặt vé/thanh toán, không phải hóa đơn GTGT. Nếu cần hóa đơn GTGT, vui lòng liên hệ nhà xe. Chứng từ này không thay thế mã QR lên xe.",
+  "uiViewPaymentReceipt": "Xem chứng từ thanh toán",
+  "uiCreatingYourShipmentPleaseWait": "Đang xử lý tạo đơn, vui lòng đợi trong giây lát...",
+  "uiUnverifiedShipmentWarning": "Cảnh báo đơn hàng chưa xác minh",
+  "uiTheServerHasNotConfirmedThisShipmentLeave": "Kết quả tạo đơn chưa được máy chủ xác nhận. Bạn có chắc muốn rời khỏi màn hình này?",
+  "uiYourSessionHasChangedDataHasBeenRefreshed": "Phiên làm việc đã thay đổi. Dữ liệu đã được làm mới.",
+  "uiCreateShipment": "Tạo đơn",
+  "uiTrackShipment": "Tra cứu",
+  "uiMyShipments": "Đơn của tôi",
+  "uiShipmentDetails": "Chi tiết vận đơn",
+  "uiShipmentCreationResult": "Kết quả tạo đơn",
+  "uiLookUpShipment": "Tra cứu vận đơn",
+  "uiShipmentCancelledContactTheOperatorForHelpRefunding": "Đã hủy đơn. Vui lòng liên hệ nhà xe để được hỗ trợ hoàn tiền cước đã thanh toán.",
+  "uiShipmentCancelledIfYouAlreadyPaidContactThe": "Đơn đã được hủy. Nếu đã thanh toán, vui lòng liên hệ nhà xe để được hỗ trợ.",
+  "uiCheckCancellationStatus": "Kiểm tra trạng thái hủy",
+  "uiCancelShipment": "Hủy đơn gửi hàng",
+  "uiShippingNoLongerNeeded": "Không còn nhu cầu gửi hàng",
+  "uiShipmentDetailsChanged": "Thông tin đơn đã thay đổi",
+  "uiCancelThisShipment": "Hủy đơn gửi hàng?",
+  "uiCancellationIsAvailableOnlyBeforeItemsAreAccepted": "Chỉ hủy khi hàng chưa được tiếp nhận. Nếu đã trả cước, bạn cần liên hệ nhà xe để được hỗ trợ hoàn tiền; không hoàn tiền trực tuyến.",
+  "uiIncorrectShipmentDetails": "Nhập sai thông tin đơn",
+  "uiOtherReasonOptional": "Lý do khác (tùy chọn)",
+  "uiKeepShipment": "Giữ đơn",
+  "uiConfirmCancellation1939df": "Xác nhận hủy",
+  "uiUnableToLoadProvincesAndCities": "Không thể tải danh sách tỉnh/thành phố.",
+  "uiSelectAnOriginAndDestination": "Vui lòng chọn điểm đi và điểm đến.",
+  "uiOriginAndDestinationMustBeDifferent": "Điểm đi và điểm đến không được trùng nhau.",
+  "uiSelectARouteAndOperatorBeforeCreatingA": "Vui lòng chọn tuyến và nhà xe trước khi tạo đơn.",
+  "uiYourSessionHasChangedCloseAndReopenThis": "Phiên làm việc đã thay đổi. Vui lòng đóng và mở lại tính năng.",
+  "uiLoadingProvincesAndCities": "Đang tải danh sách tỉnh/thành phố...",
+  "uiNoProvincesOrCitiesAreAvailableYet": "Chưa có danh sách tỉnh/thành phố khả dụng.",
+  "uiShippingDate": "Ngày gửi",
+  "uiFindShippingRoutes": "Tìm tuyến gửi hàng",
+  "uiNoEstimatedFeeAvailable": "Chưa có cước tham khảo",
+  "uiLoadingThisRouteSShippingOptions": "Đang tải cấu hình nhận hàng của tuyến...",
+  "ui2DropOffAndCollectionPoints": "2. Điểm gửi và điểm nhận hàng",
+  "uiNoteShippingDropOffCollectionPointsMayDiffer": "Lưu ý: Điểm giao nhận hàng độc lập có thể khác điểm đón trả khách.",
+  "uiSelectDropOffPoint": "Chọn điểm gửi hàng *",
+  "uiSelectDropOffOfficeStation": "Chọn văn phòng/bến gửi hàng",
+  "uiSelectCollectionPoint": "Chọn điểm nhận hàng *",
+  "uiSelectCollectionOfficeStation": "Chọn văn phòng/bến nhận hàng",
+  "ui3SenderRecipientDetails": "3. Thông tin người gửi & người nhận",
+  "uiSender": "NGƯỜI GỬI",
+  "uiSenderSFullName": "Họ và tên người gửi *",
+  "uiEnterFullName": "Nhập đầy đủ họ tên",
+  "uiSenderSPhoneNumber": "Số điện thoại người gửi *",
+  "uiSenderSEmailOptional": "Email người gửi (tùy chọn)",
+  "uiRecipient": "NGƯỜI NHẬN",
+  "uiRecipientSFullName": "Họ và tên người nhận *",
+  "uiEnterRecipientSFullName": "Nhập đầy đủ họ tên người nhận",
+  "uiRecipientSPhoneNumber": "Số điện thoại người nhận *",
+  "uiRecipientSNationalIdOptional12Digits": "CCCD người nhận (tùy chọn - 12 số)",
+  "uiEnter12DigitsIfAvailable": "Nhập 12 chữ số nếu có",
+  "ui4Items": "4. Danh sách kiện hàng",
+  "uiAddItem2d1b7b": "Thêm kiện",
+  "ui5PayerPaymentMethod": "5. Người thanh toán & Phương thức",
+  "uiSenderPaysAtStation": "Người gửi trả tại bến",
+  "uiPayCashWhenDroppingOffItems": "Thanh toán tiền mặt khi gửi hàng",
+  "uiRecipientPaysAtStation": "Người nhận trả tại bến",
+  "uiPayCashWhenCollectingItems": "Thanh toán tiền mặt khi nhận hàng",
+  "ui6GeneralNotesOptional": "6. Ghi chú chung (tùy chọn)",
+  "uiEnterNotesOrHandoverInstructionsForTheOperator": "Nhập ghi chú hoặc yêu cầu bàn giao cho nhà xe...",
+  "uiCalculatingEstimatedFee": "Đang tính cước tạm tính...",
+  "uiEstimatedFeef58e86": "CƯỚC DỰ TÍNH",
+  "uiGetEstimate": "Báo cước",
+  "uiCreateShipment905793": "Tạo đơn gửi hàng",
+  "uiItemName237ded": "Tên hàng hóa *",
+  "uiEGBoxOfFruitDocuments": "VD: Thùng trái cây, Tài liệu...",
+  "uiItemType": "Loại hàng hóa *",
+  "uiSelectItemType": "Chọn loại hàng",
+  "uiWeightKgItem": "Khối lượng (kg/kiện) *",
+  "uiDimensionsCmOptionalLengthXWidthXHeight": "Kích thước (cm - tùy chọn: Dài x Rộng x Cao)",
+  "uiLength": "Dài",
+  "uiWidth": "Rộng",
+  "uiServiceType": "Loại dịch vụ",
+  "uiStandardNormal": "Tiêu chuẩn (NORMAL)",
+  "uiFragileFragile": "Dễ vỡ (FRAGILE)",
+  "uiHighValueValuable": "Giá trị cao (VALUABLE)",
+  "uiEGLightItemsKeepDry": "VD: Hàng nhẹ, cần che mưa...",
+  "uiSelectProvinceCity": "Chọn tỉnh/thành phố",
+  "uiShipmentDetailsNotFound": "Không tìm thấy chi tiết vận đơn.",
+  "uiCreateNewShipment": "Tạo đơn mới",
+  "uiShipmentCode9dec85": "MÃ VẬN ĐƠN",
+  "uiCopyShipmentCode": "Sao chép mã vận đơn",
+  "uiShipmentCode09837d": "mã vận đơn",
+  "uiBookingCoded6f725": "Mã đơn hàng: ",
+  "uiCopyBookingCodeffae60": "Sao chép mã đơn",
+  "uiBookingCodeee647d": "mã đơn hàng",
+  "uiDropOffDeadline": "Hạn mang hàng ra bến:",
+  "uiNoTripAssigned": "Chưa phân chuyến",
+  "uiDropOffPoint": "Điểm gửi hàng",
+  "uiCollectionPoint": "Điểm nhận hàng",
+  "uiDeliveryInformation": "Thông tin giao nhận",
+  "uiSenderfeefc2": "Người gửi:",
+  "uiRecipient2a6b0f": "Người nhận:",
+  "uiEstimatedFee321adb": "Cước dự tính",
+  "uiConfirmedFee": "Cước phí xác nhận",
+  "uiTheFinalFeeWillBeConfirmedAfterWeighing": "Cước phí thực tế sẽ được cân đo và xác nhận tại bến.",
+  "uiBaseFee": "Cước cơ bản",
+  "uiServiceSurcharge": "Phụ phí dịch vụ",
+  "uiTotalShippingFee": "Tổng cước",
+  "uiAmountOutstanding": "Còn phải thanh toán",
+  "uiThisShipmentIsCancelledDoNotBringItems": "Đơn đã hủy; không cần mang hàng ra bến cho đơn này.",
+  "uiPayAtTheStation": "Thanh toán tại bến xe",
+  "uiSender53bc00": "Người gửi",
+  "uiRecipient449171": "Người nhận",
+  "uiPaymentConfirmedSuccessfully": "Đã xác nhận thanh toán thành công!",
+  "uiPaymentReconciliationInProgress": "Giao dịch đang đối soát",
+  "uiThisShipmentPreviouslyUsedOnlinePaymentContactThe": "Đơn thanh toán trực tuyến trước đây. Liên hệ nhà xe để kiểm tra trạng thái, không chuyển thêm tiền.",
+  "uiCreateAnotherShipment": "Tạo đơn gửi hàng khác",
+  "uiViewShipments": "Xem danh sách đơn gửi hàng",
+  "uiEnterTheShipmentCodeAndPhoneNumber": "Vui lòng nhập mã vận đơn và số điện thoại.",
+  "uiTrackShipmentStatus": "Tra cứu trạng thái vận đơn",
+  "uiEnterTheShipmentCodeAndSenderSRecipient": "Nhập mã vận đơn và số điện thoại người gửi/nhận để theo dõi hành trình kiện hàng.",
+  "uiShipmentCode1eaa4b": "Mã vận đơn",
+  "uiSenderSOrRecipientSPhoneNumber": "Số điện thoại người gửi hoặc người nhận",
+  "uiCopyCode": "Sao chép mã",
+  "uiPaymentStatus": "Trạng thái thanh toán: ",
+  "uiDropOffa17ae9": "Điểm gửi:",
+  "uiCollection": "Điểm nhận:",
+  "uiShippingTimeline": "Lịch trình vận chuyển",
+  "uiSearchByShipmentCode": "Tìm kiếm theo mã vận đơn...",
+  "uiCreated": "Mới tạo",
+  "uiAccepted": "Đã tiếp nhận",
+  "uiInTransit": "Đang vận chuyển",
+  "uiDelivered": "Đã giao",
+  "uiNoShipmentsYet": "Chưa có đơn gửi hàng nào",
+  "uiYouHaveNoShipmentsYetOrNoneMatch": "Bạn chưa tạo đơn gửi hàng nào hoặc không có đơn phù hợp bộ lọc.",
+  "uiPreviousPage": "Trang trước",
+  "uiTheDisplayedFeeIsAnEstimateTheExact": "Cước hiển thị chỉ để tham khảo. Cước phí chính xác do máy chủ xác nhận khi tạo đơn.",
+  "uiUnknown": "Chưa xác định",
+  "uiReconciling": "Đang đối soát",
+  "uiAwaitingPaymentac4098": "Chờ thanh toán",
+  "uiPayAtStation": "Thanh toán tại bến",
+  "uiShipmentResultNotYetVerified": "Chưa thể xác minh kết quả tạo đơn",
+  "uiANetworkIssueOccurredOrTheResponseIs": "Hệ thống gặp sự cố mạng hoặc phản hồi chưa được xác nhận. Vui lòng không tạo lại đơn ngay lập tức để tránh phát sinh đơn trùng lặp.",
+  "uiProvisionalShipmentDetails": "Thông tin vận đơn ghi nhận tạm thời:",
+  "uiShipmentCode9f610f": "Mã vận đơn: ",
+  "uiShipmentCodeCopied": "Đã sao chép mã vận đơn",
+  "uiCheckExistingShipment": "Kiểm tra đơn đã tạo",
+  "uiLookUpThisShipment": "Tra cứu vận đơn này",
+  "uiCheckShipmentCreationResult": "Kiểm tra lại kết quả tạo đơn",
+  "uiResubmitTheSameDetailsAndTransactionCodeTo": "Gửi lại cùng thông tin và mã giao dịch để kiểm tra đơn đã tạo trên máy chủ.",
+  "uiForUrgentHelpContactVexgoSupportOrTake": "Nếu cần hỗ trợ khẩn cấp, vui lòng liên hệ tổng đài VexGo hoặc chụp lại màn hình này.",
+  "uiUnableToLoadTripDetailsFromTheServer": "Chưa tải được thông tin chuyến xe từ máy chủ. Vui lòng thử lại sau.",
+  "uiThisTripIsNoLongerAvailableOrLive": "Chuyến xe không còn khả dụng hoặc chưa tải được dữ liệu thực tế.",
+  "uiTheServerDidNotProvideAValidDeparture": "Chuyến xe không có thông tin ngày khởi hành hợp lệ từ máy chủ.",
+  "uiViewSavedResponses": "Xem phản hồi đã lưu",
+  "uiNewConversation": "Hội thoại mới",
+  "uiChatWithSupport": "Chat với nhân viên",
+  "uiClearOperatorFilter": "Bỏ lọc nhà xe",
+  "uiStartANewConversation": "Bắt đầu hội thoại mới?",
+  "uiThisStartsANewConversationInTheApp": "Thao tác này mở một phiên trò chuyện mới trên ứng dụng và không xóa các yêu cầu đã gửi lên máy chủ trước đó.",
+  "uiStartNewSession": "Tạo phiên mới",
+  "uiStartNewKeepDraft": "Tạo mới & Giữ nháp",
+  "uiQuestionForTheAiAssistant": "Câu hỏi cho Trợ lý AI",
+  "uiAskAboutPoliciesBusTrips": "Nhập câu hỏi về chính sách, chuyến xe…",
+  "uiSendQuestion": "Gửi câu hỏi",
+  "uiTicketPoliciesLuggageAndTripSuggestions": "Hỏi đáp chính sách vé, hành lý và gợi ý chuyến xe",
+  "uiYou": "Bạn",
+  "uiInternalPolicyDocumentNotAWebLink": "Tài liệu quy định nội bộ (không phải đường dẫn web):",
+  "uiFaresAndAvailableSeatsBelowAreSuggestionsLive": "Giá và số chỗ trống dưới đây là thông tin gợi ý; hệ thống sẽ tải lại chuyến xe từ máy chủ khi bạn chọn.",
+  "uiPriceUnavailable": "Chưa có giá",
+  "uiCheckingTrip": "Đang kiểm tra chuyến…",
+  "uiViewSelectTrip": "Xem & chọn chuyến",
+  "uiConsiderSpeakingToSupport": "Gợi ý trao đổi trực tiếp với nhân viên hỗ trợ",
+  "uiThisIsASuggestionOnlyYouHaveNot": "Hệ thống chỉ gợi ý chuyển tiếp và chưa tự động kết nối hay gửi nội dung cho nhân viên khi bạn chưa bấm nút bên dưới.",
+  "uiSuggestedFollowUpQuestions": "Gợi ý hỏi tiếp:",
+  "uiYouSending": "Bạn • Đang gửi…",
+  "uiTheAiAssistantIsReplying": "Trợ lý AI đang trả lời…",
+  "uiItIsUnclearWhetherYourQuestionWasProcessed": "Chưa xác định được câu hỏi đã xử lý hay chưa. Giữ lại bản nháp; không gửi lại tự động.",
+  "uiYouCanCheckSavedResponsesForThisSession": "Bạn có thể kiểm tra các phản hồi đã lưu của phiên hiện tại trước, hoặc chủ động bắt đầu hội thoại mới. Lưu ý: câu hỏi vừa gửi có thể đã được máy chủ tiếp nhận.",
+  "uiTheFirstResponseWasInterruptedBeforeASession": "Do phản hồi đầu tiên bị gián đoạn trước khi nhận mã phiên nên chưa thể đối chiếu lịch sử trên máy chủ. Bạn có thể bắt đầu hội thoại mới và giữ lại câu hỏi nháp.",
+  "uiCheckSavedResponses": "Kiểm tra phản hồi đã lưu",
+  "uiNewConversationKeepDraft": "Hội thoại mới (Giữ nháp)",
+  "uiNewConversationClearDraft": "Hội thoại mới (Xóa nháp)",
+  "uiServerResponseRecordReadOnly": "Bản ghi phản hồi từ máy chủ (Chỉ đọc)",
+  "uiRefreshSavedResponses": "Tải lại phản hồi đã lưu",
+  "uiReadOnlyServerRecordOfThisSessionS": "Bản ghi chỉ đọc từ máy chủ (hiển thị các tin nhắn đã lưu của phiên này); không tự thay thế hội thoại trên máy hoặc tự mở khóa câu hỏi đang gián đoạn.",
+  "uiLoadingResponseHistory": "Đang tải lịch sử phản hồi…",
+  "uiNoResponsesAreSavedInThisSessionYet": "Chưa có phản hồi nào được lưu trong phiên này.",
+  "uiUser": "Người dùng",
+  "uiPolicies": "Chính sách",
+  "uiLuggage": "Hành lý",
+  "uiBusTrips": "Chuyến xe",
+  "uiCancellationRefunds": "Hủy & hoàn tiền",
+  "uiSuggestions": "Gợi ý",
+  "uiFrequentlyAskedQuestions": "Câu hỏi thường gặp",
+  "uiLoadingSuggestedQuestions": "Đang tải câu hỏi gợi ý…",
+  "uiNoSuggestedQuestionsAreAvailableYetEnterYour": "Chưa có câu hỏi gợi ý sẵn. Bạn có thể nhập trực tiếp câu hỏi bên dưới.",
+  "uiRefreshSuggestedQuestions": "Tải lại câu hỏi gợi ý",
+  "uiHelloIMTheVexgoAiAssistant": "Xin chào! Tôi là Trợ lý AI VexGo",
+  "uiICanHelpWithTicketPoliciesAccompaniedLuggage": "Hỗ trợ giải đáp chính sách vé, hành lý đi kèm, gợi ý chuyến xe và hướng dẫn quy trình đặt vé.",
+  "uiTheAiAssistantProvidesInformationOnlyItDoes": "Trợ lý AI chỉ cung cấp thông tin tham khảo và không tự động đặt vé, thanh toán, hủy vé hay thay đổi vận đơn.",
+  "uiInsertQuestionIntoTheMessageField": "Chèn câu hỏi vào ô nhập",
+  "uiChatRequiresAnOnlineServerConnection": "Chat cần kết nối máy chủ ở chế độ trực tuyến.",
+  "uiSignInToChatWithTheOperator": "Đăng nhập để trò chuyện với nhà xe.",
+  "uiSelectOperator": "Chọn nhà xe",
+  "uiEndConversation": "Kết thúc hội thoại",
+  "uiReconnectingLiveChatYouCanStillSendAnd": "Realtime đang kết nối lại. Bạn vẫn có thể gửi và tải lại tin nhắn.",
+  "uiSupportIsTyping": "Nhân viên đang nhập…",
+  "uiThisConversationHasEndedOrMessagesCannotBe": "Hội thoại đã kết thúc hoặc chưa thể gửi tin. Mở hội thoại mới để được hỗ trợ.",
+  "uiEndThisConversationYouCanStartANew": "Kết thúc hội thoại này? Bạn có thể mở hội thoại mới sau đó.",
+  "uiKeepConversation": "Giữ hội thoại",
+  "uiEnd": "Kết thúc",
+  "uiUnableToLoadOperatorsTryAgain": "Không tải được nhà xe. Thử lại",
+  "uiNoOperatorsAreAvailableToContactYet": "Chưa có nhà xe để liên hệ.",
+  "uiOpenOrContinueConversation": "Mở hoặc tiếp tục hội thoại",
+  "uiYouHaveNoConversationsYetSelectNewConversation": "Bạn chưa có hội thoại nào. Chọn “Hội thoại mới” để liên hệ nhà xe.",
+  "uiLoadMoreConversations": "Tải thêm hội thoại",
+  "uiLoadEarlierMessages": "Tải tin nhắn trước",
+  "uiNoMessagesYetSayHelloToStart": "Chưa có tin nhắn. Gửi lời chào để bắt đầu.",
+  "uiStartConversation": "Bắt đầu hội thoại",
+  "uiMessageTheOperator": "Nhắn tin cho nhà xe…",
+  "uiSendMessage": "Gửi tin nhắn",
+  "uiSending": "Đang gửi…",
+  "uiSendingNotConfirmed": "Chưa xác nhận gửi",
+  "uiRead": "Đã đọc",
+  "uiSent": "Đã gửi",
+  "uiSupportAgent": "Nhân viên hỗ trợ",
+  "uiTrySendingAgain": "Thử gửi lại",
+  "uiAboutVexgo532a39": "Giới thiệu VexGo",
+  "uiUserGuide": "Hướng dẫn sử dụng",
+  "uiWithYouOnEveryJourney": "Đồng hành cùng hành trình của bạn",
+  "uiVexgoIsAnOnlineBusBookingAppThat": "VexGo là ứng dụng đặt vé xe khách trực tuyến, giúp bạn tìm chuyến, chọn chỗ và theo dõi vé trên điện thoại.",
+  "uiWhatCanYouDoWithVexgo": "Bạn có thể làm gì với VexGo?",
+  "uiFaresSchedulesAndServiceConditionsAreShownFor": "Giá vé, lịch chạy và điều kiện phục vụ được hiển thị theo từng chuyến. Bạn nên kiểm tra thông tin trước khi xác nhận đặt vé.",
+  "ui1FindATrip": "1. Tìm chuyến",
+  "uiSelectYourOriginDestinationAndDepartureDateOn": "Chọn nơi đi, nơi đến và ngày khởi hành trên Trang chủ. Nếu đi khứ hồi, bật Khứ hồi và chọn ngày về. Mở kết quả để xem giờ chạy, giá và thông tin xe.",
+  "ui2SelectSeatsAndStops": "2. Chọn ghế và điểm đón/trả",
+  "uiSelectAvailableSeatsOnTheTripSSeat": "Chọn chỗ còn trống trên sơ đồ của chuyến. Với xe hai tầng, kiểm tra cả tầng dưới và tầng trên. Sau đó chọn điểm đón và điểm trả phù hợp. Hoàn tất đặt vé trong thời gian giữ chỗ hiển thị trên màn hình.",
+  "ui3CheckPassengerDetailsAndOffers": "3. Kiểm tra hành khách và ưu đãi",
+  "uiEnterContactDetailsToReceiveYourTicketCheck": "Điền thông tin liên hệ để nhận vé. Kiểm tra lại chuyến, ghế và các điểm đón/trả. Nếu có mã ưu đãi, nhập mã và chờ hệ thống kiểm tra điều kiện, sau đó xem tổng tiền đã cập nhật.",
+  "ui4PayAndReceiveTickets": "4. Thanh toán và nhận vé",
+  "uiUseTheBankDetailsAmountAndTransferReference": "Làm theo thông tin ngân hàng, số tiền và nội dung chuyển khoản trên màn hình thanh toán. Chờ hệ thống xác nhận, sau đó kiểm tra vé đã phát hành. Nếu hết thời gian giữ chỗ, kiểm tra trạng thái đơn trước khi đặt lại hoặc liên hệ hỗ trợ khi cần.",
+  "ui5LookUpTicketsAndReceipts": "5. Tra cứu vé và chứng từ",
+  "uiOpenMyTicketsForTicketsLinkedToYour": "Mở Vé của tôi để xem các vé gắn với tài khoản. Khi đặt vé không đăng nhập, dùng thông tin tra cứu được cung cấp sau đặt vé. Từ Chi tiết vé, mở chứng từ đặt vé/thanh toán để xem thông tin đơn. Với khứ hồi, kiểm tra trạng thái vé của cả lượt đi và lượt về.",
+  "ui6CancellationAndSupport": "6. Hủy vé và hỗ trợ",
+  "uiOpenTicketDetailsAndCancelIfEligibleReview": "Mở Chi tiết vé và chọn hủy nếu vé còn cho phép. Xem điều kiện, phí và số tiền hoàn được hệ thống hiển thị trước khi xác nhận. Hệ thống không hoàn tiền online. Sau khi hủy vé, liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền theo chính sách nhà xe. Bạn có thể mở Chat với nhà xe trong Tài khoản để trao đổi.",
+  "uiFromFindingTripsToReceivingTicketsAndManaging": "Từ tìm chuyến đến nhận vé và quản lý hành trình. Chọn mục bạn cần xem.",
+  "uiBookWithVexgo": "Đặt vé cùng VexGo",
+  "ui1FindTheRightTrip": "1. Tìm chuyến phù hợp",
+  "ui2SelectSeatsAndJourneyDetails": "2. Chọn ghế và thông tin hành trình",
+  "ui3PayAndReceiveTickets": "3. Thanh toán và nhận vé",
+  "uiViewBookingGuide": "Xem hướng dẫn đặt vé",
+  "uiFindOneWayOrRoundTripsSelectSeats": "• Tìm chuyến một chiều hoặc khứ hồi.\n\n• Chọn ghế và điểm đón/trả theo chuyến.\n\n• Xem giá, nhập mã ưu đãi và thanh toán theo hướng dẫn.\n\n• Tra cứu vé và chứng từ đặt vé/thanh toán.\n\n• Theo dõi thông báo và trao đổi qua chat hỗ trợ.",
+  "uiShipmentIdentificationQrCodeForVerificationAtThe": "Mã QR nhận diện vận đơn tại bến\n(Quét để đối chiếu tại quầy, không phải mã thanh toán chuyển khoản)",
+  "ui1PaymentForThisBookingIsConfirmed2": "1. Đơn hàng đã được xác nhận thanh toán thành công.\n\n2. Nếu danh sách vé chưa hiển thị hoặc đang đồng bộ, vui lòng nhấn nút \"Kiểm tra kết quả thanh toán\" ở thanh bên dưới.\n\n3. Bạn cũng có thể tra cứu lại vé bất kỳ lúc nào trong mục \"Vé của tôi\" bằng số điện thoại đặt vé.",
+  "ui1DoNotTransferMoneyForThisBooking": "1. Vui lòng không thực hiện chuyển khoản cho đơn hàng này.\n\n2. Nếu bạn đã chuyển khoản trước khi đơn hết hạn, nhấn \"Kiểm tra kết quả thanh toán\" để hệ thống đối soát.\n\n3. Trường hợp cần trợ giúp hoặc đã trừ tiền nhưng chưa có vé, vui lòng liên hệ tổng đài VexGo để được hỗ trợ.",
+  "ui1OpenYourBankingAppAndTransferThe": "1. Mở ứng dụng ngân hàng và chuyển khoản đúng số tiền cùng nội dung chuyển khoản.\n\n2. Nhấn nút \"Kiểm tra kết quả thanh toán\" ở thanh bên dưới.\n\n3. Vé được hiển thị sau khi hệ thống xác nhận thanh toán và đồng bộ đầy đủ.",
+  "uiFilteringByOperator": "Đang lọc theo nhà xe #{p0}",
+  "@uiFilteringByOperator": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiOverThe2000CharacterLimit2000Shorten": "Vượt giới hạn 2.000 ký tự ({p0}/2000). Vui lòng rút gọn câu hỏi.",
+  "@uiOverThe2000CharacterLimit2000Shorten": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui2000Characters": "{p0}/2000 ký tự",
+  "@ui2000Characters": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiInternalSources": "Nguồn tham khảo nội bộ ({p0})",
+  "@uiInternalSources": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSources": "Nguồn tham khảo ({p0})",
+  "@uiSources": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSuggestedTrips": "Chuyến xe gợi ý ({p0})",
+  "@uiSuggestedTrips": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCode": "Mã: {p0}",
+  "@uiCode": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDepartureDate0f7f31": "Ngày đi: {p0}",
+  "@uiDepartureDate0f7f31": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTime": "Giờ: {p0} - {p1}",
+  "@uiTime": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDepartureTime527188": "Giờ khởi hành: {p0}",
+  "@uiDepartureTime527188": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiVehicleType54222d": "Loại xe: {p0}",
+  "@uiVehicleType54222d": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEstimatedAvailableSeats": "Chỗ trống tham khảo: {p0}",
+  "@uiEstimatedAvailableSeats": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSource": "Nguồn: {p0}",
+  "@uiSource": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPassengerCountChangedCheckTheLuggageAllowanceFor": "Số ghế đã thay đổi ({p0} → {p1} hành khách). Vui lòng kiểm tra lại hạn mức hành lý theo số hành khách mới.",
+  "@uiPassengerCountChangedCheckTheLuggageAllowanceFor": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTickets": "{p0} vé",
+  "@uiTickets": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeat25a5f5": "Ghế {p0}",
+  "@uiSeat25a5f5": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelectUpToSeatsPerBooking": "Chọn tối đa {p0} chỗ cho mỗi lượt đặt.",
+  "@uiSelectUpToSeatsPerBooking": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelectPickUpIn": "Chọn điểm đón tại {p0}",
+  "@uiSelectPickUpIn": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelectDropOffIn": "Chọn điểm trả tại {p0}",
+  "@uiSelectDropOffIn": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeats9c637d": "Ghế: {p0}",
+  "@uiSeats9c637d": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPickUpfb4009": "Đón: {p0}",
+  "@uiPickUpfb4009": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDropOff52eaac": "Trả: {p0}",
+  "@uiDropOff52eaac": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiRequired": "{p0}, bắt buộc",
+  "@uiRequired": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeats4f4448": "{p0} chỗ",
+  "@uiSeats4f4448": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatLocations": "Vị trí chỗ ngồi: {p0}",
+  "@uiSeatLocations": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCheckingCode": "Đang kiểm tra mã: {p0}",
+  "@uiCheckingCode": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCodeNotConfirmed": "Mã chưa được xác nhận: {p0}",
+  "@uiCodeNotConfirmed": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiAppliedCode": "Mã đã áp dụng: {p0}",
+  "@uiAppliedCode": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiYouSave": "Tiết kiệm được {p0}",
+  "@uiYouSave": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFareSeats": "Giá vé ({p0} chỗ)",
+  "@uiFareSeats": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNotAddedToBooking": "{p0} (chưa cộng vào đơn)",
+  "@uiNotAddedToBooking": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCopied6cef06": "Đã sao chép {p0}",
+  "@uiCopied6cef06": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatHoldTimeRemaining": "Thời gian giữ chỗ còn lại: {p0}",
+  "@uiSeatHoldTimeRemaining": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFareAfterDiscountsItemFeesPaidSeparatelyAt": "Tiền vé sau ưu đãi: {p0} • Cước vật phẩm thanh toán riêng tại bến",
+  "@uiFareAfterDiscountsItemFeesPaidSeparatelyAt": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTickets94511a": "{p0} Vé",
+  "@uiTickets94511a": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPickUp67b5a7": "Điểm đón: {p0}",
+  "@uiPickUp67b5a7": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDropOff782e84": "Điểm trả: {p0}",
+  "@uiDropOff782e84": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiBooking": "Đơn đặt chỗ: #{p0}",
+  "@uiBooking": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiBookingCode8ca81b": "Mã đặt vé: {p0}",
+  "@uiBookingCode8ca81b": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiBookingCodeb74fc3": "mã đặt vé: {p0}",
+  "@uiBookingCodeb74fc3": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTicketCode628257": "Mã vé: {p0}",
+  "@uiTicketCode628257": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTicketCode5fb7de": "mã vé: {p0}",
+  "@uiTicketCode5fb7de": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTransferReference1c34c4": "Nội dung chuyển khoản: {p0}",
+  "@uiTransferReference1c34c4": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTransferReferencecedf32": "nội dung chuyển khoản: {p0}",
+  "@uiTransferReferencecedf32": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiBankb96a80": "Ngân hàng: {p0}",
+  "@uiBankb96a80": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiAccountNumberaa169c": "Số tài khoản: {p0}",
+  "@uiAccountNumberaa169c": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiAccountNumbera056e0": "số tài khoản: {p0}",
+  "@uiAccountNumbera056e0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiAccountHolderd62428": "Chủ tài khoản: {p0}",
+  "@uiAccountHolderd62428": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiAmount": "Số tiền: {p0}",
+  "@uiAmount": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiAmount4651de": "số tiền: {p0}",
+  "@uiAmount4651de": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTransactionCode3e5784": "Mã giao dịch: #{p0}",
+  "@uiTransactionCode3e5784": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatsCount": "Ghế: {p0} ({p1} chỗ)",
+  "@uiSeatsCount": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPay": "Thanh toán {p0}",
+  "@uiPay": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNoSuitableCategoryForIsAvailableOnThis": "Chuyến xe không có danh mục phù hợp cho nhóm {p0}.",
+  "@uiNoSuitableCategoryForIsAvailableOnThis": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiQuantityExceedsRemainingCapacitySpacesFor": "Số lượng vượt quá sức chứa còn lại ({p0} chỗ cho {p1}).",
+  "@uiQuantityExceedsRemainingCapacitySpacesFor": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSpacesLeft": "{p0}: còn {p1} chỗ",
+  "@uiSpacesLeft": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiItems583419": "Danh sách kiện hàng ({p0})",
+  "@uiItems583419": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCategory": "Danh mục #{p0}",
+  "@uiCategory": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSpecifiedWeightKgVehicle": "Khối lượng quy định: {p0} kg/xe",
+  "@uiSpecifiedWeightKgVehicle": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiWeightKgDimensionsCmVolumetricKg": "Khối lượng: {p0} kg • Kích thước: {p1}×{p2}×{p3} cm (Quy đổi: {p4} kg)",
+  "@uiWeightKgDimensionsCmVolumetricKg": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      },
+      "p3": {
+        "type": "Object"
+      },
+      "p4": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiWeightKg2d5bda": "Khối lượng: {p0} kg",
+  "@uiWeightKg2d5bda": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiVehicleModel": "Dòng xe: {p0}",
+  "@uiVehicleModel": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiLicencePlate799484": "Biển số: {p0}",
+  "@uiLicencePlate799484": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNotes": "Ghi chú: {p0}",
+  "@uiNotes": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEditItem7033d5": "Chỉnh sửa kiện hàng #{p0}",
+  "@uiEditItem7033d5": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNoItemCategoryForIsAvailableOnThis": "Không có danh mục hàng cho nhóm {p0} trên chuyến này.",
+  "@uiNoItemCategoryForIsAvailableOnThis": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiItemCategoryfbfebd": "Danh mục hàng ({p0})",
+  "@uiItemCategoryfbfebd": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiLuggage030449": "Hành lý · {p0}",
+  "@uiLuggage030449": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFreeCarryOnKgPassenger": "Xách tay miễn phí ≤ {p0} kg/khách",
+  "@uiFreeCarryOnKgPassenger": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCarryOnItemsKgItem": "Xách tay · {p0} kiện · {p1} kg/kiện",
+  "@uiCarryOnItemsKgItem": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPackage": "Gói {p0}",
+  "@uiPackage": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiKgItem": "{p0} kg/kiện",
+  "@uiKgItem": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCarryOnExceedsTheFreeAllowanceKgItem": "Hành lý xách tay vượt hạn mức miễn phí ({p0} kg/kiện); hãy chuyển sang hành lý ký gửi.",
+  "@uiCarryOnExceedsTheFreeAllowanceKgItem": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEachPassengerMayRegisterOneFreeCarryOn": "Mỗi hành khách được khai báo tối đa một kiện xách tay miễn phí (tối đa {p0} kiện). Hãy chuyển kiện vượt sang hành lý ký gửi.",
+  "@uiEachPassengerMayRegisterOneFreeCarryOn": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPassengers": "{p0} hành khách",
+  "@uiPassengers": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiYourSelectedLuggageCheckedCarryOnIsKept": "Hành lý đã chọn ({p0} mục ký gửi, {p1} mục xách tay) vẫn được giữ nguyên. Hãy thử tải lại chính sách hoặc chọn \"Không thêm hành lý ký gửi\" nếu chỉ muốn đặt vé.",
+  "@uiYourSelectedLuggageCheckedCarryOnIsKept": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCarryOnFreeKgPassenger": "Xách tay · miễn phí ≤ {p0} kg/khách",
+  "@uiCarryOnFreeKgPassenger": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFreeKgItemMaximumItems": "Miễn phí ≤ {p0} kg/kiện • Tối đa {p1} kiện",
+  "@uiFreeKgItemMaximumItems": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCarryOnKgItems": "Kiện xách tay #{p0}: {p1} kg × {p2} kiện",
+  "@uiCarryOnKgItems": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiExceedsTheFreeAllowanceKgItemMoveTo": "Vượt hạn mức miễn phí ({p0} kg/kiện). Hãy chuyển sang hành lý ký gửi.",
+  "@uiExceedsTheFreeAllowanceKgItemMoveTo": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCarryOnCountExceedsPassengerCountMoveExtra": "Tổng số kiện xách tay ({p0}) vượt quá số hành khách ({p1}). Hãy chuyển sang hành lý ký gửi.",
+  "@uiCarryOnCountExceedsPassengerCountMoveExtra": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEditCarryOnItem98d081": "Chỉnh sửa kiện xách tay #{p0}",
+  "@uiEditCarryOnItem98d081": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiWeightKga695f2": "Khối lượng (kg, ≤{p0}) *",
+  "@uiWeightKga695f2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiItemCount": "Số kiện (≤{p0}) *",
+  "@uiItemCount": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCheckedLuggage8cf512": "Danh sách hành lý ký gửi ({p0})",
+  "@uiCheckedLuggage8cf512": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiMotorbike10c633": "Xe máy ({p0})",
+  "@uiMotorbike10c633": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEstimated": "Dự tính {p0}",
+  "@uiEstimated": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiWeightKgDimensionsCmChargeableKg": "Khối lượng: {p0} kg • Kích thước: {p1}×{p2}×{p3} cm (Hiệu dụng: {p4} kg)",
+  "@uiWeightKgDimensionsCmChargeableKg": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      },
+      "p3": {
+        "type": "Object"
+      },
+      "p4": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEditCheckedItem": "Chỉnh sửa mục ký gửi #{p0}",
+  "@uiEditCheckedItem": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPackageKg": "Gói {p0} · ≤ {p1} kg",
+  "@uiPackageKg": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiBicycle8324c2": "Xe đạp ({p0})",
+  "@uiBicycle8324c2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTicket": "Vé {p0}",
+  "@uiTicket": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiBooking36090d": "Đơn #{p0}",
+  "@uiBooking36090d": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDiscounted": "Đã giảm {p0}",
+  "@uiDiscounted": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelectedSeatsdead0d": "Đã chọn {p0} chỗ: {p1}",
+  "@uiSelectedSeatsdead0d": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui": "{p0} ⌃",
+  "@ui": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatDeck": "Ghế {p0} • Tầng {p1}",
+  "@uiSeatDeck": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEstimate": "Tạm tính: {p0}",
+  "@uiEstimate": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiStep": "Bước {p0}/{p1}: {p2}, {p3}",
+  "@uiStep": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      },
+      "p3": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiStepd0a756": "Bước {p0}/{p1}",
+  "@uiStepd0a756": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatHoldExpiring": "Sắp hết hạn giữ ghế{p0}: ",
+  "@uiSeatHoldExpiring": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatsHeld": "Ghế đang được giữ{p0}: ",
+  "@uiSeatsHeld": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeat45469b": "Ghế {p0}, {p1}{p2}",
+  "@uiSeat45469b": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiAvailableStops": "Có {p0} điểm để lựa chọn",
+  "@uiAvailableStops": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTheBookingDoesNotMeetTheMinimumOf": "Đơn hàng chưa đạt mức tối thiểu {p0}",
+  "@uiTheBookingDoesNotMeetTheMinimumOf": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiApplied": "Đang áp dụng: {p0}",
+  "@uiApplied": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiAnAdditionalIsRequired": "Cần thêm {p0}",
+  "@uiAnAdditionalIsRequired": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFormer": "{p0} (cũ)",
+  "@uiFormer": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFormerLocationName": "{p0} (địa danh cũ)",
+  "@uiFormerLocationName": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiStationsStops": "{p0} • {p1} bến xe/điểm đón",
+  "@uiStationsStops": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiViewAllOffers": "Xem tất cả {p0} ưu đãi",
+  "@uiViewAllOffers": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSaveCode": "Giảm {p0} · Mã {p1}",
+  "@uiSaveCode": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiMinimumFare": "Tiền vé tối thiểu: {p0}",
+  "@uiMinimumFare": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiMaximumDiscount": "Giảm tối đa: {p0}",
+  "@uiMaximumDiscount": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiValid": "Hiệu lực: {p0} – {p1}",
+  "@uiValid": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCopyCode30ae06": "Sao chép mã {p0}",
+  "@uiCopyCode30ae06": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPolicy": "Chính sách: {p0}",
+  "@uiPolicy": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDistance": "Khoảng cách: {p0}",
+  "@uiDistance": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNoTicketsMatchCheckTheTicketCodePhone": "Không có vé nào khớp với từ khóa \"{p0}\". Vui lòng kiểm tra lại mã vé, số điện thoại hoặc lộ trình.",
+  "@uiNoTicketsMatchCheckTheTicketCodePhone": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiContactForTrip": "Liên hệ chuyến đi {p0}",
+  "@uiContactForTrip": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiReviewed5View": "Đã đánh giá • {p0}/5 — Xem",
+  "@uiReviewed5View": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui56e768": "{p0} ➔ {p1}",
+  "@ui56e768": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatscfb411": "Chỗ ngồi: {p0}",
+  "@uiSeatscfb411": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiThisTripDepartsAtOnContactTheOperator": "Chuyến xe khởi hành lúc {p0} ngày {p1}. Quý khách vui lòng liên hệ nhà xe nếu cần trợ giúp.",
+  "@uiThisTripDepartsAtOnContactTheOperator": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiContactPhone": "SĐT liên hệ: {p0}",
+  "@uiContactPhone": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCancellationFee": "Phí hủy theo quy định ({p0}%):",
+  "@uiCancellationFee": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiIAgreeToCancelAndAcceptTheCancellation": "Tôi đồng ý hủy vé và chấp nhận mức khấu trừ phí hủy {p0}% ({p1}) nêu trên.",
+  "@uiIAgreeToCancelAndAcceptTheCancellation": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCancellationFee942acf": "Phí hủy ({p0}%): ",
+  "@uiCancellationFee942acf": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiReplyFrom": "Phản hồi từ {p0}",
+  "@uiReplyFrom": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPickUp4845a7": "Đón: {p0} ({p1})",
+  "@uiPickUp4845a7": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiReason": "Lý do: {p0}",
+  "@uiReason": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEstimatedRefund26c8c6": "Dự kiến hoàn: {p0}",
+  "@uiEstimatedRefund26c8c6": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui0Reviewed": "{p0}.0 (Đã đánh giá)",
+  "@ui0Reviewed": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiHide": "Ẩn {p0}",
+  "@uiHide": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiShow": "Hiện {p0}",
+  "@uiShow": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEnterThe6DigitVerificationCodeFor": "Nhập mã OTP gồm 6 chữ số cho {p0}.",
+  "@uiEnterThe6DigitVerificationCodeFor": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiResendCodeInSeconds": "Gửi lại mã sau {p0} giây",
+  "@uiResendCodeInSeconds": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPoints746cfa": "{p0} điểm",
+  "@uiPoints746cfa": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiA6DigitVerificationCodeWasSentTo": "Mã xác thực gồm 6 chữ số đã được gửi đến số điện thoại {p0}",
+  "@uiA6DigitVerificationCodeWasSentTo": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTier": "HẠNG {p0}",
+  "@uiTier": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPointsNeededForTheNextTier": "Cần thêm {p0} điểm để lên hạng tiếp theo",
+  "@uiPointsNeededForTheNextTier": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTierba8164": "Hạng {p0}",
+  "@uiTierba8164": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPointsRequired": "Cần: {p0} điểm",
+  "@uiPointsRequired": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPoints05f590": "{p0}{p1} điểm",
+  "@uiPoints05f590": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiArriveBy": "Có mặt trước: {p0}",
+  "@uiArriveBy": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiArriveMinutesBeforePickUp": "Có mặt trước giờ đón {p0} phút",
+  "@uiArriveMinutesBeforePickUp": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiStopSurcharge": "Phụ phí tại điểm: {p0}",
+  "@uiStopSurcharge": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiStopContact": "Liên hệ điểm: {p0}",
+  "@uiStopContact": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiShuttle": "Trung chuyển: {p0}",
+  "@uiShuttle": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiShuttleAddress": "Địa chỉ trung chuyển: {p0}",
+  "@uiShuttleAddress": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiType": "Loại: {p0}",
+  "@uiType": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDeclaredWeightKg": "Khối lượng khai báo: {p0} kg",
+  "@uiDeclaredWeightKg": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTicketsInBooking": "Vé trong đơn ({p0})",
+  "@uiTicketsInBooking": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatba07d4": "Ghế {p0} • {p1}",
+  "@uiSeatba07d4": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatCountForChangedPassengersCheckTheLuggage": "Số ghế {p0} đã thay đổi ({p1} → {p2} hành khách). Vui lòng kiểm tra lại hạn mức hành lý theo số hành khách mới.",
+  "@uiSeatCountForChangedPassengersCheckTheLuggage": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCompletedb1ec0b": "Đã xong {p0}",
+  "@uiCompletedb1ec0b": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelectSeatsAndStopsForToContinue": "Vui lòng chọn chỗ ngồi và điểm đón/trả cho {p0} để tiếp tục tiến trình.",
+  "@uiSelectSeatsAndStopsForToContinue": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSwitchTo": "Chuyển sang {p0}",
+  "@uiSwitchTo": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelectPickUp": "Chọn điểm đón ({p0})",
+  "@uiSelectPickUp": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelectDropOff9938e9": "Chọn điểm trả ({p0})",
+  "@uiSelectDropOff9938e9": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelected3e13f1": "Đã chọn: {p0}",
+  "@uiSelected3e13f1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui742d76": "{p0} ⇄ {p1}",
+  "@ui742d76": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTickets11c2bb": "{p0} - {p1} • {p2} vé",
+  "@uiTickets11c2bb": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiOutbound39fb6f": "Lượt đi: {p0} → {p1}",
+  "@uiOutbound39fb6f": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiReturn0b24ba": "Lượt về: {p0} → {p1}",
+  "@uiReturn0b24ba": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSearchingForTrips3befb9": "Đang tìm kiếm chuyến {p0}...",
+  "@uiSearchingForTrips3befb9": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNoTripsFound": "Không tìm thấy chuyến {p0}",
+  "@uiNoTripsFound": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiNoTripsDepartOnOrThereAreNot": "Không có chuyến nào khởi hành vào ngày {p0} hoặc đã hết chỗ cho {p1} vé.",
+  "@uiNoTripsDepartOnOrThereAreNot": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelected01ccfb": "Đã chọn {p0}:",
+  "@uiSelected01ccfb": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiOutbound8a89c9": "Đi: {p0} ({p1})",
+  "@uiOutbound8a89c9": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiReturn824be9": "Về: {p0} ({p1})",
+  "@uiReturn824be9": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPaymentForIsCompletePayForToComplete": "Bạn đã thanh toán thành công cho {p0}. Vui lòng hoàn tất thanh toán cho {p1} để hoàn thành chuyến khứ hồi.",
+  "@uiPaymentForIsCompletePayForToComplete": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui1OutboundPayment": "1. Thanh toán Lượt đi: {p0} → {p1}",
+  "@ui1OutboundPayment": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui2ReturnPayment": "2. Thanh toán Lượt về: {p0} → {p1}",
+  "@ui2ReturnPayment": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelectedSeats09ff88": "Ghế đã chọn: {p0}",
+  "@uiSelectedSeats09ff88": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiExpiresIn": "Hết hạn sau: {p0}:{p1}",
+  "@uiExpiresIn": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCopy4ecb8d": "Sao chép {p0}",
+  "@uiCopy4ecb8d": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiOutboundTickets": "Lượt đi ({p0} vé)",
+  "@uiOutboundTickets": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiReturnTickets": "Lượt về ({p0} vé)",
+  "@uiReturnTickets": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPickUp4156d4": "Đón: {p0} - {p1}",
+  "@uiPickUp4156d4": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDropOff05415d": "Trả: {p0} - {p1}",
+  "@uiDropOff05415d": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPromoCodef90eb2": "Mã giảm giá {p0}",
+  "@uiPromoCodef90eb2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSeatsLeft": "Còn {p0} chỗ",
+  "@uiSeatsLeft": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTickets719a21": "{p0} • {p1} vé",
+  "@uiTickets719a21": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTripsFound": "Tìm thấy {p0} chuyến xe",
+  "@uiTripsFound": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiClearFilters": "Xóa bộ lọc ({p0})",
+  "@uiClearFilters": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiClearFiltersa8df77": "Xóa lọc ({p0})",
+  "@uiClearFiltersa8df77": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFare": "{p0}, giá {p1}",
+  "@uiFare": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiOpenFiltersFiltersSelected": "Mở bộ lọc, có {p0} bộ lọc đang chọn",
+  "@uiOpenFiltersFiltersSelected": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSortBy58dd7b": "Sắp xếp theo: {p0}",
+  "@uiSortBy58dd7b": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTicketSeatsLeft": "/vé · Còn {p0} chỗ",
+  "@uiTicketSeatsLeft": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPickUpb65f22": "Điểm đón • {p0}",
+  "@uiPickUpb65f22": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDropOff37f63f": "Điểm trả • {p0}",
+  "@uiDropOff37f63f": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiShipmentCodeee9663": "Mã vận đơn: {p0}",
+  "@uiShipmentCodeee9663": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiSelectRouteAndOperatorOperatorsFound": "Chọn tuyến và nhà xe ({p0} nhà xe tìm thấy):",
+  "@uiSelectRouteAndOperatorOperatorsFound": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFeesFrom": "Cước từ {p0}",
+  "@uiFeesFrom": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiEstimatedFeeTheFinalFeeIsConfirmedAfter": "Cước dự tính: {p0}. Cước được chốt sau cân đo tại bến.",
+  "@uiEstimatedFeeTheFinalFeeIsConfirmedAfter": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiItem": "Kiện #{p0}",
+  "@uiItem": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCopiedd3e09c": "Đã sao chép {p0}: {p1}",
+  "@uiCopiedd3e09c": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiCreatedb409e6": "Ngày tạo đơn: {p0}",
+  "@uiCreatedb409e6": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiExpectedShippingDate": "Ngày dự kiến gửi: {p0}",
+  "@uiExpectedShippingDate": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiRoute97d69f": "Tuyến: {p0} → {p1}",
+  "@uiRoute97d69f": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDeparture": "Khởi hành: {p0}",
+  "@uiDeparture": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiItemsCount": "Danh sách kiện hàng ({p0} kiện)",
+  "@uiItemsCount": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiTypeWeightKgItem": "Loại: {p0} • Khối lượng: {p1} kg/kiện",
+  "@uiTypeWeightKgItem": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDimensions": "Kích thước: {p0}",
+  "@uiDimensions": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiConfirmed": "Đã xác nhận: {p0}",
+  "@uiConfirmed": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiPaysAtTheStationCounterWhenDroppingOff": "{p0} thanh toán trực tiếp tại quầy bến xe khi gửi hoặc nhận hàng.",
+  "@uiPaysAtTheStationCounterWhenDroppingOff": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiDropOffDeadlinecb255c": "Hạn mang hàng ra bến: {p0}",
+  "@uiDropOffDeadlinecb255c": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiItemCountdd0fa2": "Số kiện: {p0}",
+  "@uiItemCountdd0fa2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiFee": "Cước: {p0}",
+  "@uiFee": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiOperator": "Nhà xe: {p0}",
+  "@uiOperator": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiRecipient3b3790": "Người nhận: {p0}",
+  "@uiRecipient3b3790": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiItems930257": "{p0} kiện",
+  "@uiItems930257": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiType81d219": "Loại {p0}",
+  "@uiType81d219": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiRouteFeeEstimatesRates": "Bảng cước tham khảo theo tuyến ({p0} mức)",
+  "@uiRouteFeeEstimatesRates": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiKg": "≥ {p0} kg",
+  "@uiKg": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "uiImage": "[Hình ảnh] {p0}",
+  "@uiImage": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "ui1FindTheRightTrip2SelectSeats": "1. Tìm chuyến phù hợp\n2. Chọn ghế và thông tin hành trình\n3. Thanh toán và nhận vé",
+  "uiCancelledOnRequest1422c3": "Đã hủy theo yêu cầu",
+  "uiOperatore2807c": "nhà xe",
+  "uiEarliestDeparture": "Giờ đi sớm nhất",
+  "uiLatestDeparture": "Giờ đi muộn nhất",
+  "uiLowestFareFirst": "Giá tăng dần",
+  "uiHighestFareFirst": "Giá giảm dần",
+  "uiHighestRated": "Đánh giá cao nhất",
+  "uiEarlyMorning00000600": "Sáng sớm (00:00 - 06:00)",
+  "uiMorning06001200130f30": "Buổi sáng (06:00 - 12:00)",
+  "uiAfternoon12001800": "Buổi chiều (12:00 - 18:00)",
+  "uiEvening18002400922d53": "Buổi tối (18:00 - 24:00)",
+  "uiWaitingForSupport": "Chờ tiếp nhận",
+  "uiInProgress": "Đang hỗ trợ",
+  "uiEnded": "Đã kết thúc",
+  "uiUnsupportedStatus": "Trạng thái chưa hỗ trợ",
+  "uiBusStation": "Bến xe",
+  "uiOffice": "Văn phòng",
+  "uiShuttleTransfer": "Trung chuyển",
+  "uiPickUpDropOffPoint": "Điểm đón/trả",
+  "uiThisTicketWasAlreadyCancelled": "Vé đã được hủy trước đó.",
+  "uiDepartureTimeIsUnavailableSoCancellationEligibilityCannot": "Chưa xác định được giờ khởi hành để xét điều kiện hủy.",
+  "uiThisTripHasDepartedOnlineCancellationIsUnavailable": "Chuyến xe đã khởi hành, không thể hủy trực tuyến.",
+  "uiTheOnlineCancellationDeadlineHasPassed": "Đã qua thời hạn hủy trực tuyến của chuyến xe.",
+  "uiThisBookingHasAnActiveAccompanyingShipmentContact": "Đơn có hàng gửi kèm còn hiệu lực. Vui lòng liên hệ nhà xe.",
+  "uiThisTicketIsNotEligibleForOnlineCancellation370dc5": "Vé hiện không đủ điều kiện hủy trực tuyến. Vui lòng liên hệ nhà xe.",
+  "uiVexgoOnlineBusBooking": "VexGo - Đặt vé xe khách trực tuyến",
+  "uiYouHaveANewTicketUpdate": "Bạn có cập nhật mới về vé.",
+  "uiLanguageChangedForThisSessionUnableToSave": "Đã đổi ngôn ngữ cho phiên này. Chưa lưu được lựa chọn.",
+  "ui1PaymentForThisBookingIsConfirmed2ff0c49": "1. Đơn hàng đã được xác nhận thanh toán thành công.\n2. Nếu danh sách vé chưa hiển thị hoặc đang đồng bộ, vui lòng nhấn nút \"Kiểm tra kết quả thanh toán\" ở thanh bên dưới.\n3. Bạn cũng có thể tra cứu lại vé bất kỳ lúc nào trong mục \"Vé của tôi\" bằng số điện thoại đặt vé.",
+  "ui1DoNotTransferMoneyForThisBooking4ec818": "1. Vui lòng không thực hiện chuyển khoản cho đơn hàng này.\n2. Nếu bạn đã chuyển khoản trước khi đơn hết hạn, nhấn \"Kiểm tra kết quả thanh toán\" để hệ thống đối soát.\n3. Trường hợp cần trợ giúp hoặc đã trừ tiền nhưng chưa có vé, vui lòng liên hệ tổng đài VexGo để được hỗ trợ.",
+  "ui1OpenYourBankingAppAndTransferThea659be": "1. Mở ứng dụng ngân hàng và chuyển khoản đúng số tiền cùng nội dung chuyển khoản.\n2. Nhấn nút \"Kiểm tra kết quả thanh toán\" ở thanh bên dưới.\n3. Vé được hiển thị sau khi hệ thống xác nhận thanh toán và đồng bộ đầy đủ.",
+  "uiUnableToLoadSuggestionsYouCanStillEnter": "Chưa tải được câu hỏi gợi ý. Bạn vẫn có thể nhập câu hỏi.",
+  "uiEnterAQuestionBetween1And2000": "Nhập câu hỏi từ 1 đến 2.000 ký tự.",
+  "uiYourSessionHasExpiredSignInAgain": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+  "uiYouAreSendingTooQuicklyWaitAndTry": "Bạn đang gửi quá nhanh. Vui lòng chờ rồi thử lại.",
+  "uiUnableToSendYourQuestionCheckAndTry": "Chưa gửi được câu hỏi. Vui lòng kiểm tra và thử lại.",
+  "uiNoHistoryWasFoundForThisSession": "Chưa tìm thấy lịch sử phiên này.",
+  "uiUnableToLoadHistoryYourLocalConversationIs": "Chưa tải được lịch sử. Hội thoại trên máy vẫn được giữ.",
+  "uiInvalidRoundTripPaymentCode": "Mã thanh toán khứ hồi không hợp lệ.",
+  "uiTheTripsHaveIncorrectRoutesDatesOrOverlapping": "Hai chuyến không đúng tuyến/ngày hoặc thời gian bị chồng lấn.",
+  "uiRoundTripsRequireAnApiConnectionDemoTickets": "Khứ hồi yêu cầu repository API, không tạo vé demo.",
+  "uiCheckTheExistingLegBeforeContinuingWithThe": "Kiểm tra lại chặng đã tạo trước khi tiếp tục chặng còn lại.",
+  "uiCompleteSeatsStopsPassengerDetailsAndQuotesFor": "Hoàn tất ghế, đón/trả, hành khách và báo giá của cả hai chiều.",
+  "uiTheLegDetailsDoNotMatchNoBooking": "Thông tin hai chặng không khớp. Không gửi yêu cầu tạo đơn.",
+  "uiInvalidRoundTripPair": "Cặp chuyến khứ hồi không hợp lệ.",
+  "uiInvalidRouteTravelDatesOrTicketCount": "Tuyến, ngày đi/về hoặc số vé không hợp lệ.",
+  "uiUnableToVerifyServerDataCheckYourConnection": "Không thể xác minh dữ liệu từ máy chủ. Vui lòng kiểm tra kết nối và thử tải lại.",
+  "uiThisRouteDoesNotHaveEnoughDropOff": "Tuyến chưa có đủ điểm gửi và nhận.",
+  "uiCheckTheRouteShippingDateAndItemDetails": "Kiểm tra tuyến, ngày gửi và thông tin kiện hàng.",
+  "uiEnterShippingDetails": "Nhập thông tin gửi hàng.",
+  "uiLoadShippingOptionsForTheCorrectRoute": "Cần tải cấu hình nhận hàng của đúng tuyến.",
+  "uiTheDropOffPointIsNotOnThe": "Điểm gửi không thuộc tuyến đã chọn.",
+  "uiTheCollectionPointIsNotOnTheSelected": "Điểm nhận không thuộc tuyến đã chọn.",
+  "uiThisItemTypeIsNoLongerValid": "Loại hàng không còn hợp lệ.",
+  "uiTheShippingDateHasChangedSearchRoutesAgain": "Ngày gửi đã thay đổi; tìm lại tuyến.",
+  "uiRequestANewQuoteForTheCurrentDetails": "Cần báo giá lại cho thông tin hiện tại.",
+  "uiShipmentCreationIsUnconfirmedDoNotCreateIt": "Chưa xác minh kết quả tạo đơn. Không tạo lại; hãy tra cứu vận đơn hoặc liên hệ hỗ trợ.",
+  "uiTheReturnedStatusBelongsToAnotherShipment": "Trạng thái trả về thuộc đơn khác.",
+  "uiCancellationReasonMustBeAtMost255Characters": "Lý do hủy tối đa 255 ký tự.",
+  "uiCancellationIsUnconfirmedCheckStatusDoNotResubmit": "Chưa xác minh kết quả hủy. Hãy kiểm tra trạng thái; không gửi lại yêu cầu.",
+  "uiUnableToLoadConversationsTryAgain": "Không tải được hội thoại. Vui lòng thử lại.",
+  "uiUnableToOpenAConversationWithTheOperator": "Không mở được hội thoại với nhà xe.",
+  "uiUnableToLoadMessagesPullToRetry": "Không tải được tin nhắn. Kéo để thử lại.",
+  "uiTheConfirmedMessageDoesNotMatch": "Tin nhắn xác nhận không khớp.",
+  "uiUnableToEndTheConversationRefreshAndTry": "Chưa thể kết thúc hội thoại. Vui lòng tải lại.",
+  "uiLiveChatWasInterruptedUsingTheApiTo": "Kết nối chat bị gián đoạn. Đang dùng API để đồng bộ.",
+  "uiChatDataIsInvalidRefreshAndTryAgain": "Dữ liệu chat chưa hợp lệ. Vui lòng tải lại.",
+  "uiTripNotFound": "Không tìm thấy chuyến xe.",
+  "uiUnableToLoadTripDetailsTryAgain": "Không thể tải chi tiết chuyến xe. Vui lòng thử lại.",
+  "uiThisBookingBelongsToAnotherAccountSignIn": "Đơn này thuộc tài khoản khác. Vui lòng đăng nhập đúng tài khoản đặt vé.",
+  "uiReceiptNotFoundOrTheCodePhoneNumber": "Không tìm thấy chứng từ hoặc mã/số điện thoại không khớp.",
+  "uiUnableToConnectToTheServerTryAgain": "Không thể kết nối máy chủ. Vui lòng thử lại.",
+  "uiUnableToLoadAValidReceiptCheckYour": "Chưa thể tải chứng từ hợp lệ. Vui lòng kiểm tra thông tin và thử lại.",
+  "uiAccountCreatedSuccessfully": "Đăng ký tài khoản thành công!",
+  "uiProfileUpdatedSuccessfully": "Cập nhật thông tin cá nhân thành công!",
+  "uiEnterYourCurrentPasswordAndADifferentNew": "Nhập mật khẩu cũ và mật khẩu mới khác, dài 8–72 byte UTF-8.",
+  "uiSwitchedToVietnamese": "Đã đổi sang Tiếng Việt",
+  "uiSignInToEnablePushNotifications": "Vui lòng đăng nhập để bật thông báo đẩy.",
+  "uiPushNotificationsDisabled": "Đã tắt thông báo đẩy",
+  "uiPushNotificationsEnabled": "Đã bật thông báo đẩy",
+  "uiUnableToEnableNotificationsCheckNotificationPermissionAnd": "Chưa thể bật thông báo. Kiểm tra quyền thông báo và cấu hình bản cài.",
+  "uiThePreviousCancellationIsUnconfirmedCheckStatusOnly": "Chưa xác minh kết quả hủy trước đó. Chỉ kiểm tra trạng thái, không gửi lại yêu cầu.",
+  "uiTheFeeOrCancellationReasonIsInvalidRefresh": "Thông tin phí hoặc lý do hủy chưa hợp lệ. Vui lòng tải lại và xác nhận.",
+  "uiConfirmingTicketCancellation": "Đang xác nhận yêu cầu hủy vé...",
+  "uiUnableToVerifyTheTicketToCancel": "Không xác minh được vé cần hủy.",
+  "uiCancellationFeesOrTicketDetailsHaveChangedReview": "Phí hủy hoặc thông tin vé đã thay đổi. Vui lòng xem và đồng ý lại.",
+  "uiTheCancellationResponseDoesNotMatchThisTicket": "Phản hồi hủy không khớp vé.",
+  "uiTicketCancellationConfirmedContactSupportWithYourTicket": "Đã xác nhận vé bị hủy. Vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền; hệ thống không hoàn tiền online.",
+  "uiTicketCancellationIsUnconfirmedCheckStatusDoNot": "Chưa xác minh kết quả hủy vé. Vui lòng kiểm tra trạng thái; không gửi lại yêu cầu.",
+  "uiTheCancellationFeeHasChangedReviewAndAgree": "Phí hủy đã thay đổi. Vui lòng xem và đồng ý lại mức phí mới.",
+  "uiUnableToCancelTheTicketRefreshItsDetails": "Không thể hủy vé. Vui lòng tải lại thông tin và xác nhận mức phí.",
+  "uiCheckingTicketStatus": "Đang kiểm tra trạng thái vé...",
+  "uiTicketCancellationIsUnconfirmedCheckAgainLaterDo": "Chưa xác minh kết quả hủy vé. Vui lòng kiểm tra lại sau; không gửi lại yêu cầu.",
+  "uiTheTicketToCancelWasNotFound": "Không tìm thấy thông tin vé cần hủy.",
+  "uiCancellationIsUnavailableBecauseDepartureIsWithin12": "Không thể hủy vé vì chuyến xe khởi hành trong vòng dưới 12 giờ (dưới 3 giờ theo quy định tối thiểu nhà xe)! Vui lòng liên hệ tổng đài để được trợ giúp.",
+  "uiUnableToIdentifyTheTripForReviewManagement": "Không xác định được chuyến xe để quản lý đánh giá.",
+  "uiThereAreMultipleReviewsForThisTripThe": "Có nhiều đánh giá cho chuyến này; chưa xác định được đánh giá cần thay đổi.",
+  "uiReviewRefreshed": "Đã tải lại đánh giá.",
+  "uiThisReviewNoLongerExistsRefreshTheDetails": "Đánh giá không còn tồn tại. Hãy tải lại thông tin.",
+  "uiNoProvincesOrCitiesAreAvailableYetd92974": "Chưa có tỉnh/thành phố khả dụng.",
+  "uiItemsWithTicketsRequireALiveApiAnd": "Gửi hàng kèm vé yêu cầu API thật và mã chuyến hợp lệ.",
+  "uiTheDropOffCollectionPointDoesNotBelong": "Điểm gửi/nhận không thuộc chuyến hiện tại.",
+  "uiUnableToVerifyShippingServiceRefreshOrTurn": "Không xác minh được dịch vụ gửi hàng. Thử tải lại hoặc tắt gửi hàng để chỉ đặt vé.",
+  "uiBookingDetailsHaveChangedUpdateTheFare": "Thông tin đặt vé đã thay đổi. Vui lòng cập nhật giá.",
+  "uiTheServerHasNotVerifiedThisPromoCode": "Máy chủ chưa xác thực mã khuyến mãi cho thông tin liên hệ hiện tại.",
+  "uiTheFareOrPromoCodeIsUnverifiedUpdate": "Chưa xác minh được giá vé hoặc mã khuyến mãi. Vui lòng cập nhật giá.",
+  "uiYourSeatHoldHasExpiredSelectSeatsAgain": "Hết thời gian giữ ghế. Vui lòng chọn lại chỗ ngồi.",
+  "uiInvalidTripDetails": "Thông tin chuyến đi không hợp lệ.",
+  "uiInvalidSeatList": "Danh sách ghế không hợp lệ.",
+  "uiYourSeatHoldHasExpiredSelectSeatsAgain95d9a4": "Thời gian giữ chỗ đã hết hạn. Vui lòng chọn lại ghế.",
+  "uiUnableToHoldThisSeatTryAgain": "Không thể giữ chỗ ngồi này. Vui lòng thử lại.",
+  "uiSeatReleaseCouldNotBeConfirmedTryAgain": "Chưa xác nhận được việc giải phóng ghế. Vui lòng thử lại.",
+  "uiUnableToReleaseSeatsDueToAConnection": "Không thể giải phóng ghế do lỗi kết nối. Vui lòng thử lại.",
+  "uiBookingResultIsUnconfirmedDoNotResubmitCheck": "Kết quả tạo đơn chưa xác định. Không gửi lại yêu cầu; vui lòng kiểm tra Vé của tôi hoặc liên hệ hỗ trợ.",
+  "uiCompletePassengerDetailsAndHoldSeatsBeforePaying": "Vui lòng hoàn tất thông tin hành khách và giữ chỗ trước khi thanh toán.",
+  "uiShippingIsUnavailableInDemoMode": "Gửi hàng chưa hỗ trợ Demo Mode.",
+  "uiTheVietqrReceivingAccountIsNotConfiguredContact": "Chưa có cấu hình tài khoản nhận VietQR. Vui lòng liên hệ hỗ trợ.",
+  "uiTheServerDidNotReturnAValidBooking": "Máy chủ không trả mã đơn hợp lệ.",
+  "uiTheServerHasNotConfirmedTheRoundTrip": "Máy chủ chưa xác nhận mã thanh toán khứ hồi. Giữ đơn hiện tại để kiểm tra.",
+  "uiSeparateStationFeesAndItemDetailsAreUnconfirmed": "Máy chủ chưa xác nhận cước riêng tại bến và thông tin vật phẩm. Giữ đơn hiện tại để kiểm tra.",
+  "uiPaymentBookingDetailsDoNotMatch": "Thông tin đơn thanh toán không khớp.",
+  "uiTransferTheExactAmountWithTheBookingReference": "Chuyển khoản đúng số tiền và nội dung mã đơn. Hệ thống sẽ xác minh thanh toán; nhấn kiểm tra lại sau khi chuyển khoản.",
+  "uiTicketsCannotBeIssuedYetOrThisBooking": "Đơn chưa đủ điều kiện xuất vé, đã hết hạn hoặc bị hủy. Vui lòng liên hệ hỗ trợ nếu đã chuyển tiền.",
+  "uiTheServerReturnedInvalidPaymentDetails": "Máy chủ trả thông tin thanh toán không hợp lệ.",
+  "uiTheServerSupportsTestPaymentsOnlyLivePayment": "BLOCKED_BY_BACKEND: Máy chủ chỉ hỗ trợ cổng thanh toán thử nghiệm, chưa hỗ trợ thanh toán thực tế.",
+  "uiThePaymentResultDoesNotMatchThisBooking": "Kết quả thanh toán không khớp với đơn hiện tại.",
+  "uiPaymentIsPendingCompleteItWithThePayment": "Thanh toán đang chờ xử lý. Hoàn tất tại cổng thanh toán rồi kiểm tra lại.",
+  "uiPaymentFailedTheCurrentBookingAndTransactionAre": "Thanh toán không thành công. Đơn và giao dịch hiện tại được giữ để kiểm tra, không tạo lại đơn.",
+  "uiThePaymentProviderIsUnavailableOnTheServer": "BLOCKED_BY_BACKEND: Cổng thanh toán chưa khả dụng trên máy chủ. Đơn hiện tại được giữ để kiểm tra.",
+  "uiAConnectionErrorLeftTheBookingResultUnconfirmed": "Kết quả tạo đơn chưa xác định do lỗi kết nối. Không gửi lại yêu cầu; kiểm tra Vé của tôi hoặc liên hệ hỗ trợ.",
+  "uiPaymentOrTicketsAreUnverifiedCheckTheCurrent": "Chưa xác minh được thanh toán hoặc vé. Vui lòng kiểm tra lại đơn hiện tại.",
+  "uiSelectSeats2828b0": "Chọn chỗ ngồi",
+  "uiCheckExistingBookings": "Cần kiểm tra các đơn trước",
+  "uiTooManyRequests": "Bạn đang thao tác quá nhanh",
+  "uiThisPhoneNumberOrAccountHasMultipleUnpaid": "Số điện thoại hoặc tài khoản đang có nhiều đơn chưa thanh toán hoặc lượt giữ chỗ hết hạn. Vui lòng kiểm tra các đơn trước hoặc quay lại sau 30 phút theo hướng dẫn của hệ thống.",
+  "uiRequestsAreTemporarilyLimitedWaitAWhileAnd": "Hệ thống đang tạm giới hạn số lần thao tác. Vui lòng chờ một lúc rồi thử lại.",
+  "uiInvalidTripPassengerCountOrPolicyValidityPeriod": "Chuyến/số hành khách/thời hạn chính sách không hợp lệ.",
+  "uiYourSessionHasChangedOpenLuggageAgain": "Phiên đã thay đổi. Vui lòng mở lại hành lý.",
+  "uiLuggageBelongsToADifferentTrip": "Sai chuyến hành lý.",
+  "uiUnableToLoadTheLuggagePolicyRetryOr": "Không tải được chính sách hành lý. Thử lại hoặc bỏ qua để chỉ đặt vé.",
+  "uiYourLuggageSessionHasChanged": "Phiên hành lý đã thay đổi.",
+  "uiLoadingLuggagePolicy": "Đang tải chính sách hành lý.",
+  "uiTheLuggagePolicyIsOutdatedRefreshIt": "Chính sách hành lý đã cũ. Vui lòng tải lại.",
+  "uiLuggageDoesNotMatchTheCurrentTripPassenger": "Hành lý không thuộc chuyến/số khách hiện tại.",
+  "uiEnterAValidVietnamesePhoneNumber": "Nhập số điện thoại Việt Nam hợp lệ.",
+  "uiPasswordMustBe8To72Utf8": "Mật khẩu phải dài từ 8 đến 72 byte UTF-8.",
+  "uiTheVerificationCodeMustHave6Digits": "Mã OTP phải gồm 6 chữ số.",
+  "uiUnableToConnectToTheServerCheckYour": "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng."
+}

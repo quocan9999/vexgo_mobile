@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -83,7 +84,9 @@ class SeatMapView extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  floor == 1 ? 'Tầng dưới' : 'Tầng trên',
+                                  floor == 1
+                                      ? context.l10n.uiLowerDeck
+                                      : context.l10n.uiUpperDeck,
                                   style: DiscoveryTextStyles.bodyMedium
                                       .copyWith(
                                         fontWeight: selectedFloor == floor
@@ -138,16 +141,16 @@ class SeatMapView extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(
+                    SizedBox(
                       width: 32,
                       child: Tooltip(
-                        message: 'Vô lăng tài xế',
+                        message: context.l10n.uiDriverSSteeringWheel,
                         child: SteeringWheelVector(),
                       ),
                     ),
                     Expanded(
                       child: Text(
-                        'Đầu xe',
+                        context.l10n.uiFront,
                         textAlign: TextAlign.center,
                         style: DiscoveryTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
@@ -156,10 +159,10 @@ class SeatMapView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(
+                    SizedBox(
                       width: 32,
                       child: Tooltip(
-                        message: 'Cửa lên xuống',
+                        message: context.l10n.uiDoor,
                         child: BusDoorVector(),
                       ),
                     ),
@@ -170,9 +173,9 @@ class SeatMapView extends StatelessWidget {
               const Divider(height: 1, color: DiscoveryColors.neutral200),
               const SizedBox(height: 6),
               if (seats.isEmpty)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.all(16),
-                  child: Text('Chưa có sơ đồ ghế.'),
+                  child: Text(context.l10n.uiNoSeatMapAvailable),
                 )
               else if (seats.every((seat) => seat.hasSpatialCoordinates))
                 SpatialSeatMap(
@@ -269,7 +272,7 @@ class SeatMapView extends StatelessWidget {
                 ),
               const Divider(height: 24, color: DiscoveryColors.neutral200),
               Text(
-                'Cuối xe',
+                context.l10n.uiRear,
                 style: DiscoveryTextStyles.caption.copyWith(
                   color: DiscoveryColors.neutral500,
                   fontWeight: FontWeight.w600,

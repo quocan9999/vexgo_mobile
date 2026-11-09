@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -114,10 +115,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     final trimmedName = _nameController.text.trim();
     if (trimmedName.isEmpty) {
       setState(() {
-        _nameError = 'Họ và tên không được để trống';
+        _nameError = context.l10n.uiFullNameIsRequired;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Họ và tên không được để trống')),
+        SnackBar(content: Text(context.l10n.uiFullNameIsRequired)),
       );
       return;
     }
@@ -206,7 +207,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Chỉnh sửa thông tin cá nhân',
+                              context.l10n.uiEditPersonalInformation,
                               style: DiscoveryTextStyles.titleMedium.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: DiscoveryColors.neutral900,
@@ -216,7 +217,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Cập nhật hồ sơ tài khoản VexGo',
+                              context.l10n.uiUpdateYourVexgoProfile,
                               style: DiscoveryTextStyles.caption.copyWith(
                                 color: DiscoveryColors.neutral500,
                               ),
@@ -226,7 +227,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.close_rounded),
-                        tooltip: 'Đóng',
+                        tooltip: context.l10n.uiClose,
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
@@ -235,7 +236,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
 
                   // Field 1: Họ và tên (Bắt buộc)
                   Text(
-                    'Họ và tên *',
+                    context.l10n.uiFullName,
                     style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
                       color: DiscoveryColors.neutral800,
@@ -251,7 +252,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: 'Nhập họ và tên đầy đủ',
+                      hintText: context.l10n.uiEnterYourFullName,
                       hintStyle: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral400,
                       ),
@@ -296,7 +297,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
 
                   // Field 2: Số điện thoại (Read-only)
                   Text(
-                    'Số điện thoại',
+                    context.l10n.uiPhoneNumber,
                     style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
                       color: DiscoveryColors.neutral800,
@@ -328,8 +329,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                           ),
                           child: Text(
                             widget.user.daXacThucSoDienThoai
-                                ? 'Đã xác thực'
-                                : 'Chưa xác thực',
+                                ? context.l10n.uiVerified
+                                : context.l10n.uiNotVerified,
                             style: TextStyle(
                               color: widget.user.daXacThucSoDienThoai
                                   ? DiscoveryColors.successDark
@@ -397,7 +398,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Số điện thoại dùng để đăng nhập và tra cứu vé, không thể thay đổi.',
+                    context.l10n.uiYourPhoneNumberIsUsedToSignIn,
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.neutral500,
                       fontSize: 11,
@@ -465,7 +466,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Số CCCD / CMND',
+                            context.l10n.uiNationalIdNumber,
                             style: DiscoveryTextStyles.caption.copyWith(
                               fontWeight: FontWeight.w700,
                               color: DiscoveryColors.neutral800,
@@ -478,7 +479,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                             focusNode: _cccdFocusNode,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                              hintText: '12 chữ số',
+                              hintText: context.l10n.uiLabel12Digits,
                               hintStyle: DiscoveryTextStyles.bodySmall.copyWith(
                                 color: DiscoveryColors.neutral400,
                               ),
@@ -519,7 +520,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Ngày sinh (YYYY-MM-DD)',
+                            context.l10n.uiDateOfBirthYyyyMmDd,
                             style: DiscoveryTextStyles.caption.copyWith(
                               fontWeight: FontWeight.w700,
                               color: DiscoveryColors.neutral800,
@@ -604,8 +605,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
-                          'Lưu thay đổi',
+                        child: Text(
+                          context.l10n.uiSaveChanges,
                           style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                       );
@@ -618,7 +619,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text('Hủy'),
+                        child: Text(context.l10n.uiCancel),
                       );
 
                       if (constraints.maxWidth < 340 ||

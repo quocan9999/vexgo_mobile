@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/data/models/stop_point_model.dart';
@@ -32,8 +33,8 @@ class StopPointSelection extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           points.isEmpty
-              ? 'Chưa có điểm dừng cho chuyến xe này. Vui lòng quay lại chọn chuyến khác.'
-              : 'Có ${points.length} điểm để lựa chọn',
+              ? context.l10n.uiNoStopsAreAvailableForThisTripGo
+              : context.l10n.uiAvailableStops(points.length),
           style: DiscoveryTextStyles.bodySmall.copyWith(
             color: DiscoveryColors.neutral500,
           ),

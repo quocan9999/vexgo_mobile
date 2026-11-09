@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -68,8 +69,9 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
     if (match != null) {
       if (widget.currentOrderAmount < match.minOrderAmount) {
         setState(() {
-          _inputError =
-              'Đơn hàng chưa đạt mức tối thiểu ${CurrencyFormatter.format(match.minOrderAmount)}';
+          _inputError = context.l10n.uiTheBookingDoesNotMeetTheMinimumOf(
+            CurrencyFormatter.format(match.minOrderAmount),
+          );
         });
         return;
       }
@@ -77,7 +79,7 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
       Navigator.pop(context);
     } else {
       setState(() {
-        _inputError = 'Mã giảm giá không hợp lệ hoặc đã hết hạn!';
+        _inputError = context.l10n.uiThePromoCodeIsInvalidOrExpired;
       });
     }
   }
@@ -115,7 +117,7 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Chọn mã giảm giá VexGo',
+                  context.l10n.uiSelectAVexgoPromoCode,
                   style: AppTextStyles.h3.copyWith(fontSize: 18),
                 ),
                 IconButton(
@@ -141,7 +143,7 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                         controller: _codeController,
                         textCapitalization: TextCapitalization.characters,
                         decoration: InputDecoration(
-                          hintText: 'Nhập mã khuyến mãi...',
+                          hintText: context.l10n.uiEnterPromoCodeac6007,
                           prefixIcon: const Icon(
                             Icons.confirmation_number_outlined,
                             color: AppColors.primary,
@@ -170,7 +172,7 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                     ),
                     const SizedBox(width: AppDimensions.sm),
                     CustomButton(
-                      text: 'Áp dụng',
+                      text: context.l10n.uiApply,
                       height: 48,
                       onPressed: _applyManualCode,
                     ),
@@ -210,7 +212,7 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Đang áp dụng: ${widget.currentVoucher!.code}',
+                      context.l10n.uiApplied(widget.currentVoucher!.code),
                       style: AppTextStyles.caption.copyWith(
                         color: AppColors.success,
                         fontWeight: FontWeight.w700,
@@ -222,8 +224,8 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                       widget.onVoucherRemoved();
                       Navigator.pop(context);
                     },
-                    child: const Text(
-                      'Gỡ bỏ',
+                    child: Text(
+                      context.l10n.uiRemove,
                       style: TextStyle(color: AppColors.error, fontSize: 13),
                     ),
                   ),
@@ -317,7 +319,12 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                                   const Spacer(),
                                   if (!isEligible)
                                     Text(
-                                      'Cần thêm ${CurrencyFormatter.format(voucher.minOrderAmount - widget.currentOrderAmount)}',
+                                      context.l10n.uiAnAdditionalIsRequired(
+                                        CurrencyFormatter.format(
+                                          voucher.minOrderAmount -
+                                              widget.currentOrderAmount,
+                                        ),
+                                      ),
                                       style: AppTextStyles.caption.copyWith(
                                         color: AppColors.error,
                                         fontWeight: FontWeight.w600,
@@ -326,8 +333,8 @@ class _VoucherSelectionSheetState extends State<VoucherSelectionSheet> {
                                   else
                                     CustomButton(
                                       text: isSelected
-                                          ? 'Đã chọn'
-                                          : 'Dùng ngay',
+                                          ? context.l10n.uiSelected40b56a
+                                          : context.l10n.uiUseNow,
                                       height: 32,
                                       type: isSelected
                                           ? ButtonType.outline

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../notification/bloc/notification_bloc.dart';
 import '../notification/bloc/notification_event.dart';
@@ -73,31 +74,31 @@ class MainShellScreen extends StatelessWidget {
                     ),
             type: BottomNavigationBarType.fixed,
             elevation: 0,
-            items: const [
+            items: [
               BottomNavigationBarItem(
                 icon: Icon(Icons.directions_bus_outlined),
                 activeIcon: Icon(Icons.directions_bus_rounded),
-                label: 'Trang chủ',
+                label: context.l10n.uiHome,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.confirmation_number_outlined),
                 activeIcon: Icon(Icons.confirmation_number_rounded),
-                label: 'Vé của tôi',
+                label: context.l10n.uiMyTickets,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.local_shipping_outlined),
                 activeIcon: Icon(Icons.local_shipping_rounded),
-                label: 'Gửi hàng',
+                label: context.l10n.uiShipments,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.notifications_none_rounded),
                 activeIcon: Icon(Icons.notifications_rounded),
-                label: 'Thông báo',
+                label: context.l10n.uiNotifications,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline_rounded),
                 activeIcon: Icon(Icons.person_rounded),
-                label: 'Tài khoản',
+                label: context.l10n.uiAccount,
               ),
             ],
           ),

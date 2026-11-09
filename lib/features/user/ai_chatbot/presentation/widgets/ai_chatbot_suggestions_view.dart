@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -27,14 +28,17 @@ class AiChatbotSuggestionsView extends StatelessWidget {
 
   static String categoryLabel(String raw) {
     return switch (raw.trim().toUpperCase()) {
-      'POLICY' || 'CHINH_SACH' => 'Chính sách',
-      'LUGGAGE' || 'HANH_LY' => 'Hành lý',
-      'BOOKING' || 'DAT_VE' => 'Đặt vé',
-      'TRIP' || 'CHUYEN_XE' => 'Chuyến xe',
-      'PAYMENT' || 'THANH_TOAN' => 'Thanh toán',
-      'REFUND' || 'HUY_VE' => 'Hủy & hoàn tiền',
-      'SHIPMENT' || 'GUI_HANG' => 'Gửi hàng',
-      _ => raw.trim().isEmpty ? 'Gợi ý' : raw.trim(),
+      'POLICY' || 'CHINH_SACH' => LocaleController.strings.uiPolicies,
+      'LUGGAGE' || 'HANH_LY' => LocaleController.strings.uiLuggage,
+      'BOOKING' || 'DAT_VE' => LocaleController.strings.uiBookTickets,
+      'TRIP' || 'CHUYEN_XE' => LocaleController.strings.uiBusTrips,
+      'PAYMENT' || 'THANH_TOAN' => LocaleController.strings.uiPayment,
+      'REFUND' || 'HUY_VE' => LocaleController.strings.uiCancellationRefunds,
+      'SHIPMENT' || 'GUI_HANG' => LocaleController.strings.uiShipments,
+      _ =>
+        raw.trim().isEmpty
+            ? LocaleController.strings.uiSuggestions
+            : raw.trim(),
     };
   }
 
@@ -58,7 +62,7 @@ class AiChatbotSuggestionsView extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Câu hỏi thường gặp',
+                context.l10n.uiFrequentlyAskedQuestions,
                 style: DiscoveryTextStyles.titleSmall.copyWith(
                   color: DiscoveryColors.neutral900,
                   fontWeight: FontWeight.w700,
@@ -90,7 +94,7 @@ class AiChatbotSuggestionsView extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Đang tải câu hỏi gợi ý…',
+                    context.l10n.uiLoadingSuggestedQuestions,
                     style: DiscoveryTextStyles.bodyMedium.copyWith(
                       color: DiscoveryColors.neutral700,
                     ),
@@ -150,7 +154,7 @@ class AiChatbotSuggestionsView extends StatelessWidget {
                     ),
                     onPressed: onRetry,
                     icon: const Icon(Icons.refresh_rounded, size: 16),
-                    label: const Text('Thử lại'),
+                    label: Text(context.l10n.uiTryAgain),
                   ),
                 ),
               ],
@@ -169,7 +173,7 @@ class AiChatbotSuggestionsView extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Chưa có câu hỏi gợi ý sẵn. Bạn có thể nhập trực tiếp câu hỏi bên dưới.',
+                    context.l10n.uiNoSuggestedQuestionsAreAvailableYetEnterYour,
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.neutral700,
                     ),
@@ -178,7 +182,7 @@ class AiChatbotSuggestionsView extends StatelessWidget {
                 const SizedBox(width: 8),
                 IconButton(
                   key: const Key('ai-chatbot-suggestions-reload-btn'),
-                  tooltip: 'Tải lại câu hỏi gợi ý',
+                  tooltip: context.l10n.uiRefreshSuggestedQuestions,
                   constraints: const BoxConstraints(
                     minWidth: 48,
                     minHeight: 48,
@@ -257,7 +261,7 @@ class AiChatbotSuggestionsView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Xin chào! Tôi là Trợ lý AI VexGo',
+                      LocaleController.strings.uiHelloIMTheVexgoAiAssistant,
                       style: DiscoveryTextStyles.titleMedium.copyWith(
                         fontWeight: FontWeight.w800,
                         color: DiscoveryColors.neutral900,
@@ -265,7 +269,9 @@ class AiChatbotSuggestionsView extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Hỗ trợ giải đáp chính sách vé, hành lý đi kèm, gợi ý chuyến xe và hướng dẫn quy trình đặt vé.',
+                      LocaleController
+                          .strings
+                          .uiICanHelpWithTicketPoliciesAccompaniedLuggage,
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral700,
                         height: 1.4,
@@ -297,7 +303,9 @@ class AiChatbotSuggestionsView extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Trợ lý AI chỉ cung cấp thông tin tham khảo và không tự động đặt vé, thanh toán, hủy vé hay thay đổi vận đơn.',
+                    LocaleController
+                        .strings
+                        .uiTheAiAssistantProvidesInformationOnlyItDoes,
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 11.5,
@@ -399,7 +407,7 @@ class _SuggestionCard extends StatelessWidget {
               if (onFillDraft != null) ...[
                 const SizedBox(width: 4),
                 IconButton(
-                  tooltip: 'Chèn câu hỏi vào ô nhập',
+                  tooltip: context.l10n.uiInsertQuestionIntoTheMessageField,
                   constraints: const BoxConstraints(
                     minWidth: 48,
                     minHeight: 48,

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
@@ -12,7 +13,7 @@ class Step2PickupPoint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => StopPointSelection(
-    title: 'Chọn điểm đón tại ${state.trip?.fromCityName ?? ""}',
+    title: context.l10n.uiSelectPickUpIn(state.trip?.fromCityName ?? ""),
     points: state.availablePickupPoints,
     selected: state.selectedPickupPoint,
     onSelected: (point) => bloc.add(SelectPickupPointEvent(point)),

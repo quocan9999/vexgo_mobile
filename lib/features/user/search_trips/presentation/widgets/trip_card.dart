@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
@@ -231,8 +232,8 @@ class TripCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     isSoldOut
-                        ? 'Chuyến xe đã hết chỗ'
-                        : '/vé · Còn ${trip.availableSeats} chỗ',
+                        ? context.l10n.uiThisTripIsSoldOut
+                        : context.l10n.uiTicketSeatsLeft(trip.availableSeats),
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: isSoldOut
                           ? DiscoveryColors.error
@@ -251,7 +252,7 @@ class TripCard extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
-                        'Chi tiết chuyến xe',
+                        context.l10n.uiTripDetails,
                         style: DiscoveryTextStyles.bodySmall.copyWith(
                           color: DiscoveryColors.primary,
                           fontWeight: FontWeight.w600,
@@ -265,7 +266,7 @@ class TripCard extends StatelessWidget {
               );
 
               final ctaButton = DiscoveryButton(
-                text: 'Chọn chuyến',
+                text: context.l10n.uiSelectTrip,
                 type: ButtonType.secondary,
                 width: isNarrow ? double.infinity : 130,
                 height: 44,

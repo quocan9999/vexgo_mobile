@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/widgets/flat_filter_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/network/api_config.dart';
@@ -48,7 +50,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                state.errorMessage!,
+                localizedClientLabel(context, state.errorMessage!),
                 style: const TextStyle(color: Colors.white),
               ),
               backgroundColor: DiscoveryColors.error,
@@ -60,7 +62,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                state.successMessage!,
+                localizedClientLabel(context, state.successMessage!),
                 style: const TextStyle(color: Colors.white),
               ),
               backgroundColor: DiscoveryColors.success,
@@ -81,11 +83,11 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
         return Scaffold(
           backgroundColor: DiscoveryColors.background,
           appBar: TabPageHeader(
-            title: 'Vé của tôi',
+            title: context.l10n.uiMyTickets,
             actions: [
               if (!ApiConfig.isDemoMode)
                 IconButton(
-                  tooltip: 'Tra cứu chứng từ thanh toán',
+                  tooltip: context.l10n.uiLookUpPaymentReceipt,
                   icon: const Icon(Icons.receipt_long_outlined),
                   onPressed: () => context.push('/booking-receipt'),
                 ),
@@ -144,7 +146,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                 ),
               ),
               child: Text(
-                'Đăng nhập để xem tất cả vé',
+                context.l10n.uiSignInToViewAllTickets,
                 style: DiscoveryTextStyles.button.copyWith(
                   color: DiscoveryColors.primary,
                   fontSize: 14,
@@ -173,7 +175,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
           color: DiscoveryColors.neutral900,
         ),
         decoration: InputDecoration(
-          hintText: 'Nhập mã vé (VXG-...) hoặc SĐT tra cứu...',
+          hintText: context.l10n.uiEnterTicketCodeVxgOrPhoneNumber,
           hintStyle: DiscoveryTextStyles.caption.copyWith(
             color: DiscoveryColors.neutral400,
             fontSize: 13,
@@ -186,7 +188,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
           suffixIcon: _searchCtrl.text.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear_rounded, size: 18),
-                  tooltip: 'Xóa tìm kiếm',
+                  tooltip: context.l10n.uiClearSearch,
                   onPressed: () {
                     _searchCtrl.clear();
                     bloc.add(const SearchTicketsEvent(''));
@@ -223,17 +225,17 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
       onChanged: (index) => bloc.add(ChangeTabEvent(statuses[index])),
       options: [
         FlatFilterOption(
-          'Sắp đi',
+          context.l10n.uiUpcoming,
           count: state.upcomingTickets.length,
           key: const Key('tab-upcoming'),
         ),
         FlatFilterOption(
-          'Đã đi',
+          context.l10n.uiPastTrips,
           count: state.completedTickets.length,
           key: const Key('tab-completed'),
         ),
         FlatFilterOption(
-          'Đã hủy',
+          context.l10n.uiCancelled,
           count: state.cancelledTickets.length,
           key: const Key('tab-cancelled'),
         ),
@@ -343,7 +345,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                     ),
                     const SizedBox(height: AppDimensions.base),
                     Text(
-                      'Không thể tải danh sách vé',
+                      context.l10n.uiUnableToLoadTickets,
                       style: DiscoveryTextStyles.h4.copyWith(
                         color: DiscoveryColors.neutral900,
                         fontWeight: FontWeight.w700,
@@ -352,8 +354,13 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      state.errorMessage ??
-                          'Đã xảy ra lỗi trong quá trình tải dữ liệu. Vui lòng thử lại.',
+                      localizedClientLabel(
+                        context,
+                        state.errorMessage ??
+                            context
+                                .l10n
+                                .uiAnErrorOccurredWhileLoadingDataTryAgain,
+                      ),
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral500,
                         height: 1.4,
@@ -366,7 +373,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () => bloc.add(const LoadMyTicketsEvent()),
                         icon: const Icon(Icons.refresh_rounded, size: 18),
-                        label: const Text('Thử lại'),
+                        label: Text(context.l10n.uiTryAgain),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: DiscoveryColors.primary,
                           foregroundColor: Colors.white,
@@ -422,7 +429,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                     ),
                     const SizedBox(height: AppDimensions.base),
                     Text(
-                      'Không tìm thấy vé phù hợp',
+                      context.l10n.uiNoMatchingTickets,
                       style: DiscoveryTextStyles.h4.copyWith(
                         color: DiscoveryColors.neutral900,
                         fontWeight: FontWeight.w700,
@@ -431,7 +438,9 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Không có vé nào khớp với từ khóa "${state.searchQuery.trim()}". Vui lòng kiểm tra lại mã vé, số điện thoại hoặc lộ trình.',
+                      context.l10n.uiNoTicketsMatchCheckTheTicketCodePhone(
+                        state.searchQuery.trim(),
+                      ),
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral500,
                         height: 1.4,
@@ -447,7 +456,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                           bloc.add(const SearchTicketsEvent(''));
                         },
                         icon: const Icon(Icons.clear_rounded, size: 18),
-                        label: const Text('Xóa bộ lọc tìm kiếm'),
+                        label: Text(context.l10n.uiClearSearchFilters),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: DiscoveryColors.primary,
                           side: const BorderSide(
@@ -484,22 +493,20 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
     switch (status) {
       case TicketStatus.upcoming:
         icon = Icons.confirmation_number_outlined;
-        title = 'Chưa có chuyến xe nào sắp đi';
-        subtitle =
-            'Khám phá ngay hàng trăm chuyến xe khách liên tỉnh chất lượng cao với giá ưu đãi!';
+        title = context.l10n.uiNoUpcomingTrips;
+        subtitle = context.l10n.uiDiscoverIntercityBusTripsAtGreatFares;
         showAction = true;
         break;
       case TicketStatus.completed:
         icon = Icons.history_rounded;
-        title = 'Chưa có lịch sử chuyến đi';
-        subtitle =
-            'Các chuyến xe bạn đã hoàn thành sẽ hiển thị tại đây để bạn có thể xem lại hoặc đánh giá.';
+        title = context.l10n.uiNoPastTripsYet;
+        subtitle = context.l10n.uiYourCompletedTripsWillAppearHereSoYou;
         break;
       case TicketStatus.cancelled:
         icon = Icons.cancel_presentation_rounded;
-        title = 'Không có vé nào bị hủy';
+        title = context.l10n.uiNoCancelledTickets;
         subtitle =
-            'Các vé đã hủy được hiển thị tại đây. Để yêu cầu hoàn tiền, vui lòng liên hệ hỗ trợ.';
+            context.l10n.uiCancelledTicketsAppearHereContactSupportToRequest;
         break;
     }
 
@@ -556,7 +563,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                         child: ElevatedButton.icon(
                           onPressed: () => context.go('/search-trips'),
                           icon: const Icon(Icons.search_rounded, size: 18),
-                          label: const Text('Tìm chuyến ngay'),
+                          label: Text(context.l10n.uiFindATrip),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: DiscoveryColors.primary,
                             foregroundColor: Colors.white,
@@ -572,7 +579,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                     TextButton.icon(
                       onPressed: () => bloc.add(const LoadMyTicketsEvent()),
                       icon: const Icon(Icons.refresh_rounded, size: 16),
-                      label: const Text('Tải lại'),
+                      label: Text(context.l10n.uiRefresh),
                       style: TextButton.styleFrom(
                         foregroundColor: DiscoveryColors.neutral600,
                       ),

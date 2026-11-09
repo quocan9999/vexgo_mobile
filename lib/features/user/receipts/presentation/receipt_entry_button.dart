@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -35,7 +36,7 @@ class _ReceiptEntryButtonState extends State<ReceiptEntryButton> {
       ? const SizedBox.shrink()
       : OutlinedButton.icon(
           icon: const Icon(Icons.receipt_long_outlined),
-          label: const Text('Xem chứng từ thanh toán'),
+          label: Text(context.l10n.uiViewPaymentReceipt),
           onPressed: _session != TokenStorage.sessionVersion
               ? null
               : () {

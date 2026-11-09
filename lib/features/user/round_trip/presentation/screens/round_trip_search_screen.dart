@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -29,8 +30,8 @@ class RoundTripSearchScreen extends StatelessWidget {
       request = RoundTripRequest.fromRoute(query: query, extra: extra);
     } catch (e) {
       requestError = e is ArgumentError
-          ? (e.message?.toString() ?? 'Thông tin tìm kiếm không hợp lệ.')
-          : 'Thông tin tìm kiếm không hợp lệ.';
+          ? (e.message?.toString() ?? context.l10n.uiInvalidSearchDetails)
+          : context.l10n.uiInvalidSearchDetails;
     }
 
     if (request == null) {
@@ -45,7 +46,7 @@ class RoundTripSearchScreen extends StatelessWidget {
                   context.canPop() ? context.pop() : context.go(AppRoutes.home),
             ),
             title: Text(
-              'Tìm chuyến khứ hồi',
+              context.l10n.uiFindRoundTrips,
               style: DiscoveryTextStyles.titleMedium.copyWith(
                 color: Colors.white,
               ),
@@ -64,14 +65,14 @@ class RoundTripSearchScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Không thể tìm chuyến',
+                    context.l10n.uiUnableToFindTrips,
                     style: DiscoveryTextStyles.h1,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     requestError ??
-                        'Dữ liệu tuyến đường hoặc ngày đi/về không hợp lệ.',
+                        context.l10n.uiTheRouteOrDepartureReturnDatesAreInvalid,
                     style: DiscoveryTextStyles.bodyMedium.copyWith(
                       color: DiscoveryColors.neutral600,
                     ),
@@ -88,7 +89,7 @@ class RoundTripSearchScreen extends StatelessWidget {
                       ),
                     ),
                     icon: const Icon(Icons.home_rounded),
-                    label: const Text('Về Trang chủ'),
+                    label: Text(context.l10n.uiGoToHome8a211a),
                     onPressed: () => context.go(AppRoutes.home),
                   ),
                 ],
@@ -135,7 +136,7 @@ class _RoundTripSearchView extends StatelessWidget {
               backgroundColor: DiscoveryColors.header,
               elevation: 0,
               leading: IconButton(
-                tooltip: 'Quay lại',
+                tooltip: context.l10n.uiBack,
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () => context.canPop()
                     ? context.pop()
@@ -145,7 +146,10 @@ class _RoundTripSearchView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${request.origin.name} ⇄ ${request.destination.name}',
+                    context.l10n.ui742d76(
+                      request.origin.name,
+                      request.destination.name,
+                    ),
                     style: DiscoveryTextStyles.titleMedium.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -155,7 +159,11 @@ class _RoundTripSearchView extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '$departureDateStr - $returnDateStr • ${request.ticketCount} vé',
+                    context.l10n.uiTickets11c2bb(
+                      departureDateStr,
+                      returnDateStr,
+                      request.ticketCount,
+                    ),
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: Colors.white.withValues(alpha: 0.9),
                     ),
@@ -183,8 +191,8 @@ class _RoundTripSearchView extends StatelessWidget {
                         Flexible(
                           child: Text(
                             state.outbound != null
-                                ? 'Lượt đi (Đã chọn)'
-                                : 'Lượt đi',
+                                ? context.l10n.uiOutboundSelected
+                                : context.l10n.uiOutbound,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -200,8 +208,8 @@ class _RoundTripSearchView extends StatelessWidget {
                         Flexible(
                           child: Text(
                             state.inbound != null
-                                ? 'Lượt về (Đã chọn)'
-                                : 'Lượt về',
+                                ? context.l10n.uiReturnSelected
+                                : context.l10n.uiReturn,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -216,8 +224,10 @@ class _RoundTripSearchView extends StatelessWidget {
                 _buildLegTab(
                   context,
                   leg: TripLeg.outbound,
-                  title:
-                      'Lượt đi: ${request.origin.name} → ${request.destination.name}',
+                  title: context.l10n.uiOutbound39fb6f(
+                    request.origin.name,
+                    request.destination.name,
+                  ),
                   dateStr: departureDateStr,
                   loading: state.outboundLoading,
                   error: state.outboundError,
@@ -227,9 +237,11 @@ class _RoundTripSearchView extends StatelessWidget {
                     final ok = cubit.select(TripLeg.outbound, trip);
                     if (!ok) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            'Chuyến đi không tương thích với chuyến về đã chọn.',
+                            context
+                                .l10n
+                                .uiThisOutboundTripDoesNotMatchTheSelected,
                           ),
                           backgroundColor: DiscoveryColors.error,
                         ),
@@ -242,8 +254,10 @@ class _RoundTripSearchView extends StatelessWidget {
                 _buildLegTab(
                   context,
                   leg: TripLeg.inbound,
-                  title:
-                      'Lượt về: ${request.destination.name} → ${request.origin.name}',
+                  title: context.l10n.uiReturn0b24ba(
+                    request.destination.name,
+                    request.origin.name,
+                  ),
                   dateStr: returnDateStr,
                   loading: state.inboundLoading,
                   error: state.inboundError,
@@ -253,8 +267,10 @@ class _RoundTripSearchView extends StatelessWidget {
                     final ok = cubit.select(TripLeg.inbound, trip);
                     if (!ok) {
                       final reason = state.outbound == null
-                          ? 'Vui lòng chọn chuyến đi trước hoặc kiểm tra giờ khởi hành.'
-                          : 'Chuyến về phải khởi hành sau khi chuyến đi đến nơi (kể cả chuyến qua đêm).';
+                          ? context.l10n.uiSelectAnOutboundTripFirstOrCheckThe
+                          : context
+                                .l10n
+                                .uiTheReturnTripMustDepartAfterTheOutbound;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(reason),
@@ -296,7 +312,11 @@ class _RoundTripSearchView extends StatelessWidget {
             const CircularProgressIndicator(color: DiscoveryColors.primary),
             const SizedBox(height: 16),
             Text(
-              'Đang tìm kiếm chuyến ${leg == TripLeg.outbound ? 'đi' : 'về'}...',
+              context.l10n.uiSearchingForTrips3befb9(
+                leg == TripLeg.outbound
+                    ? context.l10n.uiOutbound4e8b02
+                    : context.l10n.uiReturn36c588,
+              ),
               style: DiscoveryTextStyles.bodyMedium.copyWith(
                 color: DiscoveryColors.neutral600,
               ),
@@ -328,7 +348,7 @@ class _RoundTripSearchView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Lưu ý: Tải lại sẽ làm mới cả hai chặng và đặt lại lựa chọn.',
+                context.l10n.uiNoteRefreshingReloadsBothLegsAndResetsYour,
                 style: DiscoveryTextStyles.caption.copyWith(
                   color: DiscoveryColors.neutral500,
                 ),
@@ -345,7 +365,7 @@ class _RoundTripSearchView extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Thử lại'),
+                label: Text(context.l10n.uiTryAgain),
                 onPressed: onRetry,
               ),
             ],
@@ -368,14 +388,21 @@ class _RoundTripSearchView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Không tìm thấy chuyến ${leg == TripLeg.outbound ? 'đi' : 'về'}',
+                context.l10n.uiNoTripsFound(
+                  leg == TripLeg.outbound
+                      ? context.l10n.uiOutbound4e8b02
+                      : context.l10n.uiReturn36c588,
+                ),
                 style: DiscoveryTextStyles.titleMedium.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
-                'Không có chuyến nào khởi hành vào ngày $dateStr hoặc đã hết chỗ cho ${request.ticketCount} vé.',
+                context.l10n.uiNoTripsDepartOnOrThereAreNot(
+                  dateStr,
+                  request.ticketCount,
+                ),
                 style: DiscoveryTextStyles.bodySmall.copyWith(
                   color: DiscoveryColors.neutral500,
                 ),
@@ -412,7 +439,11 @@ class _RoundTripSearchView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Đã chọn ${leg == TripLeg.outbound ? 'lượt đi' : 'lượt về'}:',
+                        context.l10n.uiSelected01ccfb(
+                          leg == TripLeg.outbound
+                              ? context.l10n.uiOutboundeff5da
+                              : context.l10n.uiReturn8bcd7d,
+                        ),
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.primary,
                           fontWeight: FontWeight.w700,
@@ -432,7 +463,7 @@ class _RoundTripSearchView extends StatelessWidget {
                 TextButton(
                   onPressed: onClear,
                   child: Text(
-                    'Đổi chuyến',
+                    context.l10n.uiChangeTrip,
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.primary,
                       fontWeight: FontWeight.w700,
@@ -498,8 +529,11 @@ class _RoundTripSearchView extends StatelessWidget {
                       Flexible(
                         child: Text(
                           out != null
-                              ? 'Đi: ${out.operatorName} (${out.departureTime})'
-                              : 'Đi: Chưa chọn',
+                              ? context.l10n.uiOutbound8a89c9(
+                                  out.operatorName,
+                                  out.departureTime,
+                                )
+                              : context.l10n.uiOutboundNotSelected,
                           style: DiscoveryTextStyles.caption.copyWith(
                             color: out != null
                                 ? DiscoveryColors.neutral800
@@ -528,8 +562,11 @@ class _RoundTripSearchView extends StatelessWidget {
                       Flexible(
                         child: Text(
                           back != null
-                              ? 'Về: ${back.operatorName} (${back.departureTime})'
-                              : 'Về: Chưa chọn',
+                              ? context.l10n.uiReturn824be9(
+                                  back.operatorName,
+                                  back.departureTime,
+                                )
+                              : context.l10n.uiReturnNotSelected,
                           style: DiscoveryTextStyles.caption.copyWith(
                             color: back != null
                                 ? DiscoveryColors.neutral800
@@ -547,7 +584,9 @@ class _RoundTripSearchView extends StatelessWidget {
                   if (estTotal != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      'Tạm tính: ${CurrencyFormatter.format(estTotal)}',
+                      context.l10n.uiEstimate(
+                        CurrencyFormatter.format(estTotal),
+                      ),
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.secondary,
                         fontWeight: FontWeight.w700,
@@ -579,7 +618,7 @@ class _RoundTripSearchView extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                'Tiếp tục',
+                context.l10n.uiContinue,
                 style: DiscoveryTextStyles.bodyMedium.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,

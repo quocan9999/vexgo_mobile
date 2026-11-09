@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import '../../../booking/presentation/widgets/booking_rate_limit_view.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -55,7 +57,7 @@ class RoundTripBookingScreen extends StatelessWidget {
                   context.canPop() ? context.pop() : context.go(AppRoutes.home),
             ),
             title: Text(
-              'Đặt vé khứ hồi',
+              context.l10n.uiBookARoundTrip,
               style: DiscoveryTextStyles.titleMedium.copyWith(
                 color: Colors.white,
               ),
@@ -74,13 +76,13 @@ class RoundTripBookingScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Thiếu dữ liệu chuyến đi',
+                    context.l10n.uiTripDetailsMissing,
                     style: DiscoveryTextStyles.h1,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Không tìm thấy thông tin cặp chuyến đã chọn. Vui lòng quay lại tìm chuyến.',
+                    context.l10n.uiTheSelectedTripPairCouldNotBeFound,
                     style: DiscoveryTextStyles.bodyMedium.copyWith(
                       color: DiscoveryColors.neutral600,
                     ),
@@ -99,7 +101,7 @@ class RoundTripBookingScreen extends StatelessWidget {
                     onPressed: () => context.canPop()
                         ? context.pop()
                         : context.go(AppRoutes.home),
-                    child: const Text('Quay lại tìm kiếm'),
+                    child: Text(context.l10n.uiBackToSearch),
                   ),
                 ],
               ),
@@ -231,8 +233,14 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
             _luggagePassengerCounts[leg] != null &&
             _luggagePassengerCounts[leg] != passengerCount &&
             hadLuggage) {
-          _luggageSeatChangeNotices[leg] =
-              'Số ghế ${leg == TripLeg.outbound ? "Lượt đi" : "Lượt về"} đã thay đổi (${_luggagePassengerCounts[leg]} → $passengerCount hành khách). Vui lòng kiểm tra lại hạn mức hành lý theo số hành khách mới.';
+          _luggageSeatChangeNotices[leg] = context.l10n
+              .uiSeatCountForChangedPassengersCheckTheLuggage(
+                leg == TripLeg.outbound
+                    ? context.l10n.uiOutbound
+                    : context.l10n.uiReturn,
+                _luggagePassengerCounts[leg] ?? 0,
+                passengerCount,
+              );
           if (legState.cargo.enabled && !legState.isCheckoutLocked) {
             checkoutCubit.dispatch(
               leg,
@@ -291,19 +299,19 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
       final exit = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Rời khỏi trang thanh toán?'),
-          content: const Text(
-            'Đơn hàng của bạn đã được ghi nhận trên hệ thống. Việc rời khỏi đây sẽ không tự động hủy đơn. Bạn có thể tra cứu và thanh toán lại tại mục "Vé của tôi".',
+          title: Text(context.l10n.uiLeavePayment),
+          content: Text(
+            context.l10n.uiYourBookingHasBeenRecordedLeavingWillNot,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Ở lại'),
+              child: Text(context.l10n.uiStay),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text(
-                'Rời khỏi',
+              child: Text(
+                context.l10n.uiLeave,
                 style: TextStyle(color: DiscoveryColors.error),
               ),
             ),
@@ -361,19 +369,17 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
     final shouldExit = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Thoát khỏi đặt vé khứ hồi?'),
-        content: const Text(
-          'Bạn có chắc chắn muốn rời khỏi tiến trình đặt vé không? Vị trí ghế đang giữ sẽ được giải phóng cho hành khách khác.',
-        ),
+        title: Text(context.l10n.uiLeaveRoundTripBooking),
+        content: Text(context.l10n.uiLeaveThisBookingYourHeldSeatsWillBea1380d),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Tiếp tục đặt vé'),
+            child: Text(context.l10n.uiContinueBooking),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text(
-              'Rời khỏi',
+            child: Text(
+              context.l10n.uiLeave,
               style: TextStyle(color: DiscoveryColors.error),
             ),
           ),
@@ -427,7 +433,7 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
         if (state.error != null && state.rateLimit == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.error!),
+              content: Text(localizedClientLabel(context, state.error!)),
               backgroundColor: DiscoveryColors.error,
               behavior: SnackBarBehavior.floating,
             ),
@@ -717,7 +723,11 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Đã xong ${_activeLeg == TripLeg.outbound ? "Lượt đi" : "Lượt về"}',
+                context.l10n.uiCompletedb1ec0b(
+                  _activeLeg == TripLeg.outbound
+                      ? context.l10n.uiOutbound
+                      : context.l10n.uiReturn,
+                ),
                 style: DiscoveryTextStyles.titleMedium.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -725,7 +735,11 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Vui lòng chọn chỗ ngồi và điểm đón/trả cho ${otherLeg == TripLeg.outbound ? "Lượt đi" : "Lượt về"} để tiếp tục tiến trình.',
+                context.l10n.uiSelectSeatsAndStopsForToContinue(
+                  otherLeg == TripLeg.outbound
+                      ? context.l10n.uiOutbound
+                      : context.l10n.uiReturn,
+                ),
                 style: DiscoveryTextStyles.bodyMedium.copyWith(
                   color: DiscoveryColors.neutral600,
                 ),
@@ -743,7 +757,11 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
                 ),
                 icon: const Icon(Icons.swap_horiz_rounded),
                 label: Text(
-                  'Chuyển sang ${otherLeg == TripLeg.outbound ? "Lượt đi" : "Lượt về"}',
+                  context.l10n.uiSwitchTo(
+                    otherLeg == TripLeg.outbound
+                        ? context.l10n.uiOutbound
+                        : context.l10n.uiReturn,
+                  ),
                 ),
                 onPressed: () => setState(() => _activeLeg = otherLeg),
               ),
@@ -829,8 +847,11 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
       children: [
         Expanded(
           child: StopPointSelection(
-            title:
-                'Chọn điểm đón (${_activeLeg == TripLeg.outbound ? "Lượt đi" : "Lượt về"})',
+            title: context.l10n.uiSelectPickUp(
+              _activeLeg == TripLeg.outbound
+                  ? context.l10n.uiOutbound
+                  : context.l10n.uiReturn,
+            ),
             points: activeState.availablePickupPoints,
             selected: activeState.selectedPickupPoint,
             onSelected: (p) =>
@@ -861,8 +882,11 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
       children: [
         Expanded(
           child: StopPointSelection(
-            title:
-                'Chọn điểm trả (${_activeLeg == TripLeg.outbound ? "Lượt đi" : "Lượt về"})',
+            title: context.l10n.uiSelectDropOff9938e9(
+              _activeLeg == TripLeg.outbound
+                  ? context.l10n.uiOutbound
+                  : context.l10n.uiReturn,
+            ),
             points: activeState.availableDropoffPoints,
             selected: activeState.selectedDropoffPoint,
             onSelected: (p) =>
@@ -921,7 +945,9 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    seatCount > 0 ? 'Đã chọn: $seatNames' : 'Chưa chọn ghế',
+                    seatCount > 0
+                        ? context.l10n.uiSelected3e13f1(seatNames)
+                        : context.l10n.uiNoSeatsSelected,
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.neutral700,
                       fontWeight: FontWeight.w600,
@@ -955,7 +981,7 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
                 elevation: 0,
               ),
               child: Text(
-                'Tiếp tục',
+                context.l10n.uiContinue,
                 style: DiscoveryTextStyles.bodyMedium.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
@@ -984,13 +1010,13 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Phiên đăng nhập đã thay đổi',
+                context.l10n.uiSignInSessionChanged,
                 style: DiscoveryTextStyles.h1,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                'Tài khoản đã đăng xuất hoặc thay đổi phiên. Vui lòng quay lại tìm kiếm chuyến đi mới.',
+                context.l10n.uiYouHaveSignedOutOrYourSessionHas,
                 style: DiscoveryTextStyles.bodyMedium.copyWith(
                   color: DiscoveryColors.neutral600,
                 ),
@@ -1007,7 +1033,7 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
                   ),
                 ),
                 icon: const Icon(Icons.home_rounded),
-                label: const Text('Về Trang chủ'),
+                label: Text(context.l10n.uiGoToHome8a211a),
                 onPressed: () => context.go(AppRoutes.home),
               ),
             ],

@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -91,9 +93,11 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
       if (ticketAmt != null) {
         return CurrencyFormatter.format(ticketAmt);
       }
-      return 'Cước vật phẩm thanh toán riêng tại bến';
+      return context.l10n.uiItemFeesArePaidSeparatelyAtTheStation;
     }
-    return s.quoteLoading ? 'Đang xác minh giá...' : 'Chưa có giá vé';
+    return s.quoteLoading
+        ? context.l10n.uiVerifyingFares
+        : context.l10n.uiFareUnavailable;
   }
 
   bool _isLegLuggageValid(LuggageCubit? cubit) {
@@ -193,8 +197,10 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
           _buildLegCard(
             context,
             leg: TripLeg.outbound,
-            title:
-                'Lượt đi: ${widget.request.origin.name} → ${widget.request.destination.name}',
+            title: context.l10n.uiOutbound39fb6f(
+              widget.request.origin.name,
+              widget.request.destination.name,
+            ),
             dateStr: DateFormatter.formatFullDate(widget.request.departureDate),
             state: out,
             voucherController: _outboundVoucherController,
@@ -208,8 +214,10 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
           _buildLegCard(
             context,
             leg: TripLeg.inbound,
-            title:
-                'Lượt về: ${widget.request.destination.name} → ${widget.request.origin.name}',
+            title: context.l10n.uiReturn0b24ba(
+              widget.request.destination.name,
+              widget.request.origin.name,
+            ),
             dateStr: DateFormatter.formatFullDate(widget.request.returnDate),
             state: back,
             voucherController: _inboundVoucherController,
@@ -240,7 +248,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Hành khách đại diện',
+                        context.l10n.uiLeadPassenger,
                         style: DiscoveryTextStyles.titleSmall.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -291,19 +299,19 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tổng kết chi phí',
+                  context.l10n.uiCostSummary,
                   style: DiscoveryTextStyles.titleMedium.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 12),
                 _buildPriceRow(
-                  'Lượt đi (${out.selectedSeats.length} vé)',
+                  context.l10n.uiOutboundTickets(out.selectedSeats.length),
                   _formatLegTotalSummary(out),
                 ),
                 const SizedBox(height: 6),
                 _buildPriceRow(
-                  'Lượt về (${back.selectedSeats.length} vé)',
+                  context.l10n.uiReturnTickets(back.selectedSeats.length),
                   _formatLegTotalSummary(back),
                 ),
                 const Divider(height: 20, color: DiscoveryColors.neutral200),
@@ -314,7 +322,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                   runSpacing: 4,
                   children: [
                     Text(
-                      'Tổng tiền thanh toán',
+                      context.l10n.uiTotalPayment0a622e,
                       style: DiscoveryTextStyles.titleSmall.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -323,8 +331,8 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                       widget.totalAmount != null
                           ? CurrencyFormatter.format(widget.totalAmount!)
                           : hasCargoPendingPrice
-                          ? 'Xác định khi tạo đơn'
-                          : 'Đang xác minh giá...',
+                          ? context.l10n.uiCalculatedWhenBookingIsCreated
+                          : context.l10n.uiVerifyingFares,
                       style: DiscoveryTextStyles.titleMedium.copyWith(
                         fontWeight: FontWeight.w800,
                         color: DiscoveryColors.secondary,
@@ -335,7 +343,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                 if (hasCargoPendingPrice) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Cước vật phẩm dự tính được thanh toán tại bến, không cộng vào tiền vé của hai chiều.',
+                    context.l10n.uiEstimatedItemFeesArePaidAtTheStation,
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.secondary,
                       fontWeight: FontWeight.w600,
@@ -344,7 +352,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                 ],
                 const SizedBox(height: 4),
                 Text(
-                  'Lưu ý: Hai đơn hàng sẽ được tạo tuần tự và thanh toán riêng từng chiều.',
+                  context.l10n.uiNoteTheTwoBookingsAreCreatedInSequence,
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.neutral500,
                   ),
@@ -368,7 +376,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                   ),
                 ),
                 child: Text(
-                  'Quay lại',
+                  context.l10n.uiBack,
                   style: DiscoveryTextStyles.bodyMedium.copyWith(
                     color: DiscoveryColors.neutral700,
                     fontWeight: FontWeight.w600,
@@ -400,7 +408,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                           ),
                         )
                       : Text(
-                          'Tạo đơn & Thanh toán',
+                          context.l10n.uiBookPay,
                           style: DiscoveryTextStyles.bodyMedium.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -454,7 +462,9 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  leg == TripLeg.outbound ? 'LƯỢT ĐI' : 'LƯỢT VỀ',
+                  leg == TripLeg.outbound
+                      ? context.l10n.uiOutboundb6646f
+                      : context.l10n.uiReturnc7af78,
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.primary,
                     fontWeight: FontWeight.w800,
@@ -476,14 +486,14 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
           ),
           const SizedBox(height: 10),
           Text(
-            '${trip?.operatorName ?? "Nhà xe"} • $dateStr',
+            '${trip?.operatorName ?? context.l10n.uiBusOperator} • $dateStr',
             style: DiscoveryTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Ghế đã chọn: $seatsStr',
+            context.l10n.uiSelectedSeats09ff88(seatsStr),
             style: DiscoveryTextStyles.bodySmall.copyWith(
               color: DiscoveryColors.primary,
               fontWeight: FontWeight.w700,
@@ -492,7 +502,10 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
           const SizedBox(height: 6),
           if (state.selectedPickupPoint != null) ...[
             Text(
-              'Đón: ${state.selectedPickupPoint!.time} - ${state.selectedPickupPoint!.name}',
+              context.l10n.uiPickUp4156d4(
+                state.selectedPickupPoint!.time,
+                state.selectedPickupPoint!.name,
+              ),
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.neutral600,
               ),
@@ -502,7 +515,10 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
           ],
           if (state.selectedDropoffPoint != null) ...[
             Text(
-              'Trả: ${state.selectedDropoffPoint!.time} - ${state.selectedDropoffPoint!.name}',
+              context.l10n.uiDropOff05415d(
+                state.selectedDropoffPoint!.time,
+                state.selectedDropoffPoint!.name,
+              ),
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.neutral600,
               ),
@@ -516,7 +532,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
               state.errorMessage!.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
-              state.errorMessage!,
+              localizedClientLabel(context, state.errorMessage!),
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.error,
                 fontWeight: FontWeight.w600,
@@ -533,7 +549,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                 key: ValueKey('edit-summary-leg-${leg.name}-btn'),
                 onPressed: widget.busy ? null : () => widget.onEditLeg!(leg),
                 icon: const Icon(Icons.edit_outlined, size: 16),
-                label: const Text('Đổi ghế / điểm đón trả'),
+                label: Text(context.l10n.uiChangeSeatsStops),
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -557,8 +573,11 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                   key: ValueKey('voucher-input-${leg.name}'),
                   controller: voucherController,
                   decoration: InputDecoration(
-                    hintText:
-                        'Mã giảm giá ${leg == TripLeg.outbound ? "lượt đi" : "lượt về"}',
+                    hintText: context.l10n.uiPromoCodef90eb2(
+                      leg == TripLeg.outbound
+                          ? context.l10n.uiOutboundeff5da
+                          : context.l10n.uiReturn8bcd7d,
+                    ),
                     hintStyle: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.neutral400,
                     ),
@@ -589,13 +608,16 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text('Áp dụng', style: TextStyle(fontSize: 12)),
+                child: Text(
+                  context.l10n.uiApply,
+                  style: TextStyle(fontSize: 12),
+                ),
               ),
               if (state.appliedVoucher != null ||
                   state.requestedPromotionCode.isNotEmpty) ...[
                 const SizedBox(width: 4),
                 IconButton(
-                  tooltip: 'Gỡ voucher',
+                  tooltip: context.l10n.uiRemoveVoucher,
                   icon: const Icon(
                     Icons.close,
                     size: 18,
@@ -625,7 +647,10 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
               spacing: 8,
               runSpacing: 2,
               children: [
-                Text('Giá vé chặng', style: DiscoveryTextStyles.bodySmall),
+                Text(
+                  context.l10n.uiLegFare,
+                  style: DiscoveryTextStyles.bodySmall,
+                ),
                 Text(
                   (state.checkoutBooking?.ticketSubtotal ??
                               state.ticketFinalAmount ??
@@ -636,7 +661,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                               state.ticketFinalAmount ??
                               state.finalAmount,
                         )
-                      : 'Đang xác minh giá',
+                      : context.l10n.uiVerifyingFare,
                   style: DiscoveryTextStyles.titleSmall.copyWith(
                     fontWeight: FontWeight.w700,
                     color: DiscoveryColors.secondary,
@@ -667,7 +692,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                         ? CurrencyFormatter.format(
                             state.checkoutBooking!.shippingFee!,
                           )
-                        : 'Cước vật phẩm thanh toán riêng tại bến',
+                        : context.l10n.uiItemFeesArePaidSeparatelyAtTheStation,
                     style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
                       color: state.checkoutBooking?.shippingFee != null
@@ -686,8 +711,8 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
               cubit: widget.outboundLuggageCubit!,
               locked: state.isCheckoutLocked || widget.busy,
               scopeKey: leg.name,
-              title: 'Hành lý đi kèm',
-              legBadge: 'Lượt đi',
+              title: context.l10n.uiAccompaniedLuggage,
+              legBadge: context.l10n.uiOutbound,
               seatChangeNotice: widget.outboundSeatChangeNotice,
               onDismissSeatChangeNotice:
                   widget.onDismissOutboundSeatChangeNotice,
@@ -711,8 +736,8 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
               cubit: widget.inboundLuggageCubit!,
               locked: state.isCheckoutLocked || widget.busy,
               scopeKey: leg.name,
-              title: 'Hành lý đi kèm',
-              legBadge: 'Lượt về',
+              title: context.l10n.uiAccompaniedLuggage,
+              legBadge: context.l10n.uiReturn,
               seatChangeNotice: widget.inboundSeatChangeNotice,
               onDismissSeatChangeNotice:
                   widget.onDismissInboundSeatChangeNotice,
@@ -735,8 +760,10 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
               cargo: state.cargo,
               locked: state.isCheckoutLocked || widget.busy,
               scopeKey: leg.name,
-              title: 'Gửi hàng kèm vé',
-              legBadge: leg == TripLeg.outbound ? 'Lượt đi' : 'Lượt về',
+              title: context.l10n.uiItemsWithYourTicket,
+              legBadge: leg == TripLeg.outbound
+                  ? context.l10n.uiOutbound
+                  : context.l10n.uiReturn,
               onToggleEnabled: (enabled) => widget.onDispatchCargo!(
                 leg,
                 SetBookingCargoEnabledEvent(enabled),

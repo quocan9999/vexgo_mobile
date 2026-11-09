@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -70,7 +71,7 @@ class AiChatbotEntryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Trợ lý AI',
+                      context.l10n.uiAiAssistant,
                       style: DiscoveryTextStyles.titleSmall.copyWith(
                         fontWeight: FontWeight.w800,
                         color: DiscoveryColors.neutral900,
@@ -78,7 +79,7 @@ class AiChatbotEntryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Hỏi đáp chính sách vé, hành lý và gợi ý chuyến xe',
+                      context.l10n.uiTicketPoliciesLuggageAndTripSuggestions,
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral600,
                       ),

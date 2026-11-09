@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/design/discovery_theme.dart';
@@ -63,9 +64,10 @@ class SupportChatMessageBubble extends StatelessWidget {
 
     final timeStr = _formatTime(message.createdAt);
     final deliveryText = switch (message.delivery) {
-      ChatDelivery.sending => 'Đang gửi…',
-      ChatDelivery.failed => 'Chưa xác nhận gửi',
-      ChatDelivery.sent => message.read ? 'Đã đọc' : 'Đã gửi',
+      ChatDelivery.sending => context.l10n.uiSending,
+      ChatDelivery.failed => context.l10n.uiSendingNotConfirmed,
+      ChatDelivery.sent =>
+        message.read ? context.l10n.uiRead : context.l10n.uiSent,
     };
 
     final isFailed = isOwn && message.delivery == ChatDelivery.failed;
@@ -115,7 +117,7 @@ class SupportChatMessageBubble extends StatelessWidget {
                   const SizedBox(width: 4),
                   Flexible(
                     child: Text(
-                      'Nhân viên hỗ trợ',
+                      context.l10n.uiSupportAgent,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -132,7 +134,7 @@ class SupportChatMessageBubble extends StatelessWidget {
             ],
             SelectableText(
               message.type == 'HINH_ANH'
-                  ? '[Hình ảnh] ${message.content}'
+                  ? context.l10n.uiImage(message.content)
                   : message.content,
               style: DiscoveryTextStyles.bodyMedium.copyWith(
                 color: DiscoveryColors.neutral900,
@@ -197,8 +199,8 @@ class SupportChatMessageBubble extends StatelessWidget {
                 ),
                 onPressed: canSend ? onRetry : null,
                 icon: const Icon(Icons.refresh_rounded, size: 14),
-                label: const Text(
-                  'Thử gửi lại',
+                label: Text(
+                  context.l10n.uiTrySendingAgain,
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ),

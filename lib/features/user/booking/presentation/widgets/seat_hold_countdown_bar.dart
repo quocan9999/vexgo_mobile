@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_colors.dart';
@@ -72,8 +73,8 @@ class SeatHoldCountdownBar extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: isUrgent
-                        ? 'Sắp hết hạn giữ ghế$seatsText: '
-                        : 'Ghế đang được giữ$seatsText: ',
+                        ? context.l10n.uiSeatHoldExpiring(seatsText)
+                        : context.l10n.uiSeatsHeld(seatsText),
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   TextSpan(

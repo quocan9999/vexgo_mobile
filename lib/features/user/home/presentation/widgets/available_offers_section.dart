@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -72,10 +73,13 @@ class _AvailableOffersSectionState extends State<AvailableOffersSection> {
           Row(
             children: [
               Expanded(
-                child: Text('Ưu đãi nhà xe', style: DiscoveryTextStyles.h3),
+                child: Text(
+                  context.l10n.uiOperatorOffers,
+                  style: DiscoveryTextStyles.h3,
+                ),
               ),
               IconButton(
-                tooltip: 'Làm mới ưu đãi',
+                tooltip: context.l10n.uiRefreshOffers,
                 onPressed: () => _load(_companyId!),
                 icon: const Icon(Icons.refresh),
               ),
@@ -91,8 +95,8 @@ class _AvailableOffersSectionState extends State<AvailableOffersSection> {
               key: ValueKey(_companyId),
               initialValue: _companyId,
               isExpanded: true,
-              decoration: const InputDecoration(
-                labelText: 'Nhà xe',
+              decoration: InputDecoration(
+                labelText: context.l10n.uiBusOperator,
                 border: UnderlineInputBorder(),
               ),
               items: [
@@ -130,18 +134,18 @@ class _AvailableOffersSectionState extends State<AvailableOffersSection> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Chưa tải được ưu đãi của nhà xe này.'),
+                    Text(context.l10n.uiUnableToLoadThisOperatorSOffers),
                     TextButton(
                       onPressed: () => _load(_companyId!),
-                      child: const Text('Thử lại ưu đãi'),
+                      child: Text(context.l10n.uiRetryOffers),
                     ),
                   ],
                 );
               }
               final offers = snapshot.data ?? const [];
               if (offers.isEmpty) {
-                return const Text(
-                  'Hiện chưa có ưu đãi đang mở cho nhà xe này.',
+                return Text(
+                  context.l10n.uiThereAreNoCurrentOffersForThisOperator,
                 );
               }
               return Column(
@@ -155,7 +159,7 @@ class _AvailableOffersSectionState extends State<AvailableOffersSection> {
                     ),
                   const SizedBox(height: 8),
                   Text(
-                    'Điều kiện áp dụng được kiểm tra lại khi đặt vé.',
+                    context.l10n.uiEligibilityIsCheckedAgainWhenYouBook,
                     style: DiscoveryTextStyles.caption,
                   ),
                   if (widget.preview && offers.length > 2)
@@ -167,8 +171,8 @@ class _AvailableOffersSectionState extends State<AvailableOffersSection> {
                               MaterialPageRoute<void>(
                                 builder: (_) => Scaffold(
                                   backgroundColor: Colors.white,
-                                  appBar: const TabPageHeader(
-                                    title: 'Ưu đãi nhà xe',
+                                  appBar: TabPageHeader(
+                                    title: context.l10n.uiOperatorOffers,
                                     showBackButton: true,
                                   ),
                                   body: SingleChildScrollView(
@@ -182,7 +186,9 @@ class _AvailableOffersSectionState extends State<AvailableOffersSection> {
                                 ),
                               ),
                             ),
-                        child: Text('Xem tất cả ${offers.length} ưu đãi'),
+                        child: Text(
+                          context.l10n.uiViewAllOffers(offers.length),
+                        ),
                       ),
                     ),
                 ],
@@ -217,26 +223,34 @@ class _OfferDetails extends StatelessWidget {
         childrenPadding: const EdgeInsets.only(bottom: 16),
         expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
         title: Text(offer.name, style: DiscoveryTextStyles.titleMedium),
-        subtitle: Text('Giảm $discount · Mã ${offer.code}'),
+        subtitle: Text(context.l10n.uiSaveCode(discount, offer.code)),
         children: [
           if (offer.minimumTicketAmount != null &&
               offer.minimumTicketAmount! > 0)
             Text(
-              'Tiền vé tối thiểu: ${CurrencyFormatter.format(offer.minimumTicketAmount)}',
+              context.l10n.uiMinimumFare(
+                CurrencyFormatter.format(offer.minimumTicketAmount),
+              ),
             ),
           if (offer.maxDiscount != null)
-            Text('Giảm tối đa: ${CurrencyFormatter.format(offer.maxDiscount)}'),
-          Text('Hiệu lực: ${_date(offer.startsOn)} – ${_date(offer.endsOn)}'),
+            Text(
+              context.l10n.uiMaximumDiscount(
+                CurrencyFormatter.format(offer.maxDiscount),
+              ),
+            ),
+          Text(
+            context.l10n.uiValid(_date(offer.startsOn), _date(offer.endsOn)),
+          ),
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               icon: const Icon(Icons.copy_outlined, size: 18),
-              label: Text('Sao chép mã ${offer.code}'),
+              label: Text(context.l10n.uiCopyCode30ae06(offer.code)),
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: offer.code));
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã sao chép mã ưu đãi.')),
+                    SnackBar(content: Text(context.l10n.uiOfferCodeCopied)),
                   );
                 }
               },

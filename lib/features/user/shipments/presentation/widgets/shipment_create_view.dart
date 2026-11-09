@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -150,7 +151,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
       if (!mounted || request != _citiesLoadSeq) return;
       setState(() {
         _loadingCities = false;
-        _citiesError = 'Không thể tải danh sách tỉnh/thành phố.';
+        _citiesError = context.l10n.uiUnableToLoadProvincesAndCities;
       });
     }
   }
@@ -290,7 +291,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
     }
     final picked = await SelectCitySheet.show(
       context,
-      title: 'Chọn điểm đi',
+      title: context.l10n.uiSelectOrigin,
       cities: _cities,
       currentCity: _fromCity,
     );
@@ -311,7 +312,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
     }
     final picked = await SelectCitySheet.show(
       context,
-      title: 'Chọn điểm đến',
+      title: context.l10n.uiSelectDestination,
       cities: _cities,
       currentCity: _toCity,
     );
@@ -339,21 +340,17 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
   void _onSearchTrips() {
     if (widget.state.searching) return;
     if (_fromCity == null || _toCity == null) {
-      const msg = 'Vui lòng chọn điểm đi và điểm đến.';
+      final msg = context.l10n.uiSelectAnOriginAndDestination;
       setState(() => _localSearchError = msg);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text(msg)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       return;
     }
     final searchFrom = _resolveCityForBackend(_fromCity!);
     final searchTo = _resolveCityForBackend(_toCity!);
     if (_fromCity!.id == _toCity!.id || searchFrom == searchTo) {
-      const msg = 'Điểm đi và điểm đến không được trùng nhau.';
+      final msg = context.l10n.uiOriginAndDestinationMustBeDifferent;
       setState(() => _localSearchError = msg);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text(msg)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       return;
     }
     setState(() => _localSearchError = null);
@@ -400,8 +397,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
     final selectedRouteId = widget.state.selectedRouteId;
     if (selectedRouteId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng chọn tuyến và nhà xe trước khi tạo đơn.'),
+        SnackBar(
+          content: Text(context.l10n.uiSelectARouteAndOperatorBeforeCreatingA),
         ),
       );
       return;
@@ -479,7 +476,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                   borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                   border: Border.all(color: DiscoveryColors.warning),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Icon(
                       Icons.info_outline,
@@ -488,7 +485,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Phiên làm việc đã thay đổi. Vui lòng đóng và mở lại tính năng.',
+                        context.l10n.uiYourSessionHasChangedCloseAndReopenThis,
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
@@ -530,7 +527,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                           AppDimensions.radiusMd,
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           SizedBox(
                             width: 16,
@@ -540,7 +537,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                           SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Đang tải danh sách tỉnh/thành phố...',
+                              context.l10n.uiLoadingProvincesAndCities,
                               style: TextStyle(
                                 fontFamily: AppTypography.fontFamily,
                                 fontSize: 12,
@@ -593,7 +590,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                                 horizontal: 8,
                               ),
                             ),
-                            child: const Text('Thử lại'),
+                            child: Text(context.l10n.uiTryAgain),
                           ),
                         ],
                       ),
@@ -620,9 +617,9 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                             color: DiscoveryColors.warningDark,
                           ),
                           const SizedBox(width: 8),
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'Chưa có danh sách tỉnh/thành phố khả dụng.',
+                              context.l10n.uiNoProvincesOrCitiesAreAvailableYet,
                               style: TextStyle(
                                 fontFamily: AppTypography.fontFamily,
                                 fontSize: 12,
@@ -638,7 +635,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                                 horizontal: 8,
                               ),
                             ),
-                            child: const Text('Tải lại'),
+                            child: Text(context.l10n.uiRefresh),
                           ),
                         ],
                       ),
@@ -654,7 +651,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                             key: const Key('shipment_from_city_selector'),
                             icon: Icons.trip_origin_rounded,
                             iconColor: DiscoveryColors.primary,
-                            label: 'Điểm đi',
+                            label: context.l10n.uiOrigin,
                             city: _fromCity,
                             onTap: _selectFromCity,
                           ),
@@ -668,7 +665,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                             key: const Key('shipment_to_city_selector'),
                             icon: Icons.location_on_rounded,
                             iconColor: DiscoveryColors.secondary,
-                            label: 'Điểm đến',
+                            label: context.l10n.uiDestination,
                             city: _toCity,
                             onTap: _selectToCity,
                           ),
@@ -678,9 +675,9 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                         right: 0,
                         child: Semantics(
                           button: true,
-                          label: 'Đổi chiều điểm đi và điểm đến',
+                          label: context.l10n.uiSwapOriginAndDestination,
                           child: Tooltip(
-                            message: 'Đổi chiều điểm đi và điểm đến',
+                            message: context.l10n.uiSwapOriginAndDestination,
                             child: Material(
                               color: Colors.white,
                               shape: const CircleBorder(),
@@ -773,7 +770,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Ngày gửi',
+                                    context.l10n.uiShippingDate,
                                     style: DiscoveryTextStyles.caption.copyWith(
                                       color: DiscoveryColors.neutral500,
                                     ),
@@ -797,7 +794,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                   const SizedBox(height: AppDimensions.base),
                   discovery.DiscoveryButton(
                     key: const Key('shipment_search_button'),
-                    text: 'Tìm tuyến gửi hàng',
+                    text: context.l10n.uiFindShippingRoutes,
                     prefixIcon: const Icon(Icons.search_rounded, size: 22),
                     width: double.infinity,
                     height: 50,
@@ -849,7 +846,9 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Chọn tuyến và nhà xe (${widget.state.routes.length} nhà xe tìm thấy):',
+                      context.l10n.uiSelectRouteAndOperatorOperatorsFound(
+                        widget.state.routes.length,
+                      ),
                       style: const TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 14,
@@ -929,8 +928,14 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                                         const SizedBox(height: 2),
                                         Text(
                                           trip.minimumEstimatedFee == null
-                                              ? 'Chưa có cước tham khảo'
-                                              : 'Cước từ ${CurrencyFormatter.format(trip.minimumEstimatedFee!)}',
+                                              ? context
+                                                    .l10n
+                                                    .uiNoEstimatedFeeAvailable
+                                              : context.l10n.uiFeesFrom(
+                                                  CurrencyFormatter.format(
+                                                    trip.minimumEstimatedFee!,
+                                                  ),
+                                                ),
                                           style: const TextStyle(
                                             fontFamily:
                                                 AppTypography.fontFamily,
@@ -965,7 +970,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
 
             // Trip capacity / options loading
             if (widget.state.loadingOptions) ...[
-              const Center(
+              Center(
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Row(
@@ -977,7 +982,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                       SizedBox(width: 8),
-                      Text('Đang tải cấu hình nhận hàng của tuyến...'),
+                      Text(context.l10n.uiLoadingThisRouteSShippingOptions),
                     ],
                   ),
                 ),
@@ -1028,8 +1033,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '2. Điểm gửi và điểm nhận hàng',
+                    Text(
+                      context.l10n.ui2DropOffAndCollectionPoints,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 15,
@@ -1038,8 +1043,10 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Lưu ý: Điểm giao nhận hàng độc lập có thể khác điểm đón trả khách.',
+                    Text(
+                      context
+                          .l10n
+                          .uiNoteShippingDropOffCollectionPointsMayDiffer,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 12,
@@ -1049,8 +1056,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     const SizedBox(height: 12),
 
                     // Sender point selector
-                    const Text(
-                      'Chọn điểm gửi hàng *',
+                    Text(
+                      context.l10n.uiSelectDropOffPoint,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 13,
@@ -1062,7 +1069,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     DropdownButtonFormField<int>(
                       initialValue: _selectedSenderPointId,
                       isExpanded: true,
-                      hint: const Text('Chọn văn phòng/bến gửi hàng'),
+                      hint: Text(context.l10n.uiSelectDropOffOfficeStation),
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -1105,8 +1112,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     const SizedBox(height: 12),
 
                     // Receiver point selector
-                    const Text(
-                      'Chọn điểm nhận hàng *',
+                    Text(
+                      context.l10n.uiSelectCollectionPoint,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 13,
@@ -1118,7 +1125,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     DropdownButtonFormField<int>(
                       initialValue: _selectedReceiverPointId,
                       isExpanded: true,
-                      hint: const Text('Chọn văn phòng/bến nhận hàng'),
+                      hint: Text(context.l10n.uiSelectCollectionOfficeStation),
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -1174,8 +1181,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '3. Thông tin người gửi & người nhận',
+                    Text(
+                      context.l10n.ui3SenderRecipientDetails,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 15,
@@ -1184,8 +1191,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'NGƯỜI GỬI',
+                    Text(
+                      context.l10n.uiSender,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 12,
@@ -1196,15 +1203,15 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     ),
                     const SizedBox(height: 6),
                     CustomTextField(
-                      label: 'Họ và tên người gửi *',
-                      hintText: 'Nhập đầy đủ họ tên',
+                      label: context.l10n.uiSenderSFullName,
+                      hintText: context.l10n.uiEnterFullName,
                       controller: _senderNameController,
                     ),
                     if (fieldErrors.containsKey('sender.fullName'))
                       _errorText(fieldErrors['sender.fullName']!),
                     const SizedBox(height: 8),
                     CustomTextField(
-                      label: 'Số điện thoại người gửi *',
+                      label: context.l10n.uiSenderSPhoneNumber,
                       hintText: 'VD: 0901234567',
                       controller: _senderPhoneController,
                       keyboardType: TextInputType.phone,
@@ -1213,7 +1220,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                       _errorText(fieldErrors['sender.phoneNumber']!),
                     const SizedBox(height: 8),
                     CustomTextField(
-                      label: 'Email người gửi (tùy chọn)',
+                      label: context.l10n.uiSenderSEmailOptional,
                       hintText: 'VD: email@example.com',
                       controller: _senderEmailController,
                       keyboardType: TextInputType.emailAddress,
@@ -1225,8 +1232,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                       height: 24,
                       color: DiscoveryColors.neutral200,
                     ),
-                    const Text(
-                      'NGƯỜI NHẬN',
+                    Text(
+                      context.l10n.uiRecipient,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 12,
@@ -1237,15 +1244,15 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     ),
                     const SizedBox(height: 6),
                     CustomTextField(
-                      label: 'Họ và tên người nhận *',
-                      hintText: 'Nhập đầy đủ họ tên người nhận',
+                      label: context.l10n.uiRecipientSFullName,
+                      hintText: context.l10n.uiEnterRecipientSFullName,
                       controller: _receiverNameController,
                     ),
                     if (fieldErrors.containsKey('receiver.fullName'))
                       _errorText(fieldErrors['receiver.fullName']!),
                     const SizedBox(height: 8),
                     CustomTextField(
-                      label: 'Số điện thoại người nhận *',
+                      label: context.l10n.uiRecipientSPhoneNumber,
                       hintText: 'VD: 0907654321',
                       controller: _receiverPhoneController,
                       keyboardType: TextInputType.phone,
@@ -1254,8 +1261,9 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                       _errorText(fieldErrors['receiver.phoneNumber']!),
                     const SizedBox(height: 8),
                     CustomTextField(
-                      label: 'CCCD người nhận (tùy chọn - 12 số)',
-                      hintText: 'Nhập 12 chữ số nếu có',
+                      label:
+                          context.l10n.uiRecipientSNationalIdOptional12Digits,
+                      hintText: context.l10n.uiEnter12DigitsIfAvailable,
                       controller: _receiverCccdController,
                       keyboardType: TextInputType.number,
                     ),
@@ -1280,9 +1288,9 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            '4. Danh sách kiện hàng',
+                            context.l10n.ui4Items,
                             style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 15,
@@ -1294,7 +1302,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                         TextButton.icon(
                           onPressed: _onAddItem,
                           icon: const Icon(Icons.add_rounded, size: 18),
-                          label: const Text('Thêm kiện'),
+                          label: Text(context.l10n.uiAddItem2d1b7b),
                           style: TextButton.styleFrom(
                             minimumSize: const Size(48, 48),
                           ),
@@ -1325,8 +1333,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '5. Người thanh toán & Phương thức',
+                    Text(
+                      context.l10n.ui5PayerPaymentMethod,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 15,
@@ -1336,14 +1344,14 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     ),
                     const SizedBox(height: 8),
                     _buildPaymentRadioTile(
-                      title: 'Người gửi trả tại bến',
-                      subtitle: 'Thanh toán tiền mặt khi gửi hàng',
+                      title: context.l10n.uiSenderPaysAtStation,
+                      subtitle: context.l10n.uiPayCashWhenDroppingOffItems,
                       value: _PaymentOption.senderCounter,
                       enabled: true,
                     ),
                     _buildPaymentRadioTile(
-                      title: 'Người nhận trả tại bến',
-                      subtitle: 'Thanh toán tiền mặt khi nhận hàng',
+                      title: context.l10n.uiRecipientPaysAtStation,
+                      subtitle: context.l10n.uiPayCashWhenCollectingItems,
                       value: _PaymentOption.receiverCounter,
                       enabled: true,
                     ),
@@ -1366,8 +1374,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '6. Ghi chú chung (tùy chọn)',
+                    Text(
+                      context.l10n.ui6GeneralNotesOptional,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 14,
@@ -1377,8 +1385,9 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     ),
                     const SizedBox(height: 8),
                     CustomTextField(
-                      hintText:
-                          'Nhập ghi chú hoặc yêu cầu bàn giao cho nhà xe...',
+                      hintText: context
+                          .l10n
+                          .uiEnterNotesOrHandoverInstructionsForTheOperator,
                       controller: _generalNoteController,
                       maxLines: 2,
                     ),
@@ -1395,7 +1404,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     color: DiscoveryColors.primaryLight,
                     borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       SizedBox(
                         width: 18,
@@ -1405,7 +1414,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                       SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Đang tính cước tạm tính...',
+                          context.l10n.uiCalculatingEstimatedFee,
                           style: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 13,
@@ -1471,8 +1480,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'CƯỚC DỰ TÍNH',
+                          Text(
+                            context.l10n.uiEstimatedFeef58e86,
                             style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 12,
@@ -1496,7 +1505,11 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Cước dự tính: ${CurrencyFormatter.format(widget.state.quote!.totalFee)}. Cước được chốt sau cân đo tại bến.',
+                        context.l10n.uiEstimatedFeeTheFinalFeeIsConfirmedAfter(
+                          CurrencyFormatter.format(
+                            widget.state.quote!.totalFee,
+                          ),
+                        ),
                         style: const TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 12,
@@ -1533,8 +1546,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
               // STEP 7: Submit CTA Button
               CustomButton(
                 text: widget.state.quote == null
-                    ? 'Báo cước'
-                    : 'Tạo đơn gửi hàng',
+                    ? context.l10n.uiGetEstimate
+                    : context.l10n.uiCreateShipment905793,
                 isLoading:
                     widget.state.phase == ShipmentCreationPhase.submitting,
                 onPressed:
@@ -1586,7 +1599,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
             children: [
               Expanded(
                 child: Text(
-                  'Kiện #${index + 1}',
+                  context.l10n.uiItem(index + 1),
                   style: const TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 13,
@@ -1602,7 +1615,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                     color: DiscoveryColors.error,
                     size: 20,
                   ),
-                  tooltip: 'Xóa kiện hàng',
+                  tooltip: context.l10n.uiRemoveItem,
                   constraints: const BoxConstraints(
                     minWidth: 48,
                     minHeight: 48,
@@ -1613,8 +1626,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
           ),
           const SizedBox(height: 6),
           CustomTextField(
-            label: 'Tên hàng hóa *',
-            hintText: 'VD: Thùng trái cây, Tài liệu...',
+            label: context.l10n.uiItemName237ded,
+            hintText: context.l10n.uiEGBoxOfFruitDocuments,
             controller: item.name,
           ),
           if (fieldErrors.containsKey('items.$index.name'))
@@ -1622,8 +1635,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
           const SizedBox(height: 8),
 
           // Category dropdown
-          const Text(
-            'Loại hàng hóa *',
+          Text(
+            context.l10n.uiItemType,
             style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 13,
@@ -1635,7 +1648,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
           DropdownButtonFormField<int>(
             initialValue: item.categoryId,
             isExpanded: true,
-            hint: const Text('Chọn loại hàng'),
+            hint: Text(context.l10n.uiSelectItemType),
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
@@ -1668,7 +1681,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomTextField(
-                      label: 'Số lượng *',
+                      label: context.l10n.uiQuantity,
                       hintText: '1',
                       controller: item.quantity,
                       keyboardType: TextInputType.number,
@@ -1684,7 +1697,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomTextField(
-                      label: 'Khối lượng (kg/kiện) *',
+                      label: context.l10n.uiWeightKgItem,
                       hintText: 'VD: 5',
                       controller: item.weight,
                       keyboardType: const TextInputType.numberWithOptions(
@@ -1701,8 +1714,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
           const SizedBox(height: 8),
 
           // Dimensions (cm) optional: L, W, H
-          const Text(
-            'Kích thước (cm - tùy chọn: Dài x Rộng x Cao)',
+          Text(
+            context.l10n.uiDimensionsCmOptionalLengthXWidthXHeight,
             style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 12,
@@ -1715,7 +1728,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
             children: [
               Expanded(
                 child: CustomTextField(
-                  hintText: 'Dài',
+                  hintText: context.l10n.uiLength,
                   controller: item.length,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -1725,7 +1738,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
               const SizedBox(width: 4),
               Expanded(
                 child: CustomTextField(
-                  hintText: 'Rộng',
+                  hintText: context.l10n.uiWidth,
                   controller: item.width,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -1749,8 +1762,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
           const SizedBox(height: 8),
 
           // Service type dropdown
-          const Text(
-            'Loại dịch vụ',
+          Text(
+            context.l10n.uiServiceType,
             style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 12,
@@ -1771,22 +1784,25 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
               ),
             ),
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: ShipmentService.normal,
                 child: Text(
-                  'Tiêu chuẩn (NORMAL)',
+                  context.l10n.uiStandardNormal,
                   style: TextStyle(fontSize: 13),
                 ),
               ),
               DropdownMenuItem(
                 value: ShipmentService.fragile,
-                child: Text('Dễ vỡ (FRAGILE)', style: TextStyle(fontSize: 13)),
+                child: Text(
+                  context.l10n.uiFragileFragile,
+                  style: TextStyle(fontSize: 13),
+                ),
               ),
               DropdownMenuItem(
                 value: ShipmentService.valuable,
                 child: Text(
-                  'Giá trị cao (VALUABLE)',
+                  context.l10n.uiHighValueValuable,
                   style: TextStyle(fontSize: 13),
                 ),
               ),
@@ -1799,8 +1815,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
           const SizedBox(height: 8),
 
           CustomTextField(
-            label: 'Ghi chú kiện hàng (tùy chọn)',
-            hintText: 'VD: Hàng nhẹ, cần che mưa...',
+            label: context.l10n.uiItemNotesOptional,
+            hintText: context.l10n.uiEGLightItemsKeepDry,
             controller: item.note,
           ),
         ],
@@ -1943,7 +1959,8 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    city?.name ?? 'Chọn tỉnh/thành phố',
+                                    city?.name ??
+                                        context.l10n.uiSelectProvinceCity,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: DiscoveryTextStyles.titleMedium

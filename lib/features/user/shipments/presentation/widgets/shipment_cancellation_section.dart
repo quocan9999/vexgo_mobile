@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -70,8 +71,10 @@ class ShipmentCancellationSection extends StatelessWidget {
           if (done)
             Text(
               result?.hasPaidBeforeCancel == true
-                  ? 'Đã hủy đơn. Vui lòng liên hệ nhà xe để được hỗ trợ hoàn tiền cước đã thanh toán.'
-                  : 'Đơn đã được hủy. Nếu đã thanh toán, vui lòng liên hệ nhà xe để được hỗ trợ.',
+                  ? context
+                        .l10n
+                        .uiShipmentCancelledContactTheOperatorForHelpRefunding
+                  : context.l10n.uiShipmentCancelledIfYouAlreadyPaidContactThe,
             ),
           if (state.cancelling)
             const Center(
@@ -85,7 +88,7 @@ class ShipmentCancellationSection extends StatelessWidget {
               key: const ValueKey('shipment-cancel-recheck'),
               onPressed: () =>
                   cubit.refreshCancellationStatus(fromLookup: fromLookup),
-              child: const Text('Kiểm tra trạng thái hủy'),
+              child: Text(context.l10n.uiCheckCancellationStatus),
             ),
           if (cubit.canCancelShipment(fromLookup: fromLookup))
             OutlinedButton.icon(
@@ -100,7 +103,7 @@ class ShipmentCancellationSection extends StatelessWidget {
               ),
               onPressed: () => _confirm(context),
               icon: const Icon(Icons.cancel_outlined),
-              label: const Text('Hủy đơn gửi hàng'),
+              label: Text(context.l10n.uiCancelShipment),
             ),
         ],
       ),
@@ -140,11 +143,11 @@ class _ShipmentCancelDialogState extends State<_ShipmentCancelDialog> {
           widget.cubit.cancellationCode(fromLookup: widget.fromLookup) !=
               widget.code) {
         return AlertDialog(
-          title: const Text('Thông tin đơn đã thay đổi'),
+          title: Text(context.l10n.uiShipmentDetailsChanged),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Đóng'),
+              child: Text(context.l10n.uiClose),
             ),
           ],
         );
@@ -158,26 +161,30 @@ class _ShipmentCancelDialogState extends State<_ShipmentCancelDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hủy đơn gửi hàng?',
+                context.l10n.uiCancelThisShipment,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
-              Text('Mã vận đơn: ${widget.code}'),
+              Text(context.l10n.uiShipmentCodeee9663(widget.code)),
               const SizedBox(height: 12),
-              const Text(
-                'Chỉ hủy khi hàng chưa được tiếp nhận. Nếu đã trả cước, bạn cần liên hệ nhà xe để được hỗ trợ hoàn tiền; không hoàn tiền trực tuyến.',
+              Text(
+                context
+                    .l10n
+                    .uiCancellationIsAvailableOnlyBeforeItemsAreAccepted,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: selected,
                 isExpanded: true,
                 itemHeight: null,
-                decoration: const InputDecoration(labelText: 'Lý do hủy'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.uiCancellationReason,
+                ),
                 items:
-                    const [
-                          'Không còn nhu cầu gửi hàng',
-                          'Nhập sai thông tin đơn',
-                          'Khác',
+                    [
+                          context.l10n.uiShippingNoLongerNeeded,
+                          context.l10n.uiIncorrectShipmentDetails,
+                          context.l10n.uiOther,
                         ]
                         .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                         .toList(),
@@ -189,8 +196,8 @@ class _ShipmentCancelDialogState extends State<_ShipmentCancelDialog> {
                   controller: other,
                   maxLength: 255,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Lý do khác (tùy chọn)',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiOtherReasonOptional,
                   ),
                 ),
               const SizedBox(height: 16),
@@ -201,7 +208,7 @@ class _ShipmentCancelDialogState extends State<_ShipmentCancelDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Giữ đơn'),
+                    child: Text(context.l10n.uiKeepShipment),
                   ),
                   FilledButton(
                     key: const ValueKey('shipment-cancel-confirm'),
@@ -218,7 +225,7 @@ class _ShipmentCancelDialogState extends State<_ShipmentCancelDialog> {
                             selected == 'Khác' ? other.text.trim() : selected,
                           )
                         : null,
-                    child: const Text('Xác nhận hủy'),
+                    child: Text(context.l10n.uiConfirmCancellation1939df),
                   ),
                 ],
               ),

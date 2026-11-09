@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
@@ -39,14 +40,14 @@ class SeatItem extends StatelessWidget {
         : DiscoveryColors.neutral400;
 
     final label = seat.status == SeatStatus.unavailable
-        ? 'Không khả dụng'
+        ? context.l10n.uiUnavailable
         : held
-        ? 'Đang giữ'
+        ? context.l10n.uiHeld
         : disabled
-        ? 'Đã đặt'
+        ? context.l10n.uiBooked
         : selected
-        ? 'Đang chọn'
-        : 'Trống';
+        ? context.l10n.uiSelected
+        : context.l10n.uiAvailable;
 
     final separateLabel =
         MediaQuery.textScalerOf(context).scale(1) > 1.3 || seat.name.length > 4;
@@ -69,8 +70,11 @@ class SeatItem extends StatelessWidget {
       onTap: disabled ? null : onTap,
       enabled: !disabled,
       selected: selected,
-      label:
-          'Ghế ${seat.name}, $label${seat.price == null ? '' : ', ${CurrencyFormatter.format(seat.price)}'}',
+      label: context.l10n.uiSeat45469b(
+        seat.name,
+        label,
+        seat.price == null ? '' : ', ${CurrencyFormatter.format(seat.price)}',
+      ),
       child: ExcludeSemantics(
         child: Material(
           color: Colors.transparent,

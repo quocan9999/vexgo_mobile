@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -207,14 +208,14 @@ class BookingPassengerDock extends StatelessWidget {
                     (textScale > 1.3 || constraints.maxWidth < 280);
 
                 final backBtn = DiscoveryButton(
-                  text: 'Quay lại',
+                  text: context.l10n.uiBack,
                   type: ButtonType.outline,
                   width: double.infinity,
                   onPressed: busy ? null : onBack,
                 );
 
                 Widget nextBtn = DiscoveryButton(
-                  text: 'Tiếp tục',
+                  text: context.l10n.uiContinue,
                   type: ButtonType.secondary,
                   isLoading:
                       state.status == BookingFlowStatus.loading ||
@@ -233,16 +234,18 @@ class BookingPassengerDock extends StatelessWidget {
                 }
 
                 final helperText = expired
-                    ? 'Thời gian giữ ghế đã hết. Vui lòng chọn lại ghế.'
+                    ? context.l10n.uiYourSeatHoldHasExpiredSelectYourSeats
                     : !state.isPassengerValid
-                    ? 'Nhập họ tên và số điện thoại hợp lệ để tiếp tục'
+                    ? context.l10n.uiEnterAValidNameAndPhoneNumberTo
                     : !luggageValid
                     ? (luggageError ??
-                          'Hoàn tất hành lý đi kèm hoặc chọn "Không thêm hành lý ký gửi"')
+                          context
+                              .l10n
+                              .uiCompleteLuggageDetailsOrSelectNoCheckedLuggage)
                     : !state.cargo.isValid
                     ? (state.cargo.validationError ??
-                          'Hoàn tất thông tin gửi hàng hoặc tắt gửi hàng để tiếp tục')
-                    : 'Tiếp theo: xem lại đặt vé & mã ưu đãi';
+                          context.l10n.uiCompleteItemDetailsOrTurnOffShippingTo)
+                    : context.l10n.uiNextReviewBookingPromoCode;
 
                 return Column(
                   mainAxisSize: MainAxisSize.min,

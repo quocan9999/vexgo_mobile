@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
@@ -47,7 +48,7 @@ class RoundTripLegHeader extends StatelessWidget {
               Row(
                 children: [
                   IconButton(
-                    tooltip: 'Quay lại',
+                    tooltip: context.l10n.uiBack,
                     constraints: const BoxConstraints(
                       minWidth: 48,
                       minHeight: 48,
@@ -62,10 +63,10 @@ class RoundTripLegHeader extends StatelessWidget {
                       children: [
                         Text(
                           currentTrip != null
-                              ? '${currentTrip.operatorName} • ${activeLeg == TripLeg.outbound ? "Lượt đi" : "Lượt về"}'
+                              ? '${currentTrip.operatorName} • ${activeLeg == TripLeg.outbound ? context.l10n.uiOutbound : context.l10n.uiReturn}'
                               : (activeLeg == TripLeg.outbound
-                                    ? 'Lượt đi'
-                                    : 'Lượt về'),
+                                    ? context.l10n.uiOutbound
+                                    : context.l10n.uiReturn),
                           style: DiscoveryTextStyles.titleMedium.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -99,7 +100,7 @@ class RoundTripLegHeader extends StatelessWidget {
                     child: _buildLegTab(
                       context,
                       leg: TripLeg.outbound,
-                      label: 'Lượt đi',
+                      label: context.l10n.uiOutbound,
                       summary: _legSummary(outboundState),
                       isSelected: activeLeg == TripLeg.outbound,
                       onTap: busy ? null : () => onLegChanged(TripLeg.outbound),
@@ -110,7 +111,7 @@ class RoundTripLegHeader extends StatelessWidget {
                     child: _buildLegTab(
                       context,
                       leg: TripLeg.inbound,
-                      label: 'Lượt về',
+                      label: context.l10n.uiReturn,
                       summary: _legSummary(inboundState),
                       isSelected: activeLeg == TripLeg.inbound,
                       onTap: busy ? null : () => onLegChanged(TripLeg.inbound),
@@ -129,7 +130,7 @@ class RoundTripLegHeader extends StatelessWidget {
     if (s.selectedSeats.isNotEmpty) {
       return s.selectedSeats.map((e) => e.name).join(', ');
     }
-    return 'Chưa chọn ghế';
+    return LocaleController.strings.uiNoSeatsSelected;
   }
 
   Widget _buildLegTab(

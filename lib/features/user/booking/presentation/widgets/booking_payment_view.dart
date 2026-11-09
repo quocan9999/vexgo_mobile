@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
@@ -133,10 +134,10 @@ class BookingPaymentDock extends StatelessWidget {
 
     if (!hasPendingOrder) {
       ctaText = state.finalAmount != null
-          ? 'Thanh toán ${CurrencyFormatter.format(state.finalAmount!)}'
+          ? context.l10n.uiPay(CurrencyFormatter.format(state.finalAmount!))
           : state.cargo.enabled
-          ? 'Tạo đơn & Thanh toán'
-          : 'Thanh toán';
+          ? context.l10n.uiBookPay
+          : context.l10n.uiPayment;
       ctaIcon = Icons.shield_rounded;
       canPress =
           !isSubmitting &&
@@ -147,7 +148,7 @@ class BookingPaymentDock extends StatelessWidget {
           state.canSubmitDraft &&
           state.hasUsableQuote;
     } else {
-      ctaText = 'Kiểm tra kết quả thanh toán';
+      ctaText = context.l10n.uiCheckPaymentResult;
       ctaIcon = Icons.refresh_rounded;
       canPress = !isSubmitting && !isBlocked && !isUnknown;
     }
@@ -187,10 +188,10 @@ class BookingPaymentDock extends StatelessWidget {
                   children: [
                     Text(
                       isPaid
-                          ? 'Đã thanh toán:'
+                          ? context.l10n.uiPaidf4bf31
                           : hasPendingOrder
-                          ? 'Giá trị đơn:'
-                          : 'Tổng thanh toán:',
+                          ? context.l10n.uiBookingValue
+                          : context.l10n.uiTotalPayment,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.neutral500,
                         fontWeight: FontWeight.w500,
@@ -201,13 +202,17 @@ class BookingPaymentDock extends StatelessWidget {
                       displayAmount != null
                           ? CurrencyFormatter.format(displayAmount)
                           : (state.quoteLoading
-                                ? 'Đang xác minh giá'
+                                ? context.l10n.uiVerifyingFare
                                 : state.cargo.enabled &&
                                       state.ticketFinalAmount != null
-                                ? 'Vé ${CurrencyFormatter.format(state.ticketFinalAmount!)}'
+                                ? context.l10n.uiTicket(
+                                    CurrencyFormatter.format(
+                                      state.ticketFinalAmount!,
+                                    ),
+                                  )
                                 : state.cargo.enabled
-                                ? 'Xác định khi tạo đơn'
-                                : 'Chưa có giá vé'),
+                                ? context.l10n.uiCalculatedWhenBookingIsCreated
+                                : context.l10n.uiFareUnavailable),
                       style: DiscoveryTextStyles.titleMedium.copyWith(
                         color: DiscoveryColors.secondary,
                         fontWeight: FontWeight.w800,
@@ -218,7 +223,7 @@ class BookingPaymentDock extends StatelessWidget {
                         state.cargo.enabled &&
                         displayAmount == null)
                       Text(
-                        'Cước vật phẩm thanh toán riêng tại bến',
+                        context.l10n.uiItemFeesArePaidSeparatelyAtTheStation,
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral600,
                           fontSize: 11,
@@ -227,7 +232,9 @@ class BookingPaymentDock extends StatelessWidget {
                       ),
                     if (hasPendingOrder)
                       Text(
-                        'Đơn #${state.pendingBookingId}',
+                        context.l10n.uiBooking36090d(
+                          state.pendingBookingId ?? '—',
+                        ),
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral600,
                           fontSize: 11,
@@ -236,7 +243,9 @@ class BookingPaymentDock extends StatelessWidget {
                       )
                     else if (state.discountAmount > 0)
                       Text(
-                        'Đã giảm ${CurrencyFormatter.format(state.discountAmount)}',
+                        context.l10n.uiDiscounted(
+                          CurrencyFormatter.format(state.discountAmount),
+                        ),
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.successDark,
                           fontSize: 11,
@@ -266,7 +275,7 @@ class BookingPaymentDock extends StatelessWidget {
                   alertBelow = Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      'Thời gian giữ ghế đã hết. Vui lòng chọn lại ghế.',
+                      context.l10n.uiYourSeatHoldHasExpiredSelectYourSeats,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.error,
                       ),
@@ -279,7 +288,7 @@ class BookingPaymentDock extends StatelessWidget {
                   alertBelow = Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      'Đã xác nhận thanh toán. Nhấn kiểm tra để nhận vé.',
+                      context.l10n.uiPaymentConfirmedTapCheckToGetYourTickets,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.successDark,
                       ),
@@ -290,7 +299,7 @@ class BookingPaymentDock extends StatelessWidget {
                   alertBelow = Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      'Đơn đặt vé đã hết hạn thanh toán.',
+                      context.l10n.uiTheBookingPaymentDeadlineHasExpired,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.error,
                       ),
@@ -301,7 +310,7 @@ class BookingPaymentDock extends StatelessWidget {
                   alertBelow = Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      'Kết quả chưa xác định. Vui lòng kiểm tra Vé của tôi.',
+                      context.l10n.uiResultUnconfirmedCheckMyTickets,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.warningDark,
                       ),

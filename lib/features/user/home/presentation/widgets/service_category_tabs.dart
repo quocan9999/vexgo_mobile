@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -34,9 +35,11 @@ class ServiceCategoryTabs extends StatelessWidget {
                       }
                       if (service == ServiceType.cargo) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              'Dịch vụ Gửi hàng hóa theo xe khách liên tỉnh sẽ sớm ra mắt theo đề cương!',
+                              context
+                                  .l10n
+                                  .uiIntercityParcelShippingIsComingSoon,
                             ),
                             duration: Duration(seconds: 2),
                           ),
@@ -116,7 +119,7 @@ class ServiceCategoryTabs extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  'Sắp có',
+                                  context.l10n.uiComingSoon,
                                   style: AppTextStyles.caption.copyWith(
                                     color: Colors.white,
                                     fontSize: 9,

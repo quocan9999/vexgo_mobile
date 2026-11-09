@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -103,19 +105,21 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                   const SizedBox(height: AppDimensions.base),
 
                   if (state.cancellationUncertain) ...[
-                    const Text(
-                      'Chưa xác minh kết quả hủy. Chỉ kiểm tra trạng thái, không gửi lại yêu cầu.',
+                    Text(
+                      context
+                          .l10n
+                          .uiCancellationResultIsUnconfirmedCheckStatusOnlyDo,
                     ),
                     TextButton(
                       onPressed: busy ? null : widget.reader.refresh,
-                      child: const Text('Kiểm tra trạng thái'),
+                      child: Text(context.l10n.uiCheckStatus),
                     ),
                   ],
                   if (state.status == TicketReadStatus.failure &&
                       !state.cancellationUncertain)
                     TextButton(
                       onPressed: widget.reader.refresh,
-                      child: const Text('Thử lại'),
+                      child: Text(context.l10n.uiTryAgain),
                     ),
                   // Header
                   Row(
@@ -145,7 +149,7 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Hủy vé',
+                              context.l10n.uiCancelTicket,
                               style: DiscoveryTextStyles.titleMedium.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: DiscoveryColors.neutral900,
@@ -154,7 +158,9 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                             if (ticket != null) ...[
                               const SizedBox(height: 2),
                               Text(
-                                'Mã vé: ${ticket.ticketCode}',
+                                context.l10n.uiTicketCode628257(
+                                  ticket.ticketCode,
+                                ),
                                 style: DiscoveryTextStyles.caption.copyWith(
                                   color: DiscoveryColors.neutral500,
                                 ),
@@ -165,7 +171,7 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.close_rounded),
-                        tooltip: 'Đóng',
+                        tooltip: context.l10n.uiClose,
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
@@ -195,7 +201,7 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                         ),
                       ),
                       child: Text(
-                        state.error!,
+                        localizedClientLabel(context, state.error!),
                         style: DiscoveryTextStyles.bodySmall.copyWith(
                           color: DiscoveryColors.errorDark,
                         ),
@@ -237,7 +243,10 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            '${ticket.trip.fromCity} ➔ ${ticket.trip.toCity}',
+                            context.l10n.ui56e768(
+                              ticket.trip.fromCity,
+                              ticket.trip.toCity,
+                            ),
                             style: DiscoveryTextStyles.h4.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
@@ -259,7 +268,9 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                                 ),
                               ),
                               Text(
-                                'Chỗ ngồi: ${ticket.seats.join(', ')}',
+                                context.l10n.uiSeatscfb411(
+                                  ticket.seats.join(', '),
+                                ),
                                 style: DiscoveryTextStyles.bodySmall.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: DiscoveryColors.neutral800,
@@ -286,7 +297,10 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                           ),
                         ),
                         child: Text(
-                          cancellationReasonText(quote.reason),
+                          localizedClientLabel(
+                            context,
+                            cancellationReasonText(quote.reason),
+                          ),
                           style: DiscoveryTextStyles.bodySmall.copyWith(
                             color: DiscoveryColors.errorDark,
                             height: 1.4,
@@ -317,18 +331,24 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'Số tiền dự kiến hoàn: '
-                              '${CurrencyFormatter.format(quote.refundAmount)}',
+                              context.l10n.uiEstimatedRefundff7ba3 +
+                                  CurrencyFormatter.format(quote.refundAmount),
                               style: DiscoveryTextStyles.h4.copyWith(
                                 color: DiscoveryColors.successDark,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Hệ thống không hoàn tiền online. Sau khi hủy vé, '
-                              'vui lòng liên hệ hỗ trợ và cung cấp mã vé '
-                              'để yêu cầu hoàn tiền theo chính sách nhà xe.',
+                            Text(
+                              context
+                                      .l10n
+                                      .uiOnlineRefundsAreNotAvailableAfterCancelling +
+                                  context
+                                      .l10n
+                                      .uiContactSupportWithYourTicketCode +
+                                  context
+                                      .l10n
+                                      .uiToRequestARefundUnderTheOperatorS,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: DiscoveryColors.neutral600,
@@ -346,7 +366,7 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                         onChanged: (_) => setState(() {}),
                         maxLength: 500,
                         decoration: InputDecoration(
-                          labelText: 'Lý do hủy',
+                          labelText: context.l10n.uiCancellationReason,
                           labelStyle: DiscoveryTextStyles.bodySmall,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -365,8 +385,8 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                         contentPadding: EdgeInsets.zero,
                         controlAffinity: ListTileControlAffinity.leading,
                         activeColor: DiscoveryColors.primary,
-                        title: const Text(
-                          'Tôi đồng ý hủy vé với mức phí trên.',
+                        title: Text(
+                          context.l10n.uiIAgreeToCancelWithTheFeeShown,
                         ),
                       ),
 
@@ -405,8 +425,8 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
-                          'Xác nhận hủy vé',
+                        child: Text(
+                          context.l10n.uiConfirmCancellation,
                           style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -423,7 +443,7 @@ class _GuestCancelTicketSheetState extends State<GuestCancelTicketSheet> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Đóng'),
+                    child: Text(context.l10n.uiClose),
                   ),
                 ],
               ),

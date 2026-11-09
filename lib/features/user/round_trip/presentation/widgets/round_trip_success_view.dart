@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
@@ -61,13 +62,13 @@ class RoundTripSuccessView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Đặt vé khứ hồi thành công!',
+                context.l10n.uiRoundTripBookingSuccessful,
                 style: DiscoveryTextStyles.h1,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 6),
               Text(
-                'Cả 2 chặng đã được xác nhận thanh toán và xuất vé điện tử.',
+                context.l10n.uiPaymentIsConfirmedAndETicketsAreIssued,
                 style: DiscoveryTextStyles.bodyMedium.copyWith(
                   color: DiscoveryColors.neutral600,
                 ),
@@ -78,10 +79,13 @@ class RoundTripSuccessView extends StatelessWidget {
 
               // Outbound tickets
               _buildLegTicketsCard(
-                title:
-                    'Lượt đi: ${request.origin.name} → ${request.destination.name}',
+                title: context.l10n.uiOutbound39fb6f(
+                  request.origin.name,
+                  request.destination.name,
+                ),
                 tickets: outTickets,
-                operatorName: outbound.trip?.operatorName ?? 'Nhà xe',
+                operatorName:
+                    outbound.trip?.operatorName ?? context.l10n.uiBusOperator,
                 state: outbound,
                 scopeKey: 'outbound-success',
               ),
@@ -90,10 +94,13 @@ class RoundTripSuccessView extends StatelessWidget {
 
               // Inbound tickets
               _buildLegTicketsCard(
-                title:
-                    'Lượt về: ${request.destination.name} → ${request.origin.name}',
+                title: context.l10n.uiReturn0b24ba(
+                  request.destination.name,
+                  request.origin.name,
+                ),
                 tickets: inTickets,
-                operatorName: inbound.trip?.operatorName ?? 'Nhà xe',
+                operatorName:
+                    inbound.trip?.operatorName ?? context.l10n.uiBusOperator,
                 state: inbound,
                 scopeKey: 'inbound-success',
               ),
@@ -115,7 +122,7 @@ class RoundTripSuccessView extends StatelessWidget {
                 ),
                 icon: const Icon(Icons.confirmation_number_outlined),
                 label: Text(
-                  'Xem vé của tôi',
+                  context.l10n.uiViewMyTickets,
                   style: DiscoveryTextStyles.bodyMedium.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -135,7 +142,7 @@ class RoundTripSuccessView extends StatelessWidget {
                 ),
                 icon: const Icon(Icons.home_outlined),
                 label: Text(
-                  'Về Trang chủ',
+                  context.l10n.uiGoToHome8a211a,
                   style: DiscoveryTextStyles.bodyMedium.copyWith(
                     color: DiscoveryColors.neutral700,
                     fontWeight: FontWeight.w600,
@@ -213,13 +220,13 @@ class RoundTripSuccessView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Mã vé: ${t.ticketCode}',
+                    LocaleController.strings.uiTicketCode628257(t.ticketCode),
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
-                    'Ghế ${t.seatNumber}',
+                    LocaleController.strings.uiSeat25a5f5(t.seatNumber ?? '—'),
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.primary,
                       fontWeight: FontWeight.w700,

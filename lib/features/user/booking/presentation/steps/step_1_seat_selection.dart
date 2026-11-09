@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
@@ -29,9 +30,9 @@ class Step1SeatSelection extends StatelessWidget {
           const SeatLegend(),
           const SizedBox(height: 14),
           if (layout.lowerFloor.isEmpty && layout.upperFloor.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
-              child: Text('Chuyến xe chưa có ghế mở bán.'),
+              child: Text(context.l10n.uiNoSeatsAreOnSaleForThisTrip),
             ),
           SeatMapView(
             layout: layout,
@@ -43,7 +44,9 @@ class Step1SeatSelection extends StatelessWidget {
           const SizedBox(height: 16),
           Center(
             child: Text(
-              'Chọn tối đa ${BookingFlowState.maxSeatsPerTrip} chỗ cho mỗi lượt đặt.',
+              context.l10n.uiSelectUpToSeatsPerBooking(
+                BookingFlowState.maxSeatsPerTrip,
+              ),
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.neutral500,
                 fontWeight: FontWeight.w500,

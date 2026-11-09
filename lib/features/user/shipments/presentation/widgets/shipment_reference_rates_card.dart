@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
@@ -29,7 +30,7 @@ class _ShipmentReferenceRatesCardState
     for (final c in widget.categories) {
       if (c.id == id) return c.name;
     }
-    return 'Loại $id';
+    return context.l10n.uiType81d219(id);
   }
 
   @override
@@ -61,7 +62,9 @@ class _ShipmentReferenceRatesCardState
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Bảng cước tham khảo theo tuyến (${widget.rates.length} mức)',
+                      context.l10n.uiRouteFeeEstimatesRates(
+                        widget.rates.length,
+                      ),
                       style: const TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 14,
@@ -96,7 +99,7 @@ class _ShipmentReferenceRatesCardState
                         color: DiscoveryColors.warning.withValues(alpha: 0.3),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(
@@ -107,7 +110,7 @@ class _ShipmentReferenceRatesCardState
                         SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            'Cước hiển thị chỉ để tham khảo. Cước phí chính xác do máy chủ xác nhận khi tạo đơn.',
+                            context.l10n.uiTheDisplayedFeeIsAnEstimateTheExact,
                             style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 12,
@@ -123,7 +126,7 @@ class _ShipmentReferenceRatesCardState
                   ...widget.rates.map((rate) {
                     final weightRange = rate.maxWeight != null
                         ? '${rate.minWeight} - ${rate.maxWeight} kg'
-                        : '≥ ${rate.minWeight} kg';
+                        : context.l10n.uiKg(rate.minWeight);
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Row(

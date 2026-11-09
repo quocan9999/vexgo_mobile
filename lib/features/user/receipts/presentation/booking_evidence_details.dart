@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -30,21 +31,28 @@ class StopSnapshotDetails extends StatelessWidget {
           if (showAddress && stop.address.isNotEmpty) Text(stop.address),
           if (time != null)
             Text(
-              '${pickup ? 'Giờ đón tại điểm' : 'Giờ trả tại điểm'}: ${evidenceClock(time)}',
+              '${pickup ? context.l10n.uiPickUpTimeAtStop : context.l10n.uiDropOffTimeAtStop}: ${evidenceClock(time)}',
             ),
           if (arriveBy != null)
-            Text('Có mặt trước: ${evidenceClock(arriveBy)}'),
+            Text(context.l10n.uiArriveBy(evidenceClock(arriveBy))),
           if (pickup && arriveBy == null && stop.arrivalLeadMinutes != null)
-            Text('Có mặt trước giờ đón ${stop.arrivalLeadMinutes} phút'),
+            Text(
+              context.l10n.uiArriveMinutesBeforePickUp(
+                stop.arrivalLeadMinutes ?? '—',
+              ),
+            ),
           if ((stop.surcharge ?? 0) > 0)
             Text(
-              'Phụ phí tại điểm: ${CurrencyFormatter.format(stop.surcharge)}',
+              context.l10n.uiStopSurcharge(
+                CurrencyFormatter.format(stop.surcharge),
+              ),
             ),
-          if (stop.phone.isNotEmpty) Text('Liên hệ điểm: ${stop.phone}'),
+          if (stop.phone.isNotEmpty)
+            Text(context.l10n.uiStopContact(stop.phone)),
           if (stop.transferName.isNotEmpty)
-            Text('Trung chuyển: ${stop.transferName}'),
+            Text(context.l10n.uiShuttle(stop.transferName)),
           if (stop.transferAddress.isNotEmpty)
-            Text('Địa chỉ trung chuyển: ${stop.transferAddress}'),
+            Text(context.l10n.uiShuttleAddress(stop.transferAddress)),
         ],
       ),
     );
@@ -72,7 +80,7 @@ class OrderCargoDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Vật phẩm đi kèm (toàn đơn)',
+          context.l10n.uiAccompanyingItemsWholeBooking,
           style: Theme.of(context).textTheme.titleSmall,
         ),
         for (final item in items)
@@ -82,16 +90,18 @@ class OrderCargoDetails extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${item.quantity} × ${item.name.isEmpty ? 'Vật phẩm' : item.name}',
+                  '${item.quantity} × ${item.name.isEmpty ? context.l10n.uiItems73b007 : item.name}',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 if (item.categoryName.isNotEmpty)
-                  Text('Loại: ${item.categoryName}'),
+                  Text(context.l10n.uiType(item.categoryName)),
                 if (item.weight != null)
                   Text(
-                    'Khối lượng khai báo: ${NumberFormat('0.###', 'vi_VN').format(item.weight)} kg',
+                    context.l10n.uiDeclaredWeightKg(
+                      NumberFormat('0.###', 'vi_VN').format(item.weight),
+                    ),
                   ),
-                if (item.note.isNotEmpty) Text('Ghi chú: ${item.note}'),
+                if (item.note.isNotEmpty) Text(context.l10n.uiNotes(item.note)),
               ],
             ),
           ),

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -109,7 +110,7 @@ class TicketSummaryCard extends StatelessWidget {
               Text(
                 ticket.trip.operatorName.isNotEmpty
                     ? ticket.trip.operatorName
-                    : 'Nhà xe VexGo',
+                    : context.l10n.uiVexgoOperator,
                 style: DiscoveryTextStyles.titleSmall.copyWith(
                   fontWeight: FontWeight.w700,
                   color: DiscoveryColors.neutral900,
@@ -150,17 +151,17 @@ class TicketSummaryCard extends StatelessWidget {
       case TicketStatus.upcoming:
         bg = DiscoveryColors.primaryLight;
         text = DiscoveryColors.primary;
-        label = 'Sắp đi';
+        label = LocaleController.strings.uiUpcoming;
         break;
       case TicketStatus.completed:
         bg = DiscoveryColors.successLight;
         text = DiscoveryColors.successDark;
-        label = 'Đã đi';
+        label = LocaleController.strings.uiPastTrips;
         break;
       case TicketStatus.cancelled:
         bg = DiscoveryColors.errorLight;
         text = DiscoveryColors.errorDark;
-        label = 'Đã hủy';
+        label = LocaleController.strings.uiCancelled;
         break;
     }
 
@@ -193,7 +194,9 @@ class TicketSummaryCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              ticket.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán',
+              ticket.isPaid
+                  ? LocaleController.strings.uiPaid
+                  : LocaleController.strings.uiUnpaid,
               style: DiscoveryTextStyles.caption.copyWith(
                 color: ticket.isPaid
                     ? DiscoveryColors.successDark
@@ -217,7 +220,7 @@ class TicketSummaryCard extends StatelessWidget {
       children: [
         // Route Cities
         Text(
-          '${ticket.trip.fromCity} ➔ ${ticket.trip.toCity}',
+          context.l10n.ui56e768(ticket.trip.fromCity, ticket.trip.toCity),
           style: DiscoveryTextStyles.h4.copyWith(
             fontWeight: FontWeight.w700,
             color: DiscoveryColors.neutral900,
@@ -266,8 +269,8 @@ class TicketSummaryCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   pickupAddress.isNotEmpty
-                      ? 'Đón: $pickup ($pickupAddress)'
-                      : 'Đón: $pickup',
+                      ? context.l10n.uiPickUp4845a7(pickup, pickupAddress)
+                      : context.l10n.uiPickUpfb4009(pickup),
                   style: DiscoveryTextStyles.bodySmall.copyWith(
                     color: DiscoveryColors.neutral600,
                     fontSize: 12,
@@ -328,12 +331,20 @@ class TicketSummaryCard extends StatelessWidget {
             children: [
               Expanded(
                 flex: 4,
-                child: field('Mã vé', code, DiscoveryColors.neutral900),
+                child: field(
+                  context.l10n.uiTicketCode3c82be,
+                  code,
+                  DiscoveryColors.neutral900,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 flex: 3,
-                child: field('Ghế', seatsStr, DiscoveryColors.primary),
+                child: field(
+                  context.l10n.uiSeatfd20bf,
+                  seatsStr,
+                  DiscoveryColors.primary,
+                ),
               ),
             ],
           ),
@@ -341,7 +352,7 @@ class TicketSummaryCard extends StatelessWidget {
           const Divider(height: 1, color: DiscoveryColors.divider),
           const SizedBox(height: 8),
           Text(
-            'Tổng tiền',
+            context.l10n.uiTotal,
             textAlign: TextAlign.end,
             style: DiscoveryTextStyles.caption.copyWith(
               color: DiscoveryColors.neutral500,
@@ -385,7 +396,10 @@ class TicketSummaryCard extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  'Lý do: ${ticket.cancelReason ?? "Đã hủy theo yêu cầu"}',
+                  context.l10n.uiReason(
+                    ticket.cancelReason ??
+                        context.l10n.uiCancelledOnRequest1422c3,
+                  ),
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.errorDark,
                     fontSize: 11,
@@ -399,7 +413,9 @@ class TicketSummaryCard extends StatelessWidget {
           if (ticket.refundAmount != null) ...[
             const SizedBox(height: 4),
             Text(
-              'Dự kiến hoàn: ${CurrencyFormatter.format(ticket.refundAmount!)}',
+              context.l10n.uiEstimatedRefund26c8c6(
+                CurrencyFormatter.format(ticket.refundAmount!),
+              ),
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.successDark,
                 fontWeight: FontWeight.w700,
@@ -429,7 +445,7 @@ class TicketSummaryCard extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            '${ticket.review!.rating}.0 (Đã đánh giá)',
+            context.l10n.ui0Reviewed(ticket.review!.rating),
             style: DiscoveryTextStyles.caption.copyWith(
               color: DiscoveryColors.warningDark,
               fontWeight: FontWeight.w600,
@@ -481,7 +497,9 @@ class TicketSummaryCard extends StatelessWidget {
             const SizedBox(width: 6),
             Flexible(
               child: Text(
-                ticket.canShowQr ? 'Xem vé & QR' : 'Xem chi tiết',
+                ticket.canShowQr
+                    ? context.l10n.uiViewTicketQr
+                    : context.l10n.uiViewDetails,
                 style: DiscoveryTextStyles.button.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -517,7 +535,7 @@ class TicketSummaryCard extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Hủy vé',
+                context.l10n.uiCancelTicket,
                 style: DiscoveryTextStyles.button.copyWith(
                   color: DiscoveryColors.error,
                   fontWeight: FontWeight.w700,
@@ -545,7 +563,9 @@ class TicketSummaryCard extends StatelessWidget {
                 color: DiscoveryColors.secondary,
               ),
               label: Text(
-                ticket.review == null ? 'Đánh giá' : 'Xem đánh giá',
+                ticket.review == null
+                    ? context.l10n.uiReview
+                    : context.l10n.uiViewReview,
                 style: DiscoveryTextStyles.button.copyWith(
                   color: DiscoveryColors.secondary,
                   fontWeight: FontWeight.w700,

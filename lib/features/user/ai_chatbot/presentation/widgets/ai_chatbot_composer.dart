@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -36,12 +37,7 @@ class AiChatbotComposer extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            12,
-            isDense ? 4 : 8,
-            8,
-            isDense ? 4 : 8,
-          ),
+          padding: EdgeInsets.fromLTRB(12, isDense ? 4 : 8, 8, isDense ? 4 : 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -74,9 +70,9 @@ class AiChatbotComposer extends StatelessWidget {
                                     : DiscoveryTextStyles.bodyMedium)
                                 .copyWith(color: DiscoveryColors.neutral900),
                         decoration: InputDecoration(
-                          labelText: 'Câu hỏi cho Trợ lý AI',
+                          labelText: context.l10n.uiQuestionForTheAiAssistant,
                           floatingLabelBehavior: FloatingLabelBehavior.never,
-                          hintText: 'Nhập câu hỏi về chính sách, chuyến xe…',
+                          hintText: context.l10n.uiAskAboutPoliciesBusTrips,
                           hintStyle: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: isDense ? 12 : 14,
@@ -100,7 +96,7 @@ class AiChatbotComposer extends StatelessWidget {
                     child: IconButton(
                       key: const ValueKey('ai-chatbot-send-btn'),
                       padding: EdgeInsets.zero,
-                      tooltip: 'Gửi câu hỏi',
+                      tooltip: context.l10n.uiSendQuestion,
                       onPressed: canSend ? onSend : null,
                       icon: sending
                           ? const SizedBox(
@@ -127,8 +123,10 @@ class AiChatbotComposer extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 4, left: 6, right: 8),
                   child: Text(
                     overLimit
-                        ? 'Vượt giới hạn 2.000 ký tự ($trimmedRunes/2000). Vui lòng rút gọn câu hỏi.'
-                        : '$trimmedRunes/2000 ký tự',
+                        ? context.l10n.uiOverThe2000CharacterLimit2000Shorten(
+                            trimmedRunes,
+                          )
+                        : context.l10n.ui2000Characters(trimmedRunes),
                     key: const ValueKey('ai-chatbot-char-counter'),
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,

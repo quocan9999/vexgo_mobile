@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/app/routes.dart';
 import 'package:vexgo_app/features/user/receipts/presentation/receipt_entry_button.dart';
@@ -64,8 +66,8 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
           }
           return Scaffold(
             backgroundColor: DiscoveryColors.background,
-            appBar: const TabPageHeader(
-              title: 'Chi tiết vé xe',
+            appBar: TabPageHeader(
+              title: context.l10n.uiTicketDetails,
               showBackButton: true,
             ),
             body: Center(
@@ -78,7 +80,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Đang tải thông tin vé...',
+                          context.l10n.uiLoadingTicketDetails,
                           style: DiscoveryTextStyles.bodyMedium.copyWith(
                             color: DiscoveryColors.neutral500,
                           ),
@@ -105,7 +107,11 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            state.error ?? 'Không thể tải thông tin vé.',
+                            localizedClientLabel(
+                              context,
+                              state.error ??
+                                  context.l10n.uiUnableToLoadTicketDetails,
+                            ),
                             style: DiscoveryTextStyles.bodyMedium.copyWith(
                               color: DiscoveryColors.neutral700,
                               fontWeight: FontWeight.w600,
@@ -115,7 +121,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                           if (state.status != TicketReadStatus.invalidated) ...[
                             const SizedBox(height: 16),
                             CustomButton(
-                              text: 'Thử lại',
+                              text: context.l10n.uiTryAgain,
                               width: 140,
                               onPressed: _reader.refresh,
                             ),
@@ -160,8 +166,8 @@ class _TicketDetailContent extends StatelessWidget {
       await Clipboard.setData(ClipboardData(text: phone));
       if (!context.mounted || !current()) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã sao chép số liên hệ.'),
+        SnackBar(
+          content: Text(context.l10n.uiContactNumberCopied),
           duration: Duration(seconds: 2),
         ),
       );
@@ -179,11 +185,11 @@ class _TicketDetailContent extends StatelessWidget {
     return Scaffold(
       backgroundColor: DiscoveryColors.background,
       appBar: TabPageHeader(
-        title: 'Chi tiết vé xe',
+        title: context.l10n.uiTicketDetails,
         showBackButton: true,
         actions: [
           IconButton(
-            tooltip: 'Cập nhật trạng thái vé',
+            tooltip: context.l10n.uiRefreshTicketStatus,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: context.read<TicketReadCubit>().refresh,
           ),
@@ -223,7 +229,7 @@ class _TicketDetailContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Thông tin liên hệ chuyến đi',
+                    context.l10n.uiTripContactDetails,
                     style: DiscoveryTextStyles.titleSmall.copyWith(
                       fontWeight: FontWeight.w700,
                       color: DiscoveryColors.neutral900,
@@ -259,7 +265,9 @@ class _TicketDetailContent extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Liên hệ chuyến đi ${ticket.trip.operatorName}',
+                                        context.l10n.uiContactForTrip(
+                                          ticket.trip.operatorName,
+                                        ),
                                         style: DiscoveryTextStyles.caption
                                             .copyWith(
                                               color: DiscoveryColors.neutral500,
@@ -271,7 +279,9 @@ class _TicketDetailContent extends StatelessWidget {
                                       Text(
                                         contactPhone == null ||
                                                 contactPhone.isEmpty
-                                            ? 'Nhà xe chưa cung cấp số liên hệ.'
+                                            ? context
+                                                  .l10n
+                                                  .uiTheOperatorHasNotProvidedAContactNumber
                                             : contactPhone,
                                         style: DiscoveryTextStyles.bodyMedium
                                             .copyWith(
@@ -305,7 +315,7 @@ class _TicketDetailContent extends StatelessWidget {
                                     vertical: 8,
                                   ),
                                 ),
-                                child: const Text('Sao chép số'),
+                                child: Text(context.l10n.uiCopyNumber),
                               ),
                             ],
                           ],
@@ -333,7 +343,9 @@ class _TicketDetailContent extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Liên hệ chuyến đi ${ticket.trip.operatorName}',
+                                  context.l10n.uiContactForTrip(
+                                    ticket.trip.operatorName,
+                                  ),
                                   style: DiscoveryTextStyles.caption.copyWith(
                                     color: DiscoveryColors.neutral500,
                                   ),
@@ -343,7 +355,9 @@ class _TicketDetailContent extends StatelessWidget {
                                 const SizedBox(height: 2),
                                 Text(
                                   contactPhone == null || contactPhone.isEmpty
-                                      ? 'Nhà xe chưa cung cấp số liên hệ.'
+                                      ? context
+                                            .l10n
+                                            .uiTheOperatorHasNotProvidedAContactNumber
                                       : contactPhone,
                                   style: DiscoveryTextStyles.bodyMedium
                                       .copyWith(
@@ -373,7 +387,7 @@ class _TicketDetailContent extends StatelessWidget {
                                   vertical: 10,
                                 ),
                               ),
-                              child: const Text('Sao chép số'),
+                              child: Text(context.l10n.uiCopyNumber),
                             ),
                         ],
                       );
@@ -394,7 +408,7 @@ class _TicketDetailContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         CustomButton(
-                          text: 'Tìm chuyến khác',
+                          text: context.l10n.uiFindAnotherTrip,
                           prefixIcon: const Icon(
                             Icons.search_rounded,
                             color: Colors.white,
@@ -404,7 +418,7 @@ class _TicketDetailContent extends StatelessWidget {
                         ),
                         const SizedBox(height: AppDimensions.sm),
                         CustomButton(
-                          text: 'Hủy vé',
+                          text: context.l10n.uiCancelTicket,
                           type: ButtonType.outline,
                           onPressed: () {
                             CancelTicketSheet.show(
@@ -423,7 +437,7 @@ class _TicketDetailContent extends StatelessWidget {
                       Expanded(
                         flex: 1,
                         child: CustomButton(
-                          text: 'Hủy vé',
+                          text: context.l10n.uiCancelTicket,
                           type: ButtonType.outline,
                           onPressed: () {
                             CancelTicketSheet.show(
@@ -440,7 +454,7 @@ class _TicketDetailContent extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: CustomButton(
-                          text: 'Tìm chuyến khác',
+                          text: context.l10n.uiFindAnotherTrip,
                           prefixIcon: const Icon(
                             Icons.search_rounded,
                             color: Colors.white,
@@ -458,7 +472,7 @@ class _TicketDetailContent extends StatelessWidget {
             if (ticket.status == TicketStatus.completed && canManage) ...[
               if (ticket.review == null)
                 CustomButton(
-                  text: 'Đánh giá chuyến đi',
+                  text: context.l10n.uiRateYourTrip,
                   prefixIcon: const Icon(
                     Icons.star_rate_rounded,
                     color: Colors.white,
@@ -484,7 +498,7 @@ class _TicketDetailContent extends StatelessWidget {
                       ),
                       icon: const Icon(Icons.star_rounded),
                       label: Text(
-                        'Đã đánh giá • ${ticket.review!.rating}/5 — Xem',
+                        context.l10n.uiReviewed5View(ticket.review!.rating),
                       ),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(48, 48),
@@ -492,7 +506,7 @@ class _TicketDetailContent extends StatelessWidget {
                     ),
                     const SizedBox(height: AppDimensions.sm),
                     CustomButton(
-                      text: 'Đặt lại chuyến xe này',
+                      text: context.l10n.uiBookThisTripAgain,
                       prefixIcon: const Icon(
                         Icons.refresh_rounded,
                         color: Colors.white,
@@ -525,7 +539,9 @@ class _TicketDetailContent extends StatelessWidget {
                     const SizedBox(width: AppDimensions.sm),
                     Expanded(
                       child: Text(
-                        'Vé này đã bị hủy. Hệ thống không hoàn tiền online. Vui lòng liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền theo chính sách nhà xe.',
+                        context
+                            .l10n
+                            .uiThisTicketHasBeenCancelledOnlineRefundsAre,
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.errorDark,
                           height: 1.4,
@@ -537,12 +553,12 @@ class _TicketDetailContent extends StatelessWidget {
               ),
               const SizedBox(height: AppDimensions.sm),
               CustomButton(
-                text: 'Liên hệ hỗ trợ',
+                text: context.l10n.uiContactSupport,
                 onPressed: () => context.push(AppRoutes.supportChat),
               ),
               const SizedBox(height: AppDimensions.sm),
               CustomButton(
-                text: 'Tìm vé mới',
+                text: context.l10n.uiFindANewTicket,
                 onPressed: () => context.go('/search-trips'),
               ),
             ],

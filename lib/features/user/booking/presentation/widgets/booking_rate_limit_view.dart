@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import '../../bloc/booking_rate_limit.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -18,7 +19,7 @@ class BookingRateLimitView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Đặt vé'),
+      title: Text(context.l10n.uiBookTickets),
       automaticallyImplyLeading: false,
       backgroundColor: DiscoveryColors.header,
       foregroundColor: Colors.white,
@@ -43,24 +44,24 @@ class BookingRateLimitView extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               hasAnyOrder || notice.existingOrder
-                  ? 'Đơn đã tạo vẫn được giữ nguyên. Hãy kiểm tra đơn hiện tại trước khi tiếp tục; không tạo đơn thay thế.'
-                  : 'Thông tin bạn đã nhập được giữ lại. Trước khi tiếp tục, hệ thống sẽ kiểm tra lại chỗ trống và thời gian giữ ghế.',
+                  ? context.l10n.uiYourExistingBookingIsPreservedCheckItBefore
+                  : context.l10n.uiYourEnteredDetailsAreKeptSeatAvailabilityAnd,
             ),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: busy ? null : onReviewOrders,
               style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
-              child: const Text('Kiểm tra vé/đơn'),
+              child: Text(context.l10n.uiCheckTicketBooking),
             ),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: busy ? null : onResume,
               style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
-              child: const Text('Quay lại đặt vé'),
+              child: Text(context.l10n.uiBackToBooking),
             ),
             TextButton(
               onPressed: busy ? null : onSupport,
-              child: const Text('Liên hệ hỗ trợ'),
+              child: Text(context.l10n.uiContactSupport),
             ),
           ],
         ),

@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -94,16 +96,16 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
     ];
     if (rawDims.every((s) => s.isEmpty)) return null;
     if (rawDims.any((s) => s.isEmpty)) {
-      return 'Nhập đủ dài, rộng, cao; mỗi chiều phải lớn hơn 0.';
+      return context.l10n.uiEnterLengthWidthAndHeightEachMustBe;
     }
     final parsedDims = rawDims
         .map((s) => double.tryParse(s.replaceAll(',', '.')))
         .toList();
     if (!parsedDims.every((v) => v != null && v.isFinite && v > 0)) {
-      return 'Kích thước dài, rộng, cao phải là số hợp lệ lớn hơn 0.';
+      return context.l10n.uiLengthWidthAndHeightMustBeValidNumbers;
     }
     if (parsedDims[0]! > 150 || parsedDims[1]! > 80 || parsedDims[2]! > 80) {
-      return 'Kích thước tối đa cho phép là 150 × 80 × 80 cm.';
+      return context.l10n.uiMaximumDimensionsAre1508080Cm;
     }
     return null;
   }
@@ -125,7 +127,9 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
   CargoGroup _computeTargetGroup() {
     final parsedWeight = _parseWeight();
     final probe = CargoItemDraft(
-      name: _nameCtrl.text.trim().isEmpty ? 'Hàng' : _nameCtrl.text.trim(),
+      name: _nameCtrl.text.trim().isEmpty
+          ? context.l10n.uiItems
+          : _nameCtrl.text.trim(),
       kind: _kind,
       categoryId: 1,
       quantity: _parseQuantity() > 0 ? _parseQuantity() : 1,
@@ -239,8 +243,9 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
     final matching = _matchingCategories(options);
     if (matching.isEmpty) {
       setState(() {
-        _editorError =
-            'Chuyến xe không có danh mục phù hợp cho nhóm ${_groupLabel(_computeTargetGroup())}.';
+        _editorError = context.l10n.uiNoSuitableCategoryForIsAvailableOnThis(
+          _groupLabel(_computeTargetGroup()),
+        );
       });
       return;
     }
@@ -268,8 +273,10 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
     final remaining = options.capacity.slots[candidate.group]?.remaining ?? 0;
     if (usedInGroup > remaining) {
       setState(() {
-        _editorError =
-            'Số lượng vượt quá sức chứa còn lại ($remaining chỗ cho ${_groupLabel(candidate.group)}).';
+        _editorError = context.l10n.uiQuantityExceedsRemainingCapacitySpacesFor(
+          remaining,
+          _groupLabel(candidate.group),
+        );
       });
       return;
     }
@@ -357,35 +364,35 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
   static String _kindLabel(CargoKind kind) {
     switch (kind) {
       case CargoKind.parcel:
-        return 'Hàng nhẹ';
+        return LocaleController.strings.uiLightItems;
       case CargoKind.bulky:
-        return 'Hàng cồng kềnh';
+        return LocaleController.strings.uiBulkyItems;
       case CargoKind.motorcycle:
-        return 'Xe máy';
+        return LocaleController.strings.uiMotorbike;
       case CargoKind.bicycle:
-        return 'Xe đạp';
+        return LocaleController.strings.uiBicycle;
     }
   }
 
   static String _groupLabel(CargoGroup group) {
     switch (group) {
       case CargoGroup.parcel:
-        return 'Hàng nhẹ';
+        return LocaleController.strings.uiLightItems;
       case CargoGroup.bulky:
-        return 'Hàng cồng kềnh / Xe đạp';
+        return LocaleController.strings.uiBulkyItemsBicycle;
       case CargoGroup.motorcycle:
-        return 'Xe máy';
+        return LocaleController.strings.uiMotorbike;
     }
   }
 
   static String _serviceLabel(CargoService service) {
     switch (service) {
       case CargoService.normal:
-        return 'Tiêu chuẩn';
+        return LocaleController.strings.uiStandard;
       case CargoService.fragile:
-        return 'Dễ vỡ';
+        return LocaleController.strings.uiFragile;
       case CargoService.valuable:
-        return 'Giá trị cao';
+        return LocaleController.strings.uiHighValue;
     }
   }
 
@@ -441,7 +448,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          widget.title,
+                          localizedClientLabel(context, widget.title),
                           style: const TextStyle(
                             color: DiscoveryColors.neutral900,
                             fontSize: 15,
@@ -470,8 +477,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                       ],
                     ),
                     const SizedBox(height: 3),
-                    const Text(
-                      'Đăng ký gửi kiện hàng, xe máy hoặc xe đạp đi cùng chuyến xe',
+                    Text(
+                      context.l10n.uiRegisterParcelsAMotorbikeOrABicycleFor,
                       style: TextStyle(
                         color: DiscoveryColors.neutral600,
                         fontSize: 12,
@@ -504,8 +511,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
               key: Key('cargo-locked-banner-$scope'),
               icon: Icons.lock_outline_rounded,
               color: DiscoveryColors.info,
-              text:
-                  'Đơn hàng đã tạo hoặc đang xử lý. Thông tin gửi hàng đã được khóa để đảm bảo đồng bộ.',
+              text: context.l10n.uiThisBookingHasBeenCreatedOrIsProcessing,
             ),
           ],
           if (cargo.enabled) ...[
@@ -514,8 +520,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
               key: Key('cargo-pricing-notice-$scope'),
               icon: Icons.info_outline_rounded,
               color: DiscoveryColors.secondary,
-              text:
-                  'Cước vật phẩm thanh toán riêng tại bến. Thông tin người nhận được lấy theo thông tin liên hệ đặt vé và sức chứa được máy chủ xác nhận khi tạo đơn.',
+              text: context.l10n.uiItemFeesArePaidSeparatelyAtTheStation6c5a15,
             ),
             const SizedBox(height: 12),
             if (cargo.loading)
@@ -523,7 +528,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
             else if (cargo.error != null || cargo.options == null)
               _buildErrorState(
                 scope,
-                cargo.error ?? 'Không tải được tùy chọn gửi hàng.',
+                cargo.error ?? context.l10n.uiUnableToLoadItemOptions,
                 locked,
               )
             else
@@ -546,7 +551,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               SizedBox(
                 width: 18,
@@ -559,7 +564,9 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
               SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Đang kiểm tra dịch vụ gửi hàng, sức chứa và điểm gửi/nhận...',
+                  context
+                      .l10n
+                      .uiCheckingShippingServiceCapacityAndDropOffCollection,
                   style: TextStyle(
                     color: DiscoveryColors.neutral900,
                     fontSize: 13,
@@ -577,7 +584,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                 key: Key('cargo-disable-btn-$scope'),
                 onPressed: () => widget.onToggleEnabled(false),
                 icon: const Icon(Icons.close_rounded, size: 16),
-                label: const Text('Bỏ gửi hàng'),
+                label: Text(context.l10n.uiRemoveItems),
               ),
             ),
           ],
@@ -632,13 +639,13 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                   key: Key('cargo-retry-btn-$scope'),
                   onPressed: widget.onRefresh,
                   icon: const Icon(Icons.refresh_rounded, size: 16),
-                  label: const Text('Thử lại'),
+                  label: Text(context.l10n.uiTryAgain),
                 ),
                 TextButton.icon(
                   key: Key('cargo-disable-btn-$scope'),
                   onPressed: () => widget.onToggleEnabled(false),
                   icon: const Icon(Icons.close_rounded, size: 16),
-                  label: const Text('Bỏ gửi hàng'),
+                  label: Text(context.l10n.uiRemoveItems),
                 ),
               ],
             ),
@@ -663,7 +670,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
                 Icon(
                   Icons.block_rounded,
@@ -673,7 +680,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                 SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Chuyến xe không nhận gửi hàng.',
+                    context.l10n.uiThisTripDoesNotAcceptItemsForShipping,
                     style: TextStyle(
                       color: DiscoveryColors.neutral900,
                       fontSize: 13,
@@ -684,8 +691,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
               ],
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Vui lòng tắt gửi hàng kèm vé để tiếp tục đặt vé hành khách như bình thường.',
+            Text(
+              context.l10n.uiTurnOffItemsWithYourTicketToContinue,
               style: TextStyle(
                 color: DiscoveryColors.neutral600,
                 fontSize: 12,
@@ -698,7 +705,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                 key: Key('cargo-disable-btn-$scope'),
                 onPressed: () => widget.onToggleEnabled(false),
                 icon: const Icon(Icons.close_rounded, size: 16),
-                label: const Text('Bỏ gửi hàng'),
+                label: Text(context.l10n.uiRemoveItems),
               ),
             ],
           ],
@@ -720,7 +727,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
         if (!hasValidRoutePoints)
           _buildErrorState(
             scope,
-            'Chuyến xe chưa cấu hình điểm gửi/nhận hàng hợp lệ.',
+            context.l10n.uiThisTripHasNoValidItemDropOff,
             locked,
           )
         else ...[
@@ -753,8 +760,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Sức chứa gửi hàng còn lại trên chuyến',
+          Text(
+            context.l10n.uiRemainingItemCapacityOnThisTrip,
             style: TextStyle(
               color: DiscoveryColors.neutral600,
               fontSize: 12,
@@ -785,7 +792,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                   ),
                 ),
                 child: Text(
-                  '${_groupLabel(group)}: còn $remaining chỗ',
+                  context.l10n.uiSpacesLeft(_groupLabel(group), remaining),
                   style: TextStyle(
                     color: available
                         ? DiscoveryColors.successDark
@@ -819,8 +826,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Điểm gửi & nhận hàng trên tuyến',
+        Text(
+          context.l10n.uiItemDropOffCollectionPoints,
           style: TextStyle(
             color: DiscoveryColors.neutral900,
             fontSize: 13,
@@ -833,7 +840,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
           initialValue: senderId,
           isExpanded: true,
           decoration: InputDecoration(
-            labelText: 'Điểm gửi hàng *',
+            labelText: context.l10n.uiItemDropOffPoint,
             filled: true,
             fillColor: DiscoveryColors.neutral50,
             contentPadding: const EdgeInsets.symmetric(
@@ -867,7 +874,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
           initialValue: receiverId,
           isExpanded: true,
           decoration: InputDecoration(
-            labelText: 'Điểm nhận hàng *',
+            labelText: context.l10n.uiItemCollectionPoint,
             filled: true,
             fillColor: DiscoveryColors.neutral50,
             contentPadding: const EdgeInsets.symmetric(
@@ -909,8 +916,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
         key: Key('cargo-empty-categories-$scope'),
         icon: Icons.warning_amber_rounded,
         color: DiscoveryColors.error,
-        text:
-            'Chuyến xe chưa có danh mục hàng hóa hợp lệ. Không thể thêm kiện hàng.',
+        text: context.l10n.uiNoValidItemCategoriesAreAvailableForThis,
       );
     }
 
@@ -925,7 +931,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
-              'Danh sách kiện hàng (${items.length})',
+              context.l10n.uiItems583419(items.length),
               style: const TextStyle(
                 color: DiscoveryColors.neutral900,
                 fontSize: 13,
@@ -937,7 +943,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                 key: Key('cargo-add-item-btn-$scope'),
                 onPressed: () => _openAddItem(options),
                 icon: const Icon(Icons.add_rounded, size: 16),
-                label: const Text('Thêm kiện hàng'),
+                label: Text(context.l10n.uiAddItem),
               ),
           ],
         ),
@@ -951,8 +957,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: DiscoveryColors.neutral200),
             ),
-            child: const Text(
-              'Chưa có kiện hàng nào. Nhấn "Thêm kiện hàng" để khai báo thông tin hàng gửi.',
+            child: Text(
+              context.l10n.uiNoItemsAddedTapAddItemToEnter,
               style: TextStyle(
                 color: DiscoveryColors.neutral600,
                 fontSize: 12,
@@ -970,7 +976,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                     .where((c) => c.id == item.categoryId)
                     .map((c) => c.name)
                     .firstOrNull ??
-                'Danh mục #${item.categoryId}';
+                context.l10n.uiCategory(item.categoryId);
             return _buildCargoItemTile(
               scope: scope,
               index: index,
@@ -1051,7 +1057,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                         size: 18,
                         color: DiscoveryColors.primary,
                       ),
-                      tooltip: 'Sửa kiện hàng',
+                      tooltip: context.l10n.uiEditItem,
                       visualDensity: VisualDensity.compact,
                     ),
                     IconButton(
@@ -1062,7 +1068,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                         size: 18,
                         color: DiscoveryColors.error,
                       ),
-                      tooltip: 'Xóa kiện hàng',
+                      tooltip: context.l10n.uiRemoveItem,
                       visualDensity: VisualDensity.compact,
                     ),
                   ],
@@ -1072,10 +1078,18 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
           const SizedBox(height: 6),
           Text(
             item.isVehicle
-                ? 'Khối lượng quy định: ${_formatNumber(item.payloadWeight)} kg/xe'
+                ? context.l10n.uiSpecifiedWeightKgVehicle(
+                    _formatNumber(item.payloadWeight),
+                  )
                 : hasDimensions
-                ? 'Khối lượng: ${_formatNumber(item.weight)} kg • Kích thước: ${_formatNumber(item.length!)}×${_formatNumber(item.width!)}×${_formatNumber(item.height!)} cm (Quy đổi: ${_formatNumber(item.effectiveWeight)} kg)'
-                : 'Khối lượng: ${_formatNumber(item.weight)} kg',
+                ? context.l10n.uiWeightKgDimensionsCmVolumetricKg(
+                    _formatNumber(item.weight),
+                    _formatNumber(item.length!),
+                    _formatNumber(item.width!),
+                    _formatNumber(item.height!),
+                    _formatNumber(item.effectiveWeight),
+                  )
+                : context.l10n.uiWeightKg2d5bda(_formatNumber(item.weight)),
             style: const TextStyle(
               color: DiscoveryColors.neutral600,
               fontSize: 12,
@@ -1088,9 +1102,9 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
             Text(
               [
                 if (item.vehicleModel.isNotEmpty)
-                  'Dòng xe: ${item.vehicleModel}',
+                  context.l10n.uiVehicleModel(item.vehicleModel),
                 if (item.licensePlate.isNotEmpty)
-                  'Biển số: ${item.licensePlate}',
+                  context.l10n.uiLicencePlate799484(item.licensePlate),
               ].join(' • '),
               style: const TextStyle(
                 color: DiscoveryColors.neutral600,
@@ -1101,7 +1115,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
           if (item.note.isNotEmpty) ...[
             const SizedBox(height: 3),
             Text(
-              'Ghi chú: ${item.note}',
+              context.l10n.uiNotes(item.note),
               style: const TextStyle(
                 color: DiscoveryColors.neutral600,
                 fontSize: 12,
@@ -1154,8 +1168,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
         children: [
           Text(
             _editingIndex != null
-                ? 'Chỉnh sửa kiện hàng #${_editingIndex! + 1}'
-                : 'Thêm kiện hàng mới',
+                ? context.l10n.uiEditItem7033d5(_editingIndex! + 1)
+                : context.l10n.uiAddNewItem,
             style: const TextStyle(
               color: DiscoveryColors.neutral900,
               fontSize: 14,
@@ -1163,8 +1177,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
-            'Phân loại kiện hàng',
+          Text(
+            context.l10n.uiItemCategory,
             style: TextStyle(
               color: DiscoveryColors.neutral600,
               fontSize: 12,
@@ -1210,8 +1224,9 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
             _buildBanner(
               icon: Icons.warning_amber_rounded,
               color: DiscoveryColors.warningDark,
-              text:
-                  'Không có danh mục hàng cho nhóm ${_groupLabel(targetGroup)} trên chuyến này.',
+              text: context.l10n.uiNoItemCategoryForIsAvailableOnThis(
+                _groupLabel(targetGroup),
+              ),
             )
           else
             DropdownButtonFormField<int>(
@@ -1219,7 +1234,9 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
               initialValue: selectedCatId,
               isExpanded: true,
               decoration: InputDecoration(
-                labelText: 'Danh mục hàng (${_groupLabel(targetGroup)})',
+                labelText: context.l10n.uiItemCategoryfbfebd(
+                  _groupLabel(targetGroup),
+                ),
                 filled: true,
                 fillColor: DiscoveryColors.surface,
                 contentPadding: const EdgeInsets.symmetric(
@@ -1255,10 +1272,10 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
             key: Key('cargo-item-name-$scope'),
             controller: _nameCtrl,
             decoration: InputDecoration(
-              labelText: 'Tên kiện hàng *',
+              labelText: context.l10n.uiItemName,
               hintText: isVehicle
-                  ? 'VD: Xe máy Honda Vision / Xe đạp thể thao'
-                  : 'VD: Thùng quà, tài liệu, vali...',
+                  ? context.l10n.uiEGHondaVisionMotorbikeSportsBicycle
+                  : context.l10n.uiEGGiftBoxDocumentsSuitcase,
               filled: true,
               fillColor: DiscoveryColors.surface,
               border: OutlineInputBorder(
@@ -1280,7 +1297,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                   controller: _quantityCtrl,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Số lượng *',
+                    labelText: context.l10n.uiQuantity,
                     filled: true,
                     fillColor: DiscoveryColors.surface,
                     border: OutlineInputBorder(
@@ -1301,8 +1318,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                   ),
                   decoration: InputDecoration(
                     labelText: isVehicle
-                        ? 'Khối lượng cố định (kg)'
-                        : 'Khối lượng (kg, ≤40) *',
+                        ? context.l10n.uiFixedWeightKg
+                        : context.l10n.uiWeightKg40,
                     filled: true,
                     fillColor: DiscoveryColors.surface,
                     border: OutlineInputBorder(
@@ -1321,8 +1338,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
           ),
           if (!isVehicle) ...[
             const SizedBox(height: 10),
-            const Text(
-              'Kích thước tùy chọn (cm - tối đa 150 × 80 × 80 cm)',
+            Text(
+              context.l10n.uiOptionalDimensionsCmMaximum1508080Cm,
               style: TextStyle(
                 color: DiscoveryColors.neutral600,
                 fontSize: 12,
@@ -1340,7 +1357,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      labelText: 'Dài (≤150)',
+                      labelText: context.l10n.uiLength150,
                       filled: true,
                       fillColor: DiscoveryColors.surface,
                       border: OutlineInputBorder(
@@ -1364,7 +1381,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      labelText: 'Rộng (≤80)',
+                      labelText: context.l10n.uiWidth80,
                       filled: true,
                       fillColor: DiscoveryColors.surface,
                       border: OutlineInputBorder(
@@ -1388,7 +1405,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      labelText: 'Cao (≤80)',
+                      labelText: context.l10n.uiHeight80,
                       filled: true,
                       fillColor: DiscoveryColors.surface,
                       border: OutlineInputBorder(
@@ -1427,7 +1444,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                     key: Key('cargo-item-vehicle-model-$scope'),
                     controller: _vehicleModelCtrl,
                     decoration: InputDecoration(
-                      labelText: 'Dòng xe / Loại xe',
+                      labelText: context.l10n.uiVehicleModelType,
                       filled: true,
                       fillColor: DiscoveryColors.surface,
                       border: OutlineInputBorder(
@@ -1442,7 +1459,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                     key: Key('cargo-item-license-plate-$scope'),
                     controller: _licensePlateCtrl,
                     decoration: InputDecoration(
-                      labelText: 'Biển số xe',
+                      labelText: context.l10n.uiLicencePlate,
                       filled: true,
                       fillColor: DiscoveryColors.surface,
                       border: OutlineInputBorder(
@@ -1455,8 +1472,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
             ),
           ],
           const SizedBox(height: 10),
-          const Text(
-            'Dịch vụ bảo quản',
+          Text(
+            context.l10n.uiHandlingService,
             style: TextStyle(
               color: DiscoveryColors.neutral600,
               fontSize: 12,
@@ -1481,7 +1498,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
             key: Key('cargo-item-note-$scope'),
             controller: _noteCtrl,
             decoration: InputDecoration(
-              labelText: 'Ghi chú kiện hàng (tùy chọn)',
+              labelText: context.l10n.uiItemNotesOptional,
               filled: true,
               fillColor: DiscoveryColors.surface,
               border: OutlineInputBorder(
@@ -1507,7 +1524,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
               TextButton(
                 key: Key('cargo-cancel-item-btn-$scope'),
                 onPressed: _cancelEditor,
-                child: const Text('Hủy'),
+                child: Text(context.l10n.uiCancel),
               ),
               ElevatedButton.icon(
                 key: Key('cargo-save-item-btn-$scope'),
@@ -1519,8 +1536,8 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
                 icon: const Icon(Icons.check_rounded, size: 16),
                 label: Text(
                   _editingIndex != null
-                      ? 'Cập nhật kiện hàng'
-                      : 'Lưu kiện hàng',
+                      ? context.l10n.uiUpdateItem
+                      : context.l10n.uiSaveItem,
                 ),
               ),
             ],
@@ -1644,7 +1661,7 @@ class BookingCargoSummaryBox extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  title,
+                  localizedClientLabel(context, title),
                   style: const TextStyle(
                     color: DiscoveryColors.neutral900,
                     fontSize: 13,
@@ -1657,7 +1674,7 @@ class BookingCargoSummaryBox extends StatelessWidget {
           const SizedBox(height: 8),
           if (shipmentCode.isNotEmpty) ...[
             _buildRow(
-              'Mã vận đơn gửi hàng',
+              context.l10n.uiShipmentCode,
               shipmentCode,
               valueColor: DiscoveryColors.secondary,
               bold: true,
@@ -1670,7 +1687,7 @@ class BookingCargoSummaryBox extends StatelessWidget {
             ),
             shippingFee != null
                 ? CurrencyFormatter.format(shippingFee)
-                : 'Cước vật phẩm thanh toán riêng tại bến',
+                : context.l10n.uiItemFeesArePaidSeparatelyAtTheStation,
             valueColor: shippingFee != null
                 ? DiscoveryColors.neutral900
                 : DiscoveryColors.warningDark,
@@ -1683,12 +1700,15 @@ class BookingCargoSummaryBox extends StatelessWidget {
           ),
           if (senderName != null && receiverName != null) ...[
             const SizedBox(height: 4),
-            _buildRow('Tuyến gửi hàng', '$senderName → $receiverName'),
+            _buildRow(
+              context.l10n.uiShippingRoute,
+              '$senderName → $receiverName',
+            ),
           ],
           if (confirmedItems.isNotEmpty) ...[
             const SizedBox(height: 6),
-            const Text(
-              'Kiện hàng đã xác nhận:',
+            Text(
+              context.l10n.uiConfirmedItems,
               style: TextStyle(
                 color: DiscoveryColors.neutral600,
                 fontSize: 11,
@@ -1711,8 +1731,8 @@ class BookingCargoSummaryBox extends StatelessWidget {
             ),
           ] else if (draftItems.isNotEmpty) ...[
             const SizedBox(height: 6),
-            const Text(
-              'Kiện hàng đăng ký gửi:',
+            Text(
+              context.l10n.uiRegisteredItems,
               style: TextStyle(
                 color: DiscoveryColors.neutral600,
                 fontSize: 11,

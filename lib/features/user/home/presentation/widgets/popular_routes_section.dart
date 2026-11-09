@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,7 +35,7 @@ class PopularRoutesSection extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Tuyến đường phổ biến',
+                      context.l10n.uiPopularRoutes,
                       style: DiscoveryTextStyles.h3.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -204,7 +205,7 @@ class _PopularRouteCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Khoảng cách: ${route.distance}',
+                    context.l10n.uiDistance(route.distance),
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.neutral500,
                       fontSize: 11,
@@ -215,7 +216,7 @@ class _PopularRouteCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'Từ ',
+                          context.l10n.uiFrom,
                           style: DiscoveryTextStyles.caption.copyWith(
                             color: DiscoveryColors.neutral500,
                           ),
@@ -235,7 +236,7 @@ class _PopularRouteCard extends StatelessWidget {
                     )
                   else
                     Text(
-                      'Xem giá vé',
+                      context.l10n.uiViewFares,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.primary,
                         fontWeight: FontWeight.w600,

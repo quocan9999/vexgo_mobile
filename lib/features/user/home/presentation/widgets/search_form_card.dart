@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -61,7 +62,7 @@ class SearchFormCard extends StatelessWidget {
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
-                              'Khứ hồi',
+                              context.l10n.uiRoundTrip,
                               style: DiscoveryTextStyles.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: state.isRoundTrip
@@ -76,7 +77,7 @@ class SearchFormCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Semantics(
-                      label: 'Bật tắt vé khứ hồi',
+                      label: context.l10n.uiToggleRoundTrip,
                       toggled: state.isRoundTrip,
                       child: Switch.adaptive(
                         value: state.isRoundTrip,
@@ -108,13 +109,15 @@ class SearchFormCard extends StatelessWidget {
                           context,
                           icon: Icons.trip_origin_rounded,
                           iconColor: DiscoveryColors.primary,
-                          label: 'Điểm xuất phát',
-                          cityName: state.departureCity?.name ?? 'Chọn điểm đi',
+                          label: context.l10n.uiOrigind7f375,
+                          cityName:
+                              state.departureCity?.name ??
+                              context.l10n.uiSelectOrigin,
                           province: state.departureCity?.region,
                           onTap: () async {
                             final selected = await SelectCitySheet.show(
                               context,
-                              title: 'Chọn điểm xuất phát',
+                              title: context.l10n.uiSelectOrigin829747,
                               cities: state.cities,
                               currentCity: state.departureCity,
                             );
@@ -137,14 +140,15 @@ class SearchFormCard extends StatelessWidget {
                           context,
                           icon: Icons.location_on_rounded,
                           iconColor: DiscoveryColors.secondary,
-                          label: 'Điểm đến',
+                          label: context.l10n.uiDestination,
                           cityName:
-                              state.destinationCity?.name ?? 'Chọn điểm đến',
+                              state.destinationCity?.name ??
+                              context.l10n.uiSelectDestination,
                           province: state.destinationCity?.region,
                           onTap: () async {
                             final selected = await SelectCitySheet.show(
                               context,
-                              title: 'Chọn điểm đến',
+                              title: context.l10n.uiSelectDestination,
                               cities: state.cities,
                               currentCity: state.destinationCity,
                             );
@@ -162,10 +166,10 @@ class SearchFormCard extends StatelessWidget {
                     Positioned(
                       right: 0,
                       child: Tooltip(
-                        message: 'Đổi chiều điểm đi và điểm đến',
+                        message: context.l10n.uiSwapOriginAndDestination,
                         child: Semantics(
                           button: true,
-                          label: 'Đổi chiều điểm đi và điểm đến',
+                          label: context.l10n.uiSwapOriginAndDestination,
                           child: Material(
                             color: Colors.white,
                             shape: const CircleBorder(),
@@ -210,7 +214,7 @@ class SearchFormCard extends StatelessWidget {
                     if (!state.isRoundTrip)
                       _buildDateField(
                         context: context,
-                        label: 'Ngày đi',
+                        label: context.l10n.uiDepartureDate,
                         date: state.departureDate,
                         onTap: () => _pickDate(
                           context,
@@ -227,7 +231,7 @@ class SearchFormCard extends StatelessWidget {
                           final isNarrow = constraints.maxWidth < 320;
                           final depField = _buildDateField(
                             context: context,
-                            label: 'Ngày đi',
+                            label: context.l10n.uiDepartureDate,
                             date: state.departureDate,
                             onTap: () => _pickDate(
                               context,
@@ -252,7 +256,7 @@ class SearchFormCard extends StatelessWidget {
                               state.departureDate.add(const Duration(days: 2));
                           final retField = _buildDateField(
                             context: context,
-                            label: 'Ngày về',
+                            label: context.l10n.uiReturnDate,
                             date: retDate,
                             onTap: () => _pickDate(
                               context,
@@ -288,7 +292,7 @@ class SearchFormCard extends StatelessWidget {
 
                     // Primary Search Button
                     DiscoveryButton(
-                      text: 'Tìm chuyến',
+                      text: context.l10n.uiFindTrips,
                       type: ButtonType.secondary,
                       prefixIcon: const Icon(
                         Icons.search_rounded,
@@ -467,26 +471,18 @@ class SearchFormCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (province != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      province,
+                      style: DiscoveryTextStyles.caption.copyWith(
+                        color: DiscoveryColors.neutral600,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
-            if (province != null) ...[
-              Container(
-                margin: const EdgeInsets.only(right: 48),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: DiscoveryColors.neutral100,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  province,
-                  style: DiscoveryTextStyles.caption.copyWith(
-                    color: DiscoveryColors.neutral600,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -44,8 +45,8 @@ class ShipmentUncertainView extends StatelessWidget {
                   size: 48,
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Chưa thể xác minh kết quả tạo đơn',
+                Text(
+                  context.l10n.uiShipmentResultNotYetVerified,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
@@ -57,7 +58,7 @@ class ShipmentUncertainView extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   state.createError ??
-                      'Hệ thống gặp sự cố mạng hoặc phản hồi chưa được xác nhận. Vui lòng không tạo lại đơn ngay lập tức để tránh phát sinh đơn trùng lặp.',
+                      context.l10n.uiANetworkIssueOccurredOrTheResponseIs,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: AppTypography.fontFamily,
@@ -81,8 +82,8 @@ class ShipmentUncertainView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Thông tin vận đơn ghi nhận tạm thời:',
+                  Text(
+                    context.l10n.uiProvisionalShipmentDetails,
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 14,
@@ -94,8 +95,8 @@ class ShipmentUncertainView extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Mã vận đơn: ',
+                      Text(
+                        context.l10n.uiShipmentCode9f610f,
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
@@ -116,7 +117,7 @@ class ShipmentUncertainView extends StatelessWidget {
                       ),
                       IconButton(
                         icon: const Icon(Icons.copy_rounded, size: 18),
-                        tooltip: 'Sao chép mã',
+                        tooltip: context.l10n.uiCopyCode,
                         constraints: const BoxConstraints(
                           minWidth: 48,
                           minHeight: 48,
@@ -126,8 +127,8 @@ class ShipmentUncertainView extends StatelessWidget {
                             ClipboardData(text: recovery.waybillCode),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Đã sao chép mã vận đơn'),
+                            SnackBar(
+                              content: Text(context.l10n.uiShipmentCodeCopied),
                               duration: Duration(seconds: 1),
                             ),
                           );
@@ -139,8 +140,8 @@ class ShipmentUncertainView extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Mã đơn hàng: ',
+                      Text(
+                        context.l10n.uiBookingCoded6f725,
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
@@ -167,7 +168,7 @@ class ShipmentUncertainView extends StatelessWidget {
             const SizedBox(height: 16),
             if (isAuthenticated) ...[
               CustomButton(
-                text: 'Kiểm tra đơn đã tạo',
+                text: context.l10n.uiCheckExistingShipment,
                 isLoading: state.refreshing,
                 onPressed: () => cubit.recoverKnownCreation(),
                 type: ButtonType.primary,
@@ -175,7 +176,7 @@ class ShipmentUncertainView extends StatelessWidget {
               const SizedBox(height: 8),
             ] else if (onNavigateToLookup != null) ...[
               CustomButton(
-                text: 'Tra cứu vận đơn này',
+                text: context.l10n.uiLookUpThisShipment,
                 onPressed: () => onNavigateToLookup!(recovery.waybillCode),
                 type: ButtonType.primary,
               ),
@@ -184,7 +185,7 @@ class ShipmentUncertainView extends StatelessWidget {
           ],
           if (state.draft != null) ...[
             CustomButton(
-              text: 'Kiểm tra lại kết quả tạo đơn',
+              text: context.l10n.uiCheckShipmentCreationResult,
               isLoading: state.phase == ShipmentCreationPhase.submitting,
               onPressed: state.phase == ShipmentCreationPhase.submitting
                   ? null
@@ -192,8 +193,8 @@ class ShipmentUncertainView extends StatelessWidget {
               type: ButtonType.outline,
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Gửi lại cùng thông tin và mã giao dịch để kiểm tra đơn đã tạo trên máy chủ.',
+            Text(
+              context.l10n.uiResubmitTheSameDetailsAndTransactionCodeTo,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: AppTypography.fontFamily,
@@ -223,7 +224,7 @@ class ShipmentUncertainView extends StatelessWidget {
               color: DiscoveryColors.neutral100,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 Icon(
                   Icons.support_agent_rounded,
@@ -232,7 +233,7 @@ class ShipmentUncertainView extends StatelessWidget {
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Nếu cần hỗ trợ khẩn cấp, vui lòng liên hệ tổng đài VexGo hoặc chụp lại màn hình này.',
+                    context.l10n.uiForUrgentHelpContactVexgoSupportOrTake,
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 12,

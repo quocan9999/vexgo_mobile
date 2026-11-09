@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -36,10 +37,10 @@ class Step4PassengerInfo extends StatefulWidget {
   static String? validateName(String raw) {
     final trimmed = raw.trim();
     if (trimmed.isEmpty) {
-      return 'Vui lòng nhập họ và tên hành khách';
+      return LocaleController.strings.uiEnterThePassengerSFullName;
     }
     if (trimmed.length < 2) {
-      return 'Họ và tên cần ít nhất 2 ký tự';
+      return LocaleController.strings.uiFullNameMustHaveAtLeast2Characters;
     }
     return null;
   }
@@ -47,10 +48,12 @@ class Step4PassengerInfo extends StatefulWidget {
   static String? validatePhone(String raw) {
     final trimmed = raw.trim();
     if (trimmed.isEmpty) {
-      return 'Vui lòng nhập số điện thoại liên hệ';
+      return LocaleController.strings.uiEnterAContactPhoneNumber;
     }
     if (!RegExp(r'^(?:0|\+84)[35789][0-9]{8}$').hasMatch(trimmed)) {
-      return 'Số điện thoại không hợp lệ (ví dụ: 0912345678 hoặc +84912345678)';
+      return LocaleController
+          .strings
+          .uiInvalidPhoneNumberEG0912345678Or84912345678;
     }
     return null;
   }
@@ -59,7 +62,7 @@ class Step4PassengerInfo extends StatefulWidget {
     final trimmed = raw.trim();
     if (trimmed.isEmpty) return null;
     if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(trimmed)) {
-      return 'Email không đúng định dạng (ví dụ: ten@email.com)';
+      return LocaleController.strings.uiInvalidEmailAddressEGNameEmailCom;
     }
     return null;
   }
@@ -332,7 +335,7 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Thông tin liên hệ cho đơn đặt vé',
+                    context.l10n.uiBookingContactDetails,
                     style: DiscoveryTextStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.w800,
                       color: DiscoveryColors.neutral900,
@@ -340,7 +343,7 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Dùng để xác nhận thông tin đặt chỗ và liên hệ đón trả trong chuyến đi này.',
+                    context.l10n.uiUsedToConfirmYourBookingAndArrangePick,
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.neutral600,
                     ),
@@ -351,9 +354,9 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
                   _PassengerContactField(
                     key: _nameFieldKey,
                     fieldKey: const ValueKey('passenger-name-input'),
-                    label: 'Họ và tên',
+                    label: context.l10n.uiFullNamead9f29,
                     isRequired: true,
-                    hintText: 'Ví dụ: Nguyễn Văn An',
+                    hintText: context.l10n.uiExampleNguyNVNAn,
                     controller: _nameController,
                     focusNode: _nameFocusNode,
                     enabled: !_isLocked,
@@ -379,11 +382,11 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
                   _PassengerContactField(
                     key: _phoneFieldKey,
                     fieldKey: const ValueKey('passenger-phone-input'),
-                    label: 'Số điện thoại',
+                    label: context.l10n.uiPhoneNumber,
                     isRequired: true,
-                    hintText: 'Ví dụ: 0987654321',
+                    hintText: context.l10n.uiExample0987654321,
                     helperText:
-                        'Hỗ trợ số di động Việt Nam bắt đầu bằng 0 hoặc +84.',
+                        context.l10n.uiVietnameseMobileNumbersStartingWith0Or84,
                     controller: _phoneController,
                     focusNode: _phoneFocusNode,
                     enabled: !_isLocked,
@@ -408,11 +411,11 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
                   _PassengerContactField(
                     key: _emailFieldKey,
                     fieldKey: const ValueKey('passenger-email-input'),
-                    label: 'Email (tùy chọn)',
+                    label: context.l10n.uiEmailOptional,
                     isRequired: false,
-                    hintText: 'Ví dụ: nguyenvanan@gmail.com',
+                    hintText: context.l10n.uiExampleNameGmailCom,
                     helperText:
-                        'Không bắt buộc. Nếu nhập, vui lòng dùng đúng định dạng email.',
+                        context.l10n.uiOptionalIfEnteredUseAValidEmailAddress,
                     controller: _emailController,
                     focusNode: _emailFocusNode,
                     enabled: !_isLocked,
@@ -488,7 +491,7 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
         children: [
           if (seatNames.isNotEmpty)
             Text(
-              'Ghế: $seatNames',
+              context.l10n.uiSeats9c637d(seatNames),
               style: DiscoveryTextStyles.bodySmall.copyWith(
                 color: DiscoveryColors.primaryDark,
                 fontWeight: FontWeight.w700,
@@ -496,7 +499,7 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
             ),
           if (pickupName != null && pickupName.isNotEmpty)
             Text(
-              'Đón: $pickupName',
+              context.l10n.uiPickUpfb4009(pickupName),
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.neutral700,
                 fontWeight: FontWeight.w600,
@@ -504,7 +507,7 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
             ),
           if (dropoffName != null && dropoffName.isNotEmpty)
             Text(
-              'Trả: $dropoffName',
+              context.l10n.uiDropOff52eaac(dropoffName),
               style: DiscoveryTextStyles.caption.copyWith(
                 color: DiscoveryColors.neutral700,
                 fontWeight: FontWeight.w600,
@@ -557,7 +560,7 @@ class _PassengerContactField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasError = errorText != null && errorText!.isNotEmpty;
-    final semanticLabel = isRequired ? '$label, bắt buộc' : label;
+    final semanticLabel = isRequired ? context.l10n.uiRequired(label) : label;
 
     return Semantics(
       container: true,

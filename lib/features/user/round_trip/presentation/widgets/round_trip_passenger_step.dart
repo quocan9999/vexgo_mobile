@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -150,8 +151,12 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
                 Expanded(
                   child: Text(
                     widget.readOnly
-                        ? 'Thông tin hành khách được giữ theo đơn đã tạo. Bạn có thể đổi ghế và điểm đón/trả của chiều còn lại.'
-                        : 'Thông tin hành khách sẽ được áp dụng chung cho cả Lượt đi và Lượt về.',
+                        ? context
+                              .l10n
+                              .uiPassengerDetailsAreKeptFromTheExistingBooking
+                        : context
+                              .l10n
+                              .uiPassengerDetailsApplyToBothOutboundAndReturn,
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.primaryDark,
                       fontWeight: FontWeight.w600,
@@ -183,7 +188,7 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Thông tin liên hệ',
+                  context.l10n.uiContactInformation,
                   style: DiscoveryTextStyles.titleMedium.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -193,7 +198,7 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
                 // Họ và tên
                 _buildField(
                   key: const ValueKey('passenger-name-field'),
-                  label: 'Họ và tên *',
+                  label: context.l10n.uiFullName,
                   hint: 'Nguyễn Văn A',
                   controller: _nameController,
                   icon: Icons.person_outline_rounded,
@@ -205,7 +210,7 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
                 // Số điện thoại
                 _buildField(
                   key: const ValueKey('passenger-phone-field'),
-                  label: 'Số điện thoại *',
+                  label: context.l10n.uiPhoneNumber42d534,
                   hint: '0912345678',
                   controller: _phoneController,
                   icon: Icons.phone_outlined,
@@ -218,7 +223,7 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
                 // Email
                 _buildField(
                   key: const ValueKey('passenger-email-field'),
-                  label: 'Email nhận vé (tùy chọn)',
+                  label: context.l10n.uiTicketEmailOptional,
                   hint: 'example@email.com',
                   controller: _emailController,
                   icon: Icons.email_outlined,
@@ -231,8 +236,8 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
                 // Ghi chú
                 _buildField(
                   key: const ValueKey('passenger-note-field'),
-                  label: 'Ghi chú cho nhà xe (tùy chọn)',
-                  hint: 'Đón tại ngã tư, có hành lý cồng kềnh...',
+                  label: context.l10n.uiNotesForTheOperatorOptional,
+                  hint: context.l10n.uiEGPickUpAtTheJunctionCarrying,
                   controller: _noteController,
                   icon: Icons.note_alt_outlined,
                   maxLines: 2,
@@ -251,8 +256,8 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
                   (widget.outboundState?.isCheckoutLocked ?? false) ||
                   widget.busy,
               scopeKey: 'outbound',
-              title: 'Hành lý đi kèm',
-              legBadge: 'Lượt đi',
+              title: context.l10n.uiAccompaniedLuggage,
+              legBadge: context.l10n.uiOutbound,
               seatChangeNotice: widget.outboundSeatChangeNotice,
               onDismissSeatChangeNotice:
                   widget.onDismissOutboundSeatChangeNotice,
@@ -267,8 +272,8 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
                   (widget.inboundState?.isCheckoutLocked ?? false) ||
                   widget.busy,
               scopeKey: 'inbound',
-              title: 'Hành lý đi kèm',
-              legBadge: 'Lượt về',
+              title: context.l10n.uiAccompaniedLuggage,
+              legBadge: context.l10n.uiReturn,
               seatChangeNotice: widget.inboundSeatChangeNotice,
               onDismissSeatChangeNotice:
                   widget.onDismissInboundSeatChangeNotice,
@@ -284,8 +289,8 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
               cargo: widget.outboundState!.cargo,
               locked: widget.outboundState!.isCheckoutLocked,
               scopeKey: 'outbound',
-              title: 'Gửi hàng kèm vé',
-              legBadge: 'Lượt đi',
+              title: context.l10n.uiItemsWithYourTicket,
+              legBadge: context.l10n.uiOutbound,
               onToggleEnabled: (enabled) => widget.onDispatchCargo!(
                 TripLeg.outbound,
                 SetBookingCargoEnabledEvent(enabled),
@@ -304,8 +309,8 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
               cargo: widget.inboundState!.cargo,
               locked: widget.inboundState!.isCheckoutLocked,
               scopeKey: 'inbound',
-              title: 'Gửi hàng kèm vé',
-              legBadge: 'Lượt về',
+              title: context.l10n.uiItemsWithYourTicket,
+              legBadge: context.l10n.uiReturn,
               onToggleEnabled: (enabled) => widget.onDispatchCargo!(
                 TripLeg.inbound,
                 SetBookingCargoEnabledEvent(enabled),
@@ -355,7 +360,7 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
               ),
             ),
             child: Text(
-              'Quay lại',
+              LocaleController.strings.uiBack,
               style: DiscoveryTextStyles.bodyMedium.copyWith(
                 color: DiscoveryColors.neutral700,
                 fontWeight: FontWeight.w600,
@@ -378,7 +383,7 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
                 ),
               ),
               child: Text(
-                'Xác nhận thông tin',
+                LocaleController.strings.uiConfirmDetails,
                 style: DiscoveryTextStyles.bodyMedium.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,

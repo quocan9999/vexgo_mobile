@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -84,8 +86,12 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
             builder: (_, revision, _) {
               if (!mounted) {
                 return Scaffold(
-                  appBar: AppBar(title: const Text('Hành lý đi kèm')),
-                  body: const Center(child: Text('Phiên đặt vé đã kết thúc.')),
+                  appBar: AppBar(
+                    title: Text(context.l10n.uiAccompaniedLuggage),
+                  ),
+                  body: Center(
+                    child: Text(context.l10n.uiThisBookingSessionHasEnded),
+                  ),
                 );
               }
               final current = widget;
@@ -101,20 +107,24 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                       final discard = await showDialog<bool>(
                         context: routeContext,
                         builder: (dialogContext) => AlertDialog(
-                          title: const Text('Bỏ phần đang nhập?'),
-                          content: const Text(
-                            'Mục chưa lưu sẽ bị bỏ. Các kiện đã lưu vẫn được giữ nguyên.',
+                          title: Text(context.l10n.uiDiscardUnsavedDetails),
+                          content: Text(
+                            context
+                                .l10n
+                                .uiUnsavedDetailsWillBeDiscardedSavedItemsWill,
                           ),
                           actions: [
                             TextButton(
                               onPressed: () =>
                                   Navigator.pop(dialogContext, false),
-                              child: const Text('Nhập tiếp'),
+                              child: Text(context.l10n.uiKeepEditing),
                             ),
                             TextButton(
                               onPressed: () =>
                                   Navigator.pop(dialogContext, true),
-                              child: const Text('Bỏ phần đang nhập'),
+                              child: Text(
+                                context.l10n.uiDiscardUnsavedDetails5d5a16,
+                              ),
                             ),
                           ],
                         ),
@@ -130,13 +140,17 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                       foregroundColor: Colors.white,
                       title: Text(
                         current.legBadge == null
-                            ? 'Hành lý đi kèm'
-                            : 'Hành lý · ${current.legBadge}',
+                            ? context.l10n.uiAccompaniedLuggage
+                            : context.l10n.uiLuggage030449(
+                                current.legBadge ?? '—',
+                              ),
                       ),
                       actions: [
                         _infoButton(
-                          'Cước phí dự tính',
-                          'Cước được dự tính theo gói của nhà xe và có thể thay đổi sau khi kiểm tra vật phẩm. Thanh toán tại bến khi giao vật phẩm, không cộng vào tiền vé thanh toán trực tuyến.',
+                          context.l10n.uiEstimatedFee,
+                          context
+                              .l10n
+                              .uiThisEstimateUsesTheOperatorSPackagesAnd,
                           'luggage-manager-info-${current.scopeKey}',
                         ),
                       ],
@@ -174,9 +188,11 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                           final editor = _editorKey.currentState;
                           if (editor?._hasUnsavedInput ?? false) {
                             ScaffoldMessenger.of(routeContext).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
-                                  'Lưu hoặc hủy mục đang nhập trước khi hoàn tất.',
+                                  context
+                                      .l10n
+                                      .uiSaveOrDiscardTheCurrentItemBeforeFinishing,
                                 ),
                               ),
                             );
@@ -194,7 +210,9 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                           }
                           Navigator.of(routeContext).pop();
                         },
-                        child: Text(current.locked ? 'Đóng' : 'Xong'),
+                        child: Text(
+                          current.locked ? context.l10n.uiClose : 'Xong',
+                        ),
                       ),
                     ),
                   ),
@@ -256,7 +274,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                       minimumSize: const Size(48, 48),
                     ),
                     onPressed: () => Navigator.of(dialogContext).pop(),
-                    child: const Text('Đã hiểu'),
+                    child: Text(context.l10n.uiGotIt),
                   ),
                 ),
               ),
@@ -305,8 +323,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               Expanded(
                 child: Text(
                   widget.legBadge == null
-                      ? widget.title
-                      : '${widget.title} · ${widget.legBadge}',
+                      ? localizedClientLabel(context, widget.title)
+                      : '${localizedClientLabel(context, widget.title)} · ${widget.legBadge}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -314,8 +332,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 ),
               ),
               _infoButton(
-                'Thông tin hành lý',
-                'Hành lý xách tay được miễn phí trong hạn mức nhà xe. Thêm kiện ký gửi hoặc phương tiện để xem cước dự tính. Các lựa chọn được quản lý riêng theo từng chặng.',
+                context.l10n.uiLuggageInformation,
+                context.l10n.uiCarryOnLuggageIsFreeWithinTheOperator,
                 'luggage-info-$scope',
               ),
             ],
@@ -323,9 +341,13 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
           if (state.phase != LuggagePhase.revoked)
             _descriptionInfo(
               state.options == null
-                  ? 'Hạn mức xách tay theo nhà xe'
-                  : 'Xách tay miễn phí ≤ ${_formatNumber(state.options!.policy.freeWeightPerPassengerKg)} kg/khách',
-              'Mỗi hành khách được mang một kiện xách tay trong hạn mức. Kiện vượt hạn mức cần kiểm tra điều kiện ký gửi. Hạn mức áp dụng theo chuyến đang chọn.',
+                  ? context.l10n.uiOperatorCarryOnAllowance
+                  : context.l10n.uiFreeCarryOnKgPassenger(
+                      _formatNumber(
+                        state.options!.policy.freeWeightPerPassengerKg,
+                      ),
+                    ),
+              context.l10n.uiEachPassengerMayBringOneCarryOnItem,
               'luggage-allowance-info-$scope',
             ),
           if (hasItems) ...[
@@ -333,7 +355,10 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  'Xách tay · ${bag.quantity} kiện · ${_formatNumber(bag.weightKg)} kg/kiện',
+                  context.l10n.uiCarryOnItemsKgItem(
+                    bag.quantity,
+                    _formatNumber(bag.weightKg),
+                  ),
                 ),
               ),
             for (final item in selection.checked)
@@ -341,7 +366,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
                   '${item.cargo.name} × ${item.cargo.quantity} · '
-                  '${item.packageCode == null ? 'Phương tiện' : 'Gói ${item.packageCode}'} · '
+                  '${item.packageCode == null ? context.l10n.uiVehicles : context.l10n.uiPackage(item.packageCode ?? '—')} · '
                   '${_formatNumber(item.cargo.payloadWeight)} kg/kiện',
                 ),
               ),
@@ -351,13 +376,13 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 spacing: 12,
                 runSpacing: 4,
                 children: [
-                  const Text(
-                    'Cước phí dự tính',
+                  Text(
+                    context.l10n.uiEstimatedFee,
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   Text(
                     fee == null
-                        ? 'Cần kiểm tra lại'
+                        ? context.l10n.uiNeedsReview
                         : CurrencyFormatter.format(fee),
                     style: const TextStyle(
                       color: DiscoveryColors.primary,
@@ -377,7 +402,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               ),
             ),
           if (state.phase == LuggagePhase.revoked)
-            const Text('Phiên đã thay đổi. Vui lòng mở lại đặt vé.')
+            Text(context.l10n.uiYourSessionHasChangedOpenBookingAgain)
           else if (!widget.locked) ...[
             if (state.phase != LuggagePhase.idle &&
                 widget.cubit.validationError != null)
@@ -398,13 +423,17 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   minimumSize: const Size.fromHeight(48),
                 ),
                 icon: Icon(hasItems ? Icons.edit_outlined : Icons.add),
-                label: Text(hasItems ? 'Sửa hành lý' : 'Thêm hành lý ký gửi'),
+                label: Text(
+                  hasItems
+                      ? context.l10n.uiEditLuggage
+                      : context.l10n.uiAddCheckedLuggage,
+                ),
               ),
             ),
           ] else
             TextButton(
               onPressed: _openManager,
-              child: const Text('Xem hành lý'),
+              child: Text(context.l10n.uiViewLuggage),
             ),
         ],
       ),
@@ -541,13 +570,15 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
     final weight = _parseDecimal(_carryOnWeightCtrl.text);
     final qty = int.tryParse(_carryOnQtyCtrl.text.trim());
     if (weight == null || !weight.isFinite || weight <= 0) {
-      return 'Nhập khối lượng xách tay hợp lệ (> 0 kg).';
+      return context.l10n.uiEnterAValidCarryOnWeight0Kg;
     }
     if (qty == null || qty < 1) {
-      return 'Số kiện xách tay phải từ 1 trở lên.';
+      return context.l10n.uiCarryOnQuantityMustBeAtLeast1;
     }
     if (weight > policy.freeWeightPerPassengerKg) {
-      return 'Hành lý xách tay vượt hạn mức miễn phí (${_formatNumber(policy.freeWeightPerPassengerKg)} kg/kiện); hãy chuyển sang hành lý ký gửi.';
+      return context.l10n.uiCarryOnExceedsTheFreeAllowanceKgItem(
+        _formatNumber(policy.freeWeightPerPassengerKg),
+      );
     }
     final existing = widget.cubit.state.selection.carryOn;
     var otherBags = 0;
@@ -557,7 +588,9 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
       }
     }
     if (otherBags + qty > widget.cubit.passengerCount) {
-      return 'Mỗi hành khách được khai báo tối đa một kiện xách tay miễn phí (tối đa ${widget.cubit.passengerCount} kiện). Hãy chuyển kiện vượt sang hành lý ký gửi.';
+      return context.l10n.uiEachPassengerMayRegisterOneFreeCarryOn(
+        widget.cubit.passengerCount,
+      );
     }
     return null;
   }
@@ -657,7 +690,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
       _editingCheckedIndex = null;
       _editorIsVehicle = false;
       _selectedPackageCode = matchingPack.code;
-      _nameCtrl.text = 'Hành lý ký gửi';
+      _nameCtrl.text = context.l10n.uiCheckedLuggage;
       _convertingCarryOn = source;
       _qtyCtrl.text = quantity.toString();
       _weightCtrl.text = _formatNumber(resolvedWeight);
@@ -737,7 +770,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
       _editorIsVehicle = true;
       _vehicleKind = CargoKind.bicycle;
       _motorcycleTariff = LuggageMotorcycleTariff.wave;
-      _nameCtrl.text = 'Xe đạp đi kèm';
+      _nameCtrl.text = context.l10n.uiAccompanyingBicycle;
       _qtyCtrl.text = '1';
       _weightCtrl.text = '15';
       _lengthCtrl.clear();
@@ -808,11 +841,11 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
     ];
     if (raw.every((s) => s.isEmpty)) return null;
     if (raw.any((s) => s.isEmpty)) {
-      return 'Nhập đủ cả 3 chiều Dài, Rộng, Cao (hoặc để trống cả 3).';
+      return context.l10n.uiEnterAllThreeDimensionsOrLeaveAllThree;
     }
     final parsed = raw.map(_parseDecimal).toList();
     if (parsed.any((v) => v == null || !v.isFinite || v <= 0)) {
-      return 'Kích thước Dài, Rộng, Cao phải là số hợp lệ lớn hơn 0.';
+      return context.l10n.uiLengthWidthAndHeightMustBeValidNumbers8bcef9;
     }
     return null;
   }
@@ -884,7 +917,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
       final weight = _parseDecimal(_weightCtrl.text);
       if (_weightCtrl.text.trim().isNotEmpty &&
           (weight == null || !weight.isFinite || weight <= 0)) {
-        return 'Khối lượng hàng phải là số hợp lệ lớn hơn 0.';
+        return context.l10n.uiItemWeightMustBeAValidNumberGreater;
       }
       if (weight != null && weight > 0) {
         final l = _parseDecimal(_lengthCtrl.text);
@@ -893,7 +926,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
         final probe = CheckedLuggageItem(
           cargo: CargoItemDraft(
             name: _nameCtrl.text.trim().isEmpty
-                ? 'Kiện hành lý'
+                ? context.l10n.uiLuggageItem
                 : _nameCtrl.text.trim(),
             kind: CargoKind.parcel,
             categoryId: _resolveCategoryId(options) ?? 1,
@@ -920,19 +953,23 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
       return;
     }
     if (_nameCtrl.text.trim().isEmpty) {
-      setState(() => _checkedEditorError = 'Vui lòng nhập tên kiện hành lý.');
+      setState(
+        () => _checkedEditorError = context.l10n.uiEnterALuggageItemName,
+      );
       return;
     }
     final qty = int.tryParse(_qtyCtrl.text.trim());
     if (qty == null || qty < 1) {
-      setState(() => _checkedEditorError = 'Số lượng phải là số nguyên ≥ 1.');
+      setState(
+        () => _checkedEditorError = context.l10n.uiQuantityMustBeAWholeNumber1,
+      );
       return;
     }
     final candidate = _buildCandidateCheckedItem(options);
     if (candidate == null) {
       setState(
         () => _checkedEditorError =
-            'Vui lòng kiểm tra lại khối lượng và kích thước kiện hành lý.',
+            context.l10n.uiCheckTheLuggageWeightAndDimensions,
       );
       return;
     }
@@ -959,7 +996,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
     if (source != null && !carryOn.remove(source)) {
       setState(
         () => _checkedEditorError =
-            'Kiện xách tay đã thay đổi. Vui lòng mở lại thao tác chuyển ký gửi.',
+            context.l10n.uiTheCarryOnItemHasChangedStartThe,
       );
       return;
     }
@@ -1102,7 +1139,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                             minWidth: 48,
                             minHeight: 48,
                           ),
-                          tooltip: 'Đóng thông báo',
+                          tooltip: context.l10n.uiDismissMessage,
                         )
                       : null,
                 ),
@@ -1113,8 +1150,9 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   key: Key('luggage-locked-banner-$scope'),
                   icon: Icons.lock_outline_rounded,
                   color: DiscoveryColors.info,
-                  text:
-                      'Đơn hàng đã tạo hoặc đang xử lý. Thông tin hành lý đi kèm đã được khóa để đảm bảo đồng bộ.',
+                  text: context
+                      .l10n
+                      .uiThisBookingHasBeenCreatedOrIsProcessing81566a,
                 ),
               ],
               if (state.phase == LuggagePhase.revoked) ...[
@@ -1123,8 +1161,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   key: Key('luggage-revoked-banner-$scope'),
                   icon: Icons.lock_reset_rounded,
                   color: DiscoveryColors.error,
-                  text:
-                      'Phiên đăng nhập đã thay đổi. Vui lòng mở lại đặt vé để khai báo hành lý.',
+                  text: context.l10n.uiYourSignInSessionHasChangedOpenBooking,
                 ),
               ] else if (state.phase == LuggagePhase.idle) ...[
                 const SizedBox(height: 10),
@@ -1175,7 +1212,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
-                    widget.title,
+                    localizedClientLabel(context, widget.title),
                     style: const TextStyle(
                       color: DiscoveryColors.neutral900,
                       fontSize: 15,
@@ -1204,7 +1241,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 ],
               ),
               const SizedBox(height: 3),
-              Text('${widget.cubit.passengerCount} hành khách'),
+              Text(context.l10n.uiPassengers(widget.cubit.passengerCount)),
             ],
           ),
         ),
@@ -1232,9 +1269,9 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 color: DiscoveryColors.success,
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Đang chọn: Không thêm hành lý ký gửi (chỉ đặt vé hành khách).',
+                  context.l10n.uiSelectedNoCheckedLuggagePassengerTicketsOnly,
                   style: TextStyle(
                     color: DiscoveryColors.neutral800,
                     fontSize: 12.5,
@@ -1260,8 +1297,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 ),
                 onPressed: () => widget.cubit.load(),
                 icon: const Icon(Icons.add_box_outlined, size: 18),
-                label: const Text(
-                  'Xem chính sách & Khai báo hành lý đi kèm',
+                label: Text(
+                  context.l10n.uiViewPolicyAddLuggage,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -1284,7 +1321,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               SizedBox(
                 width: 18,
@@ -1297,7 +1334,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Đang tải chính sách hành lý của nhà xe và sức chứa trên chuyến...',
+                  context.l10n.uiLoadingTheOperatorSLuggagePolicyAndTrip,
                   style: TextStyle(
                     color: DiscoveryColors.neutral900,
                     fontSize: 13,
@@ -1316,7 +1353,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
                 onPressed: _handleSkip,
                 icon: const Icon(Icons.close_rounded, size: 16),
-                label: const Text('Không thêm hành lý ký gửi'),
+                label: Text(context.l10n.uiNoCheckedLuggage),
               ),
             ),
           ],
@@ -1353,7 +1390,10 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  state.error ?? 'Không tải được chính sách hành lý.',
+                  localizedClientLabel(
+                    context,
+                    state.error ?? context.l10n.uiUnableToLoadTheLuggagePolicy,
+                  ),
                   style: const TextStyle(
                     color: DiscoveryColors.neutral900,
                     fontSize: 13,
@@ -1367,7 +1407,10 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
           if (hasExistingItems) ...[
             const SizedBox(height: 8),
             Text(
-              'Hành lý đã chọn (${state.selection.checked.length} mục ký gửi, ${state.selection.carryOn.length} mục xách tay) vẫn được giữ nguyên. Hãy thử tải lại chính sách hoặc chọn "Không thêm hành lý ký gửi" nếu chỉ muốn đặt vé.',
+              context.l10n.uiYourSelectedLuggageCheckedCarryOnIsKept(
+                state.selection.checked.length,
+                state.selection.carryOn.length,
+              ),
               key: Key('luggage-preserved-items-notice-$scope'),
               style: const TextStyle(
                 color: DiscoveryColors.neutral700,
@@ -1389,14 +1432,14 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   ),
                   onPressed: () => widget.cubit.load(),
                   icon: const Icon(Icons.refresh_rounded, size: 16),
-                  label: const Text('Thử lại'),
+                  label: Text(context.l10n.uiTryAgain),
                 ),
                 TextButton.icon(
                   key: Key('luggage-skip-btn-$scope'),
                   style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
                   onPressed: _handleSkip,
                   icon: const Icon(Icons.close_rounded, size: 16),
-                  label: const Text('Không thêm hành lý ký gửi'),
+                  label: Text(context.l10n.uiNoCheckedLuggage),
                 ),
               ],
             ),
@@ -1435,7 +1478,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
                     Icon(
                       Icons.schedule_rounded,
@@ -1445,7 +1488,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Chính sách hành lý đã quá hạn 5 phút. Vui lòng tải lại để tiếp tục.',
+                        context.l10n.uiThisLuggagePolicyIsOver5MinutesOld,
                         style: TextStyle(
                           color: DiscoveryColors.neutral900,
                           fontSize: 12.5,
@@ -1464,7 +1507,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                     ),
                     onPressed: () => widget.cubit.load(),
                     icon: const Icon(Icons.refresh_rounded, size: 16),
-                    label: const Text('Tải lại chính sách'),
+                    label: Text(context.l10n.uiRefreshPolicy),
                   ),
                 ],
               ],
@@ -1478,7 +1521,9 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
           key: Key('luggage-carryon-disclosure-$scope'),
           tilePadding: EdgeInsets.zero,
           title: Text(
-            'Xách tay · miễn phí ≤ ${_formatNumber(policy.freeWeightPerPassengerKg)} kg/khách',
+            context.l10n.uiCarryOnFreeKgPassenger(
+              _formatNumber(policy.freeWeightPerPassengerKg),
+            ),
           ),
           children: [
             _buildCarryOnSection(scope, policy, cargoOptions, state, locked),
@@ -1519,7 +1564,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               ),
               onPressed: _handleSkip,
               icon: const Icon(Icons.not_interested_rounded, size: 16),
-              label: const Text('Không thêm hành lý ký gửi'),
+              label: Text(context.l10n.uiNoCheckedLuggage),
             ),
           ),
         ],
@@ -1565,9 +1610,9 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                     color: DiscoveryColors.primary,
                   ),
                   const SizedBox(width: 6),
-                  const Flexible(
+                  Flexible(
                     child: Text(
-                      '1. Hành lý xách tay miễn phí',
+                      context.l10n.ui1FreeCarryOnLuggage,
                       style: TextStyle(
                         color: DiscoveryColors.neutral900,
                         fontSize: 13.5,
@@ -1585,7 +1630,10 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Miễn phí ≤ ${_formatNumber(freeKg)} kg/kiện • Tối đa $maxPassengers kiện',
+                  context.l10n.uiFreeKgItemMaximumItems(
+                    _formatNumber(freeKg),
+                    maxPassengers,
+                  ),
                   style: const TextStyle(
                     color: DiscoveryColors.successDark,
                     fontSize: 11,
@@ -1597,8 +1645,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
           ),
           const SizedBox(height: 6),
           _descriptionInfo(
-            'Quy định xách tay',
-            'Mỗi hành khách được khai báo một kiện xách tay trong hạn mức. Kiện vượt hạn mức có thể chuyển sang ký gửi khi chuyến xe còn nhận.',
+            context.l10n.uiCarryOnRules,
+            context.l10n.uiEachPassengerMayRegisterOneCarryOnItem,
             'luggage-carryon-info-$scope',
           ),
           if (bags.isNotEmpty) ...[
@@ -1629,7 +1677,11 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                       children: [
                         Expanded(
                           child: Text(
-                            'Kiện xách tay #${i + 1}: ${_formatNumber(bag.weightKg)} kg × ${bag.quantity} kiện',
+                            context.l10n.uiCarryOnKgItems(
+                              i + 1,
+                              _formatNumber(bag.weightKg),
+                              bag.quantity,
+                            ),
                             style: const TextStyle(
                               color: DiscoveryColors.neutral900,
                               fontSize: 13,
@@ -1650,7 +1702,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                               minWidth: 48,
                               minHeight: 48,
                             ),
-                            tooltip: 'Sửa kiện xách tay',
+                            tooltip: context.l10n.uiEditCarryOnItem,
                           ),
                           IconButton(
                             key: Key('luggage-carryon-delete-$scope-$i'),
@@ -1664,7 +1716,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                               minWidth: 48,
                               minHeight: 48,
                             ),
-                            tooltip: 'Xóa kiện xách tay',
+                            tooltip: context.l10n.uiRemoveCarryOnItem,
                           ),
                         ],
                       ],
@@ -1673,8 +1725,15 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                       const SizedBox(height: 4),
                       Text(
                         isOverweight
-                            ? 'Vượt hạn mức miễn phí (${_formatNumber(freeKg)} kg/kiện). Hãy chuyển sang hành lý ký gửi.'
-                            : 'Tổng số kiện xách tay ($totalBags) vượt quá số hành khách ($maxPassengers). Hãy chuyển sang hành lý ký gửi.',
+                            ? context.l10n
+                                  .uiExceedsTheFreeAllowanceKgItemMoveTo(
+                                    _formatNumber(freeKg),
+                                  )
+                            : context.l10n
+                                  .uiCarryOnCountExceedsPassengerCountMoveExtra(
+                                    totalBags,
+                                    maxPassengers,
+                                  ),
                         style: const TextStyle(
                           color: DiscoveryColors.error,
                           fontSize: 11.5,
@@ -1697,7 +1756,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                             removeCarryOnIndex: i,
                           ),
                           icon: const Icon(Icons.luggage_rounded, size: 16),
-                          label: const Text('Chuyển sang hành lý ký gửi'),
+                          label: Text(context.l10n.uiMoveToCheckedLuggage),
                         ),
                       ],
                     ],
@@ -1716,7 +1775,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
               onPressed: () => _openAddCarryOn(policy),
               icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Khai báo kiện xách tay'),
+              label: Text(context.l10n.uiAddCarryOnItem),
             ),
           ],
         ],
@@ -1745,8 +1804,10 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
         children: [
           Text(
             _editingCarryOnIndex != null
-                ? 'Chỉnh sửa kiện xách tay #${_editingCarryOnIndex! + 1}'
-                : 'Khai báo kiện xách tay miễn phí',
+                ? context.l10n.uiEditCarryOnItem98d081(
+                    _editingCarryOnIndex! + 1,
+                  )
+                : context.l10n.uiAddFreeCarryOnItem,
             style: const TextStyle(
               color: DiscoveryColors.neutral900,
               fontSize: 13,
@@ -1764,8 +1825,9 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   decimal: true,
                 ),
                 decoration: InputDecoration(
-                  labelText:
-                      'Khối lượng (kg, ≤${_formatNumber(policy.freeWeightPerPassengerKg)}) *',
+                  labelText: context.l10n.uiWeightKga695f2(
+                    _formatNumber(policy.freeWeightPerPassengerKg),
+                  ),
                   filled: true,
                   fillColor: DiscoveryColors.neutral50,
                   border: OutlineInputBorder(
@@ -1779,7 +1841,9 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 controller: _carryOnQtyCtrl,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Số kiện (≤${widget.cubit.passengerCount}) *',
+                  labelText: context.l10n.uiItemCount(
+                    widget.cubit.passengerCount,
+                  ),
                   filled: true,
                   fillColor: DiscoveryColors.neutral50,
                   border: OutlineInputBorder(
@@ -1823,7 +1887,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   cargoOptions: cargoOptions,
                 ),
                 icon: const Icon(Icons.luggage_rounded, size: 16),
-                label: const Text('Chuyển sang hành lý ký gửi'),
+                label: Text(context.l10n.uiMoveToCheckedLuggage),
               ),
             ],
           ],
@@ -1837,7 +1901,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 key: Key('luggage-carryon-cancel-btn-$scope'),
                 style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
                 onPressed: _cancelCarryOnEditor,
-                child: const Text('Hủy'),
+                child: Text(context.l10n.uiCancel),
               ),
               ElevatedButton.icon(
                 key: Key('luggage-carryon-save-btn-$scope'),
@@ -1848,7 +1912,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 ),
                 onPressed: () => _saveCarryOn(policy),
                 icon: const Icon(Icons.check_rounded, size: 16),
-                label: const Text('Lưu kiện xách tay'),
+                label: Text(context.l10n.uiSaveCarryOnItem),
               ),
             ],
           ),
@@ -1875,7 +1939,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
             color: DiscoveryColors.warning.withValues(alpha: 0.4),
           ),
         ),
-        child: const Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -1888,7 +1952,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Chuyến xe không nhận hành lý ký gửi.',
+                    context.l10n.uiThisTripDoesNotAcceptCheckedLuggage,
                     style: TextStyle(
                       color: DiscoveryColors.neutral900,
                       fontSize: 13,
@@ -1900,7 +1964,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
             ),
             SizedBox(height: 6),
             Text(
-              'Bạn vẫn có thể mang hành lý xách tay miễn phí đúng hạn mức hoặc bấm "Không thêm hành lý ký gửi" để tiếp tục đặt vé.',
+              context.l10n.uiYouCanStillBringFreeCarryOnLuggage,
               style: TextStyle(
                 color: DiscoveryColors.neutral600,
                 fontSize: 12,
@@ -1931,8 +1995,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _descriptionInfo(
-            'Hành lý ký gửi',
-            'Số lượng và loại hành lý phụ thuộc sức chứa còn lại của chuyến xe. Hệ thống sẽ kiểm tra khi bạn chọn hành lý.',
+            context.l10n.uiCheckedLuggage,
+            context.l10n.uiLuggageQuantitiesAndTypesDependOnRemainingCapacity,
             'luggage-capacity-info-$scope',
           ),
           const SizedBox(height: 8),
@@ -1941,15 +2005,14 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               key: Key('luggage-missing-points-$scope'),
               icon: Icons.error_outline_rounded,
               color: DiscoveryColors.error,
-              text:
-                  'Chuyến xe chưa cấu hình điểm gửi/nhận hành lý ký gửi hợp lệ.',
+              text: context.l10n.uiThisTripHasNoValidCheckedLuggageDrop,
             )
           else ...[
             _buildRoutePointsSelector(scope, points, state.selection, locked),
             const SizedBox(height: 12),
             if (checkedItems.isNotEmpty) ...[
               Text(
-                'Danh sách hành lý ký gửi (${checkedItems.length})',
+                context.l10n.uiCheckedLuggage8cf512(checkedItems.length),
                 style: const TextStyle(
                   color: DiscoveryColors.neutral900,
                   fontSize: 13,
@@ -1983,7 +2046,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                     ),
                     onPressed: () => _openAddPackageItem(policy, cargoOptions),
                     icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('Kiện hành lý'),
+                    label: Text(context.l10n.uiLuggageItem),
                   ),
                   OutlinedButton.icon(
                     key: Key('luggage-add-vehicle-btn-$scope'),
@@ -1992,7 +2055,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                     ),
                     onPressed: () => _openAddVehicleItem(cargoOptions),
                     icon: const Icon(Icons.two_wheeler_rounded, size: 18),
-                    label: const Text('Xe đạp / Xe máy'),
+                    label: Text(context.l10n.uiBicycleMotorbike),
                   ),
                 ],
               ),
@@ -2019,8 +2082,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Điểm gửi & nhận hành lý ký gửi trên tuyến',
+        Text(
+          context.l10n.uiCheckedLuggageDropOffCollectionPoints,
           style: TextStyle(
             color: DiscoveryColors.neutral900,
             fontSize: 12.5,
@@ -2033,7 +2096,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
           initialValue: senderId,
           isExpanded: true,
           decoration: InputDecoration(
-            labelText: 'Điểm gửi hành lý *',
+            labelText: context.l10n.uiLuggageDropOffPoint,
             filled: true,
             fillColor: DiscoveryColors.surface,
             contentPadding: const EdgeInsets.symmetric(
@@ -2067,7 +2130,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
           initialValue: receiverId,
           isExpanded: true,
           decoration: InputDecoration(
-            labelText: 'Điểm nhận hành lý *',
+            labelText: context.l10n.uiLuggageCollectionPoint,
             filled: true,
             fillColor: DiscoveryColors.surface,
             contentPadding: const EdgeInsets.symmetric(
@@ -2157,15 +2220,19 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                         _buildTag(
                           cargo.isVehicle
                               ? (cargo.kind == CargoKind.bicycle
-                                    ? 'Xe đạp'
-                                    : 'Xe máy (${_tariffLabel(item.motorcycleTariff)})')
-                              : 'Gói ${item.packageCode ?? "?"}',
+                                    ? context.l10n.uiBicycle
+                                    : context.l10n.uiMotorbike10c633(
+                                        _tariffLabel(item.motorcycleTariff),
+                                      ))
+                              : context.l10n.uiPackage(item.packageCode ?? "?"),
                         ),
                         if (cargo.service != CargoService.normal)
                           _buildTag(_serviceLabel(cargo.service)),
                         if (itemRefFee != null)
                           _buildTag(
-                            'Dự tính ${CurrencyFormatter.format(itemRefFee)}',
+                            context.l10n.uiEstimated(
+                              CurrencyFormatter.format(itemRefFee),
+                            ),
                             highlight: true,
                           ),
                       ],
@@ -2190,7 +2257,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                         minWidth: 48,
                         minHeight: 48,
                       ),
-                      tooltip: 'Sửa hành lý ký gửi',
+                      tooltip: context.l10n.uiEditCheckedLuggage,
                     ),
                     IconButton(
                       key: Key('luggage-checked-delete-$scope-$index'),
@@ -2204,7 +2271,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                         minWidth: 48,
                         minHeight: 48,
                       ),
-                      tooltip: 'Xóa hành lý ký gửi',
+                      tooltip: context.l10n.uiRemoveCheckedLuggage,
                     ),
                   ],
                 ),
@@ -2213,10 +2280,18 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
           const SizedBox(height: 6),
           Text(
             cargo.isVehicle
-                ? 'Khối lượng quy định: ${_formatNumber(cargo.payloadWeight)} kg/xe'
+                ? context.l10n.uiSpecifiedWeightKgVehicle(
+                    _formatNumber(cargo.payloadWeight),
+                  )
                 : hasDimensions
-                ? 'Khối lượng: ${_formatNumber(cargo.weight)} kg • Kích thước: ${_formatNumber(cargo.length!)}×${_formatNumber(cargo.width!)}×${_formatNumber(cargo.height!)} cm (Hiệu dụng: ${_formatNumber(cargo.effectiveWeight)} kg)'
-                : 'Khối lượng: ${_formatNumber(cargo.weight)} kg',
+                ? context.l10n.uiWeightKgDimensionsCmChargeableKg(
+                    _formatNumber(cargo.weight),
+                    _formatNumber(cargo.length!),
+                    _formatNumber(cargo.width!),
+                    _formatNumber(cargo.height!),
+                    _formatNumber(cargo.effectiveWeight),
+                  )
+                : context.l10n.uiWeightKg2d5bda(_formatNumber(cargo.weight)),
             style: const TextStyle(
               color: DiscoveryColors.neutral600,
               fontSize: 12,
@@ -2262,10 +2337,10 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
         children: [
           Text(
             _editingCheckedIndex != null
-                ? 'Chỉnh sửa mục ký gửi #${_editingCheckedIndex! + 1}'
+                ? context.l10n.uiEditCheckedItem(_editingCheckedIndex! + 1)
                 : (_editorIsVehicle
-                      ? 'Thêm phương tiện gửi kèm'
-                      : 'Thêm kiện hành lý ký gửi'),
+                      ? context.l10n.uiAddAccompanyingVehicle
+                      : context.l10n.uiAddCheckedLuggageItem),
             style: const TextStyle(
               color: DiscoveryColors.neutral900,
               fontSize: 13.5,
@@ -2274,8 +2349,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
           ),
           const SizedBox(height: 10),
           if (!_editorIsVehicle) ...[
-            const Text(
-              'Chọn gói hành lý (S / M / L / XL):',
+            Text(
+              context.l10n.uiSelectLuggagePackageSMLXl,
               style: TextStyle(
                 color: DiscoveryColors.neutral700,
                 fontSize: 12,
@@ -2301,7 +2376,10 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                           : DiscoveryColors.neutral500,
                     ),
                     title: Text(
-                      'Gói ${pack.code} · ≤ ${_formatNumber(pack.maxWeightKg)} kg',
+                      context.l10n.uiPackageKg(
+                        pack.code,
+                        _formatNumber(pack.maxWeightKg),
+                      ),
                     ),
                     subtitle: Text(
                       '${_formatNumber(pack.lengthCm)} × ${_formatNumber(pack.widthCm)} × ${_formatNumber(pack.heightCm)} cm\n'
@@ -2318,8 +2396,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               }).toList(),
             ),
           ] else ...[
-            const Text(
-              'Loại phương tiện đi kèm:',
+            Text(
+              context.l10n.uiAccompanyingVehicleType,
               style: TextStyle(
                 color: DiscoveryColors.neutral700,
                 fontSize: 12,
@@ -2334,7 +2412,11 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 ChoiceChip(
                   key: Key('luggage-vehicle-kind-bicycle-$scope'),
                   label: Text(
-                    'Xe đạp (${CurrencyFormatter.format(policy.vehicleFees["bicycle"] ?? 0)})',
+                    context.l10n.uiBicycle8324c2(
+                      CurrencyFormatter.format(
+                        policy.vehicleFees["bicycle"] ?? 0,
+                      ),
+                    ),
                   ),
                   selected: _vehicleKind == CargoKind.bicycle,
                   onSelected: (_) {
@@ -2348,7 +2430,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 ),
                 ChoiceChip(
                   key: Key('luggage-vehicle-kind-motorcycle-$scope'),
-                  label: const Text('Xe máy'),
+                  label: Text(context.l10n.uiMotorbike),
                   selected: _vehicleKind == CargoKind.motorcycle,
                   onSelected: (_) {
                     setState(() {
@@ -2363,8 +2445,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
             ),
             if (_vehicleKind == CargoKind.motorcycle) ...[
               const SizedBox(height: 8),
-              const Text(
-                'Phân nhóm xe máy (Phí tham khảo):',
+              Text(
+                context.l10n.uiMotorbikeCategoryEstimatedFee,
                 style: TextStyle(
                   color: DiscoveryColors.neutral700,
                   fontSize: 12,
@@ -2400,11 +2482,11 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
             controller: _nameCtrl,
             decoration: InputDecoration(
               labelText: _editorIsVehicle
-                  ? 'Tên phương tiện *'
-                  : 'Tên kiện hành lý *',
+                  ? context.l10n.uiVehicleName
+                  : context.l10n.uiLuggageItemName,
               hintText: _editorIsVehicle
-                  ? 'VD: Xe máy Honda Vision / Xe đạp Giant'
-                  : 'VD: Vali hành lý, thùng quà...',
+                  ? context.l10n.uiEGHondaVisionMotorbikeGiantBicycle
+                  : context.l10n.uiEGSuitcaseGiftBox,
               filled: true,
               fillColor: DiscoveryColors.neutral50,
               border: OutlineInputBorder(
@@ -2422,7 +2504,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 controller: _qtyCtrl,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Số lượng *',
+                  labelText: context.l10n.uiQuantity,
                   filled: true,
                   fillColor: DiscoveryColors.neutral50,
                   border: OutlineInputBorder(
@@ -2440,8 +2522,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 ),
                 decoration: InputDecoration(
                   labelText: _editorIsVehicle
-                      ? 'Khối lượng quy định (kg)'
-                      : 'Khối lượng (kg) *',
+                      ? context.l10n.uiSpecifiedWeightKg
+                      : context.l10n.uiWeightKg,
                   filled: true,
                   fillColor: DiscoveryColors.neutral50,
                   border: OutlineInputBorder(
@@ -2480,10 +2562,12 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   _heightCtrl.text.isNotEmpty,
               title: Row(
                 children: [
-                  const Expanded(child: Text('Kích thước chi tiết')),
+                  Expanded(child: Text(context.l10n.uiDetailedDimensions)),
                   _infoButton(
-                    'Kích thước và khối lượng quy đổi',
-                    'Nhập số đo thực tế theo cm. Khối lượng quy đổi = Dài × Rộng × Cao / 5.000, làm tròn một chữ số thập phân. Khối lượng tính cước là số lớn hơn giữa cân nặng và khối lượng quy đổi. Không dùng kích thước tối đa của gói thay cho số đo thực tế.',
+                    context.l10n.uiDimensionsAndVolumetricWeight,
+                    context
+                        .l10n
+                        .uiEnterActualDimensionsInCmVolumetricWeightLength,
                     'luggage-dimensions-info-$scope',
                   ),
                 ],
@@ -2499,7 +2583,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                         decimal: true,
                       ),
                       decoration: InputDecoration(
-                        labelText: 'Dài (cm)',
+                        labelText: context.l10n.uiLengthCm,
                         filled: true,
                         fillColor: DiscoveryColors.neutral50,
                         border: OutlineInputBorder(
@@ -2516,7 +2600,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                         decimal: true,
                       ),
                       decoration: InputDecoration(
-                        labelText: 'Rộng (cm)',
+                        labelText: context.l10n.uiWidthCm,
                         filled: true,
                         fillColor: DiscoveryColors.neutral50,
                         border: OutlineInputBorder(
@@ -2576,7 +2660,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   key: Key('luggage-vehicle-model-$scope'),
                   controller: _vehicleModelCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Dòng xe / Loại xe',
+                    labelText: context.l10n.uiVehicleModelType,
                     filled: true,
                     fillColor: DiscoveryColors.neutral50,
                     border: OutlineInputBorder(
@@ -2588,7 +2672,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                   key: Key('luggage-license-plate-$scope'),
                   controller: _licensePlateCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Biển số xe',
+                    labelText: context.l10n.uiLicencePlate,
                     filled: true,
                     fillColor: DiscoveryColors.neutral50,
                     border: OutlineInputBorder(
@@ -2621,11 +2705,11 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
             tilePadding: EdgeInsets.zero,
             initiallyExpanded:
                 _service != CargoService.normal || _noteCtrl.text.isNotEmpty,
-            title: const Text('Bảo quản và ghi chú'),
+            title: Text(context.l10n.uiHandlingAndNotes),
             children: [
               _descriptionInfo(
-                'Dịch vụ bảo quản',
-                'Chọn dịch vụ phù hợp nếu kiện dễ vỡ hoặc có giá trị. Phụ phí hiển thị theo chính sách nhà xe.',
+                context.l10n.uiHandlingService,
+                context.l10n.uiSelectSuitableHandlingForFragileOrValuableItems,
                 'luggage-service-info-$scope',
               ),
               const SizedBox(height: 6),
@@ -2652,7 +2736,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 key: Key('luggage-checked-note-$scope'),
                 controller: _noteCtrl,
                 decoration: InputDecoration(
-                  labelText: 'Ghi chú (tùy chọn)',
+                  labelText: context.l10n.uiNotesOptional,
                   filled: true,
                   fillColor: DiscoveryColors.neutral50,
                   border: OutlineInputBorder(
@@ -2681,7 +2765,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 key: Key('luggage-checked-cancel-btn-$scope'),
                 style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
                 onPressed: _cancelCheckedEditor,
-                child: const Text('Hủy'),
+                child: Text(context.l10n.uiCancel),
               ),
               ElevatedButton.icon(
                 key: Key('luggage-checked-save-btn-$scope'),
@@ -2694,8 +2778,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 icon: const Icon(Icons.check_rounded, size: 16),
                 label: Text(
                   _editingCheckedIndex != null
-                      ? 'Cập nhật mục ký gửi'
-                      : 'Lưu mục ký gửi',
+                      ? context.l10n.uiUpdateCheckedItem
+                      : context.l10n.uiSaveCheckedItem,
                 ),
               ),
             ],
@@ -2726,8 +2810,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              const Text(
-                'Cước phí dự tính',
+              Text(
+                context.l10n.uiEstimatedFee,
                 style: TextStyle(
                   color: DiscoveryColors.neutral900,
                   fontSize: 13,
@@ -2737,7 +2821,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
               Text(
                 refFee != null
                     ? CurrencyFormatter.format(refFee)
-                    : 'Đang kiểm tra điều kiện gói',
+                    : context.l10n.uiCheckingPackageEligibility,
                 key: Key('luggage-reference-fee-value-$scope'),
                 style: const TextStyle(
                   color: DiscoveryColors.secondary,
@@ -2748,8 +2832,8 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
             ],
           ),
           _infoButton(
-            'Cước phí dự tính',
-            'Đây là cước dự tính theo gói của nhà xe. Thanh toán tại bến khi giao vật phẩm, không cộng vào tiền vé thanh toán trực tuyến.',
+            context.l10n.uiEstimatedFee,
+            context.l10n.uiThisFeeIsEstimatedUsingTheOperatorS,
             'luggage-fee-info-$scope',
           ),
         ],
@@ -2785,15 +2869,15 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
   }
 
   String _serviceLabel(CargoService srv) => switch (srv) {
-    CargoService.normal => 'Tiêu chuẩn',
-    CargoService.fragile => 'Hàng dễ vỡ',
-    CargoService.valuable => 'Hàng giá trị cao',
+    CargoService.normal => context.l10n.uiStandard,
+    CargoService.fragile => context.l10n.uiFragileItems,
+    CargoService.valuable => context.l10n.uiHighValueItems,
   };
 
   String _tariffLabel(LuggageMotorcycleTariff t) => switch (t) {
-    LuggageMotorcycleTariff.wave => 'Xe số',
+    LuggageMotorcycleTariff.wave => context.l10n.uiManualMotorbike,
     LuggageMotorcycleTariff.scooter => 'Xe tay ga',
-    LuggageMotorcycleTariff.big => 'Xe phân khối lớn',
+    LuggageMotorcycleTariff.big => context.l10n.uiLargeDisplacementMotorbike,
   };
 
   Widget _buildBanner({

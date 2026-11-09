@@ -1,3 +1,5 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -98,7 +100,7 @@ class _Step6PaymentState extends State<Step6Payment>
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã sao chép $label'),
+        content: Text(context.l10n.uiCopied6cef06(label)),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -151,7 +153,7 @@ class _Step6PaymentState extends State<Step6Payment>
                     onPressed: state.quoteLoading
                         ? null
                         : () => bloc.add(const RefreshBookingQuoteEvent()),
-                    child: const Text('Cập nhật giá vé'),
+                    child: Text(context.l10n.uiUpdateFare),
                   ),
                 ],
               ),
@@ -184,7 +186,7 @@ class _Step6PaymentState extends State<Step6Payment>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Kết quả tạo đơn chưa xác định',
+                          context.l10n.uiBookingResultNotConfirmed,
                           style: DiscoveryTextStyles.bodyMedium.copyWith(
                             color: DiscoveryColors.warningDark,
                             fontWeight: FontWeight.w700,
@@ -192,7 +194,7 @@ class _Step6PaymentState extends State<Step6Payment>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Máy chủ chưa phản hồi trạng thái tạo đơn. Không gửi lại yêu cầu để tránh trừ tiền nhiều lần. Vui lòng kiểm tra mục "Vé của tôi" hoặc liên hệ tổng đài.',
+                          context.l10n.uiTheServerHasNotConfirmedThisBookingDo,
                           style: DiscoveryTextStyles.bodySmall.copyWith(
                             color: DiscoveryColors.neutral700,
                           ),
@@ -229,7 +231,7 @@ class _Step6PaymentState extends State<Step6Payment>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      state.errorMessage!,
+                      localizedClientLabel(context, state.errorMessage!),
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.errorDark,
                         fontWeight: FontWeight.w500,
@@ -264,7 +266,9 @@ class _Step6PaymentState extends State<Step6Payment>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Thời gian giữ chỗ còn lại: ${state.countdownFormatted}',
+                      context.l10n.uiSeatHoldTimeRemaining(
+                        state.countdownFormatted,
+                      ),
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.warningDark,
                         fontWeight: FontWeight.w700,
@@ -320,7 +324,7 @@ class _Step6PaymentState extends State<Step6Payment>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Số tiền thanh toán',
+                      context.l10n.uiPaymentAmount,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.neutral500,
                         fontWeight: FontWeight.w500,
@@ -333,8 +337,8 @@ class _Step6PaymentState extends State<Step6Payment>
                               state.pendingPaymentAmount ?? state.finalAmount,
                             )
                           : state.cargo.enabled
-                          ? 'Xác định khi tạo đơn'
-                          : 'Chưa có giá vé',
+                          ? context.l10n.uiCalculatedWhenBookingIsCreated
+                          : context.l10n.uiFareUnavailable,
                       style: DiscoveryTextStyles.price.copyWith(
                         color: DiscoveryColors.secondary,
                         fontSize:
@@ -351,8 +355,15 @@ class _Step6PaymentState extends State<Step6Payment>
                       const SizedBox(height: 4),
                       Text(
                         state.ticketFinalAmount != null
-                            ? 'Tiền vé sau ưu đãi: ${CurrencyFormatter.format(state.ticketFinalAmount!)} • Cước vật phẩm thanh toán riêng tại bến'
-                            : 'Cước vật phẩm thanh toán riêng tại bến',
+                            ? context.l10n
+                                  .uiFareAfterDiscountsItemFeesPaidSeparatelyAt(
+                                    CurrencyFormatter.format(
+                                      state.ticketFinalAmount!,
+                                    ),
+                                  )
+                            : context
+                                  .l10n
+                                  .uiItemFeesArePaidSeparatelyAtTheStation,
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral600,
                           fontWeight: FontWeight.w600,
@@ -372,7 +383,7 @@ class _Step6PaymentState extends State<Step6Payment>
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '${state.selectedSeats.length} Vé',
+                  context.l10n.uiTickets94511a(state.selectedSeats.length),
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.primary,
                     fontWeight: FontWeight.w700,
@@ -412,7 +423,7 @@ class _Step6PaymentState extends State<Step6Payment>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Thông tin chuyến đi',
+                        context.l10n.uiTripInformation,
                         style: DiscoveryTextStyles.titleSmall.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -448,7 +459,7 @@ class _Step6PaymentState extends State<Step6Payment>
                           ),
                         ),
                         child: Text(
-                          'Ghế ${seat.name}',
+                          context.l10n.uiSeat25a5f5(seat.name),
                           style: DiscoveryTextStyles.caption.copyWith(
                             color: DiscoveryColors.primary,
                             fontWeight: FontWeight.w700,
@@ -460,7 +471,9 @@ class _Step6PaymentState extends State<Step6Payment>
                 if (state.selectedPickupPoint != null) ...[
                   const SizedBox(height: 10),
                   Text(
-                    'Điểm đón: ${state.selectedPickupPoint!.name}',
+                    context.l10n.uiPickUp67b5a7(
+                      state.selectedPickupPoint!.name,
+                    ),
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.neutral600,
                     ),
@@ -469,7 +482,9 @@ class _Step6PaymentState extends State<Step6Payment>
                 if (state.selectedDropoffPoint != null) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Điểm trả: ${state.selectedDropoffPoint!.name}',
+                    context.l10n.uiDropOff782e84(
+                      state.selectedDropoffPoint!.name,
+                    ),
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.neutral600,
                     ),
@@ -483,7 +498,7 @@ class _Step6PaymentState extends State<Step6Payment>
 
         // Payment Methods Section
         Text(
-          'Chọn phương thức thanh toán',
+          context.l10n.uiSelectPaymentMethod,
           style: DiscoveryTextStyles.titleMedium.copyWith(
             fontWeight: FontWeight.w700,
           ),
@@ -493,40 +508,40 @@ class _Step6PaymentState extends State<Step6Payment>
         // Real Mode only exposes VietQR; Demo mode exposes all demo methods
         _buildPaymentMethodTile(
           methodId: 'vietqr',
-          title: 'Chuyển khoản VietQR',
-          subtitle:
-              'Quét mã QR tự động xác nhận 24/7 (Hỗ trợ mọi ngân hàng & ví điện tử)',
+          title: context.l10n.uiVietqrBankTransfer,
+          subtitle: context.l10n.uiScanTheQrCodeForAutomaticConfirmation24,
           iconData: Icons.qr_code_2_rounded,
           iconColor: DiscoveryColors.successDark,
-          badgeText: 'Khuyên dùng',
+          badgeText: context.l10n.uiRecommended,
         ),
 
         if (ApiConfig.isDemoMode) ...[
           _buildPaymentMethodTile(
             methodId: 'momo',
-            title: 'Ví MoMo',
-            subtitle: 'Thanh toán tức thì qua ứng dụng MoMo (Demo)',
+            title: context.l10n.uiMomoWallet,
+            subtitle: context.l10n.uiInstantPaymentWithMomoDemo,
             iconData: Icons.account_balance_wallet_rounded,
             iconColor: const Color(0xFFA50064),
           ),
           _buildPaymentMethodTile(
             methodId: 'zalopay',
-            title: 'Ví ZaloPay',
-            subtitle: 'Thanh toán an toàn với ví ZaloPay hoặc Zalo (Demo)',
+            title: context.l10n.uiZalopayWallet,
+            subtitle: context.l10n.uiSecurePaymentWithZalopayOrZaloDemo,
             iconData: Icons.wallet_rounded,
             iconColor: const Color(0xFF0068FF),
           ),
           _buildPaymentMethodTile(
             methodId: 'napas',
-            title: 'Thẻ ATM nội địa',
-            subtitle: 'Internet Banking hơn 40 ngân hàng Việt Nam (Demo)',
+            title: context.l10n.uiDomesticBankCard,
+            subtitle:
+                context.l10n.uiInternetBankingWithOver40VietnameseBanksDemo,
             iconData: Icons.credit_card_rounded,
             iconColor: DiscoveryColors.primary,
           ),
           _buildPaymentMethodTile(
             methodId: 'visa',
-            title: 'Thẻ quốc tế',
-            subtitle: 'Thanh toán thẻ Visa, MasterCard, JCB (Demo)',
+            title: context.l10n.uiInternationalCard,
+            subtitle: context.l10n.uiPayWithVisaMastercardOrJcbDemo,
             iconData: Icons.payment_rounded,
             iconColor: const Color(0xFF1A1F71),
           ),
@@ -547,7 +562,7 @@ class _Step6PaymentState extends State<Step6Payment>
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
-                  'Chỉ xuất vé sau khi hệ thống xác nhận thanh toán',
+                  context.l10n.uiTicketsAreIssuedOnlyAfterPaymentIsConfirmed,
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.neutral500,
                     fontSize: 11,
@@ -580,7 +595,7 @@ class _Step6PaymentState extends State<Step6Payment>
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
-              'Đơn đặt chỗ: #${state.pendingBookingId}',
+              context.l10n.uiBooking(state.pendingBookingId ?? '—'),
               style: DiscoveryTextStyles.bodyMedium.copyWith(
                 fontWeight: FontWeight.w700,
                 color: DiscoveryColors.neutral800,
@@ -612,7 +627,7 @@ class _Step6PaymentState extends State<Step6Payment>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Đã xác nhận thanh toán',
+                        context.l10n.uiPaymentConfirmed,
                         style: DiscoveryTextStyles.bodyMedium.copyWith(
                           color: DiscoveryColors.successDark,
                           fontWeight: FontWeight.w800,
@@ -620,7 +635,9 @@ class _Step6PaymentState extends State<Step6Payment>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Hệ thống đã ghi nhận thanh toán thành công cho đơn hàng này. Vé điện tử đang được đồng bộ và xử lý phát hành. Vui lòng nhấn "Kiểm tra kết quả thanh toán" ở thanh bên dưới để làm mới trạng thái vé.',
+                        context
+                            .l10n
+                            .uiPaymentForThisBookingHasBeenConfirmedYour,
                         style: DiscoveryTextStyles.bodySmall.copyWith(
                           color: DiscoveryColors.neutral700,
                         ),
@@ -655,7 +672,7 @@ class _Step6PaymentState extends State<Step6Payment>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Đơn đặt vé đã hết hạn thanh toán',
+                        context.l10n.uiPaymentDeadlineExpired,
                         style: DiscoveryTextStyles.bodyMedium.copyWith(
                           color: DiscoveryColors.errorDark,
                           fontWeight: FontWeight.w800,
@@ -663,7 +680,7 @@ class _Step6PaymentState extends State<Step6Payment>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Thời gian giữ chỗ và thanh toán của đơn đã kết thúc. Vui lòng không thực hiện chuyển khoản cho đơn này. Nếu đã chuyển tiền sát giờ, vui lòng nhấn "Kiểm tra kết quả thanh toán" hoặc liên hệ tổng đài hỗ trợ.',
+                        context.l10n.uiTheSeatHoldAndPaymentDeadlineHaveExpired,
                         style: DiscoveryTextStyles.bodySmall.copyWith(
                           color: DiscoveryColors.neutral700,
                         ),
@@ -711,7 +728,7 @@ class _Step6PaymentState extends State<Step6Payment>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Thời gian thanh toán còn lại:',
+                        context.l10n.uiTimeLeftToPay,
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral700,
                         ),
@@ -757,7 +774,7 @@ class _Step6PaymentState extends State<Step6Payment>
                   children: [
                     Expanded(
                       child: SelectableText(
-                        'Mã đặt vé: ${booking.bookingCode}',
+                        context.l10n.uiBookingCode8ca81b(booking.bookingCode),
                         style: DiscoveryTextStyles.titleMedium.copyWith(
                           fontWeight: FontWeight.w800,
                           color: DiscoveryColors.neutral900,
@@ -765,7 +782,7 @@ class _Step6PaymentState extends State<Step6Payment>
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Sao chép mã đặt vé',
+                      tooltip: context.l10n.uiCopyBookingCode,
                       icon: const Icon(
                         Icons.copy_rounded,
                         size: 18,
@@ -774,7 +791,7 @@ class _Step6PaymentState extends State<Step6Payment>
                       onPressed: () => _copyToClipboard(
                         context,
                         booking.bookingCode,
-                        'mã đặt vé: ${booking.bookingCode}',
+                        context.l10n.uiBookingCodeb74fc3(booking.bookingCode),
                       ),
                     ),
                   ],
@@ -788,14 +805,16 @@ class _Step6PaymentState extends State<Step6Payment>
                         children: [
                           Expanded(
                             child: SelectableText(
-                              'Mã vé: ${ticket.ticketCode}',
+                              context.l10n.uiTicketCode628257(
+                                ticket.ticketCode,
+                              ),
                               style: DiscoveryTextStyles.bodyMedium.copyWith(
                                 color: DiscoveryColors.neutral700,
                               ),
                             ),
                           ),
                           IconButton(
-                            tooltip: 'Sao chép mã vé',
+                            tooltip: context.l10n.uiCopyTicketCode,
                             icon: const Icon(
                               Icons.copy_rounded,
                               size: 16,
@@ -804,7 +823,9 @@ class _Step6PaymentState extends State<Step6Payment>
                             onPressed: () => _copyToClipboard(
                               context,
                               ticket.ticketCode,
-                              'mã vé: ${ticket.ticketCode}',
+                              context.l10n.uiTicketCode5fb7de(
+                                ticket.ticketCode,
+                              ),
                             ),
                           ),
                         ],
@@ -828,7 +849,7 @@ class _Step6PaymentState extends State<Step6Payment>
                           runSpacing: 2,
                           children: [
                             Text(
-                              'Tiền vé sau ưu đãi:',
+                              context.l10n.uiFareAfterDiscountsfb669a,
                               style: DiscoveryTextStyles.bodySmall.copyWith(
                                 color: DiscoveryColors.neutral600,
                               ),
@@ -883,7 +904,7 @@ class _Step6PaymentState extends State<Step6Payment>
                         runSpacing: 2,
                         children: [
                           Text(
-                            'Tổng đơn thanh toán:',
+                            context.l10n.uiTotalBookingPayment,
                             style: DiscoveryTextStyles.bodyMedium.copyWith(
                               fontWeight: FontWeight.w800,
                               color: DiscoveryColors.neutral900,
@@ -908,7 +929,7 @@ class _Step6PaymentState extends State<Step6Payment>
                   const SizedBox(height: 8),
                 ],
                 Text(
-                  'Lưu mã vé và tra cứu bằng số điện thoại liên hệ để kiểm tra đơn sau khi rời màn hình.',
+                  context.l10n.uiSaveYourTicketCodeAndContactPhoneNumber,
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.neutral600,
                   ),
@@ -939,7 +960,7 @@ class _Step6PaymentState extends State<Step6Payment>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Thông tin chuyển khoản VietQR',
+                  context.l10n.uiVietqrTransferDetails,
                   style: DiscoveryTextStyles.titleSmall.copyWith(
                     fontWeight: FontWeight.w700,
                     color: DiscoveryColors.neutral900,
@@ -947,7 +968,7 @@ class _Step6PaymentState extends State<Step6Payment>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Quét mã QR qua app ngân hàng hoặc sao chép thông tin chuyển khoản chính xác bên dưới:',
+                  context.l10n.uiScanTheQrCodeWithYourBankingApp,
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.neutral600,
                   ),
@@ -960,7 +981,9 @@ class _Step6PaymentState extends State<Step6Payment>
                   children: [
                     Expanded(
                       child: SelectableText(
-                        'Nội dung chuyển khoản: ${booking.orderCode ?? ''}',
+                        context.l10n.uiTransferReference1c34c4(
+                          booking.orderCode ?? '',
+                        ),
                         style: DiscoveryTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w800,
                           color: DiscoveryColors.secondary,
@@ -968,7 +991,7 @@ class _Step6PaymentState extends State<Step6Payment>
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Sao chép nội dung chuyển khoản',
+                      tooltip: context.l10n.uiCopyTransferReference,
                       icon: const Icon(
                         Icons.copy_rounded,
                         size: 18,
@@ -977,7 +1000,9 @@ class _Step6PaymentState extends State<Step6Payment>
                       onPressed: () => _copyToClipboard(
                         context,
                         booking.orderCode ?? '',
-                        'nội dung chuyển khoản: ${booking.orderCode ?? ''}',
+                        context.l10n.uiTransferReferencecedf32(
+                          booking.orderCode ?? '',
+                        ),
                       ),
                     ),
                   ],
@@ -986,7 +1011,7 @@ class _Step6PaymentState extends State<Step6Payment>
 
                 // Ngân hàng
                 Text(
-                  'Ngân hàng: ${VietQrConfig.bankId}',
+                  context.l10n.uiBankb96a80(VietQrConfig.bankId),
                   style: DiscoveryTextStyles.bodyMedium.copyWith(
                     color: DiscoveryColors.neutral800,
                   ),
@@ -999,7 +1024,9 @@ class _Step6PaymentState extends State<Step6Payment>
                   children: [
                     Expanded(
                       child: SelectableText(
-                        'Số tài khoản: ${VietQrConfig.accountNumber}',
+                        context.l10n.uiAccountNumberaa169c(
+                          VietQrConfig.accountNumber,
+                        ),
                         style: DiscoveryTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
                           color: DiscoveryColors.neutral800,
@@ -1007,7 +1034,7 @@ class _Step6PaymentState extends State<Step6Payment>
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Sao chép số tài khoản',
+                      tooltip: context.l10n.uiCopyAccountNumber,
                       icon: const Icon(
                         Icons.copy_rounded,
                         size: 18,
@@ -1016,7 +1043,9 @@ class _Step6PaymentState extends State<Step6Payment>
                       onPressed: () => _copyToClipboard(
                         context,
                         VietQrConfig.accountNumber,
-                        'số tài khoản: ${VietQrConfig.accountNumber}',
+                        context.l10n.uiAccountNumbera056e0(
+                          VietQrConfig.accountNumber,
+                        ),
                       ),
                     ),
                   ],
@@ -1025,7 +1054,7 @@ class _Step6PaymentState extends State<Step6Payment>
 
                 // Chủ tài khoản
                 Text(
-                  'Chủ tài khoản: ${VietQrConfig.accountName}',
+                  context.l10n.uiAccountHolderd62428(VietQrConfig.accountName),
                   style: DiscoveryTextStyles.bodyMedium.copyWith(
                     color: DiscoveryColors.neutral800,
                   ),
@@ -1038,7 +1067,9 @@ class _Step6PaymentState extends State<Step6Payment>
                   children: [
                     Expanded(
                       child: Text(
-                        'Số tiền: ${CurrencyFormatter.format(booking.totalAmount)}',
+                        context.l10n.uiAmount(
+                          CurrencyFormatter.format(booking.totalAmount),
+                        ),
                         style: DiscoveryTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w800,
                           color: DiscoveryColors.secondary,
@@ -1046,7 +1077,7 @@ class _Step6PaymentState extends State<Step6Payment>
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Sao chép số tiền',
+                      tooltip: context.l10n.uiCopyAmount,
                       icon: const Icon(
                         Icons.copy_rounded,
                         size: 18,
@@ -1055,7 +1086,9 @@ class _Step6PaymentState extends State<Step6Payment>
                       onPressed: () => _copyToClipboard(
                         context,
                         booking.totalAmount.toString(),
-                        'số tiền: ${CurrencyFormatter.format(booking.totalAmount)}',
+                        context.l10n.uiAmount4651de(
+                          CurrencyFormatter.format(booking.totalAmount),
+                        ),
                       ),
                     ),
                   ],
@@ -1089,10 +1122,10 @@ class _Step6PaymentState extends State<Step6Payment>
                             )!,
                         height: 260,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => const Padding(
+                        errorBuilder: (_, _, _) => Padding(
                           padding: EdgeInsets.all(12),
                           child: Text(
-                            'Không tải được QR. Bạn có thể chuyển khoản theo thông tin và nội dung bên trên.',
+                            context.l10n.uiUnableToLoadTheQrCodeUseThe,
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -1128,7 +1161,7 @@ class _Step6PaymentState extends State<Step6Payment>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Giao dịch thanh toán đang chờ xử lý',
+                        context.l10n.uiPaymentIsPending,
                         style: DiscoveryTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
                           color: DiscoveryColors.neutral800,
@@ -1139,7 +1172,9 @@ class _Step6PaymentState extends State<Step6Payment>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Mã giao dịch: #${state.pendingPaymentId}',
+                  context.l10n.uiTransactionCode3e5784(
+                    state.pendingPaymentId ?? '—',
+                  ),
                   style: DiscoveryTextStyles.caption.copyWith(
                     color: DiscoveryColors.neutral600,
                   ),
@@ -1152,7 +1187,7 @@ class _Step6PaymentState extends State<Step6Payment>
                       _copyToClipboard(
                         context,
                         state.pendingPaymentUrl!,
-                        'đường dẫn thanh toán',
+                        context.l10n.uiPaymentLink,
                       );
                     },
                     child: Container(
@@ -1222,7 +1257,7 @@ class _Step6PaymentState extends State<Step6Payment>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Lưu ý về vé điện tử',
+                        context.l10n.uiAboutYourETicket,
                         style: DiscoveryTextStyles.titleSmall.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -1232,9 +1267,7 @@ class _Step6PaymentState extends State<Step6Payment>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '1. Đơn hàng đã được xác nhận thanh toán thành công.\n'
-                  '2. Nếu danh sách vé chưa hiển thị hoặc đang đồng bộ, vui lòng nhấn nút "Kiểm tra kết quả thanh toán" ở thanh bên dưới.\n'
-                  '3. Bạn cũng có thể tra cứu lại vé bất kỳ lúc nào trong mục "Vé của tôi" bằng số điện thoại đặt vé.',
+                  context.l10n.ui1PaymentForThisBookingIsConfirmed2ff0c49,
                   style: DiscoveryTextStyles.bodySmall.copyWith(
                     color: DiscoveryColors.neutral700,
                     height: 1.5,
@@ -1264,7 +1297,7 @@ class _Step6PaymentState extends State<Step6Payment>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Lưu ý khi đơn hàng hết hạn',
+                        context.l10n.uiWhenABookingExpires,
                         style: DiscoveryTextStyles.titleSmall.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -1274,9 +1307,7 @@ class _Step6PaymentState extends State<Step6Payment>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '1. Vui lòng không thực hiện chuyển khoản cho đơn hàng này.\n'
-                  '2. Nếu bạn đã chuyển khoản trước khi đơn hết hạn, nhấn "Kiểm tra kết quả thanh toán" để hệ thống đối soát.\n'
-                  '3. Trường hợp cần trợ giúp hoặc đã trừ tiền nhưng chưa có vé, vui lòng liên hệ tổng đài VexGo để được hỗ trợ.',
+                  context.l10n.ui1DoNotTransferMoneyForThisBooking4ec818,
                   style: DiscoveryTextStyles.bodySmall.copyWith(
                     color: DiscoveryColors.neutral700,
                     height: 1.5,
@@ -1306,7 +1337,7 @@ class _Step6PaymentState extends State<Step6Payment>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Hướng dẫn sau khi chuyển tiền',
+                        context.l10n.uiAfterMakingATransfer,
                         style: DiscoveryTextStyles.titleSmall.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -1316,9 +1347,7 @@ class _Step6PaymentState extends State<Step6Payment>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '1. Mở ứng dụng ngân hàng và chuyển khoản đúng số tiền cùng nội dung chuyển khoản.\n'
-                  '2. Nhấn nút "Kiểm tra kết quả thanh toán" ở thanh bên dưới.\n'
-                  '3. Vé được hiển thị sau khi hệ thống xác nhận thanh toán và đồng bộ đầy đủ.',
+                  context.l10n.ui1OpenYourBankingAppAndTransferThea659be,
                   style: DiscoveryTextStyles.bodySmall.copyWith(
                     color: DiscoveryColors.neutral700,
                     height: 1.5,
@@ -1335,9 +1364,9 @@ class _Step6PaymentState extends State<Step6Payment>
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
             ),
             child: Text(
-              'Đơn hiện tại chưa đủ điều kiện thanh toán hoặc chưa xác minh được trạng thái. '
-              'Vui lòng không chuyển thêm tiền. Nhấn "Kiểm tra kết quả thanh toán" '
-              'để kiểm tra đơn hiện tại hoặc liên hệ hỗ trợ nếu đã chuyển khoản.',
+              context.l10n.uiThisBookingCannotBePaidYetOrIts +
+                  context.l10n.uiDoNotTransferMoreMoneyTapCheckPayment +
+                  context.l10n.uiToCheckThisBookingOrContactSupportIf,
               style: DiscoveryTextStyles.bodySmall.copyWith(
                 color: DiscoveryColors.neutral700,
               ),

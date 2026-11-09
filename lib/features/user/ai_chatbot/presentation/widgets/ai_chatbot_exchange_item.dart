@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -69,7 +70,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Bạn',
+                  context.l10n.uiYou,
                   style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 11,
@@ -130,7 +131,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
-                        'Trợ lý AI',
+                        context.l10n.uiAiAssistant,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -200,7 +201,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
           Semantics(
             button: true,
             toggled: _citationsExpanded,
-            label: 'Nguồn tham khảo nội bộ (${citations.length})',
+            label: context.l10n.uiInternalSources(citations.length),
             child: InkWell(
               key: Key('ai-chatbot-citations-toggle-$idx'),
               borderRadius: BorderRadius.circular(12),
@@ -225,7 +226,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Nguồn tham khảo (${citations.length})',
+                          context.l10n.uiSources(citations.length),
                           style: DiscoveryTextStyles.bodySmall.copyWith(
                             color: DiscoveryColors.neutral900,
                             fontWeight: FontWeight.w700,
@@ -253,7 +254,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
                 children: [
                   const Divider(height: 12, color: DiscoveryColors.neutral200),
                   Text(
-                    'Tài liệu quy định nội bộ (không phải đường dẫn web):',
+                    context.l10n.uiInternalPolicyDocumentNotAWebLink,
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 11,
@@ -347,7 +348,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                'Chuyến xe gợi ý (${trips.length})',
+                context.l10n.uiSuggestedTrips(trips.length),
                 style: DiscoveryTextStyles.bodySmall.copyWith(
                   color: DiscoveryColors.neutral900,
                   fontWeight: FontWeight.w800,
@@ -358,7 +359,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Giá và số chỗ trống dưới đây là thông tin gợi ý; hệ thống sẽ tải lại chuyến xe từ máy chủ khi bạn chọn.',
+          context.l10n.uiFaresAndAvailableSeatsBelowAreSuggestionsLive,
           style: TextStyle(
             fontFamily: AppTypography.fontFamily,
             fontSize: 11,
@@ -407,7 +408,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
                         border: Border.all(color: DiscoveryColors.neutral300),
                       ),
                       child: Text(
-                        'Mã: ${trip.code}',
+                        context.l10n.uiCode(trip.code),
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 11,
@@ -432,15 +433,22 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
                   runSpacing: 4,
                   children: [
                     Text(
-                      'Ngày đi: ${_formatIsoDate(trip.departureDate)}',
+                      context.l10n.uiDepartureDate0f7f31(
+                        _formatIsoDate(trip.departureDate),
+                      ),
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral700,
                       ),
                     ),
                     Text(
                       trip.arrivalTime != null
-                          ? 'Giờ: ${trip.departureTime} - ${trip.arrivalTime}'
-                          : 'Giờ khởi hành: ${trip.departureTime}',
+                          ? context.l10n.uiTime(
+                              trip.departureTime,
+                              trip.arrivalTime ?? '—',
+                            )
+                          : context.l10n.uiDepartureTime527188(
+                              trip.departureTime,
+                            ),
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral700,
                       ),
@@ -454,13 +462,15 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      'Loại xe: ${trip.vehicleType}',
+                      context.l10n.uiVehicleType54222d(trip.vehicleType),
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral700,
                       ),
                     ),
                     Text(
-                      'Chỗ trống tham khảo: ${trip.availableSeats}',
+                      context.l10n.uiEstimatedAvailableSeats(
+                        trip.availableSeats,
+                      ),
                       style: DiscoveryTextStyles.bodySmall.copyWith(
                         color: DiscoveryColors.neutral700,
                       ),
@@ -477,7 +487,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
                     Text(
                       trip.price != null
                           ? CurrencyFormatter.format(trip.price!)
-                          : 'Chưa có giá',
+                          : context.l10n.uiPriceUnavailable,
                       key: Key('ai-chatbot-trip-price-$idx-$tIndex'),
                       style: DiscoveryTextStyles.titleSmall.copyWith(
                         color: trip.price != null
@@ -512,14 +522,11 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 16,
-                              ),
+                            : const Icon(Icons.arrow_forward_rounded, size: 16),
                         label: Text(
                           isVerifying
-                              ? 'Đang kiểm tra chuyến…'
-                              : 'Xem & chọn chuyến',
+                              ? context.l10n.uiCheckingTrip
+                              : context.l10n.uiViewSelectTrip,
                         ),
                       ),
                     ),
@@ -540,9 +547,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
       decoration: BoxDecoration(
         color: DiscoveryColors.infoLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: DiscoveryColors.info.withValues(alpha: 0.35),
-        ),
+        border: Border.all(color: DiscoveryColors.info.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,7 +565,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Gợi ý trao đổi trực tiếp với nhân viên hỗ trợ',
+                  context.l10n.uiConsiderSpeakingToSupport,
                   style: DiscoveryTextStyles.bodySmall.copyWith(
                     color: DiscoveryColors.neutral900,
                     fontWeight: FontWeight.w800,
@@ -571,7 +576,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Hệ thống chỉ gợi ý chuyển tiếp và chưa tự động kết nối hay gửi nội dung cho nhân viên khi bạn chưa bấm nút bên dưới.',
+            context.l10n.uiThisIsASuggestionOnlyYouHaveNot,
             style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 11.5,
@@ -596,8 +601,8 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
               ),
               onPressed: widget.onOpenSupportChat,
               icon: const Icon(Icons.forum_outlined, size: 18),
-              label: const Text(
-                'Chat với nhân viên',
+              label: Text(
+                context.l10n.uiChatWithSupport,
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
@@ -613,7 +618,7 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Gợi ý hỏi tiếp:',
+          context.l10n.uiSuggestedFollowUpQuestions,
           style: TextStyle(
             fontFamily: AppTypography.fontFamily,
             fontSize: 11.5,
@@ -699,7 +704,7 @@ class AiChatbotPendingExchange extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Bạn • Đang gửi…',
+                    context.l10n.uiYouSending,
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 11,
@@ -750,7 +755,7 @@ class AiChatbotPendingExchange extends StatelessWidget {
                 const SizedBox(width: 10),
                 Flexible(
                   child: Text(
-                    'Trợ lý AI đang trả lời…',
+                    context.l10n.uiTheAiAssistantIsReplying,
                     style: DiscoveryTextStyles.bodySmall.copyWith(
                       color: DiscoveryColors.neutral700,
                       fontWeight: FontWeight.w600,

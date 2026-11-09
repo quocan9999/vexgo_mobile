@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -59,7 +60,7 @@ class LoyaltyCardWidget extends StatelessWidget {
                   ),
                   const SizedBox(width: AppDimensions.xs),
                   Text(
-                    'HẠNG ${user.tierName}',
+                    context.l10n.uiTier(user.tierName),
                     style: AppTextStyles.titleSmall.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -97,7 +98,7 @@ class LoyaltyCardWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Điểm tích lũy VexGo Points',
+                      context.l10n.uiVexgoRewardPoints,
                       style: AppTextStyles.caption.copyWith(
                         color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 12,
@@ -119,7 +120,7 @@ class LoyaltyCardWidget extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'điểm',
+                          context.l10n.uiPoints,
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: Colors.white.withValues(alpha: 0.95),
                             fontWeight: FontWeight.w600,
@@ -161,7 +162,7 @@ class LoyaltyCardWidget extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Đổi điểm',
+                        context.l10n.uiRedeemPoints,
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.neutral900,
                           fontWeight: FontWeight.w700,
@@ -197,8 +198,12 @@ class LoyaltyCardWidget extends StatelessWidget {
                   Expanded(
                     child: Text(
                       user.tier == MembershipTier.diamond
-                          ? 'Bạn đã đạt hạng thành viên cao nhất!'
-                          : 'Cần thêm ${user.diemToiHangTiepTheo - user.diemTichLuy} điểm để lên hạng tiếp theo',
+                          ? context
+                                .l10n
+                                .uiYouHaveReachedTheHighestMembershipTier
+                          : context.l10n.uiPointsNeededForTheNextTier(
+                              user.diemToiHangTiepTheo - user.diemTichLuy,
+                            ),
                       style: AppTextStyles.caption.copyWith(
                         color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 11,

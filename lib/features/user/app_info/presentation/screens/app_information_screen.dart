@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/widgets/tab_page_header.dart';
@@ -13,13 +14,16 @@ class AppInformationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Colors.white,
-    appBar: const TabPageHeader(title: 'Thông tin VexGo', showBackButton: true),
+    appBar: TabPageHeader(
+      title: context.l10n.uiAboutVexgo,
+      showBackButton: true,
+    ),
     body: ListView(
       children: [
         ListTile(
           minVerticalPadding: 16,
           leading: const Icon(Icons.directions_bus_outlined),
-          title: const Text('Giới thiệu VexGo'),
+          title: Text(context.l10n.uiAboutVexgo532a39),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => openAppInformation(context, const AboutVexGoScreen()),
         ),
@@ -27,7 +31,7 @@ class AppInformationScreen extends StatelessWidget {
         ListTile(
           minVerticalPadding: 16,
           leading: const Icon(Icons.menu_book_outlined),
-          title: const Text('Hướng dẫn sử dụng'),
+          title: Text(context.l10n.uiUserGuide),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => openAppInformation(context, const BookingGuideScreen()),
         ),
@@ -41,31 +45,28 @@ class AboutVexGoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Colors.white,
-    appBar: const TabPageHeader(
-      title: 'Giới thiệu VexGo',
+    appBar: TabPageHeader(
+      title: context.l10n.uiAboutVexgo532a39,
       showBackButton: true,
     ),
     body: ListView(
       padding: const EdgeInsets.all(20),
       children: [
         Text(
-          'Đồng hành cùng hành trình của bạn',
+          context.l10n.uiWithYouOnEveryJourney,
           style: DiscoveryTextStyles.h2,
         ),
         const SizedBox(height: 12),
-        const Text(
-          'VexGo là ứng dụng đặt vé xe khách trực tuyến, giúp bạn tìm chuyến, chọn chỗ và theo dõi vé trên điện thoại.',
-        ),
+        Text(context.l10n.uiVexgoIsAnOnlineBusBookingAppThat),
         const SizedBox(height: 24),
-        Text('Bạn có thể làm gì với VexGo?', style: DiscoveryTextStyles.h4),
+        Text(
+          context.l10n.uiWhatCanYouDoWithVexgo,
+          style: DiscoveryTextStyles.h4,
+        ),
         const SizedBox(height: 12),
-        const Text(
-          '• Tìm chuyến một chiều hoặc khứ hồi.\n\n• Chọn ghế và điểm đón/trả theo chuyến.\n\n• Xem giá, nhập mã ưu đãi và thanh toán theo hướng dẫn.\n\n• Tra cứu vé và chứng từ đặt vé/thanh toán.\n\n• Theo dõi thông báo và trao đổi qua chat hỗ trợ.',
-        ),
+        Text(context.l10n.uiFindOneWayOrRoundTripsSelectSeats),
         const SizedBox(height: 24),
-        const Text(
-          'Giá vé, lịch chạy và điều kiện phục vụ được hiển thị theo từng chuyến. Bạn nên kiểm tra thông tin trước khi xác nhận đặt vé.',
-        ),
+        Text(context.l10n.uiFaresSchedulesAndServiceConditionsAreShownFor),
       ],
     ),
   );
@@ -73,46 +74,46 @@ class AboutVexGoScreen extends StatelessWidget {
 
 class BookingGuideScreen extends StatelessWidget {
   const BookingGuideScreen({super.key});
-  static const topics = <(String, String)>[
+  static List<(String, String)> get topics => <(String, String)>[
     (
-      '1. Tìm chuyến',
-      'Chọn nơi đi, nơi đến và ngày khởi hành trên Trang chủ. Nếu đi khứ hồi, bật Khứ hồi và chọn ngày về. Mở kết quả để xem giờ chạy, giá và thông tin xe.',
+      LocaleController.strings.ui1FindATrip,
+      LocaleController.strings.uiSelectYourOriginDestinationAndDepartureDateOn,
     ),
     (
-      '2. Chọn ghế và điểm đón/trả',
-      'Chọn chỗ còn trống trên sơ đồ của chuyến. Với xe hai tầng, kiểm tra cả tầng dưới và tầng trên. Sau đó chọn điểm đón và điểm trả phù hợp. Hoàn tất đặt vé trong thời gian giữ chỗ hiển thị trên màn hình.',
+      LocaleController.strings.ui2SelectSeatsAndStops,
+      LocaleController.strings.uiSelectAvailableSeatsOnTheTripSSeat,
     ),
     (
-      '3. Kiểm tra hành khách và ưu đãi',
-      'Điền thông tin liên hệ để nhận vé. Kiểm tra lại chuyến, ghế và các điểm đón/trả. Nếu có mã ưu đãi, nhập mã và chờ hệ thống kiểm tra điều kiện, sau đó xem tổng tiền đã cập nhật.',
+      LocaleController.strings.ui3CheckPassengerDetailsAndOffers,
+      LocaleController.strings.uiEnterContactDetailsToReceiveYourTicketCheck,
     ),
     (
-      '4. Thanh toán và nhận vé',
-      'Làm theo thông tin ngân hàng, số tiền và nội dung chuyển khoản trên màn hình thanh toán. Chờ hệ thống xác nhận, sau đó kiểm tra vé đã phát hành. Nếu hết thời gian giữ chỗ, kiểm tra trạng thái đơn trước khi đặt lại hoặc liên hệ hỗ trợ khi cần.',
+      LocaleController.strings.ui4PayAndReceiveTickets,
+      LocaleController.strings.uiUseTheBankDetailsAmountAndTransferReference,
     ),
     (
-      '5. Tra cứu vé và chứng từ',
-      'Mở Vé của tôi để xem các vé gắn với tài khoản. Khi đặt vé không đăng nhập, dùng thông tin tra cứu được cung cấp sau đặt vé. Từ Chi tiết vé, mở chứng từ đặt vé/thanh toán để xem thông tin đơn. Với khứ hồi, kiểm tra trạng thái vé của cả lượt đi và lượt về.',
+      LocaleController.strings.ui5LookUpTicketsAndReceipts,
+      LocaleController.strings.uiOpenMyTicketsForTicketsLinkedToYour,
     ),
     (
-      '6. Hủy vé và hỗ trợ',
-      'Mở Chi tiết vé và chọn hủy nếu vé còn cho phép. Xem điều kiện, phí và số tiền hoàn được hệ thống hiển thị trước khi xác nhận. Hệ thống không hoàn tiền online. Sau khi hủy vé, liên hệ hỗ trợ và cung cấp mã vé để yêu cầu hoàn tiền theo chính sách nhà xe. Bạn có thể mở Chat với nhà xe trong Tài khoản để trao đổi.',
+      LocaleController.strings.ui6CancellationAndSupport,
+      LocaleController.strings.uiOpenTicketDetailsAndCancelIfEligibleReview,
     ),
   ];
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Colors.white,
-    appBar: const TabPageHeader(
-      title: 'Hướng dẫn sử dụng',
+    appBar: TabPageHeader(
+      title: context.l10n.uiUserGuide,
       showBackButton: true,
     ),
     body: ListView(
       padding: const EdgeInsets.symmetric(vertical: 12),
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
           child: Text(
-            'Từ tìm chuyến đến nhận vé và quản lý hành trình. Chọn mục bạn cần xem.',
+            context.l10n.uiFromFindingTripsToReceivingTicketsAndManaging,
           ),
         ),
         for (var i = 0; i < topics.length; i++)
@@ -140,10 +141,10 @@ class BookingGuideSection extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Đặt vé cùng VexGo', style: DiscoveryTextStyles.h3),
+        Text(context.l10n.uiBookWithVexgo, style: DiscoveryTextStyles.h3),
         const SizedBox(height: 12),
-        const Text(
-          '1. Tìm chuyến phù hợp\n2. Chọn ghế và thông tin hành trình\n3. Thanh toán và nhận vé',
+        Text(
+          context.l10n.ui1FindTheRightTrip2SelectSeats,
           style: TextStyle(height: 1.8),
         ),
         Align(
@@ -151,7 +152,7 @@ class BookingGuideSection extends StatelessWidget {
           child: TextButton(
             onPressed: () =>
                 openAppInformation(context, const BookingGuideScreen()),
-            child: const Text('Xem hướng dẫn đặt vé'),
+            child: Text(context.l10n.uiViewBookingGuide),
           ),
         ),
       ],

@@ -1,21 +1,26 @@
+import '../localization/locale_controller.dart';
 import 'package:intl/intl.dart';
 
 class CurrencyFormatter {
   CurrencyFormatter._();
 
-  static final NumberFormat _formatter = NumberFormat.currency(
-    locale: 'vi_VN',
-    symbol: 'đ',
+  static NumberFormat get _formatter => NumberFormat.currency(
+    locale: LocaleController.instance.value.languageCode == 'en'
+        ? 'en_US'
+        : 'vi_VN',
+    symbol: LocaleController.instance.value.languageCode == 'en' ? 'VND ' : 'đ',
     decimalDigits: 0,
   );
 
   static String format(num? amount) {
-    if (amount == null) return '0 đ';
-    return _formatter.format(amount).replaceAll('₫', 'đ');
+    return _formatter.format(amount ?? 0).replaceAll('₫', 'đ');
   }
 
   static String formatSimple(num? amount) {
     if (amount == null) return '0';
-    return NumberFormat('#,###', 'vi_VN').format(amount);
+    return NumberFormat(
+      '#,###',
+      LocaleController.instance.value.languageCode == 'en' ? 'en_US' : 'vi_VN',
+    ).format(amount);
   }
 }

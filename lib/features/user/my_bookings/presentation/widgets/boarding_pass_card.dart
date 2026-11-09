@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/features/user/receipts/presentation/booking_evidence_details.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -118,7 +119,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Phiên đã thay đổi. Vui lòng mở lại thông tin vé.',
+                context.l10n.uiYourSessionHasChangedOpenTicketDetailsAgain,
                 style: DiscoveryTextStyles.bodySmall.copyWith(
                   color: DiscoveryColors.errorDark,
                   fontWeight: FontWeight.w600,
@@ -179,7 +180,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                           Text(
                             ticket.trip.operatorName.isNotEmpty
                                 ? ticket.trip.operatorName
-                                : 'Nhà xe VexGo',
+                                : context.l10n.uiVexgoOperator,
                             style: DiscoveryTextStyles.titleSmall.copyWith(
                               fontWeight: FontWeight.w700,
                               color: DiscoveryColors.neutral900,
@@ -191,7 +192,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                           Text(
                             ticket.trip.vehicleType.isNotEmpty
                                 ? ticket.trip.vehicleType
-                                : 'Xe khách chất lượng cao',
+                                : context.l10n.uiQualityBusService,
                             style: DiscoveryTextStyles.bodySmall.copyWith(
                               color: DiscoveryColors.neutral500,
                               fontSize: 12,
@@ -218,7 +219,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Điểm đi',
+                            context.l10n.uiOrigin,
                             style: DiscoveryTextStyles.caption.copyWith(
                               color: DiscoveryColors.neutral500,
                             ),
@@ -262,7 +263,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'Điểm đến',
+                            context.l10n.uiDestination,
                             style: DiscoveryTextStyles.caption.copyWith(
                               color: DiscoveryColors.neutral500,
                             ),
@@ -298,7 +299,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                 if (ticket.canShowQr)
                   Semantics(
                     button: true,
-                    label: 'Mã QR lên xe, chạm để phóng to',
+                    label: context.l10n.uiBoardingQrCodeTapToEnlarge,
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
@@ -343,7 +344,9 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Mã vé: ${ticket.ticketCode}',
+                                      context.l10n.uiTicketCode628257(
+                                        ticket.ticketCode,
+                                      ),
                                       style: DiscoveryTextStyles.titleSmall
                                           .copyWith(
                                             color: DiscoveryColors.primary,
@@ -362,7 +365,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
-                                            'Chạm để phóng to mã QR',
+                                            context.l10n.uiTapToEnlargeQrCode,
                                             style: DiscoveryTextStyles.caption
                                                 .copyWith(
                                                   color:
@@ -375,7 +378,9 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Dùng mã này khi lên xe tại điểm đón',
+                                      context
+                                          .l10n
+                                          .uiUseThisCodeWhenBoardingAtYourPick,
                                       style: DiscoveryTextStyles.bodySmall
                                           .copyWith(
                                             color: DiscoveryColors.neutral500,
@@ -425,7 +430,9 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Mã vé: ${ticket.ticketCode}',
+                                context.l10n.uiTicketCode628257(
+                                  ticket.ticketCode,
+                                ),
                                 style: DiscoveryTextStyles.titleSmall.copyWith(
                                   color: DiscoveryColors.neutral800,
                                   fontWeight: FontWeight.w700,
@@ -463,7 +470,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                   children: [
                     Expanded(
                       child: _buildPassDetailBlock(
-                        title: 'Chỗ ngồi',
+                        title: context.l10n.uiSeat,
                         value: ticket.seats.join(', '),
                         valueColor: DiscoveryColors.primary,
                         isHighlight: true,
@@ -471,14 +478,14 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                     ),
                     Expanded(
                       child: _buildPassDetailBlock(
-                        title: 'Ngày khởi hành',
+                        title: context.l10n.uiDepartureDate6d003e,
                         value: ticket.trip.departureDate,
                       ),
                     ),
                     if (ticket.licensePlate != null)
                       Expanded(
                         child: _buildPassDetailBlock(
-                          title: 'Biển số xe',
+                          title: context.l10n.uiLicencePlate,
                           value: ticket.licensePlate!,
                         ),
                       ),
@@ -531,20 +538,20 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
 
                 // Passenger and Contact
                 _buildInfoLine(
-                  label: 'Hành khách:',
+                  label: context.l10n.uiPassenger,
                   value:
                       '${ticket.passenger.fullName} · ${ticket.passenger.phone}',
                 ),
                 _buildInfoLine(
-                  label: 'Email nhận vé:',
+                  label: context.l10n.uiTicketEmail,
                   value: ticket.passenger.email,
                 ),
                 _buildInfoLine(
-                  label: 'Thanh toán qua:',
+                  label: context.l10n.uiPaymentMethod,
                   value: ticket.paymentMethod,
                 ),
                 _buildInfoLine(
-                  label: 'Giá vé này:',
+                  label: context.l10n.uiTicketFare,
                   value: CurrencyFormatter.format(ticket.finalAmount),
                   valueColor: ticket.status == TicketStatus.cancelled
                       ? DiscoveryColors.neutral500
@@ -563,16 +570,18 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
 
                 if (ticket.status == TicketStatus.cancelled) ...[
                   _buildInfoLine(
-                    label: 'Số tiền dự kiến hoàn:',
+                    label: context.l10n.uiEstimatedRefund,
                     value: ticket.refundAmount != null
                         ? CurrencyFormatter.format(ticket.refundAmount!)
-                        : 'Chưa có dữ liệu',
+                        : context.l10n.uiNoDataAvailable,
                     valueColor: DiscoveryColors.successDark,
                     isBold: true,
                   ),
                   _buildInfoLine(
-                    label: 'Lý do hủy:',
-                    value: ticket.cancelReason ?? 'Hủy theo yêu cầu',
+                    label: context.l10n.uiCancellationReason525ac0,
+                    value:
+                        ticket.cancelReason ??
+                        context.l10n.uiCancelledOnRequest,
                     valueColor: DiscoveryColors.error,
                   ),
                 ],
@@ -586,15 +595,15 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
 
   String _getQrUnavailableReason() {
     if (ticket.status == TicketStatus.cancelled) {
-      return 'Vé đã bị hủy. Mã QR không khả dụng.';
+      return context.l10n.uiThisTicketIsCancelledTheQrCodeIs;
     }
     if (ticket.status == TicketStatus.completed) {
-      return 'Chuyến đi đã hoàn thành.';
+      return context.l10n.uiThisTripIsCompleted;
     }
     if (!ticket.isPaid) {
-      return 'Chưa có xác nhận thanh toán';
+      return context.l10n.uiPaymentNotYetConfirmed;
     }
-    return 'Mã QR chưa khả dụng cho vé này.';
+    return context.l10n.uiTheQrCodeIsNotAvailableForThis;
   }
 
   Widget _buildTearLine() {
@@ -779,17 +788,17 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
       case TicketStatus.upcoming:
         bg = DiscoveryColors.primaryLight;
         text = DiscoveryColors.primary;
-        label = 'Sắp đi';
+        label = context.l10n.uiUpcoming;
         break;
       case TicketStatus.completed:
         bg = DiscoveryColors.successLight;
         text = DiscoveryColors.successDark;
-        label = 'Đã đi';
+        label = context.l10n.uiPastTrips;
         break;
       case TicketStatus.cancelled:
         bg = DiscoveryColors.errorLight;
         text = DiscoveryColors.errorDark;
-        label = 'Đã hủy';
+        label = context.l10n.uiCancelled;
         break;
     }
 
@@ -823,7 +832,7 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              ticket.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán',
+              ticket.isPaid ? context.l10n.uiPaid : context.l10n.uiUnpaid,
               style: DiscoveryTextStyles.caption.copyWith(
                 color: ticket.isPaid
                     ? DiscoveryColors.successDark

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/design/discovery_theme.dart';
@@ -53,7 +54,7 @@ class SupportChatComposer extends StatelessWidget {
                             : DiscoveryTextStyles.bodyMedium)
                         .copyWith(color: DiscoveryColors.neutral900),
                 decoration: InputDecoration(
-                  hintText: 'Nhắn tin cho nhà xe…',
+                  hintText: context.l10n.uiMessageTheOperator,
                   hintStyle: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: isDense ? 12 : 14,
@@ -77,7 +78,7 @@ class SupportChatComposer extends StatelessWidget {
             height: 48,
             child: IconButton(
               padding: EdgeInsets.zero,
-              tooltip: 'Gửi tin nhắn',
+              tooltip: context.l10n.uiSendMessage,
               icon: Icon(
                 Icons.send_rounded,
                 color: DiscoveryColors.primary,

@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -180,7 +181,7 @@ class BookingTripSummaryDock extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Tổng thanh toán:',
+                      context.l10n.uiTotalPayment,
                       style: DiscoveryTextStyles.caption.copyWith(
                         color: DiscoveryColors.neutral500,
                         fontWeight: FontWeight.w500,
@@ -191,13 +192,17 @@ class BookingTripSummaryDock extends StatelessWidget {
                       state.finalAmount != null
                           ? CurrencyFormatter.format(state.finalAmount!)
                           : (state.quoteLoading
-                                ? 'Đang xác minh giá'
+                                ? context.l10n.uiVerifyingFare
                                 : state.cargo.enabled &&
                                       state.ticketFinalAmount != null
-                                ? 'Vé ${CurrencyFormatter.format(state.ticketFinalAmount!)}'
+                                ? context.l10n.uiTicket(
+                                    CurrencyFormatter.format(
+                                      state.ticketFinalAmount!,
+                                    ),
+                                  )
                                 : state.cargo.enabled
-                                ? 'Xác định khi tạo đơn'
-                                : 'Chưa có giá vé'),
+                                ? context.l10n.uiCalculatedWhenBookingIsCreated
+                                : context.l10n.uiFareUnavailable),
                       style: DiscoveryTextStyles.titleMedium.copyWith(
                         color: DiscoveryColors.secondary,
                         fontWeight: FontWeight.w800,
@@ -206,7 +211,7 @@ class BookingTripSummaryDock extends StatelessWidget {
                     ),
                     if (state.cargo.enabled && state.finalAmount == null)
                       Text(
-                        'Cước vật phẩm thanh toán riêng tại bến',
+                        context.l10n.uiItemFeesArePaidSeparatelyAtTheStation,
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral600,
                           fontSize: 11,
@@ -215,7 +220,9 @@ class BookingTripSummaryDock extends StatelessWidget {
                       ),
                     if (state.discountAmount > 0)
                       Text(
-                        'Đã giảm ${CurrencyFormatter.format(state.discountAmount)}',
+                        context.l10n.uiDiscounted(
+                          CurrencyFormatter.format(state.discountAmount),
+                        ),
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.successDark,
                           fontSize: 11,
@@ -226,7 +233,7 @@ class BookingTripSummaryDock extends StatelessWidget {
                 );
 
                 final ctaBtn = DiscoveryButton(
-                  text: 'Thanh toán',
+                  text: context.l10n.uiPayment,
                   type: ButtonType.secondary,
                   isLoading: state.status == BookingFlowStatus.submitting,
                   width: stack ? double.infinity : 160,
@@ -246,7 +253,7 @@ class BookingTripSummaryDock extends StatelessWidget {
                       if (expired) ...[
                         const SizedBox(height: 4),
                         Text(
-                          'Thời gian giữ ghế đã hết. Vui lòng chọn lại ghế.',
+                          context.l10n.uiYourSeatHoldHasExpiredSelectYourSeats,
                           style: DiscoveryTextStyles.caption.copyWith(
                             color: DiscoveryColors.error,
                           ),
@@ -271,7 +278,7 @@ class BookingTripSummaryDock extends StatelessWidget {
                     if (expired) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Thời gian giữ ghế đã hết. Vui lòng chọn lại ghế.',
+                        context.l10n.uiYourSeatHoldHasExpiredSelectYourSeats,
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.error,
                         ),

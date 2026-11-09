@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/client_labels.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/design/discovery_theme.dart';
@@ -114,7 +115,10 @@ class SupportChatConversationCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
-                                conversation.statusLabel,
+                                localizedClientLabel(
+                                  context,
+                                  conversation.statusLabel,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(

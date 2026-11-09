@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/my_tickets_bloc.dart';
@@ -127,8 +128,8 @@ class _TicketQrModalState extends State<TicketQrModal> {
   Widget build(BuildContext context) {
     if (!_authorized) return const SizedBox.shrink();
     if (!ticket.canShowQr) {
-      return const AlertDialog(
-        content: Text('Chưa có xác nhận thanh toán để hiển thị mã lên xe.'),
+      return AlertDialog(
+        content: Text(context.l10n.uiPaymentMustBeConfirmedBeforeABoardingCode),
       );
     }
     return Dialog(
@@ -147,7 +148,7 @@ class _TicketQrModalState extends State<TicketQrModal> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Mã vé điện tử (E-Ticket)',
+                  context.l10n.uiETicketCode,
                   style: AppTextStyles.titleSmall.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.neutral900,
@@ -199,7 +200,7 @@ class _TicketQrModalState extends State<TicketQrModal> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Mã vé: ',
+                    context.l10n.uiTicketCode782acf,
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.neutral700,
                     ),
@@ -221,8 +222,8 @@ class _TicketQrModalState extends State<TicketQrModal> {
                       }
                       Clipboard.setData(ClipboardData(text: ticket.ticketCode));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Đã sao chép mã vé vào bộ nhớ tạm!'),
+                        SnackBar(
+                          content: Text(context.l10n.uiTicketCodeCopied),
                           duration: Duration(seconds: 2),
                         ),
                       );
@@ -240,7 +241,7 @@ class _TicketQrModalState extends State<TicketQrModal> {
             const SizedBox(height: AppDimensions.sm),
 
             Text(
-              'Đưa mã này cho Phụ xe hoặc Tài xế quét soát vé khi lên xe',
+              context.l10n.uiShowThisCodeToTheAttendantOrDriver,
               style: AppTextStyles.caption.copyWith(
                 color: AppColors.neutral500,
                 fontStyle: FontStyle.italic,
@@ -261,7 +262,7 @@ class _TicketQrModalState extends State<TicketQrModal> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text('Đóng'),
+                child: Text(context.l10n.uiClose),
               ),
             ),
           ],

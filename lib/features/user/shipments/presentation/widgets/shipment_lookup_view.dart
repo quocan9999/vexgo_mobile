@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'shipment_cancellation_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,8 +63,8 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
     final phone = _phoneController.text.trim();
     if (waybill.isEmpty || phone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập mã vận đơn và số điện thoại.'),
+        SnackBar(
+          content: Text(context.l10n.uiEnterTheShipmentCodeAndPhoneNumber),
         ),
       );
       return;
@@ -75,7 +76,7 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã sao chép $label'),
+        content: Text(context.l10n.uiCopied6cef06(label)),
         duration: const Duration(seconds: 1),
       ),
     );
@@ -101,8 +102,8 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Tra cứu trạng thái vận đơn',
+                Text(
+                  context.l10n.uiTrackShipmentStatus,
                   style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 16,
@@ -111,8 +112,8 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Nhập mã vận đơn và số điện thoại người gửi/nhận để theo dõi hành trình kiện hàng.',
+                Text(
+                  context.l10n.uiEnterTheShipmentCodeAndSenderSRecipient,
                   style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 13,
@@ -121,7 +122,7 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
-                  label: 'Mã vận đơn',
+                  label: context.l10n.uiShipmentCode1eaa4b,
                   hintText: 'VD: WAY-123456',
                   controller: _waybillController,
                   prefixIcon: const Icon(
@@ -131,8 +132,8 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                 ),
                 const SizedBox(height: 12),
                 CustomTextField(
-                  label: 'Số điện thoại',
-                  hintText: 'Số điện thoại người gửi hoặc người nhận',
+                  label: context.l10n.uiPhoneNumber,
+                  hintText: context.l10n.uiSenderSOrRecipientSPhoneNumber,
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   prefixIcon: const Icon(
@@ -142,7 +143,7 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                 ),
                 const SizedBox(height: 18),
                 CustomButton(
-                  text: 'Tra cứu vận đơn',
+                  text: context.l10n.uiLookUpShipment,
                   isLoading: widget.state.lookingUp,
                   onPressed: _onLookup,
                   type: ButtonType.primary,
@@ -202,8 +203,8 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'MÃ VẬN ĐƠN',
+                            Text(
+                              context.l10n.uiShipmentCode9dec85,
                               style: TextStyle(
                                 fontFamily: AppTypography.fontFamily,
                                 fontSize: 11,
@@ -230,14 +231,14 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                                     Icons.copy_rounded,
                                     size: 16,
                                   ),
-                                  tooltip: 'Sao chép mã',
+                                  tooltip: context.l10n.uiCopyCode,
                                   constraints: const BoxConstraints(
                                     minWidth: 48,
                                     minHeight: 48,
                                   ),
                                   onPressed: () => _copyToClipboard(
                                     lookup.waybillCode,
-                                    'mã vận đơn',
+                                    context.l10n.uiShipmentCode09837d,
                                   ),
                                 ),
                               ],
@@ -252,8 +253,8 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Mã đơn hàng: ',
+                      Text(
+                        context.l10n.uiBookingCoded6f725,
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
@@ -274,20 +275,24 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.copy_rounded, size: 16),
-                        tooltip: 'Sao chép mã đơn',
+                        tooltip: context.l10n.uiCopyBookingCodeffae60,
                         constraints: const BoxConstraints(
                           minWidth: 48,
                           minHeight: 48,
                         ),
-                        onPressed: () =>
-                            _copyToClipboard(lookup.orderCode, 'mã đơn hàng'),
+                        onPressed: () => _copyToClipboard(
+                          lookup.orderCode,
+                          context.l10n.uiBookingCodeee647d,
+                        ),
                       ),
                     ],
                   ),
                   if (lookup.dropoffDeadline != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      'Hạn mang hàng ra bến: ${_formatLocalDateTime(lookup.dropoffDeadline!)}',
+                      context.l10n.uiDropOffDeadlinecb255c(
+                        _formatLocalDateTime(lookup.dropoffDeadline!),
+                      ),
                       style: const TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 12,
@@ -300,8 +305,8 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                   Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      const Text(
-                        'Trạng thái thanh toán: ',
+                      Text(
+                        context.l10n.uiPaymentStatus,
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
@@ -324,7 +329,7 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                     alignment: WrapAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Số kiện: ${lookup.packageCount}',
+                        context.l10n.uiItemCountdd0fa2(lookup.packageCount),
                         style: const TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
@@ -332,7 +337,9 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                         ),
                       ),
                       Text(
-                        'Cước: ${CurrencyFormatter.format(lookup.amount)}',
+                        context.l10n.uiFee(
+                          CurrencyFormatter.format(lookup.amount),
+                        ),
                         style: const TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 14,
@@ -344,7 +351,7 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                   ),
                   const Divider(height: 16, color: DiscoveryColors.neutral200),
                   Text(
-                    'Nhà xe: ${lookup.carrier}',
+                    context.l10n.uiOperator(lookup.carrier),
                     style: const TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 13,
@@ -353,7 +360,10 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                     ),
                   ),
                   Text(
-                    'Tuyến: ${lookup.origin} → ${lookup.destination}',
+                    context.l10n.uiRoute97d69f(
+                      lookup.origin,
+                      lookup.destination,
+                    ),
                     style: const TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 13,
@@ -364,7 +374,7 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                   _buildPoint(
                     icon: Icons.trip_origin_rounded,
                     color: DiscoveryColors.primary,
-                    label: 'Điểm gửi:',
+                    label: context.l10n.uiDropOffa17ae9,
                     name: lookup.pickupName,
                     address: lookup.pickupAddress,
                   ),
@@ -372,7 +382,7 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                   _buildPoint(
                     icon: Icons.location_on_rounded,
                     color: DiscoveryColors.secondary,
-                    label: 'Điểm nhận:',
+                    label: context.l10n.uiCollection,
                     name: lookup.dropoffName,
                     address: lookup.dropoffAddress,
                   ),
@@ -381,8 +391,8 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                       height: 20,
                       color: DiscoveryColors.neutral200,
                     ),
-                    const Text(
-                      'Lịch trình vận chuyển',
+                    Text(
+                      context.l10n.uiShippingTimeline,
                       style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 14,
