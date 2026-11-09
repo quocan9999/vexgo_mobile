@@ -1,3 +1,5 @@
+import 'package:vexgo_app/data/models/cargo_settlement.dart';
+import 'booking_rate_limit.dart';
 import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/data/models/booking_model.dart';
 import 'package:vexgo_app/data/repositories/cargo_repository.dart';
@@ -21,6 +23,7 @@ import 'booking_flow_state.dart';
 class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   final SeatRepository seatRepository;
   final BookingRepository bookingRepository;
+  final String? comboCode;
   final CargoRepository cargoRepository;
   int _cargoRevision = 0;
   Timer? _countdownTimer;
@@ -50,6 +53,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
   BookingFlowBloc({
     required this.seatRepository,
     required this.bookingRepository,
+    this.comboCode,
     CargoRepository? cargoRepository,
     DateTime Function()? now,
     VietQrReceivingAccount receivingAccount = VietQrConfig.account,
@@ -73,6 +77,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     on<SelectPaymentMethodEvent>(_onSelectPaymentMethod);
     on<TickCountdownEvent>(_onTickCountdown);
     on<NextStepEvent>(_onNextStep);
+    on<ResumeAfterBookingRateLimitEvent>(_onResumeAfterRateLimit);
     on<PreviousStepEvent>(_onPreviousStep);
     on<GoToStepEvent>(_onGoToStep);
     on<ConfirmPaymentEvent>(_onConfirmPayment);
@@ -100,6 +105,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
           _onSelectPickupPoint(action, emit);
         } else if (action is SelectDropoffPointEvent) {
           _onSelectDropoffPoint(action, emit);
+        } else if (action is ResumeAfterBookingRateLimitEvent) {
+          _onResumeAfterRateLimit(action, emit);
         } else if (action is NextStepEvent) {
           await _onNextStep(action, emit);
         } else if (action is PreviousStepEvent) {
@@ -190,7 +197,10 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     }
     emit(
       state.copyWith(
-        cargo: BookingCargoState(enabled: true, draft: state.cargo.draft),
+        cargo: BookingCargoState(
+          enabled: true,
+          draft: event.initialDraft ?? state.cargo.draft,
+        ),
       ),
     );
     await _loadCargo(emit);
@@ -287,7 +297,8 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     if (booking.tripId != draft.trip!.numericTripId ||
         booking.ticketSubtotal != draft.ticketFinalAmount ||
         booking.shippingFee == null ||
-        booking.ticketSubtotal! + booking.shippingFee! != booking.totalAmount) {
+        booking.cargoPayment == CargoSettlement.unknown ||
+        (creation && booking.cargoPayment == CargoSettlement.includedOnline)) {
       return false;
     }
     if (creation) {
@@ -784,11 +795,35 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     }
   }
 
+  void _onResumeAfterRateLimit(
+    ResumeAfterBookingRateLimitEvent event,
+    Emitter<BookingFlowState> emit,
+  ) {
+    if (_sessionInvalidated ||
+        _closing ||
+        emit.isDone ||
+        _confirmBusy ||
+        _holdBusy ||
+        state.rateLimit == null) {
+      return;
+    }
+    emit(
+      state.copyWith(
+        clearRateLimit: true,
+        errorMessage: null,
+        status: state.pendingBookingId == null
+            ? BookingFlowStatus.loaded
+            : BookingFlowStatus.failure,
+      ),
+    );
+  }
+
   Future<void> _onNextStep(
     NextStepEvent event,
     Emitter<BookingFlowState> emit,
   ) async {
     if (_sessionInvalidated ||
+        state.rateLimit != null ||
         !state.canProceed ||
         state.isCheckoutLocked ||
         _holdBusy ||
@@ -862,6 +897,17 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         return;
       } on ApiException catch (e) {
         if (_sessionInvalidated || _closing || emit.isDone) return;
+        if (e.statusCode == 429) {
+          final limit = BookingRateLimit.fromError(e, existingOrder: false);
+          emit(
+            state.copyWith(
+              status: BookingFlowStatus.failure,
+              rateLimit: limit,
+              errorMessage: limit.message,
+            ),
+          );
+          return;
+        }
         emit(
           state.copyWith(
             status: BookingFlowStatus.failure,
@@ -978,6 +1024,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     Emitter<BookingFlowState> emit,
   ) async {
     if (_sessionInvalidated ||
+        state.rateLimit != null ||
         _confirmBusy ||
         _holdBusy ||
         state.status == BookingFlowStatus.success ||
@@ -1111,6 +1158,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         // has no idempotency key contract, so never automatically replay it.
         emit(state.copyWith(bookingOutcomeUnknown: true));
         final booking = await bookingRepository.createApiBooking(
+          comboCode: comboCode,
           expectedPromotionQuote: draft.quote,
           cargo: draft.cargo.enabled ? draft.cargo.draft : null,
           tripId: trip.numericTripId ?? int.parse(trip.id),
@@ -1142,9 +1190,14 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
         );
       }
       if (_sessionInvalidated) return;
+      if (comboCode != null && state.checkoutBooking!.comboCode != comboCode) {
+        throw StateError(
+          'Máy chủ chưa xác nhận mã thanh toán khứ hồi. Giữ đơn hiện tại để kiểm tra.',
+        );
+      }
       if (!_verifiedCargo(state.checkoutBooking!, draft, creation: true)) {
         throw StateError(
-          'Máy chủ chưa xác nhận đủ tiền hàng và mã vận đơn. Giữ đơn hiện tại để kiểm tra.',
+          'Máy chủ chưa xác nhận cước riêng tại bến và thông tin vật phẩm. Giữ đơn hiện tại để kiểm tra.',
         );
       }
       if (bankTransfer || state.checkoutBooking?.totalAmount == 0) {
@@ -1157,6 +1210,7 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
             verified.bookingId != expected.bookingId ||
             verified.bookingCode != expected.bookingCode ||
             verified.orderCode != expected.orderCode ||
+            verified.comboCode != expected.comboCode ||
             verified.totalAmount != expected.totalAmount ||
             verified.totalAmount < 0 ||
             !_verifiedCargo(verified, draft, creation: false) ||
@@ -1275,6 +1329,23 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
       );
     } on ApiException catch (error) {
       if (_sessionInvalidated || _closing || emit.isDone) return;
+      if (error.statusCode == 429) {
+        final limit = BookingRateLimit.fromError(
+          error,
+          existingOrder: state.pendingBookingId != null,
+        );
+        emit(
+          state.copyWith(
+            status: BookingFlowStatus.failure,
+            rateLimit: limit,
+            errorMessage: limit.message,
+            bookingOutcomeUnknown: state.pendingBookingId == null
+                ? false
+                : state.bookingOutcomeUnknown,
+          ),
+        );
+        return;
+      }
       final definiteRejection =
           state.pendingBookingId == null &&
           error.statusCode >= 400 &&

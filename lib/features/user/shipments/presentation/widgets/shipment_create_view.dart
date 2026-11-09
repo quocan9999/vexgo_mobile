@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
 import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart' hide ButtonType;
@@ -9,7 +10,6 @@ import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
 import 'package:vexgo_app/core/widgets/custom_button.dart';
 import 'package:vexgo_app/core/widgets/custom_text_field.dart';
-import 'package:vexgo_app/data/adapters/city_search_adapter.dart';
 import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/data/models/city_model.dart';
 import 'package:vexgo_app/data/repositories/trip_repository.dart';
@@ -73,8 +73,6 @@ class _ItemFormData {
 
 enum _PaymentOption { senderCounter, receiverCounter }
 
-final MockTripRepository _defaultShipmentTripRepository = MockTripRepository();
-
 class ShipmentCreateView extends StatefulWidget {
   final ShipmentFlowCubit cubit;
   final ShipmentFlowState state;
@@ -132,7 +130,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
   }
 
   Future<List<CityModel>> _defaultCitiesLoader() =>
-      _defaultShipmentTripRepository.getCities();
+      (context.read<TripRepository?>() ?? RealTripRepository()).getCities();
 
   Future<void> _loadCities() async {
     final request = ++_citiesLoadSeq;
@@ -336,11 +334,7 @@ class _ShipmentCreateViewState extends State<ShipmentCreateView> {
     _routeInputsChanged();
   }
 
-  String _resolveCityForBackend(CityModel city) {
-    final byId = CitySearchAdapter.resolveBackendSearchCity(city.id);
-    if (byId != city.id.trim()) return byId;
-    return CitySearchAdapter.resolveBackendSearchCity(city.name);
-  }
+  String _resolveCityForBackend(CityModel city) => city.searchValue;
 
   void _onSearchTrips() {
     if (widget.state.searching) return;

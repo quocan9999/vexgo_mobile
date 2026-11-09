@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/review_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/core/network/api_exceptions.dart';
@@ -18,6 +19,14 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
   bool _sessionInitialized = false;
   bool _authenticated;
   bool _reviewSubmitting = false;
+  final _uncertainReviews = <String>{};
+  String _reviewKey(String id) {
+    final ticket = state.tickets.where((t) => t.id == id).firstOrNull;
+    return '${TokenStorage.sessionVersion}:${ticket?.trip.id ?? id}';
+  }
+
+  bool reviewUncertain(String id) => _uncertainReviews.contains(_reviewKey(id));
+  final _reviewSnapshots = <String, ReviewModel?>{};
   int? _cancellationFlight;
   final _uncertainCancellations = <String>{};
   bool cancellationUncertain(String id) =>
@@ -34,6 +43,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     _authenticated = key != null;
     _generation++;
     _reviewSubmitting = false;
+    _reviewSnapshots.clear();
     // Clear synchronously before pending account requests can complete.
     // ignore: invalid_use_of_visible_for_testing_member
     emit(MyTicketsState(requiresLogin: !_authenticated));
@@ -57,7 +67,12 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       final tickets = List<TicketModel>.from(state.tickets);
       final index = tickets.indexWhere((t) => t.id == event.ticket.id);
       if (index < 0) return;
-      tickets[index] = event.ticket;
+      tickets[index] = _reviewSnapshots.containsKey(event.ticket.trip.id)
+          ? event.ticket.copyWith(
+              review: _reviewSnapshots[event.ticket.trip.id],
+              clearReview: _reviewSnapshots[event.ticket.trip.id] == null,
+            )
+          : event.ticket;
       emit(
         state.copyWith(
           tickets: tickets,
@@ -73,6 +88,13 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     on<CancelTicketEvent>(_onCancelTicket);
     on<CheckCancellationEvent>(_onCheckCancellation);
     on<SubmitTicketReviewEvent>(_onSubmitReview);
+    on<RefreshTicketReviewEvent>((e, emit) => _manageReview(e.ticketId, emit));
+    on<UpdateTicketReviewEvent>(
+      (e, emit) => _manageReview(e.ticketId, emit, update: e.review),
+    );
+    on<DeleteTicketReviewEvent>(
+      (e, emit) => _manageReview(e.ticketId, emit, delete: true),
+    );
   }
 
   Future<void> _onLoadMyTickets(
@@ -90,7 +112,16 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       emit(
         state.copyWith(
           status: MyTicketsStatus.loaded,
-          tickets: loadedTickets,
+          tickets: loadedTickets
+              .map(
+                (t) => _reviewSnapshots.containsKey(t.trip.id)
+                    ? t.copyWith(
+                        review: _reviewSnapshots[t.trip.id],
+                        clearReview: _reviewSnapshots[t.trip.id] == null,
+                      )
+                    : t,
+              )
+              .toList(),
           clearMessages: true,
         ),
       );
@@ -482,12 +513,192 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     }
   }
 
+  Future<int> _reviewTrip(TicketModel ticket) async {
+    final id = int.tryParse(ticket.trip.id);
+    if (id != null && id > 0) return id;
+    if (ticket.bookingId != null) {
+      final booking = await bookingRepository.getBookingById(ticket.bookingId);
+      if (booking != null &&
+          booking.bookingId.toString() == ticket.bookingId.toString() &&
+          booking.tripId > 0) {
+        return booking.tripId;
+      }
+    }
+    throw StateError('Không xác định được chuyến xe để quản lý đánh giá.');
+  }
+
+  void _saveReviewSnapshot(
+    Emitter<MyTicketsState> emit,
+    TicketModel target,
+    int tripId,
+    ReviewModel? review,
+    TicketReviewStatus status,
+    String message,
+  ) {
+    _reviewSnapshots[tripId.toString()] = review;
+    emit(
+      state.copyWith(
+        tickets: state.tickets
+            .map(
+              (t) => t.id == target.id || int.tryParse(t.trip.id) == tripId
+                  ? t.copyWith(review: review, clearReview: review == null)
+                  : t,
+            )
+            .toList(),
+        reviewStatus: status,
+        reviewTicketId: target.id,
+        reviewMessage: message,
+      ),
+    );
+  }
+
+  Future<void> _manageReview(
+    String ticketId,
+    Emitter<MyTicketsState> emit, {
+    ReviewModel? update,
+    bool delete = false,
+  }) async {
+    if (!_authenticated ||
+        _reviewSubmitting ||
+        ((update != null || delete) && reviewUncertain(ticketId))) {
+      return;
+    }
+    final matches = state.tickets.where((t) => t.id == ticketId).toList();
+    if (matches.length != 1) return;
+    final ticket = matches.single,
+        generation = _generation,
+        token = TokenStorage.sessionVersion;
+    bool active() =>
+        !isClosed &&
+        !emit.isDone &&
+        _authenticated &&
+        generation == _generation &&
+        token == TokenStorage.sessionVersion;
+    _reviewSubmitting = true;
+    emit(
+      state.copyWith(
+        reviewStatus: update != null || delete
+            ? TicketReviewStatus.submitting
+            : TicketReviewStatus.loading,
+        reviewTicketId: ticketId,
+        clearMessages: true,
+      ),
+    );
+    try {
+      final tripId = await _reviewTrip(ticket);
+      if (!active()) return;
+      final mine = await reviewRemoteDataSource.getMyReviews();
+      if (!active()) return;
+      final candidates = mine.where((r) => r.tripId == tripId).toList();
+      final current =
+          candidates
+              .where((r) => r.reviewId == ticket.review?.reviewId)
+              .firstOrNull ??
+          (candidates.length == 1 ? candidates.single : null);
+      if (candidates.length > 1 && current == null) {
+        throw StateError(
+          'Có nhiều đánh giá cho chuyến này; chưa xác định được đánh giá cần thay đổi.',
+        );
+      }
+      if (update == null && !delete) {
+        _uncertainReviews.remove(_reviewKey(ticketId));
+        _saveReviewSnapshot(
+          emit,
+          ticket,
+          tripId,
+          current,
+          TicketReviewStatus.idle,
+          'Đã tải lại đánh giá.',
+        );
+        return;
+      }
+      if (current?.reviewId == null) {
+        throw StateError('Đánh giá không còn tồn tại. Hãy tải lại thông tin.');
+      }
+      if (delete) {
+        await reviewRemoteDataSource.deleteReview(
+          reviewId: current!.reviewId!,
+          tripId: tripId,
+        );
+        if (active()) {
+          _saveReviewSnapshot(
+            emit,
+            ticket,
+            tripId,
+            null,
+            TicketReviewStatus.succeeded,
+            'Đã xóa đánh giá.',
+          );
+        }
+      } else {
+        if (current!.isEditable != true) {
+          throw StateError('Đã hết thời hạn chỉnh sửa đánh giá.');
+        }
+        final saved = await reviewRemoteDataSource.updateReview(
+          reviewId: current.reviewId!,
+          tripId: tripId,
+          rating: update!.rating,
+          comment: update.comment,
+        );
+        if (active()) {
+          _saveReviewSnapshot(
+            emit,
+            ticket,
+            tripId,
+            saved,
+            TicketReviewStatus.succeeded,
+            'Đã cập nhật đánh giá.',
+          );
+        }
+      }
+    } catch (e) {
+      if (active() &&
+          ((e is ApiException && e.statusCode >= 500) ||
+              (e is! ApiException &&
+                  e is! StateError &&
+                  e is! UnsupportedError))) {
+        _uncertainReviews.add(_reviewKey(ticketId));
+      }
+      if (active()) {
+        emit(
+          state.copyWith(
+            reviewStatus:
+                (e is ApiException && e.statusCode < 500) ||
+                    e is StateError ||
+                    e is UnsupportedError
+                ? TicketReviewStatus.failed
+                : TicketReviewStatus.uncertain,
+            reviewTicketId: ticketId,
+            reviewMessage: e is ApiException
+                ? e.message
+                : e is StateError
+                ? e.message.toString()
+                : 'Chưa xác nhận được thay đổi. Hãy tải lại đánh giá trước khi thử lại.',
+          ),
+        );
+      }
+    } finally {
+      if (generation == _generation) _reviewSubmitting = false;
+    }
+  }
+
   Future<void> _onSubmitReview(
     SubmitTicketReviewEvent event,
     Emitter<MyTicketsState> emit,
   ) async {
-    if (!_authenticated || _reviewSubmitting) return;
+    if (!_authenticated ||
+        _reviewSubmitting ||
+        reviewUncertain(event.ticketId)) {
+      return;
+    }
     final generation = _generation;
+    final version = TokenStorage.sessionVersion;
+    bool active() =>
+        !isClosed &&
+        !emit.isDone &&
+        _authenticated &&
+        generation == _generation &&
+        version == TokenStorage.sessionVersion;
     final ticketIndex = state.tickets.indexWhere(
       (t) => t.id == event.ticketId || t.ticketCode == event.ticketId,
     );
@@ -505,7 +716,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     }
 
     if (ApiConfig.isDemoMode) {
-      if (generation != _generation) return;
+      if (!active()) return;
       final updatedTicket = ticket.copyWith(review: event.review);
       final updatedList = List<TicketModel>.from(state.tickets);
       final currentIndex = updatedList.indexWhere((t) => t.id == ticket.id);
@@ -523,7 +734,13 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
     }
 
     _reviewSubmitting = true;
-    emit(state.copyWith(clearMessages: true));
+    emit(
+      state.copyWith(
+        clearMessages: true,
+        reviewStatus: TicketReviewStatus.submitting,
+        reviewTicketId: event.ticketId,
+      ),
+    );
     try {
       // Resolve tripId authoritatively: check ticket.trip.id, or query booking
       int? tripId;
@@ -534,7 +751,7 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
         final booking = await bookingRepository.getBookingById(
           ticket.bookingId,
         );
-        if (generation != _generation) return;
+        if (!active()) return;
         if (booking != null &&
             booking.bookingId.toString() == ticket.bookingId.toString() &&
             booking.tripId > 0) {
@@ -545,6 +762,10 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       if (tripId == null || tripId <= 0) {
         emit(
           state.copyWith(
+            reviewStatus: TicketReviewStatus.failed,
+            reviewTicketId: event.ticketId,
+            reviewMessage:
+                'Không thể xác định mã chuyến đi hợp lệ để gửi đánh giá.',
             errorMessage:
                 'Không thể xác định mã chuyến đi hợp lệ để gửi đánh giá.',
           ),
@@ -558,7 +779,8 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
         comment: event.review.comment,
       );
 
-      if (generation != _generation) return;
+      if (!active()) return;
+      _reviewSnapshots[tripId.toString()] = savedReview;
       final updatedList = List<TicketModel>.from(state.tickets);
       final currentIndex = updatedList.indexWhere((t) => t.id == ticket.id);
       if (currentIndex < 0) return;
@@ -573,16 +795,30 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       emit(
         state.copyWith(
           tickets: updatedList,
+          reviewStatus: TicketReviewStatus.succeeded,
+          reviewTicketId: event.ticketId,
+          reviewMessage: 'Đã gửi đánh giá.',
           successMessage:
               'Cảm ơn bạn đã gửi đánh giá cho chuyến đi của nhà xe ${ticket.trip.operatorName}!',
         ),
       );
     } catch (e) {
-      if (generation != _generation) return;
+      if (!active()) return;
+      if (e is! ApiException || e.statusCode >= 500) {
+        _uncertainReviews.add(_reviewKey(event.ticketId));
+      }
       emit(
         state.copyWith(
-          errorMessage:
-              'Tính năng đánh giá chuyến đi chưa khả dụng trên máy chủ hiện tại ($e).',
+          reviewStatus: e is ApiException && e.statusCode < 500
+              ? TicketReviewStatus.failed
+              : TicketReviewStatus.uncertain,
+          reviewTicketId: event.ticketId,
+          reviewMessage: e is ApiException
+              ? e.message
+              : 'Chưa xác nhận được đánh giá. Hãy tải lại trước khi gửi lại.',
+          errorMessage: e is ApiException
+              ? e.message
+              : 'Chưa xác nhận được đánh giá. Hãy tải lại trước khi gửi lại.',
         ),
       );
     } finally {

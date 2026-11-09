@@ -43,7 +43,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final formattedPhone = phone.startsWith('0')
         ? '+84${phone.substring(1)}'
         : phone;
-    final body = {'phoneNumber': formattedPhone, 'password': password};
+    final body = {
+      'phoneNumber': formattedPhone,
+      'password': password,
+      'accountType': 'KHACH_HANG',
+    };
 
     final res = await client.post(
       ApiConfig.authLogin,

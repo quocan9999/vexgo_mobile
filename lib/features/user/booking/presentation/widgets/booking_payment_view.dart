@@ -218,7 +218,7 @@ class BookingPaymentDock extends StatelessWidget {
                         state.cargo.enabled &&
                         displayAmount == null)
                       Text(
-                        'Phí gửi hàng được xác định khi tạo đơn',
+                        'Cước vật phẩm thanh toán riêng tại bến',
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral600,
                           fontSize: 11,

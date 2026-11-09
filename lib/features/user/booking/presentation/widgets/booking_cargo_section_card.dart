@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
@@ -514,7 +515,7 @@ class _BookingCargoSectionCardState extends State<BookingCargoSectionCard> {
               icon: Icons.info_outline_rounded,
               color: DiscoveryColors.secondary,
               text:
-                  'Phí gửi hàng được xác định khi tạo đơn. Thông tin người nhận được lấy theo thông tin liên hệ đặt vé và sức chứa được máy chủ xác nhận khi tạo đơn.',
+                  'Cước vật phẩm thanh toán riêng tại bến. Thông tin người nhận được lấy theo thông tin liên hệ đặt vé và sức chứa được máy chủ xác nhận khi tạo đơn.',
             ),
             const SizedBox(height: 12),
             if (cargo.loading)
@@ -1664,14 +1665,21 @@ class BookingCargoSummaryBox extends StatelessWidget {
             const SizedBox(height: 4),
           ],
           _buildRow(
-            'Phí gửi hàng',
+            cargoSettlementLabel(
+              resolvedBooking?.cargoPayment ?? CargoSettlement.atStation,
+            ),
             shippingFee != null
                 ? CurrencyFormatter.format(shippingFee)
-                : 'Phí gửi hàng được xác định khi tạo đơn',
+                : 'Cước vật phẩm thanh toán riêng tại bến',
             valueColor: shippingFee != null
                 ? DiscoveryColors.neutral900
                 : DiscoveryColors.warningDark,
             bold: shippingFee != null,
+          ),
+          Text(
+            cargoSettlementDescription(
+              resolvedBooking?.cargoPayment ?? CargoSettlement.atStation,
+            ),
           ),
           if (senderName != null && receiverName != null) ...[
             const SizedBox(height: 4),

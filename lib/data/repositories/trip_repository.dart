@@ -7,6 +7,7 @@ import '../models/city_model.dart';
 import '../models/operator_model.dart';
 import '../models/popular_route_model.dart';
 import '../models/trip_model.dart';
+import 'location_repository.dart';
 
 abstract class TripRepository {
   Future<List<CityModel>> getCities();
@@ -191,21 +192,33 @@ class HybridTripRepository implements TripRepository {
 /// Real trip repository: 100% live remote backend data, zero mock fallback
 class RealTripRepository implements TripRepository {
   final TripRemoteDataSource remoteDataSource;
+  final LocationRepository locations;
 
-  RealTripRepository({TripRemoteDataSource? remoteDataSource})
-    : remoteDataSource =
-          remoteDataSource ?? TripRemoteDataSourceImpl(client: ApiClient());
-
-  List<CityModel>? _cachedCities;
+  RealTripRepository({
+    TripRemoteDataSource? remoteDataSource,
+    LocationRepository? locations,
+  }) : remoteDataSource =
+           remoteDataSource ?? TripRemoteDataSourceImpl(client: ApiClient()),
+       locations =
+           locations ??
+           LocationRepository(
+             client: remoteDataSource is TripRemoteDataSourceImpl
+                 ? remoteDataSource.client
+                 : null,
+           );
 
   @override
-  Future<List<CityModel>> getCities() async {
-    if (_cachedCities != null) return _cachedCities!;
-    final List<Map<String, dynamic>> rawList = await JsonLoader.loadJsonList(
-      'assets/mock_data/cities.json',
-    );
-    _cachedCities = rawList.map((item) => CityModel.fromJson(item)).toList();
-    return _cachedCities!;
+  Future<List<CityModel>> getCities() => locations.getCities();
+
+  Future<String> _resolveSearchValue(String input) async {
+    if (!input.contains(':')) {
+      return CitySearchAdapter.resolveBackendSearchCity(input);
+    }
+    final cities = await getCities();
+    for (final city in cities) {
+      if (city.id == input) return city.searchValue;
+    }
+    throw const FormatException('Địa điểm đã thay đổi, vui lòng chọn lại.');
   }
 
   @override
@@ -224,8 +237,8 @@ class RealTripRepository implements TripRepository {
     required String toCityId,
     String? date,
   }) async {
-    final resolvedFrom = CitySearchAdapter.resolveBackendSearchCity(fromCityId);
-    final resolvedTo = CitySearchAdapter.resolveBackendSearchCity(toCityId);
+    final resolvedFrom = await _resolveSearchValue(fromCityId);
+    final resolvedTo = await _resolveSearchValue(toCityId);
     return await remoteDataSource.searchTrips(
       from: resolvedFrom,
       to: resolvedTo,

@@ -10,6 +10,8 @@ import '../core/theme/app_theme.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/booking_repository.dart';
 import '../data/repositories/booking_receipt_repository.dart';
+import '../data/repositories/cargo_repository.dart';
+import '../data/repositories/luggage_repository.dart';
 import '../data/repositories/notification_repository.dart';
 import '../data/repositories/seat_repository.dart';
 import '../data/repositories/trip_repository.dart';
@@ -60,6 +62,14 @@ class VexGoApp extends StatelessWidget {
           create: (context) => isDemo
               ? MockNotificationRepository()
               : RealNotificationRepository(),
+        ),
+        RepositoryProvider<CargoRepository>(
+          create: (_) => RealCargoRepository(),
+        ),
+        RepositoryProvider<LuggageRepository>(
+          create: (context) => RealLuggageRepository(
+            cargoRepository: context.read<CargoRepository>(),
+          ),
         ),
       ],
       child: MultiBlocProvider(

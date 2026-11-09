@@ -79,6 +79,10 @@ class ApiConfig {
   static const String authRegister = '/auth/register';
   static const String authRequestOtp = '/auth/register/request-otp';
   static const String authVerifyOtp = '/auth/register/verify-otp';
+  static const String forgotPasswordRequest =
+      '/auth/forgot-password/request-otp';
+  static const String forgotPasswordVerify = '/auth/forgot-password/verify-otp';
+  static const String forgotPasswordReset = '/auth/forgot-password/reset';
   static const String authRefresh = '/auth/refresh';
   static const String authLogout = '/auth/logout';
   static const String authChangePassword = '/auth/change-password';
@@ -86,6 +90,7 @@ class ApiConfig {
   static const String me = '/me';
 
   // Trips
+  static const String locations = '/locations';
   static const String tripsSearch = '/trips/search';
   static String tripDetail(dynamic tripId) => '/trips/$tripId';
   static String tripSeats(dynamic tripId) => '/trips/$tripId/seats';

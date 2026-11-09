@@ -1,3 +1,4 @@
+import 'shipment_cancellation_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vexgo_app/core/constants/app_dimensions.dart';
@@ -429,6 +430,11 @@ class _ShipmentLookupViewState extends State<ShipmentLookupView> {
                   ],
                 ],
               ),
+            ),
+            ShipmentCancellationSection(
+              cubit: widget.cubit,
+              state: widget.state,
+              fromLookup: true,
             ),
           ],
         ],

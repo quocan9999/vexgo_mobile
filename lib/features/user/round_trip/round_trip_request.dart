@@ -41,6 +41,7 @@ class RoundTripRequest extends Equatable {
     if (origin.id.trim().isEmpty ||
         destination.id.trim().isEmpty ||
         origin.id == destination.id ||
+        _identity(origin.searchValue) == _identity(destination.searchValue) ||
         (_identity(origin.name).isNotEmpty &&
             _identity(origin.name) == _identity(destination.name)) ||
         _identity(origin.id) == _identity(destination.id) ||
@@ -107,6 +108,7 @@ class RoundTripRequest extends Equatable {
       final expected = [
         city.id,
         city.name,
+        city.searchValue,
       ].map(_identity).where((s) => s.isNotEmpty).toSet();
       return [id, name].map(_identity).any(expected.contains);
     }

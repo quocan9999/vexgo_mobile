@@ -1,3 +1,4 @@
+import 'cargo_settlement.dart';
 import 'booking_cargo_model.dart';
 import 'package:equatable/equatable.dart';
 import 'ticket_model.dart';
@@ -33,6 +34,7 @@ class BookingModel extends Equatable {
   final DateTime? expiresAt;
   final int? orderId;
   final String? orderCode;
+  final String? comboCode;
   final int ticketCount;
   final String? route;
   final String? origin;
@@ -68,6 +70,7 @@ class BookingModel extends Equatable {
     this.expiresAt,
     this.orderId,
     this.orderCode,
+    this.comboCode,
     this.ticketCount = 0,
     this.route,
     this.origin,
@@ -79,6 +82,12 @@ class BookingModel extends Equatable {
     this.paymentMethod,
     this.tickets = const [],
   });
+
+  CargoSettlement get cargoPayment => cargoSettlement(
+    onlineTotal: totalAmount,
+    ticketSubtotal: ticketSubtotal,
+    cargoFee: shippingFee,
+  );
 
   BookingModel copyWith({
     int? bookingId,
@@ -104,6 +113,7 @@ class BookingModel extends Equatable {
     DateTime? expiresAt,
     int? orderId,
     String? orderCode,
+    String? comboCode,
     int? ticketCount,
     String? route,
     String? origin,
@@ -140,6 +150,7 @@ class BookingModel extends Equatable {
       expiresAt: expiresAt ?? this.expiresAt,
       orderId: orderId ?? this.orderId,
       orderCode: orderCode ?? this.orderCode,
+      comboCode: comboCode ?? this.comboCode,
       ticketCount: ticketCount ?? this.ticketCount,
       route: route ?? this.route,
       origin: origin ?? this.origin,
@@ -278,7 +289,12 @@ class BookingModel extends Equatable {
         : (json['discountAmount'] as num?)?.toInt() ?? 0;
     if (finalTickets != null &&
         shippingFee != null &&
-        finalTickets + shippingFee != totalAmount) {
+        cargoSettlement(
+              onlineTotal: totalAmount,
+              ticketSubtotal: finalTickets,
+              cargoFee: shippingFee,
+            ) ==
+            CargoSettlement.unknown) {
       throw const FormatException('Inconsistent booking cargo total');
     }
     if (originalTickets != null &&
@@ -328,6 +344,7 @@ class BookingModel extends Equatable {
           : null,
       orderId: (json['orderId'] as num?)?.toInt(),
       orderCode: json['orderCode'] as String?,
+      comboCode: _parseComboCode(json['comboCode']),
       ticketCount: ticketCount > 0 ? ticketCount : parsedSeats.length,
       route: route,
       origin: origin,
@@ -354,6 +371,7 @@ class BookingModel extends Equatable {
     'dropoffPoint': dropoffPoint,
     'seats': seats,
     'seatIds': seatIds,
+    if (comboCode != null) 'comboCode': comboCode,
     'totalAmount': totalAmount,
     'originalAmount': originalAmount,
     if (originalTicketSubtotal != null)
@@ -369,6 +387,14 @@ class BookingModel extends Equatable {
     if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
     if (expiresAt != null) 'expiresAt': expiresAt!.toIso8601String(),
   };
+
+  static String? _parseComboCode(Object? value) {
+    if (value == null) return null;
+    if (value is! String || !RegExp(r'^[A-Za-z0-9_-]{4,50}$').hasMatch(value)) {
+      throw const FormatException('Mã thanh toán khứ hồi không hợp lệ.');
+    }
+    return value;
+  }
 
   /// Status helpers
   bool get isPending => status == BookingStatus.pending;
@@ -388,6 +414,10 @@ class BookingModel extends Equatable {
     shippingFee,
     shipment,
     cargoItems,
+    comboCode,
+    orderCode,
+    expiresAt,
+    paymentStatus,
     seatIds,
   ];
 }

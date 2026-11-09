@@ -228,6 +228,7 @@ class _FakeBookingRepo implements BookingRepository {
     BookingCargoDraft? cargo,
     int? pickupTripPointId,
     int? dropoffTripPointId,
+    String? comboCode,
   }) async {
     createApiBookingCalls++;
     return bookingToReturn ??

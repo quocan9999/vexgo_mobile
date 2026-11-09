@@ -91,6 +91,13 @@ void main() {
             client: ApiClient(
               httpClient: MockClient((request) async {
                 paths.add(request.url.path);
+                if (request.url.path.endsWith('/auth/login')) {
+                  expect(jsonDecode(request.body), {
+                    'phoneNumber': '+84912345678',
+                    'password': ' password ',
+                    'accountType': 'KHACH_HANG',
+                  });
+                }
                 if (request.url.path.endsWith('/verify-otp')) {
                   return reply({'otpProof': 'proof'});
                 }

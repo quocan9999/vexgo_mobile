@@ -1,3 +1,4 @@
+import 'package:vexgo_app/features/user/receipts/presentation/booking_evidence_details.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -490,20 +491,38 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
 
                 // Pickup Point
                 _buildTimelinePoint(
-                  time: ticket.trip.departureTime,
-                  title: ticket.trip.pickupPoint,
-                  address: ticket.trip.pickupAddress,
+                  time: ticket.pickupTimeLabel,
+                  title: ticket.pickupSnapshot?.name.isNotEmpty == true
+                      ? ticket.pickupSnapshot!.name
+                      : ticket.trip.pickupPoint,
+                  address: ticket.pickupSnapshot?.address.isNotEmpty == true
+                      ? ticket.pickupSnapshot!.address
+                      : ticket.trip.pickupAddress,
                   isStart: true,
+                ),
+                StopSnapshotDetails(
+                  snapshot: ticket.pickupSnapshot,
+                  departure: ticket.departureAt,
+                  pickup: true,
                 ),
 
                 const SizedBox(height: AppDimensions.md),
 
                 // Dropoff Point
                 _buildTimelinePoint(
-                  time: ticket.trip.arrivalTime,
-                  title: ticket.trip.dropoffPoint,
-                  address: ticket.trip.dropoffAddress,
+                  time: ticket.dropoffTimeLabel,
+                  title: ticket.dropoffSnapshot?.name.isNotEmpty == true
+                      ? ticket.dropoffSnapshot!.name
+                      : ticket.trip.dropoffPoint,
+                  address: ticket.dropoffSnapshot?.address.isNotEmpty == true
+                      ? ticket.dropoffSnapshot!.address
+                      : ticket.trip.dropoffAddress,
                   isStart: false,
+                ),
+                StopSnapshotDetails(
+                  snapshot: ticket.dropoffSnapshot,
+                  departure: ticket.departureAt,
+                  pickup: false,
                 ),
 
                 const SizedBox(height: AppDimensions.base),
@@ -525,13 +544,22 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
                   value: ticket.paymentMethod,
                 ),
                 _buildInfoLine(
-                  label: 'Tổng tiền vé:',
+                  label: 'Giá vé này:',
                   value: CurrencyFormatter.format(ticket.finalAmount),
                   valueColor: ticket.status == TicketStatus.cancelled
                       ? DiscoveryColors.neutral500
                       : DiscoveryColors.secondary,
                   isBold: true,
                 ),
+
+                if (ticket.cargoItems.isNotEmpty ||
+                    (ticket.cargoFee ?? 0) > 0) ...[
+                  const Divider(),
+                  OrderCargoDetails(
+                    items: ticket.cargoItems,
+                    fee: ticket.cargoFee,
+                  ),
+                ],
 
                 if (ticket.status == TicketStatus.cancelled) ...[
                   _buildInfoLine(
@@ -631,55 +659,49 @@ class _BoardingPassCardState extends State<BoardingPassCard> {
     required String title,
     required String address,
     required bool isStart,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          isStart ? Icons.radio_button_checked : Icons.location_on,
-          size: 16,
-          color: isStart ? DiscoveryColors.primary : DiscoveryColors.secondary,
-        ),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 50,
-          child: Text(
-            time,
-            style: DiscoveryTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w700,
-              color: DiscoveryColors.neutral900,
-            ),
-          ),
-        ),
-        const SizedBox(width: AppDimensions.xs),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: DiscoveryTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: DiscoveryColors.neutral900,
+  }) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(
+        isStart ? Icons.radio_button_checked : Icons.location_on,
+        size: 16,
+        color: isStart ? DiscoveryColors.primary : DiscoveryColors.secondary,
+      ),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: 10,
+              runSpacing: 4,
+              children: [
+                Text(
+                  time,
+                  style: DiscoveryTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
+                Text(
+                  title,
+                  style: DiscoveryTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            if (address.isNotEmpty)
               Text(
                 address,
                 style: DiscoveryTextStyles.caption.copyWith(
-                  color: DiscoveryColors.neutral500,
+                  color: DiscoveryColors.neutral600,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+          ],
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 
   Widget _buildPassDetailBlock({
     required String title,

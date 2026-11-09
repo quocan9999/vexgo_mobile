@@ -98,3 +98,25 @@ class SyncTicketDetailsEvent extends MyTicketsEvent {
   @override
   List<Object?> get props => [ticket, sessionGeneration];
 }
+
+class RefreshTicketReviewEvent extends MyTicketsEvent {
+  final String ticketId;
+  const RefreshTicketReviewEvent(this.ticketId);
+  @override
+  List<Object?> get props => [ticketId];
+}
+
+class UpdateTicketReviewEvent extends MyTicketsEvent {
+  final String ticketId;
+  final ReviewModel review;
+  const UpdateTicketReviewEvent({required this.ticketId, required this.review});
+  @override
+  List<Object?> get props => [ticketId, review];
+}
+
+class DeleteTicketReviewEvent extends MyTicketsEvent {
+  final String ticketId;
+  const DeleteTicketReviewEvent(this.ticketId);
+  @override
+  List<Object?> get props => [ticketId];
+}

@@ -157,6 +157,7 @@ class Server {
       orders[bookingId] = {
         'bookingId': bookingId,
         'bookingCode': 'B-$bookingId',
+        'comboCode': body['comboCode'],
         'tripId': id,
         'status': 'CHO_THANH_TOAN',
         'paymentStatus': 'CHO_THANH_TOAN',
@@ -818,9 +819,9 @@ void main() {
       addTearDown(c.close);
       await ready(c);
       await c.submit();
-      expect(c.state.canDisplayTransfer(TripLeg.outbound, s.now), isTrue);
+      expect(c.state.canDisplayCombo(s.now), isTrue);
       s.now = s.now.add(const Duration(minutes: 11));
-      expect(c.state.canDisplayTransfer(TripLeg.outbound, s.now), isFalse);
+      expect(c.state.canDisplayCombo(s.now), isFalse);
       await c.recheck(TripLeg.outbound);
       expect(s.posts.length, 2);
     },

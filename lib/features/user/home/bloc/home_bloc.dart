@@ -28,18 +28,29 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(status: HomeStatus.loading));
     try {
       final cities = await tripRepository.getCities();
+      if (cities.isEmpty) {
+        throw const FormatException('Chưa có tỉnh/thành phố khả dụng.');
+      }
       final popularRoutes = await tripRepository.getPopularRoutes();
       final operators = await tripRepository.getOperators();
 
       final defaultDepartureCity = cities.firstWhere(
-        (c) => c.id == 'HCM',
-        orElse: () => cities.isNotEmpty ? cities.first : cities.first,
+        (c) => c.searchValue == 'TP.HCM' && !c.isLegacy,
+        orElse: () => cities.first,
       );
 
-      final defaultDestinationCity = cities.firstWhere(
-        (c) => c.id == 'DL',
-        orElse: () => cities.length > 1 ? cities[1] : cities.first,
-      );
+      final destinations = cities
+          .where((c) => c.searchValue != defaultDepartureCity.searchValue)
+          .toList();
+      final defaultDestinationCity = destinations.isEmpty
+          ? null
+          : destinations.firstWhere(
+              (c) => c.searchValue == 'Đà Lạt' && !c.isLegacy,
+              orElse: () => destinations.firstWhere(
+                (c) => c.searchValue == 'Đà Lạt',
+                orElse: () => destinations.first,
+              ),
+            );
 
       emit(
         state.copyWith(
@@ -49,6 +60,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           operators: operators,
           departureCity: defaultDepartureCity,
           destinationCity: defaultDestinationCity,
+          clearDestinationCity: defaultDestinationCity == null,
         ),
       );
     } catch (e) {

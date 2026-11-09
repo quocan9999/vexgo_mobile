@@ -53,6 +53,7 @@ class RiskBookingRepository implements BookingRepository {
     BookingCargoDraft? cargo,
     int? pickupTripPointId,
     int? dropoffTripPointId,
+    String? comboCode,
   }) async {
     bookings++;
     if (!bookingStarted.isCompleted) bookingStarted.complete();

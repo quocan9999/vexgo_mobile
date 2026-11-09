@@ -1,14 +1,20 @@
+import '../../../booking/presentation/widgets/booking_rate_limit_view.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/app/routes.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/data/repositories/booking_repository.dart';
 import 'package:vexgo_app/data/repositories/cargo_repository.dart';
+import 'package:vexgo_app/data/repositories/luggage_repository.dart';
 import 'package:vexgo_app/data/repositories/seat_repository.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/bloc/luggage_cubit.dart';
 import 'package:vexgo_app/features/user/booking/presentation/widgets/seat_legend.dart';
 import 'package:vexgo_app/features/user/booking/presentation/widgets/seat_map_view.dart';
 import 'package:vexgo_app/features/user/booking/presentation/widgets/stop_point_selection.dart';
@@ -24,11 +30,15 @@ import '../widgets/round_trip_summary_step.dart';
 class RoundTripBookingScreen extends StatelessWidget {
   final RoundTripSelection? selection;
   final RoundTripCheckoutCubit? cubit;
+  final LuggageRepository? luggageRepository;
+  final DateTime Function()? now;
 
   const RoundTripBookingScreen({
     super.key,
     required this.selection,
     this.cubit,
+    this.luggageRepository,
+    this.now,
   });
 
   @override
@@ -99,7 +109,11 @@ class RoundTripBookingScreen extends StatelessWidget {
       );
     }
 
-    final view = _RoundTripBookingView(selection: selection!);
+    final view = _RoundTripBookingView(
+      selection: selection!,
+      luggageRepository: luggageRepository,
+      now: now,
+    );
     return DiscoveryTheme(
       child: cubit != null
           ? BlocProvider<RoundTripCheckoutCubit>.value(
@@ -138,8 +152,14 @@ class RoundTripBookingScreen extends StatelessWidget {
 
 class _RoundTripBookingView extends StatefulWidget {
   final RoundTripSelection selection;
+  final LuggageRepository? luggageRepository;
+  final DateTime Function()? now;
 
-  const _RoundTripBookingView({required this.selection});
+  const _RoundTripBookingView({
+    required this.selection,
+    this.luggageRepository,
+    this.now,
+  });
 
   @override
   State<_RoundTripBookingView> createState() => _RoundTripBookingViewState();
@@ -147,6 +167,117 @@ class _RoundTripBookingView extends StatefulWidget {
 
 class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
   TripLeg _activeLeg = TripLeg.outbound;
+  final Map<TripLeg, LuggageCubit?> _luggageCubits = {};
+  final Map<TripLeg, int?> _luggageTripIds = {};
+  final Map<TripLeg, int?> _luggagePassengerCounts = {};
+  final Map<TripLeg, int?> _luggageSessionVersions = {};
+  final Map<TripLeg, String?> _luggageSeatChangeNotices = {};
+
+  @override
+  void dispose() {
+    for (final c in _luggageCubits.values) {
+      c?.close();
+    }
+    super.dispose();
+  }
+
+  LuggageRepository _resolveLuggageRepository(BuildContext context) {
+    return widget.luggageRepository ??
+        context.read<LuggageRepository?>() ??
+        RealLuggageRepository(
+          cargoRepository: context.read<CargoRepository?>(),
+        );
+  }
+
+  void _ensureLegLuggageCubits(
+    RoundTripCheckoutCubit checkoutCubit,
+    RoundTripCheckoutState state,
+  ) {
+    final sessionVersion = TokenStorage.sessionVersion;
+    for (final leg in TripLeg.values) {
+      final legState = state.leg(leg);
+      final tripId =
+          legState.trip?.numericTripId ?? int.tryParse(legState.trip?.id ?? '');
+      final passengerCount = legState.selectedSeats.length;
+
+      if (tripId == null ||
+          tripId <= 0 ||
+          passengerCount < 1 ||
+          passengerCount > 5) {
+        if (_luggageCubits[leg] != null) {
+          unawaited(_luggageCubits[leg]!.close());
+          _luggageCubits[leg] = null;
+          _luggageTripIds[leg] = null;
+          _luggagePassengerCounts[leg] = null;
+        }
+        continue;
+      }
+
+      if (_luggageCubits[leg] != null &&
+          _luggageTripIds[leg] == tripId &&
+          _luggagePassengerCounts[leg] == passengerCount &&
+          _luggageSessionVersions[leg] == sessionVersion) {
+        continue;
+      }
+
+      if (_luggageCubits[leg] != null) {
+        final oldCubit = _luggageCubits[leg]!;
+        final hadLuggage =
+            oldCubit.state.phase != LuggagePhase.idle ||
+            oldCubit.state.selection.carryOn.isNotEmpty ||
+            oldCubit.state.selection.checked.isNotEmpty ||
+            legState.cargo.enabled;
+        if (_luggageTripIds[leg] == tripId &&
+            _luggagePassengerCounts[leg] != null &&
+            _luggagePassengerCounts[leg] != passengerCount &&
+            hadLuggage) {
+          _luggageSeatChangeNotices[leg] =
+              'Số ghế ${leg == TripLeg.outbound ? "Lượt đi" : "Lượt về"} đã thay đổi (${_luggagePassengerCounts[leg]} → $passengerCount hành khách). Vui lòng kiểm tra lại hạn mức hành lý theo số hành khách mới.';
+          if (legState.cargo.enabled && !legState.isCheckoutLocked) {
+            checkoutCubit.dispatch(
+              leg,
+              const SetBookingCargoEnabledEvent(false),
+            );
+          }
+        }
+        unawaited(oldCubit.close());
+      }
+
+      _luggageTripIds[leg] = tripId;
+      _luggagePassengerCounts[leg] = passengerCount;
+      _luggageSessionVersions[leg] = sessionVersion;
+      _luggageCubits[leg] = LuggageCubit(
+        tripId: tripId,
+        passengerCount: passengerCount,
+        repository: _resolveLuggageRepository(context),
+        now: widget.now,
+      );
+    }
+  }
+
+  Future<void> _syncLegLuggage(
+    RoundTripCheckoutCubit checkoutCubit,
+    TripLeg leg,
+    BookingCargoDraft? _,
+  ) async {
+    final legCubit = _luggageCubits[leg];
+    final legState = checkoutCubit.state.leg(leg);
+    final tripId =
+        legState.trip?.numericTripId ?? int.tryParse(legState.trip?.id ?? '');
+    final passengerCount = legState.selectedSeats.length;
+    if (legCubit == null || tripId == null || passengerCount < 1) return;
+    final draft = legCubit.exportForBooking(
+      expectedTripId: tripId,
+      expectedPassengerCount: passengerCount,
+    );
+    checkoutCubit.dispatch(
+      leg,
+      SetBookingCargoEnabledEvent(draft != null, initialDraft: draft),
+    );
+    while (!checkoutCubit.isClosed && checkoutCubit.state.busy) {
+      await Future<void>.delayed(const Duration(milliseconds: 15));
+    }
+  }
 
   Future<bool> _handlePop(
     BuildContext context,
@@ -254,6 +385,18 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
   }
 
   Future<void> _handleProceedToPayment(RoundTripCheckoutCubit cubit) async {
+    for (final leg in TripLeg.values) {
+      final legCubit = _luggageCubits[leg];
+      if (legCubit != null &&
+          cubit.state.leg(leg).pendingBookingId == null &&
+          legCubit.state.phase == LuggagePhase.ready) {
+        if (legCubit.validationError != null || !legCubit.policyIsFresh) {
+          return;
+        }
+        await _syncLegLuggage(cubit, leg, null);
+      }
+    }
+
     if (cubit.state.outbound.pendingBookingId == null &&
         cubit.state.outbound.step == BookingStep.tripSummary) {
       cubit.dispatch(TripLeg.outbound, const NextStepEvent());
@@ -281,7 +424,7 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
 
     return BlocConsumer<RoundTripCheckoutCubit, RoundTripCheckoutState>(
       listener: (context, state) {
-        if (state.error != null) {
+        if (state.error != null && state.rateLimit == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.error!),
@@ -294,6 +437,25 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
       builder: (context, state) {
         if (state.invalidated) {
           return _buildSessionInvalidatedView(context);
+        }
+
+        if (state.rateLimit != null) {
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) async {
+              if (didPop) return;
+              final canExit = await _handlePop(context, state);
+              if (canExit && context.mounted) Navigator.of(context).pop();
+            },
+            child: BookingRateLimitView(
+              notice: state.rateLimit!,
+              busy: state.busy,
+              hasAnyOrder: state.hasAnyOrder,
+              onResume: () => cubit.resumeAfterRateLimit(),
+              onReviewOrders: () => context.push(AppRoutes.myTickets),
+              onSupport: () => context.push(AppRoutes.supportChat),
+            ),
+          );
         }
 
         if (state.isComplete) {
@@ -356,6 +518,7 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
                           request: widget.selection.request,
                           state: state,
                           onRecheck: (leg) => cubit.recheck(leg),
+                          onRecheckAll: () => cubit.recheckAll(),
                           onRetrySubmitMissing: () => cubit.submit(),
                           onEditMissingLeg: (leg) {
                             cubit.dispatch(
@@ -384,6 +547,7 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
     RoundTripCheckoutCubit cubit,
     RoundTripCheckoutState state,
   ) {
+    _ensureLegLuggageCubits(cubit, state);
     final bothAtSummary =
         state.outbound.step.index >= BookingStep.tripSummary.index &&
         state.inbound.step.index >= BookingStep.tripSummary.index;
@@ -436,6 +600,15 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
           setState(() => _activeLeg = leg);
         },
         onDispatchCargo: (leg, event) => cubit.dispatch(leg, event),
+        outboundLuggageCubit: _luggageCubits[TripLeg.outbound],
+        inboundLuggageCubit: _luggageCubits[TripLeg.inbound],
+        outboundSeatChangeNotice: _luggageSeatChangeNotices[TripLeg.outbound],
+        inboundSeatChangeNotice: _luggageSeatChangeNotices[TripLeg.inbound],
+        onDismissOutboundSeatChangeNotice: () =>
+            setState(() => _luggageSeatChangeNotices[TripLeg.outbound] = null),
+        onDismissInboundSeatChangeNotice: () =>
+            setState(() => _luggageSeatChangeNotices[TripLeg.inbound] = null),
+        onSyncLuggage: (leg, draft) => _syncLegLuggage(cubit, leg, draft),
         onSubmit: () => _handleProceedToPayment(cubit),
         onBack: () {
           if (state.outbound.pendingBookingId == null) {
@@ -467,6 +640,15 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
         outboundState: state.outbound,
         inboundState: state.inbound,
         onDispatchCargo: (leg, event) => cubit.dispatch(leg, event),
+        outboundLuggageCubit: _luggageCubits[TripLeg.outbound],
+        inboundLuggageCubit: _luggageCubits[TripLeg.inbound],
+        outboundSeatChangeNotice: _luggageSeatChangeNotices[TripLeg.outbound],
+        inboundSeatChangeNotice: _luggageSeatChangeNotices[TripLeg.inbound],
+        onDismissOutboundSeatChangeNotice: () =>
+            setState(() => _luggageSeatChangeNotices[TripLeg.outbound] = null),
+        onDismissInboundSeatChangeNotice: () =>
+            setState(() => _luggageSeatChangeNotices[TripLeg.inbound] = null),
+        onSyncLuggage: (leg, draft) => _syncLegLuggage(cubit, leg, draft),
         isValid:
             state.outbound.isPassengerValid &&
             state.inbound.isPassengerValid &&
@@ -474,11 +656,22 @@ class _RoundTripBookingViewState extends State<_RoundTripBookingView> {
             state.inbound.cargo.isValid,
         busy: state.busy,
         onUpdate: (event) => cubit.updatePassenger(event),
-        onNext: () {
-          if (state.outbound.step == BookingStep.passengerInfo) {
+        onNext: () async {
+          for (final leg in TripLeg.values) {
+            final legCubit = _luggageCubits[leg];
+            if (legCubit != null &&
+                state.leg(leg).pendingBookingId == null &&
+                legCubit.state.phase == LuggagePhase.ready) {
+              if (legCubit.validationError != null || !legCubit.policyIsFresh) {
+                return;
+              }
+              await _syncLegLuggage(cubit, leg, null);
+            }
+          }
+          if (cubit.state.outbound.step == BookingStep.passengerInfo) {
             cubit.dispatch(TripLeg.outbound, const NextStepEvent());
           }
-          if (state.inbound.step == BookingStep.passengerInfo) {
+          if (cubit.state.inbound.step == BookingStep.passengerInfo) {
             cubit.dispatch(TripLeg.inbound, const NextStepEvent());
           }
         },

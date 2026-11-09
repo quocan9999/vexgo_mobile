@@ -131,6 +131,25 @@ class ReviewHarness {
         headers: jsonHeaders,
       );
     }
+    if (request.method == 'GET' && request.url.path.endsWith('/reviews/my')) {
+      return http.Response(
+        jsonEncode({
+          'data': {
+            'reviews': [
+              if (savedReview != null)
+                {
+                  ...savedReview!,
+                  'id': savedReview!['reviewId'],
+                  'isEditable': true,
+                  'reply': null,
+                },
+            ],
+          },
+        }),
+        200,
+        headers: jsonHeaders,
+      );
+    }
     if (request.method == 'POST' && request.url.path.endsWith('/reviews')) {
       final body = jsonDecode(request.body) as Map<String, dynamic>;
       posts.add(body);
@@ -441,6 +460,13 @@ void main() {
         expect(result.tickets.single.review, isNull);
         expect(h.posts, hasLength(1));
         h.reviewStatus = 201;
+        final refreshed = h.bloc.stream.firstWhere(
+          (s) =>
+              s.reviewTicketId == '501' &&
+              s.reviewStatus == TicketReviewStatus.idle,
+        );
+        h.bloc.add(const RefreshTicketReviewEvent('501'));
+        await refreshed.timeout(const Duration(seconds: 3));
         final retried = await h.submit();
         expect(retried.errorMessage, isNull);
         expect(retried.tickets.single.review!.tags, isEmpty);
@@ -491,6 +517,7 @@ void main() {
         ApiConfig.isDemoMode = demo;
         final h = ReviewHarness();
         addTearDown(h.bloc.close);
+        await h.load();
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(

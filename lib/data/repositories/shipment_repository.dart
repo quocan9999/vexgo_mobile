@@ -30,6 +30,11 @@ abstract class ShipmentRepository {
     ShipmentStatus? status,
   });
   Future<ShipmentRecord> detail(int id);
+  Future<ShipmentCancellation> cancel({
+    required String waybillCode,
+    required String phone,
+    String? reason,
+  });
 }
 
 /// Standalone shipments only. Never POST /bookings or call an Admin endpoint.
@@ -345,6 +350,39 @@ class RealShipmentRepository implements ShipmentRepository {
         ),
       ),
     );
+  }
+
+  @override
+  Future<ShipmentCancellation> cancel({
+    required String waybillCode,
+    required String phone,
+    String? reason,
+  }) async {
+    final code = waybillCode.trim().toUpperCase();
+    if (code.isEmpty ||
+        !validShipmentPhone(phone) ||
+        (reason?.trim().length ?? 0) > 255) {
+      throw ArgumentError(
+        'Mã vận đơn, số điện thoại hoặc lý do hủy không hợp lệ.',
+      );
+    }
+    final result = ShipmentCancellation.fromJson(
+      _data(
+        await client.post(
+          '/shipments/cancel',
+          optionalAuth: true,
+          body: {
+            'waybillCode': code,
+            'phoneNumber': phone.trim(),
+            if (reason?.trim().isNotEmpty ?? false) 'reason': reason!.trim(),
+          },
+        ),
+      ),
+    );
+    if (result.waybillCode.toUpperCase() != code) {
+      throw const FormatException('Kết quả hủy thuộc vận đơn khác.');
+    }
+    return result;
   }
 
   @override

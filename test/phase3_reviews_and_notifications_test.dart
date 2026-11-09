@@ -13,7 +13,7 @@ import 'package:vexgo_app/features/user/notification/bloc/notification_bloc.dart
 import 'package:vexgo_app/features/user/notification/bloc/notification_event.dart';
 import 'package:vexgo_app/features/user/notification/bloc/notification_state.dart';
 
-class FakeReviewRemoteDataSource implements ReviewRemoteDataSource {
+class FakeReviewRemoteDataSource extends ReviewRemoteDataSource {
   bool called = false;
   Map<String, dynamic>? lastBody;
   bool shouldThrow = false;
@@ -173,7 +173,7 @@ void main() {
               final t = state.tickets.firstWhere((t) => t.id == '501');
               return t.review == null &&
                   state.errorMessage != null &&
-                  state.errorMessage!.contains('chưa khả dụng');
+                  state.successMessage == null;
             }),
           ),
         );

@@ -1,3 +1,5 @@
+import 'package:vexgo_app/data/models/cargo_settlement.dart';
+import 'booking_evidence_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -237,7 +239,19 @@ class _ReceiptContent extends StatelessWidget {
           if (receipt.departureAt != null)
             row('Khởi hành (giờ Việt Nam)', date(receipt.departureAt!)),
           row('Điểm đón', receipt.pickup),
+          StopSnapshotDetails(
+            snapshot: receipt.pickupSnapshot,
+            departure: receipt.departureAt,
+            pickup: true,
+            showAddress: true,
+          ),
           row('Điểm trả', receipt.dropoff),
+          StopSnapshotDetails(
+            snapshot: receipt.dropoffSnapshot,
+            departure: receipt.departureAt,
+            pickup: false,
+            showAddress: true,
+          ),
           const Divider(),
           Text(
             'Vé trong đơn (${receipt.tickets.length})',
@@ -256,12 +270,11 @@ class _ReceiptContent extends StatelessWidget {
             ),
           if (receipt.cargo.isNotEmpty) ...[
             const Divider(),
-            Text(
-              'Hàng gửi kèm',
-              style: Theme.of(context).textTheme.titleMedium,
+            OrderCargoDetails(
+              items: receipt.cargo,
+              showFee: false,
+              settlement: receipt.cargoPayment,
             ),
-            for (final parcel in receipt.cargo)
-              row('Số lượng ${parcel.quantity}', parcel.name),
           ],
           const Divider(),
           row(
@@ -275,7 +288,10 @@ class _ReceiptContent extends StatelessWidget {
             'Tiền vé sau giảm',
             CurrencyFormatter.format(receipt.ticketSubtotal),
           ),
-          row('Phí hàng gửi kèm', CurrencyFormatter.format(receipt.cargoFee)),
+          row(
+            cargoSettlementLabel(receipt.cargoPayment),
+            CurrencyFormatter.format(receipt.cargoFee),
+          ),
           row('Tổng thanh toán', CurrencyFormatter.format(receipt.total)),
           row('Phương thức thanh toán', receipt.paymentMethod),
           const SizedBox(height: 12),

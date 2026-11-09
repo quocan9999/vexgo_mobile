@@ -447,9 +447,7 @@ class TicketSummaryCard extends StatelessWidget {
         ticket.canCancel &&
         onCancel != null;
     final bool showReview =
-        ticket.status == TicketStatus.completed &&
-        ticket.review == null &&
-        onReview != null;
+        ticket.status == TicketStatus.completed && onReview != null;
 
     final Widget primaryBtn = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 44),
@@ -547,7 +545,7 @@ class TicketSummaryCard extends StatelessWidget {
                 color: DiscoveryColors.secondary,
               ),
               label: Text(
-                'Đánh giá',
+                ticket.review == null ? 'Đánh giá' : 'Xem đánh giá',
                 style: DiscoveryTextStyles.button.copyWith(
                   color: DiscoveryColors.secondary,
                   fontWeight: FontWeight.w700,

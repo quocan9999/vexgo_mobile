@@ -262,6 +262,7 @@ abstract class BookingRepository {
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    String? comboCode,
   });
 
   Future<PaymentTransactionModel> createPayment({
@@ -454,6 +455,7 @@ class MockBookingRepository implements BookingRepository {
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    String? comboCode,
   }) async {
     if (cargo != null) {
       throw UnsupportedError('Mock cargo checkout is not supported.');
@@ -736,6 +738,7 @@ class HybridBookingRepository implements BookingRepository {
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    String? comboCode,
   }) async {
     if (tripId <= 0) {
       throw ArgumentError('Mã chuyến đi không hợp lệ ($tripId)');
@@ -745,6 +748,7 @@ class HybridBookingRepository implements BookingRepository {
     }
     try {
       return await remoteBookingDataSource.createBooking(
+        comboCode: comboCode,
         expectedPromotionQuote: expectedPromotionQuote,
         cargo: cargo,
         tripId: tripId,
@@ -990,6 +994,7 @@ class RealBookingRepository implements BookingRepository {
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    String? comboCode,
   }) {
     if (tripId <= 0) {
       throw ArgumentError('Mã chuyến đi không hợp lệ ($tripId)');
@@ -998,6 +1003,7 @@ class RealBookingRepository implements BookingRepository {
       throw ArgumentError('Danh sách ghế không hợp lệ ($seatIds)');
     }
     return remoteBookingDataSource.createBooking(
+      comboCode: comboCode,
       expectedPromotionQuote: expectedPromotionQuote,
       cargo: cargo,
       tripId: tripId,

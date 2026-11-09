@@ -227,9 +227,7 @@ class CargoItemDraft extends Equatable {
 
   CargoGroup get group => kind == CargoKind.motorcycle
       ? CargoGroup.motorcycle
-      : kind == CargoKind.bicycle ||
-            kind == CargoKind.bulky ||
-            effectiveWeight >= 20
+      : kind == CargoKind.bicycle || kind == CargoKind.bulky
       ? CargoGroup.bulky
       : CargoGroup.parcel;
   String? get validationError {
@@ -362,10 +360,13 @@ class CargoOptions extends Equatable {
       final category = categories
           .where((v) => v.id == item.categoryId)
           .firstOrNull;
-      if (category == null || category.group != item.group) {
+      if (category == null ||
+          (item.kind == CargoKind.parcel
+              ? category.group == CargoGroup.motorcycle
+              : category.group != item.group)) {
         return 'Loại hàng không hợp lệ hoặc không đúng nhóm sức chứa.';
       }
-      counts[item.group] = (counts[item.group] ?? 0) + item.quantity;
+      counts[category.group] = (counts[category.group] ?? 0) + item.quantity;
     }
     for (final entry in counts.entries) {
       if (entry.value > (capacity.slots[entry.key]?.remaining ?? 0)) {

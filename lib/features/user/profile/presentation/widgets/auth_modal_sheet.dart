@@ -10,6 +10,7 @@ import 'package:vexgo_app/core/widgets/custom_text_field.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
+import '../screens/forgot_password_screen.dart';
 
 class AuthModalSheet extends StatefulWidget {
   final bool initialIsRegister;
@@ -384,6 +385,35 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
           ),
         ),
 
+        if (!_isRegister)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: _busy
+                  ? null
+                  : () async {
+                      FocusScope.of(context).unfocus();
+                      _passwordController.clear();
+                      final reset =
+                          await Navigator.of(
+                            context,
+                            rootNavigator: true,
+                          ).push<String>(
+                            MaterialPageRoute(
+                              builder: (_) => ForgotPasswordScreen(
+                                initialPhone: _phoneController.text,
+                              ),
+                            ),
+                          );
+                      if (!mounted) return;
+                      if (reset != null) {
+                        _phoneController.text = reset;
+                        _passwordController.clear();
+                      }
+                    },
+              child: const Text('Quên mật khẩu?'),
+            ),
+          ),
         const SizedBox(height: AppDimensions.lg),
 
         // Action button

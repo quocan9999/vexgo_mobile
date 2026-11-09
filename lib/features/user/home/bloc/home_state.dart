@@ -47,6 +47,7 @@ class HomeState extends Equatable {
     List<OperatorModel>? operators,
     CityModel? departureCity,
     CityModel? destinationCity,
+    bool clearDestinationCity = false,
     int? ticketCount,
     DateTime? departureDate,
     DateTime? returnDate,
@@ -60,7 +61,9 @@ class HomeState extends Equatable {
       popularRoutes: popularRoutes ?? this.popularRoutes,
       operators: operators ?? this.operators,
       departureCity: departureCity ?? this.departureCity,
-      destinationCity: destinationCity ?? this.destinationCity,
+      destinationCity: clearDestinationCity
+          ? null
+          : destinationCity ?? this.destinationCity,
       ticketCount: ticketCount ?? this.ticketCount,
       departureDate: departureDate ?? this.departureDate,
       returnDate: returnDate ?? this.returnDate,

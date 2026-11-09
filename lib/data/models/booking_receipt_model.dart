@@ -1,3 +1,6 @@
+import 'cargo_settlement.dart';
+import 'booking_evidence_model.dart';
+
 /// Read-only booking/payment evidence, not a tax invoice or boarding QR.
 class ReceiptUnavailable implements Exception {
   final String message;
@@ -20,11 +23,7 @@ class ReceiptTicket {
   const ReceiptTicket(this.code, this.seat, this.status, this.price);
 }
 
-class ReceiptCargo {
-  final String name;
-  final int quantity;
-  const ReceiptCargo(this.name, this.quantity);
-}
+typedef ReceiptCargo = EvidenceCargo;
 
 class BookingReceipt {
   final int bookingId;
@@ -42,6 +41,7 @@ class BookingReceipt {
   final String promotionCode;
   final DateTime createdAt;
   final DateTime? departureAt;
+  final StopSnapshot? pickupSnapshot, dropoffSnapshot;
   final num originalSubtotal;
   final num discount;
   final num ticketSubtotal;
@@ -66,6 +66,8 @@ class BookingReceipt {
     required this.promotionCode,
     required this.createdAt,
     required this.departureAt,
+    required this.pickupSnapshot,
+    required this.dropoffSnapshot,
     required this.originalSubtotal,
     required this.discount,
     required this.ticketSubtotal,
@@ -74,6 +76,12 @@ class BookingReceipt {
     required this.tickets,
     required this.cargo,
   });
+
+  CargoSettlement get cargoPayment => cargoSettlement(
+    onlineTotal: total,
+    ticketSubtotal: ticketSubtotal,
+    cargoFee: cargoFee,
+  );
 
   static String text(dynamic value) => value is String ? value.trim() : '';
   static int positiveId(dynamic value) {
@@ -142,8 +150,10 @@ class BookingReceipt {
     }
     final cargo = (json['cargoItems'] as List).map((item) {
       final parcel = object(item);
-      return ReceiptCargo(text(parcel['name']), positiveId(parcel['quantity']));
+      return EvidenceCargo.fromJson(parcel);
     }).toList();
+    final pickupSnapshot = StopSnapshot.parse(json['diemDonSnapshot']);
+    final dropoffSnapshot = StopSnapshot.parse(json['diemTraSnapshot']);
     return BookingReceipt._(
       bookingId: positiveId(json['bookingId']),
       bookingCode: bookingCode,
@@ -151,15 +161,21 @@ class BookingReceipt {
       company: text(json['busCompanyName']),
       route: text(json['route']),
       vehicle: text(json['vehicleType']),
-      pickup: text(json['pickup']),
-      dropoff: text(json['dropoff']),
+      pickup: pickupSnapshot?.name.isNotEmpty == true
+          ? pickupSnapshot!.name
+          : text(json['pickup']),
+      dropoff: dropoffSnapshot?.name.isNotEmpty == true
+          ? dropoffSnapshot!.name
+          : text(json['dropoff']),
       passengerName: text(passenger['fullName']),
       passengerPhone: text(passenger['phoneNumber']),
       passengerEmail: text(passenger['email']),
       paymentMethod: text(json['paymentMethod']),
       promotionCode: text(json['promotionCode']),
       createdAt: createdAt,
-      departureAt: DateTime.tryParse(text(json['departureTime'])),
+      departureAt: evidenceInstant(json['departureTime']),
+      pickupSnapshot: pickupSnapshot,
+      dropoffSnapshot: dropoffSnapshot,
       originalSubtotal: money(json['originalTicketSubtotal']),
       discount: money(json['discountAmount']),
       ticketSubtotal: money(json['ticketSubtotal']),

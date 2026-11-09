@@ -57,6 +57,7 @@ class CargoServer extends core.Server {
   final calls = <String>[];
   final optionGates = <int, Completer<void>>{};
   final optionStarted = <int, Completer<void>>{};
+  bool legacyIncluded = false;
   bool accepts = true;
   bool wrongPointsTrip = false;
   bool malformedCategories = false;
@@ -78,7 +79,7 @@ class CargoServer extends core.Server {
       'originalTicketSubtotal': original,
       'discountAmount': original - ticketSubtotal,
       'shippingFee': fee(id),
-      'totalAmount': ticketSubtotal + fee(id),
+      'totalAmount': ticketSubtotal + (legacyIncluded ? fee(id) : 0),
       'shipment': {
         'shipmentId': id + 2000,
         'shipmentCode': 'WAYBILL-$id',
@@ -344,7 +345,7 @@ void main() {
         parcel(kind: CargoKind.bicycle, category: 2).group,
         CargoGroup.bulky,
       );
-      expect(parcel(weight: 20).group, CargoGroup.bulky);
+      expect(parcel(weight: 20).group, CargoGroup.parcel);
     },
   );
   test(
@@ -463,17 +464,17 @@ void main() {
       await flow.applyDraftAction(const SetBookingCargoEnabledEvent(true));
       await flow.applyDraftAction(UpdateBookingCargoEvent(draft(101)));
       expect(flow.state.cargo.isValid, isTrue);
-      expect(flow.state.finalAmount, isNull);
+      expect(flow.state.finalAmount, 190000);
       expect(flow.state.ticketFinalAmount, 190000);
       expect(flow.state.canSubmitDraft, isTrue);
       await flow.confirmPayment();
       expect(s.posts.single['cargoItems'], draft(101).toJson()['cargoItems']);
       expect(s.calls.where((v) => v == 'POST /shipments'), isEmpty);
       expect(flow.state.status, BookingFlowStatus.paymentPending);
-      expect(flow.state.pendingPaymentAmount, 240000);
+      expect(flow.state.pendingPaymentAmount, 190000);
       expect(
         Uri.parse(flow.state.pendingQrCodeUrl!).queryParameters['amount'],
-        '240000',
+        '190000',
       );
       expect(flow.state.checkoutBooking!.shipment!.code, 'WAYBILL-101');
       expect(flow.state.checkoutBooking!.shippingFee, 50000);
@@ -495,7 +496,7 @@ void main() {
         const ApplyPromotionCodeEvent('SAVE10'),
         (s) => s.quote?.discountAmount == 10000 && !s.quoteLoading,
       );
-      expect(c.state.totalAmount, isNull);
+      expect(c.state.totalAmount, 440000);
       await c.submit();
       expect(s.posts.length, 2);
       expect(s.posts[0]['senderPointId'], 1010);
@@ -505,9 +506,9 @@ void main() {
         'discountAmount': '10000',
         'finalTotal': '180000',
       });
-      expect(c.state.outbound.pendingPaymentAmount, 230000);
-      expect(c.state.inbound.pendingPaymentAmount, 340000);
-      expect(c.state.totalAmount, 570000);
+      expect(c.state.outbound.pendingPaymentAmount, 180000);
+      expect(c.state.inbound.pendingPaymentAmount, 260000);
+      expect(c.state.totalAmount, 440000);
       expect(c.state.outbound.checkoutBooking!.shipment!.code, 'WAYBILL-101');
       expect(c.state.inbound.checkoutBooking!.shipment!.code, 'WAYBILL-102');
     },

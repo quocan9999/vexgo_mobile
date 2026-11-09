@@ -489,6 +489,7 @@ class _MockCountingBookingRepository extends HybridBookingRepository {
     BookingCargoDraft? cargo,
     int? pickupTripPointId,
     int? dropoffTripPointId,
+    String? comboCode,
   }) async {
     createBookingCallCount++;
     return BookingModel(

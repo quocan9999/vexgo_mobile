@@ -2,10 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/network/api_config.dart';
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/bloc/luggage_cubit.dart';
 import '../widgets/booking_cargo_section_card.dart';
+import '../widgets/booking_luggage_section_card.dart';
 import '../widgets/seat_hold_countdown_bar.dart';
 
 class Step4PassengerInfo extends StatefulWidget {
@@ -13,6 +16,10 @@ class Step4PassengerInfo extends StatefulWidget {
   final BookingFlowBloc bloc;
   final ValueListenable<int>? validationTrigger;
   final bool showInlineCountdown;
+  final LuggageCubit? luggageCubit;
+  final String? luggageSeatChangeNotice;
+  final VoidCallback? onDismissLuggageSeatChangeNotice;
+  final Future<void> Function(BookingCargoDraft? draft)? onSyncBookingCargo;
 
   const Step4PassengerInfo({
     super.key,
@@ -20,6 +27,10 @@ class Step4PassengerInfo extends StatefulWidget {
     required this.bloc,
     this.validationTrigger,
     this.showInlineCountdown = false,
+    this.luggageCubit,
+    this.luggageSeatChangeNotice,
+    this.onDismissLuggageSeatChangeNotice,
+    this.onSyncBookingCargo,
   });
 
   static String? validateName(String raw) {
@@ -427,17 +438,28 @@ class _Step4PassengerInfoState extends State<Step4PassengerInfo> {
               ),
             ),
             const SizedBox(height: 16),
-            BookingCargoSectionCard(
-              cargo: widget.state.cargo,
-              locked: _isLocked,
-              scopeKey: 'oneway',
-              onToggleEnabled: (enabled) =>
-                  widget.bloc.add(SetBookingCargoEnabledEvent(enabled)),
-              onRefresh: () =>
-                  widget.bloc.add(const RefreshBookingCargoEvent()),
-              onUpdateDraft: (draft) =>
-                  widget.bloc.add(UpdateBookingCargoEvent(draft)),
-            ),
+            if (widget.luggageCubit != null)
+              BookingLuggageSectionCard(
+                cubit: widget.luggageCubit!,
+                locked: _isLocked,
+                scopeKey: 'oneway',
+                seatChangeNotice: widget.luggageSeatChangeNotice,
+                onDismissSeatChangeNotice:
+                    widget.onDismissLuggageSeatChangeNotice,
+                onSyncBookingCargo: widget.onSyncBookingCargo,
+              )
+            else
+              BookingCargoSectionCard(
+                cargo: widget.state.cargo,
+                locked: _isLocked,
+                scopeKey: 'oneway',
+                onToggleEnabled: (enabled) =>
+                    widget.bloc.add(SetBookingCargoEnabledEvent(enabled)),
+                onRefresh: () =>
+                    widget.bloc.add(const RefreshBookingCargoEvent()),
+                onUpdateDraft: (draft) =>
+                    widget.bloc.add(UpdateBookingCargoEvent(draft)),
+              ),
           ],
         ),
       ),

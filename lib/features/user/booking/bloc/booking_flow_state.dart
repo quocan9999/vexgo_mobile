@@ -1,3 +1,4 @@
+import 'booking_rate_limit.dart';
 import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'dart:math';
 import 'package:vexgo_app/data/models/booking_quote_model.dart';
@@ -74,6 +75,7 @@ class BookingFlowState extends Equatable {
   /// Matches the shared API/Web limit for holds, quotes and bookings.
   static const maxSeatsPerTrip = 5;
 
+  final BookingRateLimit? rateLimit;
   final BookingCargoState cargo;
   final BookingFlowStatus status;
   final BookingStep step;
@@ -116,6 +118,7 @@ class BookingFlowState extends Equatable {
   final String? pendingDeeplink;
 
   const BookingFlowState({
+    this.rateLimit,
     this.cargo = const BookingCargoState(),
     this.status = BookingFlowStatus.initial,
     this.step = BookingStep.seatSelection,
@@ -216,7 +219,6 @@ class BookingFlowState extends Equatable {
 
   int? get finalAmount {
     if (checkoutBooking != null) return checkoutBooking!.totalAmount;
-    if (cargo.enabled) return null;
     if (requiresAuthoritativeQuote) return quote?.finalTotal;
     final seatsTotal = seatsTotalAmount;
     if (seatsTotal == null) return null;
@@ -239,6 +241,7 @@ class BookingFlowState extends Equatable {
           ).hasMatch(passengerEmail.trim()));
 
   bool get canProceed {
+    if (rateLimit != null) return false;
     switch (step) {
       case BookingStep.seatSelection:
         return isSeatsValid;
@@ -264,6 +267,8 @@ class BookingFlowState extends Equatable {
   }
 
   BookingFlowState copyWith({
+    BookingRateLimit? rateLimit,
+    bool clearRateLimit = false,
     BookingCargoState? cargo,
     BookingFlowStatus? status,
     BookingStep? step,
@@ -310,6 +315,7 @@ class BookingFlowState extends Equatable {
     bool clearPendingPayment = false,
   }) {
     return BookingFlowState(
+      rateLimit: clearRateLimit ? null : rateLimit ?? this.rateLimit,
       cargo: cargo ?? this.cargo,
       status: status ?? this.status,
       step: step ?? this.step,
@@ -377,6 +383,7 @@ class BookingFlowState extends Equatable {
 
   @override
   List<Object?> get props => [
+    rateLimit,
     cargo,
     status,
     step,

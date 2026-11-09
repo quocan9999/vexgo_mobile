@@ -35,7 +35,7 @@ import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_bloc.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_event.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_state.dart';
 
-class FailingReviewRemoteDataSource implements ReviewRemoteDataSource {
+class FailingReviewRemoteDataSource extends ReviewRemoteDataSource {
   @override
   Future<ReviewModel> createReview({
     required int tripId,
@@ -754,7 +754,7 @@ void main() {
               );
               return t.review == null &&
                   state.errorMessage != null &&
-                  state.errorMessage!.contains('chưa khả dụng');
+                  state.successMessage == null;
             }),
           ),
         );

@@ -1,15 +1,22 @@
+import '../widgets/booking_rate_limit_view.dart';
+import 'package:vexgo_app/app/routes.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
 import 'package:vexgo_app/core/widgets/custom_app_bar.dart';
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/data/models/trip_model.dart';
 import 'package:vexgo_app/data/repositories/booking_repository.dart';
 import 'package:vexgo_app/data/repositories/cargo_repository.dart';
+import 'package:vexgo_app/data/repositories/luggage_repository.dart';
 import 'package:vexgo_app/data/repositories/seat_repository.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/bloc/luggage_cubit.dart';
 import 'package:vexgo_app/features/user/profile/bloc/auth_bloc.dart';
 import 'package:vexgo_app/features/user/profile/bloc/auth_state.dart';
 import 'package:vexgo_app/features/user/search_trips/presentation/widgets/trip_detail_sheet.dart';
@@ -31,24 +38,38 @@ class BookingFlowScreen extends StatelessWidget {
   final TripModel trip;
   final DateTime date;
   final int ticketCount;
+  final BookingFlowBloc? bloc;
+  final LuggageRepository? luggageRepository;
+  final DateTime Function()? now;
 
   const BookingFlowScreen({
     super.key,
     required this.trip,
     required this.date,
     this.ticketCount = 1,
+    this.bloc,
+    this.luggageRepository,
+    this.now,
   });
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.read<AuthBloc>().state;
-    final authUser = auth.isAuthenticated ? auth.user : null;
-    return BlocProvider(
+    final auth = context.read<AuthBloc?>()?.state;
+    final authUser = (auth?.isAuthenticated ?? false) ? auth?.user : null;
+    final content = _BookingFlowContent(
+      luggageRepository: luggageRepository,
+      now: now,
+    );
+    if (bloc != null) {
+      return BlocProvider<BookingFlowBloc>.value(value: bloc!, child: content);
+    }
+    return BlocProvider<BookingFlowBloc>(
       create: (context) =>
           BookingFlowBloc(
             seatRepository: context.read<SeatRepository>(),
             bookingRepository: context.read<BookingRepository>(),
             cargoRepository: context.read<CargoRepository?>(),
+            now: now,
           )..add(
             InitBookingFlowEvent(
               trip: trip,
@@ -59,13 +80,16 @@ class BookingFlowScreen extends StatelessWidget {
               passengerEmail: authUser?.email,
             ),
           ),
-      child: const _BookingFlowContent(),
+      child: content,
     );
   }
 }
 
 class _BookingFlowContent extends StatefulWidget {
-  const _BookingFlowContent();
+  final LuggageRepository? luggageRepository;
+  final DateTime Function()? now;
+
+  const _BookingFlowContent({this.luggageRepository, this.now});
   @override
   State<_BookingFlowContent> createState() => _BookingFlowContentState();
 }
@@ -74,6 +98,113 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
     with WidgetsBindingObserver {
   int? _initialAccountId;
   bool _initialAuthenticated = false;
+  LuggageCubit? _luggageCubit;
+  int? _luggageTripId;
+  int? _luggagePassengerCount;
+  int? _luggageSessionVersion;
+  String? _luggageSeatChangeNotice;
+
+  LuggageRepository _resolveLuggageRepository(BuildContext context) {
+    return widget.luggageRepository ??
+        context.read<LuggageRepository?>() ??
+        RealLuggageRepository(
+          cargoRepository: context.read<CargoRepository?>(),
+        );
+  }
+
+  void _ensureLuggageCubit(BookingFlowState state, BookingFlowBloc bloc) {
+    final tripId =
+        state.trip?.numericTripId ?? int.tryParse(state.trip?.id ?? '');
+    final passengerCount = state.selectedSeats.length;
+    final sessionVersion = TokenStorage.sessionVersion;
+
+    if (tripId == null ||
+        tripId <= 0 ||
+        passengerCount < 1 ||
+        passengerCount > 5) {
+      if (_luggageCubit != null) {
+        unawaited(_luggageCubit!.close());
+        _luggageCubit = null;
+        _luggageTripId = null;
+        _luggagePassengerCount = null;
+      }
+      return;
+    }
+
+    if (_luggageCubit != null &&
+        _luggageTripId == tripId &&
+        _luggagePassengerCount == passengerCount &&
+        _luggageSessionVersion == sessionVersion) {
+      return;
+    }
+
+    if (_luggageCubit != null) {
+      final oldCubit = _luggageCubit!;
+      final hadLuggage =
+          oldCubit.state.phase != LuggagePhase.idle ||
+          oldCubit.state.selection.carryOn.isNotEmpty ||
+          oldCubit.state.selection.checked.isNotEmpty ||
+          state.cargo.enabled;
+      if (_luggageTripId == tripId &&
+          _luggagePassengerCount != null &&
+          _luggagePassengerCount != passengerCount &&
+          hadLuggage) {
+        _luggageSeatChangeNotice =
+            'Số ghế đã thay đổi ($_luggagePassengerCount → $passengerCount hành khách). Vui lòng kiểm tra lại hạn mức hành lý theo số hành khách mới.';
+        if (state.cargo.enabled && !state.isCheckoutLocked) {
+          unawaited(
+            bloc.applyDraftAction(const SetBookingCargoEnabledEvent(false)),
+          );
+        }
+      }
+      unawaited(oldCubit.close());
+    }
+
+    _luggageTripId = tripId;
+    _luggagePassengerCount = passengerCount;
+    _luggageSessionVersion = sessionVersion;
+    _luggageCubit = LuggageCubit(
+      tripId: tripId,
+      passengerCount: passengerCount,
+      repository: _resolveLuggageRepository(context),
+      now: widget.now,
+    );
+  }
+
+  Future<void> _syncLuggageToBookingFlow(
+    BookingFlowBloc bloc,
+    BookingCargoDraft? _,
+  ) async {
+    final cubit = _luggageCubit;
+    final tripId =
+        bloc.state.trip?.numericTripId ??
+        int.tryParse(bloc.state.trip?.id ?? '');
+    final passengerCount = bloc.state.selectedSeats.length;
+    if (cubit == null || tripId == null || passengerCount < 1) return;
+    final draft = cubit.exportForBooking(
+      expectedTripId: tripId,
+      expectedPassengerCount: passengerCount,
+    );
+    await bloc.applyDraftAction(
+      SetBookingCargoEnabledEvent(draft != null, initialDraft: draft),
+    );
+  }
+
+  Future<void> _advanceWithLuggageSync(BookingFlowBloc bloc) async {
+    final cubit = _luggageCubit;
+    if (cubit != null) {
+      if (cubit.validationError != null ||
+          (cubit.state.phase != LuggagePhase.idle && !cubit.policyIsFresh)) {
+        return;
+      }
+      if (cubit.state.phase == LuggagePhase.ready) {
+        await _syncLuggageToBookingFlow(bloc, null);
+      }
+    }
+    if (!bloc.isClosed) {
+      bloc.add(const NextStepEvent());
+    }
+  }
 
   @override
   void initState() {
@@ -93,6 +224,7 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
 
   @override
   void dispose() {
+    _luggageCubit?.close();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -164,7 +296,7 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
               'booking': state.checkoutBooking,
             },
           );
-        } else if (state.errorMessage != null) {
+        } else if (state.errorMessage != null && state.rateLimit == null) {
           if (state.errorMessage!.contains('Hết thời gian') ||
               state.errorMessage!.contains('hết hạn')) {
             showDialog(
@@ -210,7 +342,16 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
               context.pop();
             }
           },
-          child: _buildStepShell(context, state, bloc),
+          child: state.rateLimit != null
+              ? BookingRateLimitView(
+                  notice: state.rateLimit!,
+                  hasAnyOrder: state.pendingBookingId != null,
+                  onResume: () =>
+                      bloc.add(const ResumeAfterBookingRateLimitEvent()),
+                  onReviewOrders: () => context.push(AppRoutes.myTickets),
+                  onSupport: () => context.push(AppRoutes.supportChat),
+                )
+              : _buildStepShell(context, state, bloc),
         );
       },
     );
@@ -269,6 +410,7 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
     BookingFlowState state,
     BookingFlowBloc bloc,
   ) {
+    _ensureLuggageCubit(state, bloc);
     final trip = state.trip;
 
     if (state.step.index <= BookingStep.dropoffPoint.index) {
@@ -307,8 +449,13 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
       return BookingPassengerInfoView(
         state: state,
         bloc: bloc,
+        luggageCubit: _luggageCubit,
+        luggageSeatChangeNotice: _luggageSeatChangeNotice,
+        onDismissLuggageSeatChangeNotice: () =>
+            setState(() => _luggageSeatChangeNotice = null),
+        onSyncBookingCargo: (draft) => _syncLuggageToBookingFlow(bloc, draft),
         onBack: () => bloc.add(const PreviousStepEvent()),
-        onNext: () => bloc.add(const NextStepEvent()),
+        onNext: () => _advanceWithLuggageSync(bloc),
         onStep: (index) => bloc.add(GoToStepEvent(index)),
         onDetails: () {
           if (trip != null) {
@@ -322,8 +469,13 @@ class _BookingFlowContentState extends State<_BookingFlowContent>
       return BookingTripSummaryView(
         state: state,
         bloc: bloc,
+        luggageCubit: _luggageCubit,
+        luggageSeatChangeNotice: _luggageSeatChangeNotice,
+        onDismissLuggageSeatChangeNotice: () =>
+            setState(() => _luggageSeatChangeNotice = null),
+        onSyncBookingCargo: (draft) => _syncLuggageToBookingFlow(bloc, draft),
         onBack: () => bloc.add(const PreviousStepEvent()),
-        onNext: () => bloc.add(const NextStepEvent()),
+        onNext: () => _advanceWithLuggageSync(bloc),
         onStep: (index) => bloc.add(GoToStepEvent(index)),
         onDetails: () {
           if (trip != null) {

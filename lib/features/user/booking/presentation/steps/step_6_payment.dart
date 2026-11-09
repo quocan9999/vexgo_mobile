@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -350,8 +351,8 @@ class _Step6PaymentState extends State<Step6Payment>
                       const SizedBox(height: 4),
                       Text(
                         state.ticketFinalAmount != null
-                            ? 'Tiền vé sau ưu đãi: ${CurrencyFormatter.format(state.ticketFinalAmount!)} • Phí gửi hàng được xác định khi tạo đơn'
-                            : 'Phí gửi hàng được xác định khi tạo đơn',
+                            ? 'Tiền vé sau ưu đãi: ${CurrencyFormatter.format(state.ticketFinalAmount!)} • Cước vật phẩm thanh toán riêng tại bến'
+                            : 'Cước vật phẩm thanh toán riêng tại bến',
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral600,
                           fontWeight: FontWeight.w600,
@@ -855,7 +856,7 @@ class _Step6PaymentState extends State<Step6Payment>
                           runSpacing: 2,
                           children: [
                             Text(
-                              'Phí gửi hàng:',
+                              cargoSettlementLabel(booking.cargoPayment),
                               style: DiscoveryTextStyles.bodySmall.copyWith(
                                 color: DiscoveryColors.neutral600,
                               ),

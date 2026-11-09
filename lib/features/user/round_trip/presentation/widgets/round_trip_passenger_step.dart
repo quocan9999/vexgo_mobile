@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/bloc/luggage_cubit.dart';
 import 'package:vexgo_app/features/user/booking/presentation/widgets/booking_cargo_section_card.dart';
+import 'package:vexgo_app/features/user/booking/presentation/widgets/booking_luggage_section_card.dart';
 import 'package:vexgo_app/features/user/round_trip/round_trip_request.dart';
 
 /// Unified passenger info input form for round-trip booking.
@@ -15,6 +19,14 @@ class RoundTripPassengerStep extends StatefulWidget {
   final BookingFlowState? outboundState;
   final BookingFlowState? inboundState;
   final void Function(TripLeg leg, BookingFlowEvent event)? onDispatchCargo;
+  final LuggageCubit? outboundLuggageCubit;
+  final LuggageCubit? inboundLuggageCubit;
+  final String? outboundSeatChangeNotice;
+  final String? inboundSeatChangeNotice;
+  final VoidCallback? onDismissOutboundSeatChangeNotice;
+  final VoidCallback? onDismissInboundSeatChangeNotice;
+  final Future<void> Function(TripLeg leg, BookingCargoDraft? draft)?
+  onSyncLuggage;
   final bool isValid;
   final bool busy;
   final bool readOnly;
@@ -32,6 +44,13 @@ class RoundTripPassengerStep extends StatefulWidget {
     this.outboundState,
     this.inboundState,
     this.onDispatchCargo,
+    this.outboundLuggageCubit,
+    this.inboundLuggageCubit,
+    this.outboundSeatChangeNotice,
+    this.inboundSeatChangeNotice,
+    this.onDismissOutboundSeatChangeNotice,
+    this.onDismissInboundSeatChangeNotice,
+    this.onSyncLuggage,
     required this.isValid,
     required this.busy,
     this.readOnly = false,
@@ -223,7 +242,41 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
             ),
           ),
 
-          if (widget.outboundState != null &&
+          if (widget.outboundLuggageCubit != null &&
+              widget.inboundLuggageCubit != null) ...[
+            const SizedBox(height: 16),
+            BookingLuggageSectionCard(
+              cubit: widget.outboundLuggageCubit!,
+              locked:
+                  (widget.outboundState?.isCheckoutLocked ?? false) ||
+                  widget.busy,
+              scopeKey: 'outbound',
+              title: 'Hành lý đi kèm',
+              legBadge: 'Lượt đi',
+              seatChangeNotice: widget.outboundSeatChangeNotice,
+              onDismissSeatChangeNotice:
+                  widget.onDismissOutboundSeatChangeNotice,
+              onSyncBookingCargo: widget.onSyncLuggage != null
+                  ? (draft) => widget.onSyncLuggage!(TripLeg.outbound, draft)
+                  : null,
+            ),
+            const SizedBox(height: 14),
+            BookingLuggageSectionCard(
+              cubit: widget.inboundLuggageCubit!,
+              locked:
+                  (widget.inboundState?.isCheckoutLocked ?? false) ||
+                  widget.busy,
+              scopeKey: 'inbound',
+              title: 'Hành lý đi kèm',
+              legBadge: 'Lượt về',
+              seatChangeNotice: widget.inboundSeatChangeNotice,
+              onDismissSeatChangeNotice:
+                  widget.onDismissInboundSeatChangeNotice,
+              onSyncBookingCargo: widget.onSyncLuggage != null
+                  ? (draft) => widget.onSyncLuggage!(TripLeg.inbound, draft)
+                  : null,
+            ),
+          ] else if (widget.outboundState != null &&
               widget.inboundState != null &&
               widget.onDispatchCargo != null) ...[
             const SizedBox(height: 16),
@@ -271,56 +324,83 @@ class _RoundTripPassengerStepState extends State<RoundTripPassengerStep> {
           const SizedBox(height: 24),
 
           // Action Buttons
-          Row(
-            children: [
-              OutlinedButton(
-                onPressed: widget.busy ? null : widget.onBack,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(100, 48),
-                  side: const BorderSide(color: DiscoveryColors.neutral300),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  'Quay lại',
-                  style: DiscoveryTextStyles.bodyMedium.copyWith(
-                    color: DiscoveryColors.neutral700,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  key: const ValueKey('passenger-continue-btn'),
-                  onPressed: (!widget.isValid || widget.busy)
-                      ? null
-                      : widget.onNext,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: DiscoveryColors.secondary,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: DiscoveryColors.neutral300,
-                    minimumSize: const Size(140, 48),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(
-                    'Xác nhận thông tin',
-                    style: DiscoveryTextStyles.bodyMedium.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          _buildActionButtons(),
         ],
       ),
     );
+  }
+
+  bool _isLegLuggageValid(LuggageCubit? cubit) {
+    if (cubit == null) return true;
+    return cubit.validationError == null &&
+        (cubit.state.phase == LuggagePhase.idle || cubit.policyIsFresh);
+  }
+
+  Widget _buildActionButtons() {
+    Widget buildRow() {
+      final luggageValid =
+          _isLegLuggageValid(widget.outboundLuggageCubit) &&
+          _isLegLuggageValid(widget.inboundLuggageCubit);
+      final canContinue = widget.isValid && luggageValid && !widget.busy;
+
+      return Row(
+        children: [
+          OutlinedButton(
+            onPressed: widget.busy ? null : widget.onBack,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(100, 48),
+              side: const BorderSide(color: DiscoveryColors.neutral300),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              'Quay lại',
+              style: DiscoveryTextStyles.bodyMedium.copyWith(
+                color: DiscoveryColors.neutral700,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              key: const ValueKey('passenger-continue-btn'),
+              onPressed: canContinue ? widget.onNext : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: DiscoveryColors.secondary,
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: DiscoveryColors.neutral300,
+                minimumSize: const Size(140, 48),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text(
+                'Xác nhận thông tin',
+                style: DiscoveryTextStyles.bodyMedium.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (widget.outboundLuggageCubit != null &&
+        widget.inboundLuggageCubit != null) {
+      return BlocBuilder<LuggageCubit, LuggageState>(
+        bloc: widget.outboundLuggageCubit,
+        builder: (context, _) => BlocBuilder<LuggageCubit, LuggageState>(
+          bloc: widget.inboundLuggageCubit,
+          builder: (context, _) => buildRow(),
+        ),
+      );
+    }
+    return buildRow();
   }
 
   Widget _buildField({

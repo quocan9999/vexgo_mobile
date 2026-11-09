@@ -68,7 +68,12 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
           final matchStation = city.stations.any(
             (s) => s.name.toLowerCase().contains(query),
           );
-          return matchName || matchStation;
+          final matchAlias = [
+            city.searchValue,
+            ...city.aliases,
+            city.region,
+          ].any((value) => value.toLowerCase().contains(query));
+          return matchName || matchStation || matchAlias;
         }).toList();
       }
     });
@@ -195,7 +200,9 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                     children: popularCities.map((city) {
                       final isSelected = widget.currentCity?.id == city.id;
                       return ChoiceChip(
-                        label: Text(city.name),
+                        label: Text(
+                          city.isLegacy ? '${city.name} (cũ)' : city.name,
+                        ),
                         selected: isSelected,
                         selectedColor: DiscoveryColors.primaryLight,
                         backgroundColor: DiscoveryColors.neutral50,
@@ -261,6 +268,11 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                         ),
                       ),
                       child: ExpansionTile(
+                        onExpansionChanged: city.stations.isEmpty
+                            ? (expanded) {
+                                if (expanded) Navigator.of(context).pop(city);
+                              }
+                            : null,
                         shape: const Border(),
                         collapsedShape: const Border(),
                         leading: Container(
@@ -282,7 +294,9 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                           ),
                         ),
                         title: Text(
-                          city.name,
+                          city.isLegacy
+                              ? '${city.name} (địa danh cũ)'
+                              : city.name,
                           style: DiscoveryTextStyles.titleSmall.copyWith(
                             fontWeight: isSelected
                                 ? FontWeight.w700
@@ -293,7 +307,16 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                           ),
                         ),
                         subtitle: Text(
-                          '${city.region} • ${city.stations.length} bến xe/điểm đón',
+                          city.backendValue == null
+                              ? '${city.region} • ${city.stations.length} bến xe/điểm đón'
+                              : [
+                                  if (city.region.isNotEmpty) city.region,
+                                  city.kind == 'district'
+                                      ? 'Quận/huyện'
+                                      : 'Tỉnh/thành phố',
+                                  if (city.legacyNote?.isNotEmpty == true)
+                                    city.legacyNote!,
+                                ].join(' • '),
                           style: DiscoveryTextStyles.caption.copyWith(
                             color: DiscoveryColors.neutral500,
                           ),
@@ -311,10 +334,11 @@ class _SelectCitySheetState extends State<SelectCitySheet> {
                                 ),
                               ),
                             ),
-                            const Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              size: 20,
-                            ),
+                            if (city.stations.isNotEmpty)
+                              const Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: 20,
+                              ),
                           ],
                         ),
                         children: city.stations.map((station) {

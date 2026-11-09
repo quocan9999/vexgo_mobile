@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/bloc/luggage_cubit.dart';
 import '../steps/step_5_trip_summary.dart';
 import 'booking_stepper.dart';
 import 'seat_hold_countdown_bar.dart';
@@ -16,6 +19,10 @@ class BookingTripSummaryView extends StatelessWidget {
   final VoidCallback onNext;
   final ValueChanged<int>? onStep;
   final VoidCallback? onDetails;
+  final LuggageCubit? luggageCubit;
+  final String? luggageSeatChangeNotice;
+  final VoidCallback? onDismissLuggageSeatChangeNotice;
+  final Future<void> Function(BookingCargoDraft? draft)? onSyncBookingCargo;
 
   const BookingTripSummaryView({
     super.key,
@@ -25,6 +32,10 @@ class BookingTripSummaryView extends StatelessWidget {
     required this.onNext,
     this.onStep,
     this.onDetails,
+    this.luggageCubit,
+    this.luggageSeatChangeNotice,
+    this.onDismissLuggageSeatChangeNotice,
+    this.onSyncBookingCargo,
   });
 
   @override
@@ -54,6 +65,10 @@ class BookingTripSummaryView extends StatelessWidget {
       state: state,
       bloc: bloc,
       showInlineCountdown: state.seatHold != null && inlineCountdown,
+      luggageCubit: luggageCubit,
+      luggageSeatChangeNotice: luggageSeatChangeNotice,
+      onDismissLuggageSeatChangeNotice: onDismissLuggageSeatChangeNotice,
+      onSyncBookingCargo: onSyncBookingCargo,
     );
 
     return DiscoveryTheme(
@@ -85,6 +100,7 @@ class BookingTripSummaryView extends StatelessWidget {
           state: state,
           onBack: onBack,
           onNext: onNext,
+          luggageCubit: luggageCubit,
         ),
       ),
     );
@@ -96,22 +112,41 @@ class BookingTripSummaryDock extends StatelessWidget {
   final BookingFlowState state;
   final VoidCallback onBack;
   final VoidCallback onNext;
+  final LuggageCubit? luggageCubit;
 
   const BookingTripSummaryDock({
     super.key,
     required this.state,
     required this.onBack,
     required this.onNext,
+    this.luggageCubit,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (luggageCubit != null) {
+      return BlocBuilder<LuggageCubit, LuggageState>(
+        bloc: luggageCubit,
+        builder: (context, _) => _buildDockContent(context),
+      );
+    }
+    return _buildDockContent(context);
+  }
+
+  Widget _buildDockContent(BuildContext context) {
     final busy =
         state.status == BookingFlowStatus.loading ||
         state.status == BookingFlowStatus.submitting ||
-        state.isCheckoutLocked;
+        state.isCheckoutLocked ||
+        state.cargo.loading;
     final expired = state.seatHold == null || state.countdownSeconds <= 0;
-    final enabled = state.canProceed && !busy && !expired;
+    final luggageError = luggageCubit?.validationError;
+    final luggageValid =
+        luggageCubit == null ||
+        (luggageError == null &&
+            (luggageCubit!.state.phase == LuggagePhase.idle ||
+                luggageCubit!.policyIsFresh));
+    final enabled = state.canProceed && luggageValid && !busy && !expired;
 
     final mediaQuery = MediaQuery.of(context);
     final isShortViewport = mediaQuery.size.height < 420;
@@ -171,7 +206,7 @@ class BookingTripSummaryDock extends StatelessWidget {
                     ),
                     if (state.cargo.enabled && state.finalAmount == null)
                       Text(
-                        'Phí gửi hàng được xác định khi tạo đơn',
+                        'Cước vật phẩm thanh toán riêng tại bến',
                         style: DiscoveryTextStyles.caption.copyWith(
                           color: DiscoveryColors.neutral600,
                           fontSize: 11,

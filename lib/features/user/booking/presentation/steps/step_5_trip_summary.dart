@@ -1,11 +1,16 @@
+import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/bloc/luggage_cubit.dart';
 import '../widgets/booking_cargo_section_card.dart';
+import '../widgets/booking_luggage_section_card.dart';
 import '../widgets/seat_hold_countdown_bar.dart';
 import '../widgets/voucher_selection_sheet.dart';
 import '../widgets/promotion_code_sheet.dart';
@@ -14,12 +19,20 @@ class Step5TripSummary extends StatelessWidget {
   final BookingFlowState state;
   final BookingFlowBloc bloc;
   final bool showInlineCountdown;
+  final LuggageCubit? luggageCubit;
+  final String? luggageSeatChangeNotice;
+  final VoidCallback? onDismissLuggageSeatChangeNotice;
+  final Future<void> Function(BookingCargoDraft? draft)? onSyncBookingCargo;
 
   const Step5TripSummary({
     super.key,
     required this.state,
     required this.bloc,
     this.showInlineCountdown = false,
+    this.luggageCubit,
+    this.luggageSeatChangeNotice,
+    this.onDismissLuggageSeatChangeNotice,
+    this.onSyncBookingCargo,
   });
 
   @override
@@ -601,16 +614,27 @@ class Step5TripSummary extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // 3b. Cargo Card
-          BookingCargoSectionCard(
-            cargo: state.cargo,
-            locked: state.isCheckoutLocked,
-            scopeKey: 'oneway',
-            onToggleEnabled: (enabled) =>
-                bloc.add(SetBookingCargoEnabledEvent(enabled)),
-            onRefresh: () => bloc.add(const RefreshBookingCargoEvent()),
-            onUpdateDraft: (draft) => bloc.add(UpdateBookingCargoEvent(draft)),
-          ),
+          // 3b. Luggage / Cargo Card
+          if (luggageCubit != null)
+            BookingLuggageSectionCard(
+              cubit: luggageCubit!,
+              locked: state.isCheckoutLocked,
+              scopeKey: 'oneway',
+              seatChangeNotice: luggageSeatChangeNotice,
+              onDismissSeatChangeNotice: onDismissLuggageSeatChangeNotice,
+              onSyncBookingCargo: onSyncBookingCargo,
+            )
+          else
+            BookingCargoSectionCard(
+              cargo: state.cargo,
+              locked: state.isCheckoutLocked,
+              scopeKey: 'oneway',
+              onToggleEnabled: (enabled) =>
+                  bloc.add(SetBookingCargoEnabledEvent(enabled)),
+              onRefresh: () => bloc.add(const RefreshBookingCargoEvent()),
+              onUpdateDraft: (draft) =>
+                  bloc.add(UpdateBookingCargoEvent(draft)),
+            ),
           const SizedBox(height: 12),
 
           // 4. Voucher / Promotion Card
@@ -851,6 +875,27 @@ class Step5TripSummary extends StatelessWidget {
                     valueColor: DiscoveryColors.secondary,
                   ),
                 ],
+                if (luggageCubit != null)
+                  BlocBuilder<LuggageCubit, LuggageState>(
+                    bloc: luggageCubit,
+                    builder: (context, _) {
+                      final refFee = luggageCubit!.referenceFee;
+                      if (refFee == null ||
+                          refFee <= 0 ||
+                          state.checkoutBooking?.shippingFee != null) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: _buildPriceRow(
+                          label: 'Phí hành lý tham khảo (tạm tính)',
+                          value:
+                              '${CurrencyFormatter.format(refFee)} (chưa cộng vào đơn)',
+                          valueColor: DiscoveryColors.neutral700,
+                        ),
+                      );
+                    },
+                  ),
                 if (BookingCargoSummaryBox.hasCargo(state: state)) ...[
                   const SizedBox(height: 8),
                   _buildPriceRow(
@@ -861,12 +906,15 @@ class Step5TripSummary extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   _buildPriceRow(
-                    label: 'Phí gửi hàng',
+                    label: cargoSettlementLabel(
+                      state.checkoutBooking?.cargoPayment ??
+                          CargoSettlement.atStation,
+                    ),
                     value: state.checkoutBooking?.shippingFee != null
                         ? CurrencyFormatter.format(
                             state.checkoutBooking!.shippingFee!,
                           )
-                        : 'Phí gửi hàng được xác định khi tạo đơn',
+                        : 'Cước vật phẩm thanh toán riêng tại bến',
                     valueColor: state.checkoutBooking?.shippingFee != null
                         ? DiscoveryColors.neutral900
                         : DiscoveryColors.secondary,

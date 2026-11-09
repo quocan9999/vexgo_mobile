@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_bloc.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/bloc/luggage_cubit.dart';
 import '../steps/step_4_passenger_info.dart';
 import 'booking_stepper.dart';
 import 'seat_hold_countdown_bar.dart';
@@ -15,6 +18,10 @@ class BookingPassengerInfoView extends StatefulWidget {
   final VoidCallback onNext;
   final ValueChanged<int>? onStep;
   final VoidCallback? onDetails;
+  final LuggageCubit? luggageCubit;
+  final String? luggageSeatChangeNotice;
+  final VoidCallback? onDismissLuggageSeatChangeNotice;
+  final Future<void> Function(BookingCargoDraft? draft)? onSyncBookingCargo;
 
   const BookingPassengerInfoView({
     super.key,
@@ -24,6 +31,10 @@ class BookingPassengerInfoView extends StatefulWidget {
     required this.onNext,
     this.onStep,
     this.onDetails,
+    this.luggageCubit,
+    this.luggageSeatChangeNotice,
+    this.onDismissLuggageSeatChangeNotice,
+    this.onSyncBookingCargo,
   });
 
   @override
@@ -75,6 +86,10 @@ class _BookingPassengerInfoViewState extends State<BookingPassengerInfoView> {
       bloc: widget.bloc,
       validationTrigger: _validationTrigger,
       showInlineCountdown: state.seatHold != null && inlineCountdown,
+      luggageCubit: widget.luggageCubit,
+      luggageSeatChangeNotice: widget.luggageSeatChangeNotice,
+      onDismissLuggageSeatChangeNotice: widget.onDismissLuggageSeatChangeNotice,
+      onSyncBookingCargo: widget.onSyncBookingCargo,
     );
 
     return DiscoveryTheme(
@@ -109,6 +124,7 @@ class _BookingPassengerInfoViewState extends State<BookingPassengerInfoView> {
           onBack: widget.onBack,
           onNext: widget.onNext,
           onInvalidAttempt: _triggerValidationFeedback,
+          luggageCubit: widget.luggageCubit,
         ),
       ),
     );
@@ -120,6 +136,7 @@ class BookingPassengerDock extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onNext;
   final VoidCallback? onInvalidAttempt;
+  final LuggageCubit? luggageCubit;
 
   const BookingPassengerDock({
     super.key,
@@ -127,17 +144,39 @@ class BookingPassengerDock extends StatelessWidget {
     required this.onBack,
     required this.onNext,
     this.onInvalidAttempt,
+    this.luggageCubit,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (luggageCubit != null) {
+      return BlocBuilder<LuggageCubit, LuggageState>(
+        bloc: luggageCubit,
+        builder: (context, _) => _buildDockContent(context),
+      );
+    }
+    return _buildDockContent(context);
+  }
+
+  Widget _buildDockContent(BuildContext context) {
     final busy =
         state.status == BookingFlowStatus.loading ||
         state.status == BookingFlowStatus.submitting ||
-        state.isCheckoutLocked;
+        state.isCheckoutLocked ||
+        state.cargo.loading;
     final expired = state.seatHold == null || state.countdownSeconds <= 0;
+    final luggageError = luggageCubit?.validationError;
+    final luggageValid =
+        luggageCubit == null ||
+        (luggageError == null &&
+            (luggageCubit!.state.phase == LuggagePhase.idle ||
+                luggageCubit!.policyIsFresh));
     final enabled =
-        state.canProceed && state.cargo.isValid && !busy && !expired;
+        state.canProceed &&
+        state.cargo.isValid &&
+        luggageValid &&
+        !busy &&
+        !expired;
 
     final mediaQuery = MediaQuery.of(context);
     final keyboardOpen = mediaQuery.viewInsets.bottom > 0;
@@ -179,7 +218,8 @@ class BookingPassengerDock extends StatelessWidget {
                   type: ButtonType.secondary,
                   isLoading:
                       state.status == BookingFlowStatus.loading ||
-                      state.status == BookingFlowStatus.submitting,
+                      state.status == BookingFlowStatus.submitting ||
+                      state.cargo.loading,
                   width: double.infinity,
                   onPressed: enabled ? onNext : null,
                 );
@@ -196,6 +236,9 @@ class BookingPassengerDock extends StatelessWidget {
                     ? 'Thời gian giữ ghế đã hết. Vui lòng chọn lại ghế.'
                     : !state.isPassengerValid
                     ? 'Nhập họ tên và số điện thoại hợp lệ để tiếp tục'
+                    : !luggageValid
+                    ? (luggageError ??
+                          'Hoàn tất hành lý đi kèm hoặc chọn "Không thêm hành lý ký gửi"')
                     : !state.cargo.isValid
                     ? (state.cargo.validationError ??
                           'Hoàn tất thông tin gửi hàng hoặc tắt gửi hàng để tiếp tục')

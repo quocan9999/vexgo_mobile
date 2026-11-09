@@ -1,3 +1,4 @@
+import 'shipment_cancellation_section.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -51,6 +52,10 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
   @override
   void didUpdateWidget(ShipmentDetailView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.state.record?.status == ShipmentStatus.cancelled) {
+      _stopTicker();
+      return;
+    }
     if (widget.enablePollingTimer &&
         widget.state.record?.paymentMethod == ShipmentPaymentMethod.online &&
         _ticker == null) {
@@ -713,7 +718,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
                   const SizedBox(height: 6),
                   _buildFeeRow('Đã thanh toán', record.paidAmount!),
                 ],
-                if (record.outstandingAmount != null) ...[
+                if (record.outstandingAmount != null &&
+                    record.status != ShipmentStatus.cancelled) ...[
                   const SizedBox(height: 4),
                   _buildFeeRow(
                     'Còn phải thanh toán',
@@ -726,7 +732,9 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
           const SizedBox(height: 16),
 
           // Payment Handling Block
-          if (!isOnline) ...[
+          if (record.status == ShipmentStatus.cancelled) ...[
+            const Text('Đơn đã hủy; không cần mang hàng ra bến cho đơn này.'),
+          ] else if (!isOnline) ...[
             // COUNTER PAYMENT VIEW
             Container(
               padding: const EdgeInsets.all(AppDimensions.base),
@@ -799,6 +807,8 @@ class _ShipmentDetailViewState extends State<ShipmentDetailView>
               Text(widget.state.refreshError!),
           ],
           const SizedBox(height: 20),
+
+          ShipmentCancellationSection(cubit: widget.cubit, state: widget.state),
 
           // Bottom CTA Buttons
           CustomButton(

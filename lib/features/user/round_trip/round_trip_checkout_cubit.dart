@@ -1,5 +1,7 @@
+import '../booking/bloc/booking_rate_limit.dart';
 import 'package:vexgo_app/data/repositories/cargo_repository.dart';
 import 'dart:async';
+import 'dart:math';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/network/token_storage.dart';
@@ -30,16 +32,19 @@ class RoundTripCheckoutState extends Equatable {
   final bool busy;
   final bool invalidated;
   final String? error;
+  final String? requestedComboCode;
   const RoundTripCheckoutState({
     this.outbound = const BookingFlowState(),
     this.inbound = const BookingFlowState(),
     this.busy = false,
     this.invalidated = false,
     this.error,
+    this.requestedComboCode,
   });
 
   BookingFlowState leg(TripLeg leg) =>
       leg == TripLeg.outbound ? outbound : inbound;
+  BookingRateLimit? get rateLimit => outbound.rateLimit ?? inbound.rateLimit;
   bool get hasUnknownOutcome =>
       outbound.bookingOutcomeUnknown || inbound.bookingOutcomeUnknown;
   bool get hasAnyOrder =>
@@ -51,12 +56,53 @@ class RoundTripCheckoutState extends Equatable {
       (outbound.pendingBookingId == inbound.pendingBookingId ||
           (outbound.checkoutBooking?.orderCode != null &&
               outbound.checkoutBooking?.orderCode ==
-                  inbound.checkoutBooking?.orderCode));
+                  inbound.checkoutBooking?.orderCode) ||
+          (requestedComboCode != null &&
+              (outbound.checkoutBooking?.comboCode != requestedComboCode ||
+                  inbound.checkoutBooking?.comboCode != requestedComboCode)));
   bool canDisplayTransfer(TripLeg leg, DateTime now) =>
       !invalidated &&
       !busy &&
       !ordersConflict &&
+      requestedComboCode == null &&
       this.leg(leg).canDisplayBankTransfer(now);
+  String? get confirmedComboCode =>
+      requestedComboCode != null && hasBothOrders && !ordersConflict
+      ? requestedComboCode
+      : null;
+
+  int? get comboAmount {
+    if (confirmedComboCode == null) return null;
+    final a = outbound.checkoutBooking!.totalAmount;
+    final b = inbound.checkoutBooking!.totalAmount;
+    final sum = a + b;
+    return a < 0 || b < 0 || sum <= 0 || sum > 9007199254740991 ? null : sum;
+  }
+
+  bool canDisplayCombo(DateTime now) =>
+      !invalidated &&
+      !busy &&
+      !hasUnknownOutcome &&
+      comboAmount != null &&
+      [outbound, inbound].every(
+        (s) =>
+            s.canDisplayBankTransfer(now) ||
+            (s.checkoutBooking?.totalAmount == 0 &&
+                s.paymentConfirmed &&
+                s.status == BookingFlowStatus.success),
+      );
+
+  DateTime? get comboExpiresAt {
+    final dates =
+        [outbound, inbound]
+            .where((s) => !s.paymentConfirmed)
+            .map((s) => s.checkoutBooking?.expiresAt)
+            .whereType<DateTime>()
+            .toList()
+          ..sort();
+    return dates.isEmpty ? null : dates.first;
+  }
+
   bool get isComplete =>
       !invalidated &&
       !ordersConflict &&
@@ -98,14 +144,22 @@ class RoundTripCheckoutState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [outbound, inbound, busy, invalidated, error];
+  List<Object?> get props => [
+    outbound,
+    inbound,
+    busy,
+    invalidated,
+    error,
+    requestedComboCode,
+  ];
 }
 
-/// Same contract as Web: two independent orders, never one combined QR.
+/// Two separate bookings share one server-confirmed combo payment reference.
 /// Owns both one-way BLoCs. UI must dispatch through this coordinator, not
 /// instantiate BookingFlowScreen twice (that would submit independently).
 class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
   final RoundTripRequest request;
+  final String comboCode;
   final DateTime Function() _now;
   late final Map<TripLeg, BookingFlowBloc> _flows;
   final List<StreamSubscription<BookingFlowState>> _subscriptions = [];
@@ -126,8 +180,15 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
     CargoRepository? cargoRepository,
     DateTime Function()? now,
     VietQrReceivingAccount receivingAccount = VietQrConfig.account,
-  }) : _now = now ?? DateTime.now,
+    String? comboCode,
+  }) : comboCode =
+           comboCode ??
+           'RT${List.generate(16, (_) => Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0')).join().toUpperCase()}',
+       _now = now ?? DateTime.now,
        super(const RoundTripCheckoutState()) {
+    if (!RegExp(r'^[A-Za-z0-9_-]{4,50}$').hasMatch(this.comboCode)) {
+      throw ArgumentError('Mã thanh toán khứ hồi không hợp lệ.');
+    }
     if (!request.acceptsPair(outbound, inbound)) {
       throw ArgumentError(
         'Hai chuyến không đúng tuyến/ngày hoặc thời gian bị chồng lấn.',
@@ -141,6 +202,7 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
         leg: BookingFlowBloc(
           seatRepository: seatRepository,
           bookingRepository: bookingRepository,
+          comboCode: this.comboCode,
           cargoRepository: cargoRepository,
           now: _now,
           receivingAccount: receivingAccount,
@@ -179,6 +241,7 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
         outbound: _flows[TripLeg.outbound]!.state,
         inbound: _flows[TripLeg.inbound]!.state,
         busy: _busy || _pendingEdits > 0,
+        requestedComboCode: comboCode,
         error: _lastError,
       ),
     );
@@ -264,12 +327,17 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
       s.quoteError == null &&
       s.seatHold != null &&
       s.seatHold!.expiresAt.isAfter(_now()) &&
-      !s.bookingOutcomeUnknown;
+      !s.bookingOutcomeUnknown &&
+      s.rateLimit == null;
 
   /// Explicit create action. Existing orders are never recreated or implicitly
   /// paid/cancelled. On partial failure the successful leg remains available.
   Future<void> submit() async {
-    if (!_active || _busy || _pendingEdits > 0 || state.hasUnknownOutcome) {
+    if (!_active ||
+        _busy ||
+        _pendingEdits > 0 ||
+        state.hasUnknownOutcome ||
+        state.rateLimit != null) {
       return;
     }
     final missing = TripLeg.values
@@ -336,6 +404,23 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
     }
   }
 
+  Future<void> resumeAfterRateLimit() async {
+    if (!_active || _busy || _pendingEdits > 0) return;
+    _busy = true;
+    _publish(clearError: true);
+    try {
+      for (final flow in _flows.values) {
+        if (!_active) return;
+        if (flow.state.rateLimit != null) {
+          await flow.applyDraftAction(const ResumeAfterBookingRateLimitEvent());
+        }
+      }
+    } finally {
+      _busy = false;
+      if (_active) _publish(clearError: true);
+    }
+  }
+
   /// Read/reconcile ONLY an already known order. Never creates the other leg.
   Future<void> recheck(TripLeg leg) async {
     if (!_active ||
@@ -348,6 +433,22 @@ class RoundTripCheckoutCubit extends Cubit<RoundTripCheckoutState> {
     _publish(clearError: true);
     try {
       await _flows[leg]!.confirmPayment();
+    } finally {
+      _busy = false;
+      if (_active) _publish();
+    }
+  }
+
+  /// Reconciles both known orders; never resubmits a booking or simulates payment.
+  Future<void> recheckAll() async {
+    if (!_active || _busy || _pendingEdits > 0) return;
+    _busy = true;
+    _publish(clearError: true);
+    try {
+      for (final flow in _flows.values) {
+        if (!_active) return;
+        if (flow.state.pendingBookingId != null) await flow.confirmPayment();
+      }
     } finally {
       _busy = false;
       if (_active) _publish();

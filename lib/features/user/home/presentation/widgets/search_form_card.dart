@@ -297,60 +297,68 @@ class SearchFormCard extends StatelessWidget {
                       ),
                       width: double.infinity,
                       height: 50,
-                      onPressed: () {
-                        final fromId = state.departureCity?.id ?? 'HCM';
-                        final fromName =
-                            state.departureCity?.name ?? 'TP. Hồ Chí Minh';
-                        final toId = state.destinationCity?.id ?? 'DL';
-                        final toName = state.destinationCity?.name ?? 'Đà Lạt';
-                        final d = state.departureDate;
-                        final dateStr =
-                            '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+                      onPressed:
+                          state.departureCity == null ||
+                              state.destinationCity == null
+                          ? null
+                          : () {
+                              final fromId = state.departureCity?.id ?? 'HCM';
+                              final fromName =
+                                  state.departureCity?.name ??
+                                  'TP. Hồ Chí Minh';
+                              final toId = state.destinationCity?.id ?? 'DL';
+                              final toName =
+                                  state.destinationCity?.name ?? 'Đà Lạt';
+                              final d = state.departureDate;
+                              final dateStr =
+                                  '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-                        final departureCity =
-                            state.departureCity ??
-                            CityModel(
-                              id: fromId,
-                              name: fromName,
-                              region: '',
-                              isPopular: false,
-                            );
-                        final destinationCity =
-                            state.destinationCity ??
-                            CityModel(
-                              id: toId,
-                              name: toName,
-                              region: '',
-                              isPopular: false,
-                            );
+                              final departureCity =
+                                  state.departureCity ??
+                                  CityModel(
+                                    id: fromId,
+                                    name: fromName,
+                                    region: '',
+                                    isPopular: false,
+                                  );
+                              final destinationCity =
+                                  state.destinationCity ??
+                                  CityModel(
+                                    id: toId,
+                                    name: toName,
+                                    region: '',
+                                    isPopular: false,
+                                  );
 
-                        final returnDateStr =
-                            state.isRoundTrip && state.returnDate != null
-                            ? '${state.returnDate!.year}-${state.returnDate!.month.toString().padLeft(2, '0')}-${state.returnDate!.day.toString().padLeft(2, '0')}'
-                            : null;
+                              final returnDateStr =
+                                  state.isRoundTrip && state.returnDate != null
+                                  ? '${state.returnDate!.year}-${state.returnDate!.month.toString().padLeft(2, '0')}-${state.returnDate!.day.toString().padLeft(2, '0')}'
+                                  : null;
 
-                        final extraMap = <String, dynamic>{
-                          'fromCity': departureCity,
-                          'toCity': destinationCity,
-                          'date': state.departureDate,
-                          'ticketCount': state.ticketCount,
-                          'isRoundTrip': state.isRoundTrip,
-                        };
-                        if (state.isRoundTrip) {
-                          extraMap['returnDate'] =
-                              state.returnDate ??
-                              state.departureDate.add(const Duration(days: 2));
-                        }
+                              final extraMap = <String, dynamic>{
+                                'fromCity': departureCity,
+                                'toCity': destinationCity,
+                                'date': state.departureDate,
+                                'ticketCount': state.ticketCount,
+                                'isRoundTrip': state.isRoundTrip,
+                              };
+                              if (state.isRoundTrip) {
+                                extraMap['returnDate'] =
+                                    state.returnDate ??
+                                    state.departureDate.add(
+                                      const Duration(days: 2),
+                                    );
+                              }
 
-                        // unused returnQuery
+                              // unused returnQuery
 
-                        context.push(
-                          state.isRoundTrip
-                              ? '${AppRoutes.roundTripSearch}?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&returnDate=$returnDateStr&ticketCount=${state.ticketCount}'
-                              : '/search-trips?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&ticketCount=${state.ticketCount}',
-                          extra: extraMap,
-                        );
-                      },
+                              context.push(
+                                state.isRoundTrip
+                                    ? '${AppRoutes.roundTripSearch}?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&returnDate=$returnDateStr&ticketCount=${state.ticketCount}'
+                                    : '/search-trips?fromCityId=$fromId&fromCityName=$fromName&toCityId=$toId&toCityName=$toName&date=$dateStr&ticketCount=${state.ticketCount}',
+                                extra: extraMap,
+                              );
+                            },
                     ),
                   ],
                 ),

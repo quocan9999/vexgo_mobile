@@ -19,6 +19,10 @@ enum ShipmentCreationPhase {
 
 class ShipmentFlowState {
   final ShipmentCreationPhase phase;
+  final bool cancelling, cancellationUncertain;
+  final ShipmentCancellation? cancellation;
+  final String? cancellationError;
+  final String? cancellationWaybill;
   final ShipmentDraft? draft;
   final List<ShipmentRoute> routes;
   final int? selectedRouteId;
@@ -45,6 +49,11 @@ class ShipmentFlowState {
   final DateTime? nextPaymentReadAt;
   const ShipmentFlowState({
     this.phase = ShipmentCreationPhase.editing,
+    this.cancelling = false,
+    this.cancellationUncertain = false,
+    this.cancellation,
+    this.cancellationError,
+    this.cancellationWaybill,
     this.draft,
     this.routes = const [],
     this.selectedRouteId,
@@ -79,6 +88,11 @@ class ShipmentFlowState {
   // Explicit null setters avoid silently retaining data after a failed/new read.
   ShipmentFlowState copyWith({
     ShipmentCreationPhase? phase,
+    bool? cancelling,
+    bool? cancellationUncertain,
+    ShipmentCancellation? Function()? cancellation,
+    String? Function()? cancellationError,
+    String? Function()? cancellationWaybill,
     ShipmentDraft? Function()? draft,
     List<ShipmentRoute>? routes,
     int? Function()? selectedRouteId,
@@ -110,6 +124,15 @@ class ShipmentFlowState {
     DateTime? Function()? nextPaymentReadAt,
   }) => ShipmentFlowState(
     phase: phase ?? this.phase,
+    cancelling: cancelling ?? this.cancelling,
+    cancellationUncertain: cancellationUncertain ?? this.cancellationUncertain,
+    cancellation: cancellation != null ? cancellation() : this.cancellation,
+    cancellationError: cancellationError != null
+        ? cancellationError()
+        : this.cancellationError,
+    cancellationWaybill: cancellationWaybill != null
+        ? cancellationWaybill()
+        : this.cancellationWaybill,
     draft: draft != null ? draft() : this.draft,
     routes: routes ?? this.routes,
     selectedRouteId: selectedRouteId != null
@@ -166,6 +189,12 @@ class ShipmentFlowCubit extends Cubit<ShipmentFlowState> {
       _refresh = 0,
       _detail = 0;
   bool _mutation = false;
+  int _cancel = 0;
+  bool _closing = false;
+  final Set<String> _unverifiedCancellations = {};
+  final Set<String> _ineligibleCancellations = {};
+  String? _lookupPhone;
+  String? _lookupCode;
   ShipmentFlowCubit({
     required this.repository,
     this.account = VietQrConfig.account,
@@ -180,6 +209,7 @@ class ShipmentFlowCubit extends Cubit<ShipmentFlowState> {
   }
   bool get _current =>
       !isClosed &&
+      !_closing &&
       _session == TokenStorage.sessionVersion &&
       state.phase != ShipmentCreationPhase.invalidated;
   bool get _editable =>
@@ -191,6 +221,11 @@ class ShipmentFlowCubit extends Cubit<ShipmentFlowState> {
       : 'Không thể xác minh dữ liệu từ máy chủ. Vui lòng kiểm tra kết nối và thử tải lại.';
   void invalidate() {
     if (isClosed || state.phase == ShipmentCreationPhase.invalidated) return;
+    _cancel++;
+    _unverifiedCancellations.clear();
+    _ineligibleCancellations.clear();
+    _lookupPhone = null;
+    _lookupCode = null;
     _quote++;
     _search++;
     _options++;
@@ -520,11 +555,223 @@ class ShipmentFlowCubit extends Cubit<ShipmentFlowState> {
     }
   }
 
+  String? cancellationCode({bool fromLookup = false}) => fromLookup
+      ? state.lookup?.waybillCode
+      : state.record?.identity.waybillCode;
+
+  bool canCancelShipment({bool fromLookup = false}) {
+    if (!_current || _mutation || state.cancelling) {
+      return false;
+    }
+    final code = cancellationCode(fromLookup: fromLookup);
+    if (code == null ||
+        _unverifiedCancellations.contains(code) ||
+        _ineligibleCancellations.contains(code) ||
+        state.cancellation?.waybillCode == code) {
+      return false;
+    }
+    if (fromLookup) {
+      return state.lookup?.status == ShipmentStatus.created &&
+          _lookupCode == code &&
+          _lookupPhone != null;
+    }
+    return state.record?.status == ShipmentStatus.created &&
+        validShipmentPhone(state.record!.senderPhone);
+  }
+
+  String? _cancellationPhone(bool fromLookup) =>
+      fromLookup ? _lookupPhone : state.record?.senderPhone;
+
+  void _applyCancellationSnapshot(String code, ShipmentLookup snapshot) {
+    final record = state.record;
+    if (record != null &&
+        record.identity.waybillCode == code &&
+        snapshot.orderCode != record.identity.orderCode) {
+      throw const FormatException('Trạng thái trả về thuộc đơn khác.');
+    }
+    if (snapshot.status != ShipmentStatus.created) {
+      _unverifiedCancellations.remove(code);
+    }
+    emit(
+      state.copyWith(
+        record: () => record != null && record.identity.waybillCode == code
+            ? record.copyWithTracking(
+                status: snapshot.rawStatus,
+                paymentStatus: snapshot.rawPaymentStatus,
+                history: snapshot.timeline,
+              )
+            : record,
+        lookup: () =>
+            state.lookup?.waybillCode == code ? snapshot : state.lookup,
+        paymentSnapshot: () => null,
+        verifiedAt: () => null,
+        myShipments: () => null,
+      ),
+    );
+  }
+
+  Future<void> cancelShipment({bool fromLookup = false, String? reason}) async {
+    if (!canCancelShipment(fromLookup: fromLookup)) return;
+    final code = cancellationCode(fromLookup: fromLookup)!,
+        phone = _cancellationPhone(fromLookup)!;
+    if ((reason?.trim().length ?? 0) > 255) {
+      emit(
+        state.copyWith(
+          cancellationWaybill: () => code,
+          cancellationError: () => 'Lý do hủy tối đa 255 ký tự.',
+        ),
+      );
+      return;
+    }
+    _mutation = true;
+    _unverifiedCancellations.add(code);
+    final request = ++_cancel;
+    _refresh++;
+    _lookup++;
+    _detail++;
+    _list++;
+    emit(
+      state.copyWith(
+        cancelling: true,
+        cancellationWaybill: () => code,
+        refreshing: false,
+        lookingUp: false,
+        loadingMine: false,
+        cancellation: () => null,
+        cancellationError: () => null,
+        paymentSnapshot: () => null,
+        verifiedAt: () => null,
+      ),
+    );
+    try {
+      final result = await repository.cancel(
+        waybillCode: code,
+        phone: phone,
+        reason: reason,
+      );
+      if (!_current || request != _cancel) return;
+      _unverifiedCancellations.remove(code);
+      final record = state.record, lookup = state.lookup;
+      emit(
+        state.copyWith(
+          cancelling: false,
+          cancellation: () => result,
+          cancellationUncertain: false,
+          record: () => record?.identity.waybillCode == code
+              ? record!.copyWithTracking(
+                  status: 'DA_HUY',
+                  history: [
+                    ...record.timeline,
+                    ShipmentTimelineEntry('DA_HUY', result.updatedAt),
+                  ],
+                )
+              : record,
+          lookup: () => lookup?.waybillCode == code
+              ? lookup!.copyWithTracking(
+                  status: 'DA_HUY',
+                  history: [
+                    ...lookup.timeline,
+                    ShipmentTimelineEntry('DA_HUY', result.updatedAt),
+                  ],
+                )
+              : lookup,
+          myShipments: () => null,
+        ),
+      );
+    } catch (e) {
+      if (!_current || request != _cancel) return;
+      final definite =
+          e is ApiException &&
+          e.statusCode >= 400 &&
+          e.statusCode < 500 &&
+          e.statusCode != 408;
+      if (definite) {
+        _unverifiedCancellations.remove(code);
+        if (const {
+          'BOOKING_SHIPMENT_TRIP_FIXED',
+          'SHIPMENT_CANNOT_BE_CANCELLED_ONLINE',
+          'SHIPMENT_ALREADY_CANCELLED',
+        }.contains(e.errorCode)) {
+          _ineligibleCancellations.add(code);
+        }
+      }
+      emit(
+        state.copyWith(
+          cancelling: false,
+          cancellationUncertain: !definite,
+          cancellationError: () => definite
+              ? _message(e)
+              : 'Chưa xác minh kết quả hủy. Hãy kiểm tra trạng thái; không gửi lại yêu cầu.',
+        ),
+      );
+      if (definite) {
+        try {
+          final snapshot = await repository.lookup(
+            waybillCode: code,
+            phone: phone,
+          );
+          if (_current && request == _cancel) {
+            _applyCancellationSnapshot(code, snapshot);
+            if (snapshot.status == ShipmentStatus.cancelled) {
+              emit(state.copyWith(cancellationError: () => null));
+            }
+          }
+        } catch (_) {
+          /* Keep the cancellation failure and the previous data. */
+        }
+      }
+    } finally {
+      _mutation = false;
+      if (_current && request == _cancel) {
+        emit(state.copyWith(cancelling: false));
+      }
+    }
+  }
+
+  Future<void> refreshCancellationStatus({bool fromLookup = false}) async {
+    if (!_current || _mutation || state.cancelling) return;
+    final code = cancellationCode(fromLookup: fromLookup),
+        phone = _cancellationPhone(fromLookup);
+    if (code == null || phone == null) return;
+    _mutation = true;
+    final request = ++_cancel;
+    emit(state.copyWith(cancelling: true));
+    try {
+      final snapshot = await repository.lookup(waybillCode: code, phone: phone);
+      if (!_current || request != _cancel) return;
+      _applyCancellationSnapshot(code, snapshot);
+      emit(
+        state.copyWith(
+          cancelling: false,
+          cancellationUncertain:
+              snapshot.status == ShipmentStatus.created &&
+              state.cancellationUncertain,
+          cancellationError: () => snapshot.status == ShipmentStatus.cancelled
+              ? null
+              : state.cancellationError,
+        ),
+      );
+    } catch (e) {
+      if (_current && request == _cancel) {
+        emit(
+          state.copyWith(
+            cancelling: false,
+            cancellationError: () => _message(e),
+          ),
+        );
+      }
+    } finally {
+      _mutation = false;
+    }
+  }
+
   Future<void> lookup({
     required String waybillCode,
     required String phone,
   }) async {
-    if (!_current) return;
+    if (!_current || _mutation) return;
+    _lookupPhone = null;
+    _lookupCode = null;
     final request = ++_lookup;
     emit(
       state.copyWith(
@@ -540,10 +787,18 @@ class ShipmentFlowCubit extends Cubit<ShipmentFlowState> {
         phone: phone,
       );
       if (!_current || request != _lookup) return;
+      _lookupPhone = phone.trim();
+      _lookupCode = result.waybillCode;
       emit(
         state.copyWith(
           lookingUp: false,
           lookup: () => result,
+          cancellation: () => null,
+          cancellationUncertain: _unverifiedCancellations.contains(
+            result.waybillCode,
+          ),
+          cancellationWaybill: () => result.waybillCode,
+          cancellationError: () => null,
           verifiedAt: () => now().toUtc(),
         ),
       );
@@ -612,6 +867,12 @@ class ShipmentFlowCubit extends Cubit<ShipmentFlowState> {
         state.copyWith(
           refreshing: false,
           record: () => record,
+          cancellation: () => null,
+          cancellationUncertain: _unverifiedCancellations.contains(
+            record.identity.waybillCode,
+          ),
+          cancellationWaybill: () => record.identity.waybillCode,
+          cancellationError: () => null,
           recovery: () => record.identity,
         ),
       );
@@ -665,9 +926,11 @@ class ShipmentFlowCubit extends Cubit<ShipmentFlowState> {
 
   Future<void> refreshPayment() async {
     if (!_current ||
+        _mutation ||
         state.refreshing ||
         state.lookingUp ||
-        state.record == null) {
+        (state.record == null ||
+            state.record!.status == ShipmentStatus.cancelled)) {
       return;
     }
     final localNow = now().toUtc();
@@ -750,6 +1013,8 @@ class ShipmentFlowCubit extends Cubit<ShipmentFlowState> {
 
   @override
   Future<void> close() async {
+    _closing = true;
+    _cancel++;
     await _changes.cancel();
     await _invalidations.cancel();
     await super.close();

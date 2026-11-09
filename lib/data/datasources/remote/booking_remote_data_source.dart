@@ -36,6 +36,7 @@ abstract class BookingRemoteDataSource {
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    String? comboCode,
   });
 
   Future<BookingModel> getBookingById(dynamic bookingId);
@@ -119,11 +120,15 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     String? holdToken,
     BookingQuoteModel? expectedPromotionQuote,
     BookingCargoDraft? cargo,
+    String? comboCode,
   }) async {
     if (holdToken == null || holdToken.isEmpty) {
       throw ArgumentError('Cần mã giữ ghế còn hiệu lực để tạo đơn.');
     }
     final guest = !await TokenStorage.hasAccessToken();
+    final contactPayload = contact.toJson();
+    // The API accepts an omitted optional email, but rejects an empty string.
+    if (contact.email.trim().isEmpty) contactPayload.remove('email');
 
     final body = {
       'tripId': tripId,
@@ -132,10 +137,11 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
       'diemTraChuyenXeId': ?dropoffTripPointId,
       'pickupPoint': pickupPoint,
       'dropoffPoint': dropoffPoint,
-      'contact': contact.toJson(),
+      'contact': contactPayload,
       if (promotionCode != null && promotionCode.isNotEmpty)
         'promotionCode': promotionCode,
       'holdToken': holdToken,
+      'comboCode': ?comboCode,
       if (cargo != null) ...cargo.toJson(),
       if (promotionCode != null &&
           promotionCode.isNotEmpty &&

@@ -166,9 +166,10 @@ class RefreshBookingQuoteEvent extends BookingFlowEvent {
 /// Enabling loads authoritative categories/capacity/route points for this trip.
 class SetBookingCargoEnabledEvent extends BookingFlowEvent {
   final bool enabled;
-  const SetBookingCargoEnabledEvent(this.enabled);
+  final BookingCargoDraft? initialDraft;
+  const SetBookingCargoEnabledEvent(this.enabled, {this.initialDraft});
   @override
-  List<Object?> get props => [enabled];
+  List<Object?> get props => [enabled, initialDraft];
 }
 
 class RefreshBookingCargoEvent extends BookingFlowEvent {
@@ -180,4 +181,9 @@ class UpdateBookingCargoEvent extends BookingFlowEvent {
   const UpdateBookingCargoEvent(this.draft);
   @override
   List<Object?> get props => [draft];
+}
+
+/// Only dismisses the notice; never creates a booking or refreshes a hold.
+class ResumeAfterBookingRateLimitEvent extends BookingFlowEvent {
+  const ResumeAfterBookingRateLimitEvent();
 }

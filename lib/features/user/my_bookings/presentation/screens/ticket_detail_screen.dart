@@ -476,33 +476,18 @@ class _TicketDetailContent extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
+                    OutlinedButton.icon(
+                      onPressed: () => ReviewBottomSheet.show(
+                        context,
+                        ticket,
+                        context.read<MyTicketsBloc>(),
                       ),
-                      decoration: BoxDecoration(
-                        color: DiscoveryColors.surface,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: DiscoveryColors.divider),
+                      icon: const Icon(Icons.star_rounded),
+                      label: Text(
+                        'Đã đánh giá • ${ticket.review!.rating}/5 — Xem',
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.star_rounded,
-                            color: Colors.amber,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Đã đánh giá • ${ticket.review!.rating}/5',
-                            style: DiscoveryTextStyles.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: DiscoveryColors.neutral800,
-                            ),
-                          ),
-                        ],
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(48, 48),
                       ),
                     ),
                     const SizedBox(height: AppDimensions.sm),

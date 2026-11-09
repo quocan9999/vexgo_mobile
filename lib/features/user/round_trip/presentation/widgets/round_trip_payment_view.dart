@@ -1,3 +1,4 @@
+import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,12 +11,13 @@ import 'package:vexgo_app/features/user/booking/presentation/widgets/payment_dis
 import 'package:vexgo_app/features/user/round_trip/round_trip_checkout_cubit.dart';
 import 'package:vexgo_app/features/user/round_trip/round_trip_request.dart';
 
-/// Payment view displaying two independent orders and VietQR payment cards.
-/// Never combines totals for a single QR. Each leg is checked and paid separately.
+/// One combo QR only after both independent orders are confirmed by the server.
 class RoundTripPaymentView extends StatefulWidget {
   final RoundTripRequest request;
   final RoundTripCheckoutState state;
   final ValueChanged<TripLeg> onRecheck;
+  final VoidCallback? onRecheckAll;
+  final VietQrReceivingAccount receivingAccount;
   final VoidCallback? onRetrySubmitMissing;
   final ValueChanged<TripLeg>? onEditMissingLeg;
   final VoidCallback onOpenMyTickets;
@@ -26,6 +28,8 @@ class RoundTripPaymentView extends StatefulWidget {
     required this.request,
     required this.state,
     required this.onRecheck,
+    this.onRecheckAll,
+    this.receivingAccount = VietQrConfig.account,
     this.onRetrySubmitMissing,
     this.onEditMissingLeg,
     required this.onOpenMyTickets,
@@ -105,15 +109,16 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               message:
                   'Không nhận được phản hồi tạo đơn từ máy chủ. Vui lòng không tạo lại đơn mới để tránh trừ tiền 2 lần. Hãy kiểm tra mục Vé của tôi hoặc bấm "Kiểm tra" bên dưới.',
             ),
-          ] else if (partiallyPaid) ...[
+          ] else if (partiallyPaid && !widget.state.canDisplayCombo(now)) ...[
             _buildAlertBanner(
               color: DiscoveryColors.primaryLight,
               borderColor: DiscoveryColors.primary,
               icon: Icons.check_circle_rounded,
               iconColor: DiscoveryColors.primary,
               title: 'Đã thanh toán 1 chiều',
-              message:
-                  'Bạn đã thanh toán thành công cho ${out.paymentConfirmed ? "Lượt đi" : "Lượt về"}. Vui lòng hoàn tất thanh toán cho ${out.paymentConfirmed ? "Lượt về" : "Lượt đi"} để hoàn thành chuyến khứ hồi.',
+              message: widget.state.requestedComboCode != null
+                  ? 'Đã ghi nhận thanh toán một chặng. Hãy kiểm tra lại cả hai đơn; không chuyển khoản thêm trong lúc chờ đối soát.'
+                  : 'Bạn đã thanh toán thành công cho ${out.paymentConfirmed ? "Lượt đi" : "Lượt về"}. Vui lòng hoàn tất thanh toán cho ${out.paymentConfirmed ? "Lượt về" : "Lượt đi"} để hoàn thành chuyến khứ hồi.',
             ),
           ] else ...[
             _buildAlertBanner(
@@ -121,13 +126,33 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
               borderColor: DiscoveryColors.primary.withValues(alpha: 0.3),
               icon: Icons.payment_rounded,
               iconColor: DiscoveryColors.primary,
-              title: 'Thanh toán riêng từng chiều',
-              message:
-                  'Hai đơn hàng được thanh toán độc lập. Vui lòng quét mã QR hoặc chuyển khoản chính xác nội dung cho từng chặng.',
+              title: widget.state.requestedComboCode == null
+                  ? 'Thanh toán riêng từng chiều'
+                  : 'Thanh toán chung hai chiều',
+              message: widget.state.requestedComboCode == null
+                  ? 'Chuyển khoản đúng số tiền và nội dung riêng cho từng chặng.'
+                  : 'Chỉ chuyển khoản sau khi có đủ hai đơn và mã QR chung. Không chuyển thêm nếu giao dịch đang chờ xác minh.',
             ),
           ],
 
           const SizedBox(height: 16),
+
+          if (widget.state.canDisplayCombo(now)) ...[
+            _buildComboPaymentCard(context, now),
+            const SizedBox(height: 16),
+          ],
+
+          if (widget.state.requestedComboCode != null &&
+              widget.state.hasAnyOrder &&
+              !widget.state.canDisplayCombo(now)) ...[
+            OutlinedButton.icon(
+              key: const ValueKey('round-trip-combo-check-all'),
+              onPressed: widget.state.busy ? null : widget.onRecheckAll,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Kiểm tra lại cả hai đơn'),
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // Payment Card 1: Lượt đi
           _buildLegPaymentCard(
@@ -241,6 +266,97 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
     );
   }
 
+  Widget _buildComboPaymentCard(BuildContext context, DateTime now) {
+    final state = widget.state;
+    final code = state.confirmedComboCode!;
+    final amount = state.comboAmount!;
+    final account = widget.receivingAccount;
+    final url = account.imageUrl(amount, code);
+    return Container(
+      key: const ValueKey('round-trip-combo-payment'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: DiscoveryColors.primary),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Thanh toán vé khứ hồi', style: DiscoveryTextStyles.titleSmall),
+          const SizedBox(height: 12),
+          Text(
+            CurrencyFormatter.format(amount),
+            key: const ValueKey('round-trip-combo-amount'),
+            style: DiscoveryTextStyles.price,
+          ),
+          if (state.comboExpiresAt != null) ...[
+            const SizedBox(height: 8),
+            _buildCountdown(state.comboExpiresAt!, now),
+          ],
+          const SizedBox(height: 16),
+          if (url != null) ...[
+            Center(
+              child: Image.network(
+                url,
+                key: const ValueKey('round-trip-combo-qr'),
+                width: 200,
+                height: 200,
+                fit: BoxFit.contain,
+                errorBuilder: (_, error, stack) => const SizedBox(
+                  height: 64,
+                  child: Center(
+                    child: Text(
+                      'Không tải được ảnh QR. Dùng thông tin chuyển khoản bên dưới.',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildCopyableRow(
+              label: 'Ngân hàng',
+              value: account.bankId,
+              copyText: account.bankId,
+            ),
+            const SizedBox(height: 8),
+            _buildCopyableRow(
+              label: 'Số tài khoản',
+              value: account.accountNumber,
+              copyText: account.accountNumber,
+            ),
+            const SizedBox(height: 8),
+            _buildCopyableRow(
+              label: 'Chủ tài khoản',
+              value: account.accountName,
+              copyText: account.accountName,
+            ),
+            const SizedBox(height: 8),
+            _buildCopyableRow(
+              label: 'Nội dung',
+              value: code,
+              copyText: code,
+              highlight: true,
+            ),
+          ] else
+            const Text(
+              'Chưa có cấu hình tài khoản nhận tiền. Vui lòng liên hệ hỗ trợ.',
+            ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const ValueKey('round-trip-combo-recheck'),
+              onPressed: widget.onRecheckAll,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Kiểm tra thanh toán hai chiều'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLegPaymentCard(
     BuildContext context, {
     required TripLeg leg,
@@ -291,18 +407,16 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header & Status Badge
-          Row(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: DiscoveryTextStyles.titleSmall.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              Text(
+                title,
+                style: DiscoveryTextStyles.titleSmall.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(height: 8),
               if (isPaid)
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -314,8 +428,9 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(color: DiscoveryColors.success),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 4,
                     children: [
                       const Icon(
                         Icons.check_circle,
@@ -401,7 +516,9 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
             ),
             const SizedBox(height: 6),
             _buildCopyableRow(
-              label: 'Nội dung CK',
+              label: widget.state.requestedComboCode != null
+                  ? 'Mã giao dịch chặng'
+                  : 'Nội dung CK',
               value: booking.orderCode ?? '',
               copyText: booking.orderCode ?? '',
               highlight: true,
@@ -450,7 +567,7 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
                       runSpacing: 2,
                       children: [
                         Text(
-                          'Phí gửi hàng',
+                          cargoSettlementLabel(booking.cargoPayment),
                           style: DiscoveryTextStyles.bodySmall.copyWith(
                             color: DiscoveryColors.neutral600,
                           ),
@@ -750,8 +867,9 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
     final mins = diff.inMinutes.toString().padLeft(2, '0');
     final secs = (diff.inSeconds % 60).toString().padLeft(2, '0');
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 4,
       children: [
         const Icon(
           Icons.timer_outlined,
@@ -807,60 +925,60 @@ class _RoundTripPaymentViewState extends State<RoundTripPaymentView>
     required String value,
     required String copyText,
     bool highlight = false,
-  }) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 4,
-          child: Text(
-            label,
-            style: DiscoveryTextStyles.caption.copyWith(
-              color: DiscoveryColors.neutral600,
+  }) => LayoutBuilder(
+    builder: (context, constraints) {
+      final detail = Row(
+        children: [
+          Expanded(
+            child: Text(
+              value,
+              style: DiscoveryTextStyles.bodySmall.copyWith(
+                fontWeight: highlight ? FontWeight.w800 : FontWeight.w600,
+                color: highlight
+                    ? DiscoveryColors.primary
+                    : DiscoveryColors.neutral900,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          flex: 6,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Flexible(
-                child: Text(
-                  value,
-                  style: DiscoveryTextStyles.bodySmall.copyWith(
-                    fontWeight: highlight ? FontWeight.w800 : FontWeight.w600,
-                    color: highlight
-                        ? DiscoveryColors.primary
-                        : DiscoveryColors.neutral900,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          IconButton(
+            tooltip: 'Sao chép $label',
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            icon: const Icon(
+              Icons.copy_rounded,
+              size: 20,
+              color: DiscoveryColors.primary,
+            ),
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: copyText));
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Đã sao chép'),
+                  duration: Duration(seconds: 1),
                 ),
-              ),
-              const SizedBox(width: 4),
-              GestureDetector(
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: copyText));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Đã sao chép: $copyText'),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(2.0),
-                  child: Icon(
-                    Icons.copy_rounded,
-                    size: 16,
-                    color: DiscoveryColors.primary,
-                  ),
-                ),
-              ),
-            ],
+              );
+            },
           ),
+        ],
+      );
+      final caption = Text(
+        label,
+        style: DiscoveryTextStyles.caption.copyWith(
+          color: DiscoveryColors.neutral600,
         ),
-      ],
-    );
-  }
+      );
+      if (constraints.maxWidth < 360) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [caption, detail],
+        );
+      }
+      return Row(
+        children: [
+          Expanded(flex: 4, child: caption),
+          Expanded(flex: 6, child: detail),
+        ],
+      );
+    },
+  );
 }

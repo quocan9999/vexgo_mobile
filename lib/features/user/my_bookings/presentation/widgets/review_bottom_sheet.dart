@@ -1,326 +1,386 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/core/constants/app_colors.dart';
-import 'package:vexgo_app/core/constants/app_dimensions.dart';
-import 'package:vexgo_app/core/constants/app_text_styles.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vexgo_app/core/network/token_storage.dart';
+import 'package:vexgo_app/core/network/api_config.dart';
 import 'package:vexgo_app/data/models/review_model.dart';
 import 'package:vexgo_app/data/models/ticket_model.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_bloc.dart';
 import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_event.dart';
+import 'package:vexgo_app/features/user/my_bookings/bloc/my_tickets_state.dart';
 
 class ReviewBottomSheet extends StatefulWidget {
   final TicketModel ticket;
   final MyTicketsBloc bloc;
-
   const ReviewBottomSheet({
     super.key,
     required this.ticket,
     required this.bloc,
   });
-
   static Future<void> show(
     BuildContext context,
     TicketModel ticket,
     MyTicketsBloc bloc,
-  ) {
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => ReviewBottomSheet(ticket: ticket, bloc: bloc),
-    );
-  }
-
+  ) => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => ReviewBottomSheet(ticket: ticket, bloc: bloc),
+  );
   @override
   State<ReviewBottomSheet> createState() => _ReviewBottomSheetState();
 }
 
 class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
+  final _comment = TextEditingController();
+  final _tags = <String>{};
+  late final int _session, _token;
+  bool _editing = false, _confirmDelete = false, _sent = false;
   int _rating = 5;
-  final TextEditingController _commentCtrl = TextEditingController();
-  final Set<String> _selectedTags = {'Đúng giờ', 'Xe sạch sẽ'};
-
-  final List<String> _availableTags = [
-    'Đúng giờ',
-    'Xe sạch sẽ',
-    'Lái xe an toàn',
-    'Nhân viên nhiệt tình',
-    'Tiện nghi đầy đủ',
-    'Đón trả thuận tiện',
-  ];
-
-  String _getRatingLabel(int star) {
-    switch (star) {
-      case 1:
-        return 'Rất tệ';
-      case 2:
-        return 'Không hài lòng';
-      case 3:
-        return 'Bình thường';
-      case 4:
-        return 'Hài lòng';
-      case 5:
-      default:
-        return 'Tuyệt vời';
-    }
+  @override
+  void initState() {
+    super.initState();
+    _session = widget.bloc.sessionGeneration;
+    _token = TokenStorage.sessionVersion;
+    _editing = false;
+    // The ticket snapshot lacks ownership/edit/reply metadata. Read the own endpoint.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _active && !ApiConfig.isDemoMode) {
+        widget.bloc.add(RefreshTicketReviewEvent(widget.ticket.id));
+      }
+    });
   }
 
+  bool get _active =>
+      !widget.bloc.isClosed &&
+      widget.bloc.sessionGeneration == _session &&
+      TokenStorage.sessionVersion == _token;
   @override
   void dispose() {
-    _commentCtrl.dispose();
+    _comment.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppDimensions.radiusLg),
-        ),
-      ),
-      padding: EdgeInsets.fromLTRB(
-        AppDimensions.base,
-        AppDimensions.base,
-        AppDimensions.base,
-        MediaQuery.of(context).viewInsets.bottom + AppDimensions.base,
-      ),
-      child: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.neutral300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppDimensions.base),
+  void _refresh() {
+    if (_active) widget.bloc.add(RefreshTicketReviewEvent(widget.ticket.id));
+  }
 
-              // Title
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: AppColors.warningLight,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.star_rounded,
-                      color: AppColors.secondary,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: AppDimensions.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Đánh giá chuyến đi',
-                          style: AppTextStyles.h4.copyWith(fontSize: 16),
-                        ),
-                        Text(
-                          widget.ticket.trip.operatorName,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.neutral500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: AppDimensions.base),
-
-              // Stars Selection
-              Center(
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(5, (index) {
-                        final star = index + 1;
-                        final isFilled = star <= _rating;
-                        return GestureDetector(
-                          onTap: () => setState(() => _rating = star),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Icon(
-                              isFilled
-                                  ? Icons.star_rounded
-                                  : Icons.star_outline_rounded,
-                              size: 40,
-                              color: isFilled
-                                  ? AppColors.secondary
-                                  : AppColors.neutral400,
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _getRatingLabel(_rating),
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: AppDimensions.base),
-
-              // Tags are local-only in Demo Mode; the real API cannot save them.
-              if (ApiConfig.isDemoMode) ...[
-                Text(
-                  'Điểm bạn hài lòng nhất',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: _availableTags.map((tag) {
-                    final isSelected = _selectedTags.contains(tag);
-                    return FilterChip(
-                      label: Text(tag),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedTags.add(tag);
-                          } else {
-                            _selectedTags.remove(tag);
-                          }
-                        });
-                      },
-                      selectedColor: AppColors.primaryLight,
-                      checkmarkColor: AppColors.primary,
-                      labelStyle: AppTextStyles.caption.copyWith(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.neutral700,
-                        fontWeight: isSelected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                      ),
-                      backgroundColor: AppColors.neutral100,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.neutral200,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-
-                const SizedBox(height: AppDimensions.base),
-              ],
-
-              // Comment text field
-              Text(
-                'Nhận xét chi tiết',
-                style: AppTextStyles.bodySmall.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 6),
-              TextField(
-                controller: _commentCtrl,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText:
-                      'Chia sẻ cảm nhận của bạn về tài xế, độ êm của xe, thái độ phục vụ...',
-                  hintStyle: AppTextStyles.caption.copyWith(
-                    color: AppColors.neutral400,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.neutral300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: AppColors.primary,
-                      width: 1.5,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.all(12),
-                ),
-              ),
-
-              const SizedBox(height: AppDimensions.base),
-
-              // Submit button
-              SizedBox(
-                width: double.infinity,
-                height: 46,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final nowStr = DateFormat(
-                      'dd/MM/yyyy HH:mm',
-                    ).format(DateTime.now());
-                    final review = ReviewModel(
-                      rating: _rating,
-                      comment: _commentCtrl.text.trim(),
-                      tags: ApiConfig.isDemoMode
-                          ? _selectedTags.toList()
-                          : const [],
-                      createdAt: nowStr,
-                    );
-
-                    widget.bloc.add(
-                      SubmitTicketReviewEvent(
-                        ticketId: widget.ticket.id,
-                        review: review,
-                      ),
-                    );
-
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    'Gửi đánh giá',
-                    style: AppTextStyles.button.copyWith(color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+  void _save(ReviewModel? current) {
+    if (!_active || _comment.text.trim().length > 1000) return;
+    final review = ReviewModel(
+      rating: _rating,
+      comment: _comment.text.trim(),
+      tags: ApiConfig.isDemoMode ? _tags.toList() : const [],
+      createdAt: DateTime.now().toIso8601String(),
+    );
+    setState(() => _sent = true);
+    widget.bloc.add(
+      current == null
+          ? SubmitTicketReviewEvent(ticketId: widget.ticket.id, review: review)
+          : UpdateTicketReviewEvent(ticketId: widget.ticket.id, review: review),
     );
   }
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<void>(
+    stream: TokenStorage.sessionChanges,
+    builder: (_, _) => BlocConsumer<MyTicketsBloc, MyTicketsState>(
+      bloc: widget.bloc,
+      listener: (_, state) {
+        if (_active &&
+            _sent &&
+            state.reviewTicketId == widget.ticket.id &&
+            state.reviewStatus == TicketReviewStatus.succeeded) {
+          setState(() {
+            _editing = false;
+            _confirmDelete = false;
+            _sent = false;
+          });
+          _refresh();
+        }
+      },
+      builder: (context, state) {
+        final owned = state.tickets
+            .where((t) => t.id == widget.ticket.id)
+            .firstOrNull;
+        final valid = _active && !state.requiresLogin && owned != null;
+        final review = valid ? owned.review : null;
+        final scoped = state.reviewTicketId == widget.ticket.id;
+        final busy =
+            scoped &&
+            (state.reviewStatus == TicketReviewStatus.loading ||
+                state.reviewStatus == TicketReviewStatus.submitting);
+        final uncertain =
+            widget.bloc.reviewUncertain(widget.ticket.id) ||
+            scoped && state.reviewStatus == TicketReviewStatus.uncertain;
+        final failed =
+            scoped && state.reviewStatus == TicketReviewStatus.failed;
+        final editable = review == null || review.isEditable == true;
+        final form = review == null || _editing;
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight:
+                  (MediaQuery.sizeOf(context).height -
+                          MediaQuery.viewInsetsOf(context).bottom -
+                          MediaQuery.paddingOf(context).top -
+                          12)
+                      .clamp(0, double.infinity),
+            ),
+            child: Material(
+              color: Colors.white,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: SafeArea(
+                top: false,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Đánh giá chuyến đi',
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Đóng',
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close),
+                          ),
+                        ],
+                      ),
+                      if (!valid)
+                        const Text(
+                          'Phiên tài khoản đã thay đổi. Vui lòng mở lại đánh giá.',
+                        )
+                      else ...[
+                        Text(owned.trip.operatorName),
+                        const SizedBox(height: 12),
+                        if (busy) const LinearProgressIndicator(),
+                        if (scoped && state.reviewMessage != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              state.reviewMessage!,
+                              key: const Key('review-message'),
+                            ),
+                          ),
+                        if (review != null && !form) ...[
+                          Text(
+                            '${review.rating}/5 sao',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          if (review.isEdited) const Text('Đã chỉnh sửa'),
+                          const SizedBox(height: 8),
+                          Text(
+                            review.comment.isEmpty
+                                ? 'Không có nội dung nhận xét.'
+                                : review.comment,
+                          ),
+                          if (review.replyContent != null) ...[
+                            const Divider(height: 28),
+                            Text(
+                              'Phản hồi từ ${review.responderName ?? 'nhà xe'}',
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(review.replyContent!),
+                          ],
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              if (review.isEditable == true)
+                                TextButton.icon(
+                                  onPressed: busy || uncertain || failed
+                                      ? null
+                                      : () => setState(() {
+                                          _rating = review.rating;
+                                          _comment.text = review.comment;
+                                          _editing = true;
+                                        }),
+                                  icon: const Icon(Icons.edit_outlined),
+                                  label: const Text('Sửa đánh giá'),
+                                ),
+                              TextButton.icon(
+                                onPressed: busy || uncertain || failed
+                                    ? null
+                                    : () =>
+                                          setState(() => _confirmDelete = true),
+                                icon: const Icon(Icons.delete_outline),
+                                label: const Text('Xóa đánh giá'),
+                              ),
+                            ],
+                          ),
+                          if (review.isEditable == false)
+                            const Text('Đã hết thời hạn chỉnh sửa 3 ngày.'),
+                        ],
+                        if (_confirmDelete) ...[
+                          const Divider(),
+                          const Text('Xóa đánh giá và phản hồi kèm theo?'),
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              TextButton(
+                                onPressed: busy
+                                    ? null
+                                    : () => setState(
+                                        () => _confirmDelete = false,
+                                      ),
+                                child: const Text('Giữ lại'),
+                              ),
+                              TextButton(
+                                onPressed: busy || uncertain || failed
+                                    ? null
+                                    : () {
+                                        if (!_active) return;
+                                        setState(() => _sent = true);
+                                        widget.bloc.add(
+                                          DeleteTicketReviewEvent(
+                                            widget.ticket.id,
+                                          ),
+                                        );
+                                      },
+                                child: const Text('Xác nhận xóa'),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (form) ...[
+                          if (ApiConfig.isDemoMode) ...[
+                            const Text('Điểm bạn hài lòng nhất'),
+                            Wrap(
+                              spacing: 8,
+                              children:
+                                  [
+                                        'Đúng giờ',
+                                        'Xe sạch sẽ',
+                                        'Lái xe an toàn',
+                                        'Nhân viên nhiệt tình',
+                                        'Tiện nghi đầy đủ',
+                                        'Đón trả thuận tiện',
+                                      ]
+                                      .map(
+                                        (tag) => FilterChip(
+                                          label: Text(tag),
+                                          selected: _tags.contains(tag),
+                                          onSelected: busy
+                                              ? null
+                                              : (value) => setState(() {
+                                                  value
+                                                      ? _tags.add(tag)
+                                                      : _tags.remove(tag);
+                                                }),
+                                        ),
+                                      )
+                                      .toList(),
+                            ),
+                          ],
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            children: List.generate(
+                              5,
+                              (i) => IconButton(
+                                tooltip: '${i + 1} sao',
+                                constraints: const BoxConstraints(
+                                  minWidth: 48,
+                                  minHeight: 48,
+                                ),
+                                onPressed:
+                                    busy || uncertain || failed || !editable
+                                    ? null
+                                    : () => setState(() => _rating = i + 1),
+                                color: Colors.amber.shade700,
+                                icon: Icon(
+                                  i < _rating
+                                      ? Icons.star_rounded
+                                      : Icons.star_outline_rounded,
+                                ),
+                              ),
+                            ),
+                          ),
+                          TextField(
+                            controller: _comment,
+                            minLines: 3,
+                            maxLines: 6,
+                            maxLength: 1000,
+                            enabled: !busy && !uncertain && !failed && editable,
+                            decoration: const InputDecoration(
+                              labelText: 'Nhận xét chi tiết',
+                              hintText: 'Chia sẻ trải nghiệm chuyến đi',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          FilledButton(
+                            onPressed: busy || uncertain || failed || !editable
+                                ? null
+                                : () => _save(review),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(48, 48),
+                              backgroundColor: AppColors.primary,
+                            ),
+                            child: Text(
+                              review == null ? 'Gửi đánh giá' : 'Lưu thay đổi',
+                            ),
+                          ),
+                          if (review != null)
+                            TextButton(
+                              onPressed: busy
+                                  ? null
+                                  : () => setState(() => _editing = false),
+                              child: const Text('Hủy chỉnh sửa'),
+                            ),
+                        ],
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          children: [
+                            TextButton.icon(
+                              onPressed: busy ? null : _refresh,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Tải lại đánh giá'),
+                            ),
+                            TextButton.icon(
+                              onPressed: () => showDialog<void>(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                  scrollable: true,
+                                  title: const Text('Về đánh giá'),
+                                  content: const Text(
+                                    'Gửi đánh giá trong 7 ngày kể từ khi khởi hành. Bạn có thể sửa trong 3 ngày sau khi gửi. Quyền sửa do máy chủ xác nhận. Bạn có thể xóa đánh giá của mình.',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Đã hiểu'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              icon: const Icon(Icons.info_outline),
+                              label: const Text('Thông tin'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ),
+  );
 }

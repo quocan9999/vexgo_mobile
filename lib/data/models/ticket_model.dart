@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'review_model.dart';
+import 'booking_evidence_model.dart';
 import '../../core/network/api_config.dart';
 
 enum TicketStatus { upcoming, completed, cancelled }
@@ -99,7 +100,21 @@ class TicketTripSummary extends Equatable {
   };
 
   @override
-  List<Object?> get props => [id, operatorName, departureTime, departureDate];
+  List<Object?> get props => [
+    id,
+    operatorName,
+    vehicleType,
+    departureTime,
+    departureDate,
+    arrivalTime,
+    arrivalDate,
+    fromCity,
+    toCity,
+    pickupPoint,
+    pickupAddress,
+    dropoffPoint,
+    dropoffAddress,
+  ];
 }
 
 class CancellationQuote extends Equatable {
@@ -188,6 +203,11 @@ class TicketModel extends Equatable {
   final String? bookingStatus;
   final String? paymentStatus;
   final String? rawStatus;
+  final StopSnapshot? pickupSnapshot, dropoffSnapshot;
+  final DateTime? departureAt;
+  final List<EvidenceCargo> cargoItems;
+  final int? cargoFee, originalTicketSubtotal, ticketSubtotal;
+  final String? promotionCode;
 
   const TicketModel({
     required this.id,
@@ -214,6 +234,14 @@ class TicketModel extends Equatable {
     this.bookingStatus,
     this.paymentStatus,
     this.rawStatus,
+    this.pickupSnapshot,
+    this.dropoffSnapshot,
+    this.departureAt,
+    this.cargoItems = const [],
+    this.cargoFee,
+    this.originalTicketSubtotal,
+    this.ticketSubtotal,
+    this.promotionCode,
   });
 
   static TicketStatus? parseSupportedStatus(String? statusStr) {
@@ -238,6 +266,8 @@ class TicketModel extends Equatable {
     final ticketCode =
         json['ticketCode'] as String? ?? json['maVe'] as String? ?? '';
 
+    final pickupSnapshot = StopSnapshot.parse(json['diemDonSnapshot']);
+    final dropoffSnapshot = StopSnapshot.parse(json['diemTraSnapshot']);
     // Parse Trip info: support both nested mock schema and flat backend schema
     TicketTripSummary tripSummary;
     if (json['trip'] is Map<String, dynamic>) {
@@ -294,11 +324,31 @@ class TicketModel extends Equatable {
         toCity:
             json['destination'] as String? ?? json['toCity'] as String? ?? '',
         pickupPoint:
-            json['pickup'] as String? ?? json['pickupPoint'] as String? ?? '',
-        pickupAddress: json['pickupAddress'] as String? ?? '',
+            (pickupSnapshot?.name.isNotEmpty == true
+                ? pickupSnapshot!.name
+                : null) ??
+            json['pickup'] as String? ??
+            json['pickupPoint'] as String? ??
+            '',
+        pickupAddress:
+            (pickupSnapshot?.address.isNotEmpty == true
+                ? pickupSnapshot!.address
+                : null) ??
+            json['pickupAddress'] as String? ??
+            '',
         dropoffPoint:
-            json['dropoff'] as String? ?? json['dropoffPoint'] as String? ?? '',
-        dropoffAddress: json['dropoffAddress'] as String? ?? '',
+            (dropoffSnapshot?.name.isNotEmpty == true
+                ? dropoffSnapshot!.name
+                : null) ??
+            json['dropoff'] as String? ??
+            json['dropoffPoint'] as String? ??
+            '',
+        dropoffAddress:
+            (dropoffSnapshot?.address.isNotEmpty == true
+                ? dropoffSnapshot!.address
+                : null) ??
+            json['dropoffAddress'] as String? ??
+            '',
       );
     }
 
@@ -385,6 +435,16 @@ class TicketModel extends Equatable {
       bookingStatus: json['bookingStatus'] as String?,
       paymentStatus: json['paymentStatus'] as String?,
       rawStatus: json['status'] as String?,
+      pickupSnapshot: pickupSnapshot,
+      dropoffSnapshot: dropoffSnapshot,
+      departureAt: evidenceInstant(
+        json['departureAt'] ?? json['departureTime'],
+      ),
+      cargoItems: EvidenceCargo.parseList(json['cargoItems']),
+      cargoFee: evidenceMoney(json['cargoFee']),
+      originalTicketSubtotal: evidenceMoney(json['originalTicketSubtotal']),
+      ticketSubtotal: evidenceMoney(json['ticketSubtotal']),
+      promotionCode: json['promotionCode'] as String?,
     );
   }
 
@@ -400,6 +460,16 @@ class TicketModel extends Equatable {
     'finalAmount': finalAmount,
     'paymentMethod': paymentMethod,
     'passenger': passenger.toJson(),
+    if (departureAt != null)
+      'departureAt': departureAt!.toUtc().toIso8601String(),
+    if (pickupSnapshot != null) 'diemDonSnapshot': pickupSnapshot!.toJson(),
+    if (dropoffSnapshot != null) 'diemTraSnapshot': dropoffSnapshot!.toJson(),
+    'cargoItems': cargoItems.map((item) => item.toJson()).toList(),
+    if (cargoFee != null) 'cargoFee': cargoFee,
+    if (originalTicketSubtotal != null)
+      'originalTicketSubtotal': originalTicketSubtotal,
+    if (ticketSubtotal != null) 'ticketSubtotal': ticketSubtotal,
+    if (promotionCode != null) 'promotionCode': promotionCode,
     if (licensePlate != null) 'licensePlate': licensePlate,
     if (driverPhone != null) 'driverPhone': driverPhone,
     if (cancelReason != null) 'cancelReason': cancelReason,
@@ -431,6 +501,7 @@ class TicketModel extends Equatable {
     String? cancelReason,
     int? refundAmount,
     ReviewModel? review,
+    bool clearReview = false,
     CancellationQuote? cancellation,
     String? seatNumber,
     String? seatPosition,
@@ -439,6 +510,14 @@ class TicketModel extends Equatable {
     String? bookingStatus,
     String? paymentStatus,
     String? rawStatus,
+    StopSnapshot? pickupSnapshot,
+    StopSnapshot? dropoffSnapshot,
+    DateTime? departureAt,
+    List<EvidenceCargo>? cargoItems,
+    int? cargoFee,
+    int? originalTicketSubtotal,
+    int? ticketSubtotal,
+    String? promotionCode,
   }) {
     return TicketModel(
       id: id ?? this.id,
@@ -456,7 +535,7 @@ class TicketModel extends Equatable {
       driverPhone: driverPhone ?? this.driverPhone,
       cancelReason: cancelReason ?? this.cancelReason,
       refundAmount: refundAmount ?? this.refundAmount,
-      review: review ?? this.review,
+      review: clearReview ? null : review ?? this.review,
       cancellation: cancellation ?? this.cancellation,
       seatNumber: seatNumber ?? this.seatNumber,
       seatPosition: seatPosition ?? this.seatPosition,
@@ -465,8 +544,30 @@ class TicketModel extends Equatable {
       bookingStatus: bookingStatus ?? this.bookingStatus,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       rawStatus: rawStatus ?? this.rawStatus,
+      pickupSnapshot: pickupSnapshot ?? this.pickupSnapshot,
+      dropoffSnapshot: dropoffSnapshot ?? this.dropoffSnapshot,
+      departureAt: departureAt ?? this.departureAt,
+      cargoItems: cargoItems ?? this.cargoItems,
+      cargoFee: cargoFee ?? this.cargoFee,
+      originalTicketSubtotal:
+          originalTicketSubtotal ?? this.originalTicketSubtotal,
+      ticketSubtotal: ticketSubtotal ?? this.ticketSubtotal,
+      promotionCode: promotionCode ?? this.promotionCode,
     );
   }
+
+  DateTime? get pickupAt => pickupSnapshot?.at(departureAt);
+  DateTime? get dropoffAt => dropoffSnapshot?.at(departureAt);
+  String get pickupTimeLabel => pickupAt != null
+      ? evidenceClock(pickupAt!, withDate: false)
+      : pickupSnapshot == null
+      ? trip.departureTime
+      : '—';
+  String get dropoffTimeLabel => dropoffAt != null
+      ? evidenceClock(dropoffAt!, withDate: false)
+      : dropoffSnapshot == null
+      ? trip.arrivalTime
+      : '—';
 
   /// A reserved seat (DA_DAT) is created before payment. Only authoritative
   /// booking AND order settlement permits a boarding credential.
@@ -574,11 +675,22 @@ class TicketModel extends Equatable {
     ticketCode,
     status,
     finalAmount,
+    totalAmount,
+    discountAmount,
     review,
     cancelReason,
     bookingStatus,
     paymentStatus,
     rawStatus,
     cancellation,
+    trip,
+    pickupSnapshot,
+    dropoffSnapshot,
+    departureAt,
+    cargoItems,
+    cargoFee,
+    originalTicketSubtotal,
+    ticketSubtotal,
+    promotionCode,
   ];
 }

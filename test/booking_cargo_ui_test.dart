@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -544,8 +545,8 @@ void main() {
           );
         });
 
-        // Before creating order: finalAmount is null, ticketFinalAmount is 190000
-        expect(bloc.state.finalAmount, isNull);
+        // Before creating order: ticket-only finalAmount is 190000; fee is separate
+        expect(bloc.state.finalAmount, 190000);
         expect(bloc.state.ticketFinalAmount, 190000);
         expect(bloc.state.canSubmitDraft, isTrue);
 
@@ -560,10 +561,10 @@ void main() {
         );
         await tester.pump();
 
-        // Pre-order view shows "Xác định khi tạo đơn" and "Phí gửi hàng được xác định khi tạo đơn", never "0 đ"
-        expect(find.text('Xác định khi tạo đơn'), findsWidgets);
+        // Pre-order shows the known ticket price and separate station-paid cargo.
+        expect(find.textContaining('190.000'), findsWidgets);
         expect(
-          find.textContaining('Phí gửi hàng được xác định khi tạo đơn'),
+          find.textContaining('Cước vật phẩm thanh toán riêng tại bến'),
           findsWidgets,
         );
         expect(
@@ -574,15 +575,15 @@ void main() {
         // Tap CTA "Tạo đơn & Thanh toán"
         final createBtn = find.widgetWithText(
           DiscoveryButton,
-          'Tạo đơn & Thanh toán',
+          'Thanh toán ${CurrencyFormatter.format(190000)}',
         );
         expect(createBtn, findsOneWidget);
         await tester.tap(createBtn);
         await _pumpUntil(tester, () => bloc.state.pendingBookingId != null);
 
-        // Verify order created with server shippingFee (50.000 đ) and total (240.000 đ)
+        // Server returns cargo estimate 50.000đ separately from the online ticket total 190.000đ.
         expect(bloc.state.checkoutBooking?.shippingFee, 50000);
-        expect(bloc.state.checkoutBooking?.totalAmount, 240000);
+        expect(bloc.state.checkoutBooking?.totalAmount, 190000);
         expect(bloc.state.checkoutBooking?.shipment?.code, 'WAYBILL-101');
         expect(bloc.state.isCheckoutLocked, isTrue);
 
@@ -593,7 +594,7 @@ void main() {
         );
         expect(find.text('WAYBILL-101'), findsOneWidget);
         expect(find.textContaining('50.000'), findsWidgets);
-        expect(find.textContaining('240.000'), findsWidgets);
+        expect(find.textContaining('190.000'), findsWidgets);
 
         // Mark paid on server and confirm payment -> BookingSuccessScreen
         server.paid.add(101 + 900);
@@ -617,8 +618,8 @@ void main() {
           findsOneWidget,
         );
         expect(find.textContaining('Thùng quà Đà Lạt × 2'), findsOneWidget);
-        // The order total includes cargo; a boarding ticket still costs190000.
-        expect(find.textContaining('240.000'), findsOneWidget);
+        // Cargo is station-paid; online order and boarding ticket both cost 190000.
+        expect(find.textContaining('190.000'), findsWidgets);
       },
     );
   });
@@ -658,10 +659,10 @@ void main() {
         });
         addTearDown(cubit.close);
 
-        // Outbound has cargo enabled -> cubit.state.totalAmount is null before creation
+        // Cargo is station-paid, so the ticket-only total remains known before creation
         expect(cubit.state.outbound.cargo.enabled, isTrue);
         expect(cubit.state.inbound.cargo.enabled, isFalse);
-        expect(cubit.state.totalAmount, isNull);
+        expect(cubit.state.totalAmount, 450000);
 
         await tester.pumpWidget(
           MaterialApp(
@@ -670,12 +671,12 @@ void main() {
         );
         await tester.pump();
 
-        // Confirm button is enabled on RoundTripSummaryStep despite totalAmount == null
+        // Confirm is enabled with the ticket-only round-trip total
         final confirmBtn = tester.widget<ElevatedButton>(
           find.byKey(const ValueKey('confirm-and-pay-btn')),
         );
         expect(confirmBtn.onPressed, isNotNull);
-        expect(find.text('Xác định khi tạo đơn'), findsWidgets);
+        expect(find.textContaining('450.000'), findsWidgets);
 
         // Tap confirm -> outbound created (with cargo), inbound fails -> partiallyCreated
         await tester.ensureVisible(
@@ -689,7 +690,7 @@ void main() {
 
         expect(cubit.state.outbound.pendingBookingId, 1001);
         expect(cubit.state.outbound.checkoutBooking?.shippingFee, 50000);
-        expect(cubit.state.outbound.checkoutBooking?.totalAmount, 240000);
+        expect(cubit.state.outbound.checkoutBooking?.totalAmount, 190000);
         expect(cubit.state.outbound.isCheckoutLocked, isTrue);
         expect(cubit.state.inbound.pendingBookingId, isNull);
 

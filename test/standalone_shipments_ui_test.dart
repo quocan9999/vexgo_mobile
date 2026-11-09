@@ -187,6 +187,13 @@ ShipmentLookup _fakeLookup({
 );
 
 class FakeShipmentRepository implements ShipmentRepository {
+  @override
+  Future<ShipmentCancellation> cancel({
+    required String waybillCode,
+    required String phone,
+    String? reason,
+  }) async => throw UnimplementedError();
+
   List<ShipmentRoute> routesToReturn = [
     for (final id in [1, 2])
       ShipmentRoute(
@@ -338,6 +345,37 @@ class FakeAuthBloc extends Bloc<AuthEvent, AuthState> implements AuthBloc {
   AuthRepository get authRepository => throw UnimplementedError();
 }
 
+Future<List<CityModel>> _fixtureCities() async => const [
+  CityModel(
+    id: 'HCM',
+    name: 'TP. Hồ Chí Minh',
+    region: 'Miền Nam',
+    isPopular: true,
+  ),
+  CityModel(id: 'DL', name: 'Đà Lạt', region: 'Tây Nguyên', isPopular: true),
+];
+
+ShipmentsHostScreen _host({
+  ShipmentRepository? repository,
+  ShipmentRepository Function()? repositoryFactory,
+  ShipmentFlowCubit? cubit,
+  Future<List<CityModel>> Function()? citiesLoader,
+}) => ShipmentsHostScreen(
+  repository: repository,
+  repositoryFactory: repositoryFactory,
+  cubit: cubit,
+  citiesLoader: citiesLoader ?? _fixtureCities,
+);
+
+ShipmentCreateView _createView({
+  required ShipmentFlowCubit cubit,
+  required ShipmentFlowState state,
+}) => ShipmentCreateView(
+  cubit: cubit,
+  state: state,
+  citiesLoader: _fixtureCities,
+);
+
 Widget _wrap(
   Widget child, {
   FakeAuthBloc? authBloc,
@@ -415,7 +453,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrap(ShipmentsHostScreen(repository: fakeRepo, cubit: cubit)),
+          _wrap(_host(repository: fakeRepo, cubit: cubit)),
         );
         await tester.pumpAndSettle();
 
@@ -566,9 +604,7 @@ void main() {
         now: () => _testTime,
       );
 
-      await tester.pumpWidget(
-        _wrap(ShipmentsHostScreen(repository: fakeRepo, cubit: cubit)),
-      );
+      await tester.pumpWidget(_wrap(_host(repository: fakeRepo, cubit: cubit)));
       await tester.pumpAndSettle();
 
       // Search trips via city selector
@@ -613,9 +649,7 @@ void main() {
         now: () => _testTime,
       );
 
-      await tester.pumpWidget(
-        _wrap(ShipmentsHostScreen(repository: fakeRepo, cubit: cubit)),
-      );
+      await tester.pumpWidget(_wrap(_host(repository: fakeRepo, cubit: cubit)));
       await tester.pumpAndSettle();
 
       // Setup valid form
@@ -855,9 +889,7 @@ void main() {
         now: () => _testTime,
       );
 
-      await tester.pumpWidget(
-        _wrap(ShipmentsHostScreen(repository: fakeRepo, cubit: cubit)),
-      );
+      await tester.pumpWidget(_wrap(_host(repository: fakeRepo, cubit: cubit)));
       await tester.pumpAndSettle();
 
       // Select departure city in from selector
@@ -892,7 +924,7 @@ void main() {
         // Test A: 320dp width
         await tester.pumpWidget(
           _wrap(
-            ShipmentsHostScreen(repository: fakeRepo, cubit: cubit),
+            _host(repository: fakeRepo, cubit: cubit),
             width: 320,
             height: 600,
           ),
@@ -910,7 +942,7 @@ void main() {
         // Test B: Landscape (800x360)
         await tester.pumpWidget(
           _wrap(
-            ShipmentsHostScreen(repository: fakeRepo, cubit: cubit),
+            _host(repository: fakeRepo, cubit: cubit),
             width: 800,
             height: 360,
           ),
@@ -921,7 +953,7 @@ void main() {
         // Test C: 2.0x Text Scaler
         await tester.pumpWidget(
           _wrap(
-            ShipmentsHostScreen(repository: fakeRepo, cubit: cubit),
+            _host(repository: fakeRepo, cubit: cubit),
             width: 360,
             height: 700,
             textScale: 2.0,
@@ -945,7 +977,7 @@ void main() {
                 size: Size(360, 640),
                 viewInsets: EdgeInsets.only(bottom: 300),
               ),
-              child: ShipmentsHostScreen(repository: fakeRepo, cubit: cubit),
+              child: _host(repository: fakeRepo, cubit: cubit),
             ),
           ),
         );
@@ -965,7 +997,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrap(ShipmentsHostScreen(repository: fakeRepo, cubit: cubit)),
+          _wrap(_host(repository: fakeRepo, cubit: cubit)),
         );
         await tester.pumpAndSettle();
 
@@ -1008,7 +1040,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          ShipmentsHostScreen(repository: fakeRepo, cubit: cubit),
+          _host(repository: fakeRepo, cubit: cubit),
           authBloc: authBloc,
         ),
       );
@@ -1047,7 +1079,7 @@ void main() {
 
         await tester.pumpWidget(
           _wrap(
-            ShipmentsHostScreen(repository: fakeRepo, cubit: cubit),
+            _host(repository: fakeRepo, cubit: cubit),
             authBloc: authBloc,
           ),
         );
@@ -1144,7 +1176,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrap(ShipmentsHostScreen(repository: fakeRepo, cubit: cubit)),
+          _wrap(_host(repository: fakeRepo, cubit: cubit)),
         );
         await tester.pumpAndSettle();
 
@@ -1370,7 +1402,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrap(ShipmentsHostScreen(repository: fakeRepo, cubit: cubit)),
+          _wrap(_host(repository: fakeRepo, cubit: cubit)),
         );
         await tester.pumpAndSettle();
 
@@ -1494,7 +1526,7 @@ void main() {
 
         await tester.pumpWidget(
           _wrap(
-            ShipmentsHostScreen(repository: fakeRepo, cubit: cubit),
+            _host(repository: fakeRepo, cubit: cubit),
             authBloc: authBloc,
           ),
         );
@@ -1548,10 +1580,7 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: ShipmentsHostScreen(
-              repository: server.repository,
-              cubit: first,
-            ),
+            home: _host(repository: server.repository, cubit: first),
           ),
         );
         await tester.pumpAndSettle();
@@ -1590,7 +1619,7 @@ void main() {
         final server = fixture.Server();
 
         await tester.pumpWidget(
-          MaterialApp(home: ShipmentsHostScreen(repository: server.repository)),
+          MaterialApp(home: _host(repository: server.repository)),
         );
         await tester.pumpAndSettle();
 
@@ -1662,8 +1691,7 @@ void main() {
                   routes: [
                     GoRoute(
                       path: '/shipments',
-                      builder: (_, _) =>
-                          ShipmentsHostScreen(repository: fakeRepo),
+                      builder: (_, _) => _host(repository: fakeRepo),
                     ),
                   ],
                 ),
@@ -1758,7 +1786,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          _wrap(ShipmentsHostScreen(repository: fakeRepo, cubit: cubit)),
+          _wrap(_host(repository: fakeRepo, cubit: cubit)),
         );
         await tester.pumpAndSettle();
 
@@ -1857,12 +1885,7 @@ void main() {
         }
 
         await tester.pumpWidget(
-          _wrap(
-            ShipmentsHostScreen(
-              repository: fakeRepo,
-              citiesLoader: customLoader,
-            ),
-          ),
+          _wrap(_host(repository: fakeRepo, citiesLoader: customLoader)),
         );
         await tester.pumpAndSettle();
 
@@ -1908,10 +1931,7 @@ void main() {
         final authBloc = FakeAuthBloc(isAuth: true);
 
         await tester.pumpWidget(
-          _wrap(
-            ShipmentsHostScreen(repository: server.repository),
-            authBloc: authBloc,
-          ),
+          _wrap(_host(repository: server.repository), authBloc: authBloc),
         );
         await tester.pumpAndSettle();
 
@@ -1963,9 +1983,7 @@ void main() {
       '24. Date picker ignores its result after session replaces the host owner',
       (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: ShipmentsHostScreen(repository: FakeShipmentRepository()),
-          ),
+          MaterialApp(home: _host(repository: FakeShipmentRepository())),
         );
         await tester.pumpAndSettle();
         final first = tester
@@ -2016,7 +2034,7 @@ void main() {
               body: ValueListenableBuilder<ShipmentFlowCubit>(
                 valueListenable: owner,
                 builder: (_, cubit, _) =>
-                    ShipmentCreateView(cubit: cubit, state: cubit.state),
+                    _createView(cubit: cubit, state: cubit.state),
               ),
             ),
           ),

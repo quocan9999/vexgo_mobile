@@ -460,6 +460,46 @@ class ShipmentRecord {
     this.outstandingAmount,
   }) : items = List.unmodifiable(items),
        timeline = List.unmodifiable(timeline);
+
+  ShipmentRecord copyWithTracking({
+    required String status,
+    String? paymentStatus,
+    List<ShipmentTimelineEntry>? history,
+  }) => ShipmentRecord(
+    trip: trip,
+    pickup: pickup,
+    dropoff: dropoff,
+    sentAt: sentAt,
+    senderEmail: senderEmail,
+    receiverCccd: receiverCccd,
+    note: note,
+    identity: identity,
+    paymentId: paymentId,
+    tripId: tripId,
+    senderPointId: senderPointId,
+    receiverPointId: receiverPointId,
+    totalFee: totalFee,
+    baseFee: baseFee,
+    serviceFee: serviceFee,
+    discount: discount,
+    senderName: senderName,
+    senderPhone: senderPhone,
+    receiverName: receiverName,
+    receiverPhone: receiverPhone,
+    rawStatus: status,
+    rawPaymentStatus: paymentStatus ?? rawPaymentStatus,
+    paymentMethod: paymentMethod,
+    payer: payer,
+    expiresAt: expiresAt,
+    dropoffDeadline: dropoffDeadline,
+    expectedSendDate: expectedSendDate,
+    confirmedAt: confirmedAt,
+    estimatedFee: estimatedFee,
+    paidAmount: paidAmount,
+    outstandingAmount: outstandingAmount,
+    items: items,
+    timeline: history ?? timeline,
+  );
   factory ShipmentRecord.fromJson(Map<String, dynamic> j) {
     final p = shipmentMap(j['pricing']),
         sender = shipmentMap(j['sender']),
@@ -610,6 +650,33 @@ class ShipmentLookup {
       rawOrderStatus == 'CHO_THANH_TOAN' &&
       const {'DANG_XU_LY', 'CHO_THANH_TOAN'}.contains(rawPaymentStatus) &&
       amount > 0;
+
+  ShipmentLookup copyWithTracking({
+    required String status,
+    String? paymentStatus,
+    List<ShipmentTimelineEntry>? history,
+  }) => ShipmentLookup(
+    waybillCode: waybillCode,
+    orderCode: orderCode,
+    rawStatus: status,
+    rawOrderStatus: status == 'DA_HUY' ? 'DA_HUY' : rawOrderStatus,
+    rawPaymentStatus: paymentStatus ?? rawPaymentStatus,
+    amount: amount,
+    packageCount: packageCount,
+    paymentMethod: paymentMethod,
+    requiresReconciliation: requiresReconciliation,
+    expiresAt: expiresAt,
+    serverTime: serverTime,
+    dropoffDeadline: dropoffDeadline,
+    pickupName: pickupName,
+    pickupAddress: pickupAddress,
+    dropoffName: dropoffName,
+    dropoffAddress: dropoffAddress,
+    carrier: carrier,
+    origin: origin,
+    destination: destination,
+    timeline: history ?? timeline,
+  );
   factory ShipmentLookup.fromJson(Map<String, dynamic> j) {
     final pickup = shipmentMap(j['pickupPoint']),
         dropoff = shipmentMap(j['dropoffPoint']),
@@ -698,4 +765,28 @@ class ShipmentListEntry {
       carrier = cargoText(shipmentMap(j['trip'])['busCompany']),
       sentAt = shipmentDate(j['sentAt']);
   ShipmentStatus get status => ShipmentStatus.parse(rawStatus);
+}
+
+class ShipmentCancellation {
+  final String waybillCode;
+  final DateTime updatedAt;
+  final bool hasPaidBeforeCancel;
+  final String message;
+  const ShipmentCancellation({
+    required this.waybillCode,
+    required this.updatedAt,
+    required this.hasPaidBeforeCancel,
+    required this.message,
+  });
+  factory ShipmentCancellation.fromJson(Map<String, dynamic> json) {
+    if (json['status'] != 'DA_HUY' || json['hasPaidBeforeCancel'] is! bool) {
+      throw const FormatException('Chưa xác nhận kết quả hủy đơn gửi hàng.');
+    }
+    return ShipmentCancellation(
+      waybillCode: cargoText(json['waybillCode']),
+      updatedAt: shipmentDate(json['updatedAt']),
+      hasPaidBeforeCancel: json['hasPaidBeforeCancel'] as bool,
+      message: cargoText(json['message']),
+    );
+  }
 }

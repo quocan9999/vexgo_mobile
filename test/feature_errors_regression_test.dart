@@ -256,7 +256,9 @@ void main() {
         ),
       );
       await tick();
-      expect(tb.state.errorMessage, contains('lookup offline'));
+      expect(tb.state.reviewStatus, TicketReviewStatus.uncertain);
+      expect(tb.state.errorMessage, isNotEmpty);
+      expect(tb.state.errorMessage, isNot(contains('lookup offline')));
       expect(tb.state.tickets.single.review, isNull);
     },
   );

@@ -166,6 +166,7 @@ class FakeBookingRemoteDataSource implements BookingRemoteDataSource {
     BookingCargoDraft? cargo,
     int? pickupTripPointId,
     int? dropoffTripPointId,
+    String? comboCode,
   }) async {
     throw UnimplementedError();
   }

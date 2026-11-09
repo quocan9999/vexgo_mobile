@@ -1,10 +1,15 @@
+import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/core/utils/date_formatter.dart';
+import 'package:vexgo_app/data/models/booking_cargo_model.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_event.dart';
 import 'package:vexgo_app/features/user/booking/bloc/booking_flow_state.dart';
+import 'package:vexgo_app/features/user/booking/bloc/luggage_cubit.dart';
 import 'package:vexgo_app/features/user/booking/presentation/widgets/booking_cargo_section_card.dart';
+import 'package:vexgo_app/features/user/booking/presentation/widgets/booking_luggage_section_card.dart';
 import 'package:vexgo_app/features/user/round_trip/round_trip_request.dart';
 
 /// Unified review & summary step for both round-trip legs.
@@ -23,6 +28,14 @@ class RoundTripSummaryStep extends StatefulWidget {
   final VoidCallback onRemoveInboundVoucher;
   final ValueChanged<TripLeg>? onEditLeg;
   final void Function(TripLeg leg, BookingFlowEvent event)? onDispatchCargo;
+  final LuggageCubit? outboundLuggageCubit;
+  final LuggageCubit? inboundLuggageCubit;
+  final String? outboundSeatChangeNotice;
+  final String? inboundSeatChangeNotice;
+  final VoidCallback? onDismissOutboundSeatChangeNotice;
+  final VoidCallback? onDismissInboundSeatChangeNotice;
+  final Future<void> Function(TripLeg leg, BookingCargoDraft? draft)?
+  onSyncLuggage;
   final VoidCallback onSubmit;
   final VoidCallback onBack;
 
@@ -40,6 +53,13 @@ class RoundTripSummaryStep extends StatefulWidget {
     required this.onRemoveInboundVoucher,
     this.onEditLeg,
     this.onDispatchCargo,
+    this.outboundLuggageCubit,
+    this.inboundLuggageCubit,
+    this.outboundSeatChangeNotice,
+    this.inboundSeatChangeNotice,
+    this.onDismissOutboundSeatChangeNotice,
+    this.onDismissInboundSeatChangeNotice,
+    this.onSyncLuggage,
     required this.onSubmit,
     required this.onBack,
   });
@@ -69,23 +89,49 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
     if (s.cargo.enabled) {
       final ticketAmt = s.ticketFinalAmount;
       if (ticketAmt != null) {
-        return '${CurrencyFormatter.format(ticketAmt)} + phí gửi hàng';
+        return CurrencyFormatter.format(ticketAmt);
       }
-      return 'Phí gửi hàng được xác định khi tạo đơn';
+      return 'Cước vật phẩm thanh toán riêng tại bến';
     }
     return s.quoteLoading ? 'Đang xác minh giá...' : 'Chưa có giá vé';
   }
 
+  bool _isLegLuggageValid(LuggageCubit? cubit) {
+    if (cubit == null) return true;
+    return cubit.validationError == null &&
+        (cubit.state.phase == LuggagePhase.idle || cubit.policyIsFresh);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.outboundLuggageCubit != null &&
+        widget.inboundLuggageCubit != null) {
+      return BlocBuilder<LuggageCubit, LuggageState>(
+        bloc: widget.outboundLuggageCubit,
+        builder: (context, _) => BlocBuilder<LuggageCubit, LuggageState>(
+          bloc: widget.inboundLuggageCubit,
+          builder: (context, _) => _buildSummaryContent(context),
+        ),
+      );
+    }
+    return _buildSummaryContent(context);
+  }
+
+  Widget _buildSummaryContent(BuildContext context) {
     final out = widget.outbound;
     final back = widget.inbound;
     final outReady =
         out.pendingBookingId != null ||
-        (out.hasUsableQuote && !out.quoteLoading && out.cargo.isValid);
+        (out.hasUsableQuote &&
+            !out.quoteLoading &&
+            out.cargo.isValid &&
+            _isLegLuggageValid(widget.outboundLuggageCubit));
     final backReady =
         back.pendingBookingId != null ||
-        (back.hasUsableQuote && !back.quoteLoading && back.cargo.isValid);
+        (back.hasUsableQuote &&
+            !back.quoteLoading &&
+            back.cargo.isValid &&
+            _isLegLuggageValid(widget.inboundLuggageCubit));
     final hasCargoPendingPrice =
         (out.pendingBookingId == null && out.cargo.enabled) ||
         (back.pendingBookingId == null && back.cargo.enabled);
@@ -289,7 +335,7 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                 if (hasCargoPendingPrice) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Phí gửi hàng được xác định khi tạo đơn. Tổng thanh toán mỗi chiều sẽ được máy chủ trả về khi tạo đơn.',
+                    'Cước vật phẩm dự tính được thanh toán tại bến, không cộng vào tiền vé của hai chiều.',
                     style: DiscoveryTextStyles.caption.copyWith(
                       color: DiscoveryColors.secondary,
                       fontWeight: FontWeight.w600,
@@ -609,13 +655,19 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
                 spacing: 8,
                 runSpacing: 2,
                 children: [
-                  Text('Phí gửi hàng', style: DiscoveryTextStyles.bodySmall),
+                  Text(
+                    cargoSettlementLabel(
+                      state.checkoutBooking?.cargoPayment ??
+                          CargoSettlement.atStation,
+                    ),
+                    style: DiscoveryTextStyles.bodySmall,
+                  ),
                   Text(
                     state.checkoutBooking?.shippingFee != null
                         ? CurrencyFormatter.format(
                             state.checkoutBooking!.shippingFee!,
                           )
-                        : 'Phí gửi hàng được xác định khi tạo đơn',
+                        : 'Cước vật phẩm thanh toán riêng tại bến',
                     style: DiscoveryTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w700,
                       color: state.checkoutBooking?.shippingFee != null
@@ -627,7 +679,57 @@ class _RoundTripSummaryStepState extends State<RoundTripSummaryStep> {
               ),
             ),
           ],
-          if (widget.onDispatchCargo != null) ...[
+          if (leg == TripLeg.outbound &&
+              widget.outboundLuggageCubit != null) ...[
+            const SizedBox(height: 12),
+            BookingLuggageSectionCard(
+              cubit: widget.outboundLuggageCubit!,
+              locked: state.isCheckoutLocked || widget.busy,
+              scopeKey: leg.name,
+              title: 'Hành lý đi kèm',
+              legBadge: 'Lượt đi',
+              seatChangeNotice: widget.outboundSeatChangeNotice,
+              onDismissSeatChangeNotice:
+                  widget.onDismissOutboundSeatChangeNotice,
+              onSyncBookingCargo: widget.onSyncLuggage != null
+                  ? (draft) => widget.onSyncLuggage!(leg, draft)
+                  : null,
+            ),
+            if (state.cargo.enabled &&
+                widget.outboundLuggageCubit!.state.phase ==
+                    LuggagePhase.idle) ...[
+              const SizedBox(height: 10),
+              BookingCargoSummaryBox(
+                state: state,
+                scopeKey: 'summary-${leg.name}',
+              ),
+            ],
+          ] else if (leg == TripLeg.inbound &&
+              widget.inboundLuggageCubit != null) ...[
+            const SizedBox(height: 12),
+            BookingLuggageSectionCard(
+              cubit: widget.inboundLuggageCubit!,
+              locked: state.isCheckoutLocked || widget.busy,
+              scopeKey: leg.name,
+              title: 'Hành lý đi kèm',
+              legBadge: 'Lượt về',
+              seatChangeNotice: widget.inboundSeatChangeNotice,
+              onDismissSeatChangeNotice:
+                  widget.onDismissInboundSeatChangeNotice,
+              onSyncBookingCargo: widget.onSyncLuggage != null
+                  ? (draft) => widget.onSyncLuggage!(leg, draft)
+                  : null,
+            ),
+            if (state.cargo.enabled &&
+                widget.inboundLuggageCubit!.state.phase ==
+                    LuggagePhase.idle) ...[
+              const SizedBox(height: 10),
+              BookingCargoSummaryBox(
+                state: state,
+                scopeKey: 'summary-${leg.name}',
+              ),
+            ],
+          ] else if (widget.onDispatchCargo != null) ...[
             const SizedBox(height: 12),
             BookingCargoSectionCard(
               cargo: state.cargo,
