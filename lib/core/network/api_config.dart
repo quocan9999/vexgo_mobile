@@ -25,12 +25,16 @@ class ApiConfig {
   static bool useRealDevice = true;
 
   /// Default Base URL logic:
-  /// - Web / macOS / Windows / Linux: http://localhost:4000/api/v1
+  /// - Release build default: https://api.vexgo.site/api/v1
+  /// - Web / macOS / Windows / Linux (Debug/Test): http://localhost:4000/api/v1
   /// - Android (Physical with ADB Reverse): http://127.0.0.1:4000/api/v1
   /// - Android (Emulator without ADB): http://10.0.2.2:4000/api/v1
   static String get defaultBaseUrl {
     if (_envBaseUrl.isNotEmpty) {
-      return _envBaseUrl;
+      return _normalizeBaseUrl(_envBaseUrl);
+    }
+    if (kReleaseMode) {
+      return 'https://api.vexgo.site/api/v1';
     }
     if (kIsWeb) {
       return 'http://localhost:$defaultPort/api/v1';
@@ -49,6 +53,18 @@ class ApiConfig {
     }
   }
 
+  static String _normalizeBaseUrl(String raw) {
+    var normalized = raw.trim();
+    while (normalized.endsWith('/')) {
+      normalized = normalized.substring(0, normalized.length - 1);
+    }
+    if (normalized.isEmpty) return '';
+    if (!normalized.endsWith('/api/v1')) {
+      return '$normalized/api/v1';
+    }
+    return normalized;
+  }
+
   /// Dynamic Base URL (can be customized at runtime or loaded from SharedPreferences)
   static String _customBaseUrl = '';
 
@@ -56,10 +72,7 @@ class ApiConfig {
       _customBaseUrl.isNotEmpty ? _customBaseUrl : defaultBaseUrl;
 
   static void setCustomBaseUrl(String url) {
-    _customBaseUrl = url.trim();
-    if (_customBaseUrl.endsWith('/')) {
-      _customBaseUrl = _customBaseUrl.substring(0, _customBaseUrl.length - 1);
-    }
+    _customBaseUrl = _normalizeBaseUrl(url);
   }
 
   static void resetBaseUrl() {
