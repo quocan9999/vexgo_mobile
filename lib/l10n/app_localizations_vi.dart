@@ -5115,4 +5115,22 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get uiUnableToConnectToTheServerCheckYour =>
       'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.';
+
+  @override
+  String get uiDone => 'Xong';
+
+  @override
+  String uiDurationHoursMinutes(int hours, int minutes) {
+    return '$hours giờ $minutes phút';
+  }
+
+  @override
+  String uiDurationHours(int hours) {
+    return '$hours giờ';
+  }
+
+  @override
+  String uiDurationMinutes(int minutes) {
+    return '$minutes phút';
+  }
 }

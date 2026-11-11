@@ -69,8 +69,40 @@ class _FlatFilterBarState extends State<FlatFilterBar>
       color: Colors.white,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          // Measure the actual localized labels and counts. Equal-width tabs
+          // must fit the widest option, not just an estimated average width.
+          const labelStyle = TextStyle(
+            fontFamily: AppTypography.fontFamily,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          );
+          double textWidth(String text, TextStyle style) {
+            final painter = TextPainter(
+              text: TextSpan(text: text, style: style),
+              textDirection: Directionality.of(context),
+              textScaler: scale,
+            )..layout();
+            final width = painter.width;
+            painter.dispose();
+            return width;
+          }
+
+          final widest = widget.options.fold<double>(0, (width, option) {
+            final countWidth = option.count != null && option.count! > 0
+                ? 6 +
+                      textWidth(
+                        '${option.count}',
+                        labelStyle.copyWith(fontSize: 12),
+                      )
+                : 0.0;
+            return math.max(
+              width,
+              textWidth(option.label, labelStyle) + countWidth,
+            );
+          });
           final scroll =
-              constraints.maxWidth < widget.options.length * 112 ||
+              (widest.ceilToDouble() + 32 + 2) * widget.options.length + 16 >
+                  constraints.maxWidth ||
               scale.scale(1) > 1.3;
           return TabBar(
             controller: _controller,

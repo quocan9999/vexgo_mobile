@@ -1418,5 +1418,33 @@
   "uiEnterAValidVietnamesePhoneNumber": "Enter a valid Vietnamese phone number.",
   "uiPasswordMustBe8To72Utf8": "Password must be 8 to 72 UTF-8 bytes long.",
   "uiTheVerificationCodeMustHave6Digits": "The verification code must have 6 digits.",
-  "uiUnableToConnectToTheServerCheckYour": "Unable to connect to the server. Check your network connection."
+  "uiUnableToConnectToTheServerCheckYour": "Unable to connect to the server. Check your network connection.",
+  "uiDone": "Done",
+  "uiDurationHoursMinutes": "{hours} hr {minutes} min",
+  "uiDurationHours": "{hours} hr",
+  "uiDurationMinutes": "{minutes} min",
+  "@uiDurationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@uiDurationHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "@uiDurationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -4,6 +4,16 @@ import 'package:intl/intl.dart';
 class DateFormatter {
   DateFormatter._();
 
+  static String formatDuration(int? minutes, {String fallback = ''}) {
+    if (minutes == null || minutes <= 0) return fallback;
+    final hours = minutes ~/ 60;
+    final remainder = minutes % 60;
+    final strings = LocaleController.strings;
+    if (hours == 0) return strings.uiDurationMinutes(remainder);
+    if (remainder == 0) return strings.uiDurationHours(hours);
+    return strings.uiDurationHoursMinutes(hours, remainder);
+  }
+
   static String formatFullDate(DateTime date) {
     final List<String> weekdays = [
       'Thứ 2',

@@ -5121,4 +5121,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get uiUnableToConnectToTheServerCheckYour =>
       'Unable to connect to the server. Check your network connection.';
+
+  @override
+  String get uiDone => 'Done';
+
+  @override
+  String uiDurationHoursMinutes(int hours, int minutes) {
+    return '$hours hr $minutes min';
+  }
+
+  @override
+  String uiDurationHours(int hours) {
+    return '$hours hr';
+  }
+
+  @override
+  String uiDurationMinutes(int minutes) {
+    return '$minutes min';
+  }
 }

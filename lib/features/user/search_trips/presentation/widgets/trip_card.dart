@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/utils/date_formatter.dart';
 import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
@@ -114,7 +115,10 @@ class TripCard extends StatelessWidget {
                     children: [
                       if (trip.duration.isNotEmpty) ...[
                         Text(
-                          trip.duration,
+                          DateFormatter.formatDuration(
+                            trip.durationMinutes,
+                            fallback: trip.duration,
+                          ),
                           style: DiscoveryTextStyles.caption.copyWith(
                             color: DiscoveryColors.neutral500,
                             fontSize: 11,

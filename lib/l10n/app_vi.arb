@@ -3118,5 +3118,33 @@
   "uiEnterAValidVietnamesePhoneNumber": "Nhập số điện thoại Việt Nam hợp lệ.",
   "uiPasswordMustBe8To72Utf8": "Mật khẩu phải dài từ 8 đến 72 byte UTF-8.",
   "uiTheVerificationCodeMustHave6Digits": "Mã OTP phải gồm 6 chữ số.",
-  "uiUnableToConnectToTheServerCheckYour": "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng."
+  "uiUnableToConnectToTheServerCheckYour": "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.",
+  "uiDone": "Xong",
+  "uiDurationHoursMinutes": "{hours} giờ {minutes} phút",
+  "uiDurationHours": "{hours} giờ",
+  "uiDurationMinutes": "{minutes} phút",
+  "@uiDurationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@uiDurationHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "@uiDurationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

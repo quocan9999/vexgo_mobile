@@ -52,3 +52,12 @@ Tài liệu cơ chế Flutter: https://docs.flutter.dev/ui/internationalization 
 Debug APK đã build thành công (assembleDebug159,1s), chữ ký apksigner verify qua. Tệp: `mobile-qa-evidence/localization-20261108/app-debug-vi-en.apk`. SHA256 `f1ca4e83c29ef5993edb3062a9634390465308ef7ac2a153c066dc56b5119292`; bản chép khớp build output. API QA vẫn127.0.0.1:4012/api/v1, Real Mode và tài khoản VietQR sandbox từ public-defines của gói hành lý. Không kèm secret Backend.
 
 Build ghi lỗi cache incremental Kotlin do Pub cache ở ổC và worktree ở ổD, sau đó cơ chế fallback của compiler đã hoàn tất và lệnh trả thành công. Không sửa Gradle/source để tắt kiểm tra hoặc đổi phiên bản. Chưa cài APK mới lên điện thoại; không coi build thành công là device E2E.
+
+## Bổ sung sau kiểm thử Android 09/11/2026
+
+- `FlatFilterBar` đo nhãn theo font/cỡ chữ hiện tại và số lượng; nếu tab chia đều không đủ cho nhãn rộng nhất thì chuyển sang cuộn ngang. Giữ nguyên nhãn đầy đủ, số vé, semantics và vùng chạm >=48dp.
+- Đã dịch thông báo giới hạn ghế động, nút Xong của hành lý, map category QUY_DINH/TIM_CHUYEN của chatbot.
+- Thời lượng trên card chuyến một chiều/khứ hồi định dạng từ durationMinutes theo locale, giữ chuỗi gốc khi không có số phút. Không đổi payload API hoặc dữ liệu model.
+- Thêm 9 ca regression: tab tiếng Anh có số đếm ở 320/360/384/400dp với font1x/2x; duration và enum category.
+- Toàn bộ 990 test PASS; analyze không có issue. Log: mobile-qa-evidence/device-qa-20261109/fix-full-tests.log và fix-analyze.log (ngoài repository).
+- Máy thật trước đó vẫn cài APK cũ; không coi kết quả widget mới là xác nhận bản sửa đã chạy trên Android. Cần cập nhật APK mới để đối chiếu lại Upcoming/Cancelled.

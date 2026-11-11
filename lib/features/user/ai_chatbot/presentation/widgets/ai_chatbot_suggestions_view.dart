@@ -28,10 +28,14 @@ class AiChatbotSuggestionsView extends StatelessWidget {
 
   static String categoryLabel(String raw) {
     return switch (raw.trim().toUpperCase()) {
-      'POLICY' || 'CHINH_SACH' => LocaleController.strings.uiPolicies,
+      'POLICY' ||
+      'CHINH_SACH' ||
+      'QUY_DINH' => LocaleController.strings.uiPolicies,
       'LUGGAGE' || 'HANH_LY' => LocaleController.strings.uiLuggage,
       'BOOKING' || 'DAT_VE' => LocaleController.strings.uiBookTickets,
-      'TRIP' || 'CHUYEN_XE' => LocaleController.strings.uiBusTrips,
+      'TRIP' ||
+      'CHUYEN_XE' ||
+      'TIM_CHUYEN' => LocaleController.strings.uiBusTrips,
       'PAYMENT' || 'THANH_TOAN' => LocaleController.strings.uiPayment,
       'REFUND' || 'HUY_VE' => LocaleController.strings.uiCancellationRefunds,
       'SHIPMENT' || 'GUI_HANG' => LocaleController.strings.uiShipments,

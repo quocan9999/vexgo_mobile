@@ -72,7 +72,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
   bool get _hasUnsavedInput => _isEditingCarryOn || _isEditingChecked;
 
   Future<void> _openManager() async {
-    if (_managerOpen || widget.cubit.isClosed) return;
+    if (!mounted || _managerOpen || widget.cubit.isClosed) return;
     FocusManager.instance.primaryFocus?.unfocus();
     _managerOpen = true;
     if (widget.cubit.state.phase == LuggagePhase.idle) {
@@ -83,14 +83,14 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
         MaterialPageRoute(
           builder: (routeContext) => ValueListenableBuilder<int>(
             valueListenable: _managerRevision,
-            builder: (_, revision, _) {
+            builder: (managerContext, revision, _) {
+              // The pushed page can outlive this card when a hold expires.
+              final strings = managerContext.l10n;
               if (!mounted) {
                 return Scaffold(
-                  appBar: AppBar(
-                    title: Text(context.l10n.uiAccompaniedLuggage),
-                  ),
+                  appBar: AppBar(title: Text(strings.uiAccompaniedLuggage)),
                   body: Center(
-                    child: Text(context.l10n.uiThisBookingSessionHasEnded),
+                    child: Text(strings.uiThisBookingSessionHasEnded),
                   ),
                 );
               }
@@ -100,30 +100,29 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                 builder: (_, state) => PopScope(
                   canPop: false,
                   onPopInvokedWithResult: (didPop, result) async {
-                    if (didPop) return;
+                    if (didPop || !routeContext.mounted) return;
                     final unsaved =
                         _editorKey.currentState?._hasUnsavedInput ?? false;
                     if (unsaved) {
                       final discard = await showDialog<bool>(
                         context: routeContext,
                         builder: (dialogContext) => AlertDialog(
-                          title: Text(context.l10n.uiDiscardUnsavedDetails),
+                          title: Text(strings.uiDiscardUnsavedDetails),
                           content: Text(
-                            context
-                                .l10n
+                            strings
                                 .uiUnsavedDetailsWillBeDiscardedSavedItemsWill,
                           ),
                           actions: [
                             TextButton(
                               onPressed: () =>
                                   Navigator.pop(dialogContext, false),
-                              child: Text(context.l10n.uiKeepEditing),
+                              child: Text(strings.uiKeepEditing),
                             ),
                             TextButton(
                               onPressed: () =>
                                   Navigator.pop(dialogContext, true),
                               child: Text(
-                                context.l10n.uiDiscardUnsavedDetails5d5a16,
+                                strings.uiDiscardUnsavedDetails5d5a16,
                               ),
                             ),
                           ],
@@ -140,17 +139,13 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                       foregroundColor: Colors.white,
                       title: Text(
                         current.legBadge == null
-                            ? context.l10n.uiAccompaniedLuggage
-                            : context.l10n.uiLuggage030449(
-                                current.legBadge ?? '—',
-                              ),
+                            ? strings.uiAccompaniedLuggage
+                            : strings.uiLuggage030449(current.legBadge ?? '—'),
                       ),
                       actions: [
                         _infoButton(
-                          context.l10n.uiEstimatedFee,
-                          context
-                              .l10n
-                              .uiThisEstimateUsesTheOperatorSPackagesAnd,
+                          strings.uiEstimatedFee,
+                          strings.uiThisEstimateUsesTheOperatorSPackagesAnd,
                           'luggage-manager-info-${current.scopeKey}',
                         ),
                       ],
@@ -181,7 +176,10 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                           foregroundColor: Colors.white,
                         ),
                         onPressed: () {
-                          if (current.locked) {
+                          if (!routeContext.mounted) return;
+                          if (!mounted ||
+                              current.locked ||
+                              current.cubit.isClosed) {
                             Navigator.of(routeContext).pop();
                             return;
                           }
@@ -190,8 +188,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                             ScaffoldMessenger.of(routeContext).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  context
-                                      .l10n
+                                  strings
                                       .uiSaveOrDiscardTheCurrentItemBeforeFinishing,
                                 ),
                               ),
@@ -211,7 +208,7 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
                           Navigator.of(routeContext).pop();
                         },
                         child: Text(
-                          current.locked ? context.l10n.uiClose : 'Xong',
+                          current.locked ? strings.uiClose : strings.uiDone,
                         ),
                       ),
                     ),
@@ -228,62 +225,69 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
     }
   }
 
-  Widget _infoButton(
-    String title,
-    String description,
-    String key,
-  ) => IconButton(
-    key: Key(key),
-    tooltip: title,
-    constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-    icon: const Icon(Icons.info_outline_rounded, size: 20),
-    onPressed: () => showDialog<void>(
-      context: context,
-      builder: (dialogContext) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+  Widget _infoButton(String title, String description, String key) =>
+      IconButton(
+        key: Key(key),
+        tooltip: title,
+        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+        icon: const Icon(Icons.info_outline_rounded, size: 20),
+        onPressed: () {
+          if (!mounted) return;
+          unawaited(
+            showDialog<void>(
+              context: context,
+              builder: (dialogContext) => Dialog(
+                insetPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          title,
-                          style: Theme.of(dialogContext).textTheme.titleLarge,
+                      Flexible(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Semantics(
+                                header: true,
+                                child: Text(
+                                  title,
+                                  style: Theme.of(
+                                    dialogContext,
+                                  ).textTheme.titleLarge,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(description),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(description),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(48, 48),
+                            ),
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: Text(dialogContext.l10n.uiGotIt),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(48, 48),
-                    ),
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                    child: Text(context.l10n.uiGotIt),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
+            ),
+          );
+        },
+      );
 
   Widget _descriptionInfo(String title, String description, String key) => Row(
     children: [
@@ -476,9 +480,9 @@ class _BookingLuggageSectionCardState extends State<BookingLuggageSectionCard> {
   @override
   void dispose() {
     if (_managerOpen) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _managerRevision.value++,
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_managerOpen) _managerRevision.value++;
+      });
     } else {
       _managerRevision.dispose();
     }

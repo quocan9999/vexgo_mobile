@@ -8630,6 +8630,30 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.'**
   String get uiUnableToConnectToTheServerCheckYour;
+
+  /// No description provided for @uiDone.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xong'**
+  String get uiDone;
+
+  /// No description provided for @uiDurationHoursMinutes.
+  ///
+  /// In vi, this message translates to:
+  /// **'{hours} giờ {minutes} phút'**
+  String uiDurationHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @uiDurationHours.
+  ///
+  /// In vi, this message translates to:
+  /// **'{hours} giờ'**
+  String uiDurationHours(int hours);
+
+  /// No description provided for @uiDurationMinutes.
+  ///
+  /// In vi, this message translates to:
+  /// **'{minutes} phút'**
+  String uiDurationMinutes(int minutes);
 }
 
 class _AppLocalizationsDelegate

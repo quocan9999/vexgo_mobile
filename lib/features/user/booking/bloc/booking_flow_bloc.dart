@@ -1,3 +1,4 @@
+import 'package:vexgo_app/core/localization/locale_controller.dart';
 import 'package:vexgo_app/data/models/cargo_settlement.dart';
 import 'booking_rate_limit.dart';
 import 'package:vexgo_app/data/models/booking_cargo_model.dart';
@@ -440,8 +441,9 @@ class BookingFlowBloc extends Bloc<BookingFlowEvent, BookingFlowState> {
     if (!exists && current.length >= BookingFlowState.maxSeatsPerTrip) {
       emit(
         state.copyWith(
-          errorMessage:
-              'Bạn chỉ có thể chọn tối đa ${BookingFlowState.maxSeatsPerTrip} chỗ trong một lần đặt!',
+          errorMessage: LocaleController.strings.uiSelectUpToSeatsPerBooking(
+            BookingFlowState.maxSeatsPerTrip.toString(),
+          ),
         ),
       );
       return;

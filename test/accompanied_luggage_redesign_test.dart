@@ -186,6 +186,74 @@ void main() {
     await tap(t, 'luggage-manager-done-oneway');
     expect(find.byKey(const Key('luggage-manager-oneway')), findsNothing);
   });
+  testWidgets(
+    'expired booking can unmount its card while luggage page is open',
+    (t) async {
+      final c = await setup(t);
+      final visible = ValueNotifier(true);
+      addTearDown(visible.dispose);
+      await t.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ValueListenableBuilder<bool>(
+              valueListenable: visible,
+              builder: (_, showCard, _) => showCard
+                  ? BookingLuggageSectionCard(cubit: c, locked: false)
+                  : const Text('Chọn lại ghế'),
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      await tap(t, 'luggage-open-btn-oneway');
+      await tap(t, 'luggage-add-checked-btn-oneway');
+      // Expiry switches the underlying booking step back to seats while the
+      // pushed luggage route is still mounted.
+      visible.value = false;
+      await t.pumpAndSettle();
+      expect(t.takeException(), isNull);
+      expect(find.textContaining('Phiên đặt vé đã kết thúc'), findsOneWidget);
+      expect(
+        find.byKey(const Key('luggage-checked-save-btn-oneway')),
+        findsNothing,
+      );
+      await t.pageBack();
+      await t.pumpAndSettle();
+      expect(find.text('Chọn lại ghế'), findsOneWidget);
+      expect(t.takeException(), isNull);
+    },
+  );
+  testWidgets('luggage info dialog survives booking card disposal', (t) async {
+    final c = await setup(t);
+    final visible = ValueNotifier(true);
+    addTearDown(visible.dispose);
+    await t.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ValueListenableBuilder<bool>(
+            valueListenable: visible,
+            builder: (_, showCard, _) => showCard
+                ? BookingLuggageSectionCard(cubit: c, locked: false)
+                : const Text('Chọn lại ghế'),
+          ),
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    await tap(t, 'luggage-open-btn-oneway');
+    await tap(t, 'luggage-manager-info-oneway');
+    expect(find.byType(Dialog), findsOneWidget);
+    visible.value = false;
+    await t.pumpAndSettle();
+    expect(t.takeException(), isNull);
+    await t.tap(find.text('Đã hiểu'));
+    await t.pumpAndSettle();
+    expect(find.textContaining('Phiên đặt vé đã kết thúc'), findsOneWidget);
+    await t.pageBack();
+    await t.pumpAndSettle();
+    expect(find.text('Chọn lại ghế'), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
   testWidgets('account switch removes prior declarations on open manager', (
     t,
   ) async {
