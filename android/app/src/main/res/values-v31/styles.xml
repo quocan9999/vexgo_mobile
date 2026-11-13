@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@color/vexgo_brand_red</item>
+        <item name="android:windowSplashScreenBackground">@color/vexgo_brand_red</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/vexgo_splash_mark</item>
+    </style>
+</resources>
