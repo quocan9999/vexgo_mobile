@@ -22,8 +22,7 @@ void main() {
     await tester.pumpWidget(const VexGoApp());
     await tester.pump();
 
-    // Verify that VexGo title is found
-    expect(find.text('VexGo'), findsOneWidget);
+    expect(find.bySemanticsLabel('VexGo'), findsOneWidget);
   });
 }
 

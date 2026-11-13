@@ -4,6 +4,7 @@ import '../widgets/available_offers_section.dart';
 import '../../../ai_chatbot/presentation/widgets/ai_chatbot_entry_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/data/repositories/trip_repository.dart';
@@ -37,7 +38,7 @@ class _HomeScreenContent extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: ColoredBox(
-              color: DiscoveryColors.header,
+              color: const Color(0xFFE8272B),
               child: SafeArea(
                 bottom: false,
                 child: Padding(
@@ -47,33 +48,14 @@ class _HomeScreenContent extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.directions_bus_outlined,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                      const SizedBox(width: 8),
                       Expanded(
-                        child: Semantics(
-                          label: 'VexGo',
-                          child: ExcludeSemantics(
-                            child: Text.rich(
-                              TextSpan(
-                                children: const [
-                                  TextSpan(text: 'Vex'),
-                                  TextSpan(
-                                    text: 'Go',
-                                    style: TextStyle(
-                                      color: DiscoveryColors.logoAccent,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              style: DiscoveryTextStyles.h1.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: SvgPicture.asset(
+                            'assets/icons/vexgo_wordmark.svg',
+                            height: 32,
+                            fit: BoxFit.contain,
+                            semanticsLabel: 'VexGo',
                           ),
                         ),
                       ),
