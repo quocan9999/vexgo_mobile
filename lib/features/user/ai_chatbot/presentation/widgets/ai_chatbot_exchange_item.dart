@@ -4,6 +4,7 @@ import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/features/user/ai_chatbot/ai_chatbot_cubit.dart';
+import 'ai_chatbot_markdown_text.dart';
 
 class AiChatbotExchangeItem extends StatefulWidget {
   final int exchangeIndex;
@@ -145,9 +146,10 @@ class _AiChatbotExchangeItemState extends State<AiChatbotExchangeItem> {
                   ],
                 ),
                 const SizedBox(height: 6),
-                SelectableText(
-                  answer.reply,
-                  style: DiscoveryTextStyles.bodyMedium.copyWith(
+                AiChatbotMarkdownText(
+                  key: Key('ai-chatbot-assistant-markdown-$idx'),
+                  data: answer.reply,
+                  baseStyle: DiscoveryTextStyles.bodyMedium.copyWith(
                     color: DiscoveryColors.neutral900,
                     height: 1.5,
                   ),
