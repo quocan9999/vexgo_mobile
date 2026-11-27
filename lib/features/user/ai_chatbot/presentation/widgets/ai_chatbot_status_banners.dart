@@ -4,6 +4,7 @@ import 'package:vexgo_app/core/constants/app_typography.dart';
 import 'package:vexgo_app/core/design/discovery_theme.dart';
 import 'package:vexgo_app/core/utils/currency_formatter.dart';
 import 'package:vexgo_app/features/user/ai_chatbot/ai_chatbot_cubit.dart';
+import 'ai_chatbot_markdown_text.dart';
 
 class AiChatbotUncertainBanner extends StatelessWidget {
   final String? message;
@@ -343,13 +344,24 @@ class AiChatbotHistoryCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      SelectableText(
-                        msg.content,
-                        style: DiscoveryTextStyles.bodySmall.copyWith(
-                          color: DiscoveryColors.neutral900,
-                          height: 1.4,
+                      if (msg.role == 'ASSISTANT')
+                        AiChatbotMarkdownText(
+                          key: Key('ai-chatbot-history-markdown-$mIdx'),
+                          data: msg.content,
+                          compact: true,
+                          baseStyle: DiscoveryTextStyles.bodySmall.copyWith(
+                            color: DiscoveryColors.neutral900,
+                            height: 1.4,
+                          ),
+                        )
+                      else
+                        SelectableText(
+                          msg.content,
+                          style: DiscoveryTextStyles.bodySmall.copyWith(
+                            color: DiscoveryColors.neutral900,
+                            height: 1.4,
+                          ),
                         ),
-                      ),
                       if (msg.citations.isNotEmpty) ...[
                         const SizedBox(height: 6),
                         Text(

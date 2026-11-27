@@ -956,5 +956,256 @@ void main() {
         );
       },
     );
+
+    testWidgets(
+      '11. Assistant reply and server history render Markdown formatting safely while keeping user input plain text and blocking remote images/links',
+      (tester) async {
+        const mdReply = '''### Quy định hành lý
+
+- Miễn phí **1 kiện xách tay** dưới *9 kg*
+- Mã áp dụng: `LUG-FREE`
+- Link tham khảo [Trang ngoài](https://untrusted.example/phish)
+- ![Ảnh minh họa](https://untrusted.example/pixel.png)
+
+> Liên hệ nhà xe nếu mang hành lý cồng kềnh.''';
+
+        final repo = _makeRepo((req) async {
+          if (req.url.path.endsWith('/suggestions')) return _ok(const []);
+          if (req.method == 'POST') {
+            return _ok(_replyPayload(reply: mdReply));
+          }
+          return _ok({
+            'sessionToken': _sessionToken,
+            'status': 'ACTIVE',
+            'messages': [
+              {
+                'id': 1,
+                'role': 'USER',
+                'content': 'Hỏi về **hành lý** của tôi',
+                'createdAt': '2026-11-08T10:29:00Z',
+                'requiresHumanHandoff': false,
+                'citations': null,
+                'toolCalls': null,
+              },
+              {
+                'id': 2,
+                'role': 'ASSISTANT',
+                'content': 'Kết quả: **Miễn phí 9kg** cho hành lý xách tay.',
+                'createdAt': '2026-11-08T10:30:00Z',
+                'requiresHumanHandoff': false,
+                'citations': null,
+                'toolCalls': null,
+              },
+            ],
+          });
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(home: AiChatbotScreen(repository: repo)),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const ValueKey('ai-chatbot-composer-input')),
+          'Hỏi về **hành lý**',
+        );
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('ai-chatbot-send-btn')));
+        await tester.pumpAndSettle();
+
+        // User bubble stays literal plain text (Markdown syntax preserved)
+        expect(find.text('Hỏi về **hành lý**'), findsOneWidget);
+
+        // Assistant bubble renders via AiChatbotMarkdownText without raw markers
+        expect(
+          find.byKey(const Key('ai-chatbot-assistant-markdown-0')),
+          findsOneWidget,
+        );
+        expect(find.text('Quy định hành lý'), findsOneWidget);
+        expect(find.textContaining('###'), findsNothing);
+        expect(find.textContaining('**1 kiện'), findsNothing);
+        expect(find.textContaining('Miễn phí 1 kiện xách tay dưới 9 kg'), findsOneWidget);
+        expect(find.textContaining('LUG-FREE'), findsOneWidget);
+        expect(
+          find.textContaining('Liên hệ nhà xe nếu mang hành lý cồng kềnh.'),
+          findsOneWidget,
+        );
+
+        // Remote images must never be rendered as Image widgets; alt fallback is shown
+        expect(find.byType(Image), findsNothing);
+        expect(find.text('Ảnh minh họa'), findsOneWidget);
+
+        // Tapping inert Markdown link text causes no exception
+        expect(find.textContaining('Trang ngoài'), findsOneWidget);
+        await tester.tap(find.textContaining('Trang ngoài'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        // Open read-only server history -> ASSISTANT uses Markdown, USER stays plain text
+        await tester.tap(find.byKey(const Key('ai-chatbot-read-history-btn')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('ai-chatbot-history-card')), findsOneWidget);
+        expect(find.text('Hỏi về **hành lý** của tôi'), findsOneWidget);
+        expect(
+          find.byKey(const Key('ai-chatbot-history-markdown-1')),
+          findsOneWidget,
+        );
+        expect(
+          find.text('Kết quả: Miễn phí 9kg cho hành lý xách tay.'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('**Miễn phí 9kg**'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      '12. Markdown tables, code blocks, and nested lists have 0 overflow at 320x640 with 2.0x textScale',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        const complexMarkdown = '''## Bảng cước hành lý dự tính
+
+| Hạng mục | Kích thước tối đa | Cước tham khảo | Ghi chú |
+| --- | --- | --- | --- |
+| Gói S | 40x30x20 cm | **50.000đ** | Thu tại bến |
+| Gói XL | 90x60x45 cm | **180.000đ** | Cần xác nhận nhà xe |
+
+1. Kiểm tra cân nặng tại quầy
+   - Xách tay miễn phí theo chính sách tuyến
+2. Lưu mã tra cứu:
+
+```
+VEXGO-BOOKING-CONFIRMATION-CODE-20261127-LONG-LINE
+```''';
+
+        final repo = _makeRepo((req) async {
+          if (req.url.path.endsWith('/suggestions')) return _ok(const []);
+          return _ok(_replyPayload(reply: complexMarkdown));
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(2.0)),
+              child: child!,
+            ),
+            home: AiChatbotScreen(repository: repo),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const ValueKey('ai-chatbot-composer-input')),
+          'Bảng cước hành lý',
+        );
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('ai-chatbot-send-btn')));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(
+          find.byKey(const Key('ai-chatbot-assistant-markdown-0')),
+          findsOneWidget,
+        );
+        expect(find.text('Bảng cước hành lý dự tính'), findsOneWidget);
+        expect(find.byType(Table), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      '13. Nested inline Markdown preserves parent styles (heading+bold, bold+italic, bold+strike, heading+link)',
+      (tester) async {
+        const nestedMarkdown = '''## **Chính sách hủy vé**
+
+**Lưu ý *quan trọng*** và **~~Giá cũ~~**
+
+### [Chi tiết quy định](https://untrusted.example/policy)''';
+
+        final repo = _makeRepo((req) async {
+          if (req.url.path.endsWith('/suggestions')) return _ok(const []);
+          return _ok(_replyPayload(reply: nestedMarkdown));
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(home: AiChatbotScreen(repository: repo)),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const ValueKey('ai-chatbot-composer-input')),
+          'Kiểm tra markdown lồng nhau',
+        );
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('ai-chatbot-send-btn')));
+        await tester.pumpAndSettle();
+
+        final markdownFinder = find.byKey(
+          const Key('ai-chatbot-assistant-markdown-0'),
+        );
+        expect(markdownFinder, findsOneWidget);
+
+        // Collect all leaf TextSpans with their effective merged TextStyle.
+        final leafStyles = <String, TextStyle>{};
+        void collectSpans(InlineSpan span, TextStyle? inherited) {
+          if (span is TextSpan) {
+            final effective = inherited == null
+                ? span.style
+                : inherited.merge(span.style);
+            if (span.text != null &&
+                span.text!.isNotEmpty &&
+                effective != null) {
+              leafStyles[span.text!] = effective;
+            }
+            for (final child in span.children ?? const <InlineSpan>[]) {
+              collectSpans(child, effective);
+            }
+          }
+        }
+
+        final selectableTexts = tester.widgetList<SelectableText>(
+          find.descendant(
+            of: markdownFinder,
+            matching: find.byType(SelectableText),
+          ),
+        );
+        for (final st in selectableTexts) {
+          if (st.textSpan != null) {
+            collectSpans(st.textSpan!, null);
+          }
+        }
+
+        // 1. ## **Chính sách hủy vé** -> keeps h2 fontSize (17) and bold
+        final headingBold = leafStyles['Chính sách hủy vé'];
+        expect(headingBold, isNotNull);
+        expect(headingBold!.fontSize, 17.0);
+        expect(headingBold.fontWeight, FontWeight.w700);
+
+        // 2. **Lưu ý *quan trọng*** -> keeps both bold and italic
+        final boldItalic = leafStyles['quan trọng'];
+        expect(boldItalic, isNotNull);
+        expect(boldItalic!.fontWeight, FontWeight.w700);
+        expect(boldItalic.fontStyle, FontStyle.italic);
+
+        // 3. **~~Giá cũ~~** -> keeps both bold and strikethrough
+        final boldStrike = leafStyles['Giá cũ'];
+        expect(boldStrike, isNotNull);
+        expect(boldStrike!.fontWeight, FontWeight.w700);
+        expect(boldStrike.decoration, TextDecoration.lineThrough);
+
+        // 4. ### [Chi tiết quy định](...) -> keeps h3 fontSize (16) and bold
+        final headingLink = leafStyles['Chi tiết quy định'];
+        expect(headingLink, isNotNull);
+        expect(headingLink!.fontSize, 16.0);
+        expect(headingLink.fontWeight, FontWeight.w700);
+      },
+    );
   });
 }
